@@ -11,9 +11,9 @@ export async function generateMetadata({
   await getDictionary(lang);
 
   return {
-    title: "Futures & AI | AI-Powered Crypto Intelligence",
+    title: "Futures & AI | Payback Admin Dashboard",
     description:
-      "Maximize your trading rebates with Futures & AI. Connect your exchange and start earning paybacks on every trade.",
+      "Monitor affiliate commissions across all exchanges. Track your payback earnings and maximize your returns.",
   };
 }
 
