@@ -1,0 +1,226 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id               String            @id @default(cuid())
+  email            String            @unique
+  password         String
+  name             String
+  nickname         String
+  phoneNumber      String
+  imageUrl         String            @default("/images/profile.png")
+  createdAt        DateTime          @default(now()) @db.Timestamptz()
+  updatedAt        DateTime          @updatedAt @db.Timestamptz()
+  exchangeAccounts ExchangeAccount[]
+  followers        User[]            @relation("UserFollows")
+  followings       User[]            @relation("UserFollows")
+  posts            Post[]
+  comments         Comment[]
+  postLikes        PostLike[]
+  commentLikes     CommentLike[]
+}
+
+model Post {
+  id        String     @id @default(cuid())
+  title     String
+  content   String
+  imageUrl  String
+  isLong    Boolean    @default(false)
+  createdAt DateTime   @default(now()) @db.Timestamptz()
+  updatedAt DateTime   @updatedAt @db.Timestamptz()
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+  comments  Comment[]
+  likes     PostLike[]
+  hashTags  HashTag[]
+}
+
+model Comment {
+  id        String        @id @default(cuid())
+  content   String
+  createdAt DateTime      @default(now()) @db.Timestamptz()
+  updatedAt DateTime      @updatedAt @db.Timestamptz()
+  Children  Comment[]     @relation("Comment_Children")
+  parent    Comment?      @relation("Comment_Children", fields: [parentId], references: [id])
+  parentId  String?
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  postId    String
+  post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  likes     CommentLike[]
+}
+
+model PostLike {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model CommentLike {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+}
+
+model HashTag {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  posts     Post[]
+}
+
+model Verification {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+}
+
+enum BannerType {
+  EVENT
+  INTRODUCE
+}
+
+model Banner {
+  id          String     @id @default(cuid())
+  title       String
+  description String
+  imageUrl    String
+  active      Boolean
+  type        BannerType @default(EVENT)
+  createdAt   DateTime   @default(now()) @db.Timestamptz()
+  updatedAt   DateTime   @updatedAt @db.Timestamptz()
+}
+
+model Exchange {
+  id               String            @id @default(cuid())
+  name             String
+  imageUrl         String
+  titleImageUrl    String
+  paybackRatio     Float
+  discountRatio    Float
+  limitFee         Float
+  marketFee        Float
+  type             String
+  tag              String
+  averageIncome    Int
+  link             String            @default("")
+  exchangeAccounts ExchangeAccount[]
+  createdAt        DateTime          @default(now()) @db.Timestamptz()
+  updatedAt        DateTime          @updatedAt @db.Timestamptz()
+}
+
+enum ExchangeAccountStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+}
+
+model ExchangeAccount {
+  id              String                @id @default(cuid())
+  uid             String                @unique
+  userId          String
+  user            User                  @relation(fields: [userId], references: [id])
+  status          ExchangeAccountStatus @default(ACTIVE)
+  exchangeId      String
+  exchange        Exchange              @relation(fields: [exchangeId], references: [id])
+  createdAt       DateTime              @default(now()) @db.Timestamptz()
+  updatedAt       DateTime              @updatedAt @db.Timestamptz()
+  totalCommission Float                 @default(0)
+  trades          Trade[]
+  withdrawal      Withdrawal[]
+}
+
+enum TradeStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model Trade {
+  id              String          @id @default(cuid())
+  accountId       String
+  exchangeAccount ExchangeAccount @relation(fields: [accountId], references: [id])
+  amount          Float
+  payback         Float
+  withdrawId      String?
+  withdraw        Withdrawal?     @relation(fields: [withdrawId], references: [id])
+  status          TradeStatus     @default(PENDING)
+  apiCreatedAt    DateTime        @default(now()) @db.Timestamptz()
+  createdAt       DateTime        @default(now()) @db.Timestamptz()
+  updatedAt       DateTime        @updatedAt @db.Timestamptz()
+
+  @@unique([accountId, apiCreatedAt, amount], name: "unique_trade")
+}
+
+enum WithdrawalStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model Withdrawal {
+  id               String            @id @default(cuid())
+  exchangeAccounts ExchangeAccount[]
+  amount           Float
+  trades           Trade[]
+  status           WithdrawalStatus  @default(PENDING)
+  network          String            @default("TRC20")
+  address          String            @default("")
+  createdAt        DateTime          @default(now()) @db.Timestamptz()
+  updatedAt        DateTime          @updatedAt @db.Timestamptz()
+}
+
+model PaybackCalculation {
+  id           String   @id @default(cuid())
+  exchangeName String
+  tradeType    String
+  volume       Float
+  leverage     Int      @default(1)
+  makerPct     Int      @default(30)
+  monthlyFees  Float
+  payback      Float
+  yearlySavings Float
+  createdAt    DateTime @default(now()) @db.Timestamptz()
+}
+
+model News {
+  id        String   @id @default(cuid())
+  linkUrl   String
+  title     String
+  content   String
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  linkUrl   String
+  imageUrl  String
+  title     String
+  content   String
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+}
