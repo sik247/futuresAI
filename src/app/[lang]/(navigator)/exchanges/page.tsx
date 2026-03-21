@@ -4,6 +4,8 @@ import { ExchangeListSection } from "./exchange-list-section";
 import { exchangesService } from "@/lib/services/exchanges/exchanges.service";
 import { getExchanges } from "./actions";
 
+export const dynamic = "force-dynamic";
+
 type TExchangesPage = {};
 
 const ExchangesPage: React.FC<TExchangesPage> = async ({}) => {

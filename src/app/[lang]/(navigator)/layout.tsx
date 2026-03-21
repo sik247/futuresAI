@@ -1,18 +1,19 @@
 import { getDictionary } from "@/i18n";
 import Headers from "@/components/headers";
 import Footer from "@/components/footer";
-import { Metadata } from 'next';
+import { Metadata } from "next";
 
 export async function generateMetadata({
   params: { lang }
 }: {
   params: { lang: string }
 }): Promise<Metadata> {
-  const dictionary = await getDictionary(lang);
+  await getDictionary(lang);
 
   return {
     title: "Futures & AI | AI-Powered Crypto Intelligence",
-    description: "Maximize your trading rebates with Futures & AI. Connect your exchange and start earning paybacks on every trade.",
+    description:
+      "Maximize your trading rebates with Futures & AI. Connect your exchange and start earning paybacks on every trade.",
   };
 }
 

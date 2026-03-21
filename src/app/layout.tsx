@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { resolveMetadataBase } from "@/lib/site-metadata";
 import "@/app/globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import Providers from "@/components/providers/providers";
@@ -7,6 +8,9 @@ import { GlobalAlertDialog } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import SessionProviders from "@/components/providers/session-provider";
 
+export const metadata: Metadata = {
+  metadataBase: resolveMetadataBase(),
+};
 
 export default function RootLayout({
   children,
