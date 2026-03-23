@@ -80,6 +80,10 @@ const config: Config = {
           "0%, 100%": { opacity: "0.04" },
           "50%": { opacity: "0.08" },
         },
+        "pulse-subtle": {
+          "0%, 100%": { opacity: "0.6" },
+          "50%": { opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -87,6 +91,7 @@ const config: Config = {
         "fade-in": "fadeIn 0.5s ease-out",
         "fade-in-up": "fade-in-up 0.5s ease-out both",
         "skeleton": "skeleton-pulse 1.5s ease-in-out infinite",
+        "pulse-subtle": "pulse-subtle 2.5s ease-in-out infinite",
       },
     },
   },

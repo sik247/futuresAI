@@ -92,6 +92,24 @@ export type Dictionary = {
   aggregate: string;
   translate: string;
   publishAll: string;
+  news_title: string;
+  news_marketIntelligence: string;
+  news_articles: string;
+  news_sources: string;
+  news_updated: string;
+  news_breaking: string;
+  news_noResults: string;
+  news_noResultsDesc: string;
+  news_all: string;
+  sns_title: string;
+  sns_subtitle: string;
+  sns_realtime: string;
+  sns_articles: string;
+  sns_videos: string;
+  sns_updated: string;
+  sns_subscribe: string;
+  sns_shorts: string;
+  sns_shortsCta: string;
 }
 
 const dictionaries = {

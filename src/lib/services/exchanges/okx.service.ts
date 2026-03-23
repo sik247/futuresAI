@@ -42,7 +42,7 @@ class OkxService extends AffiliateService {
     const totalCommission = response.data.data[0].totalCommission;
     return {
       ok: true,
-      payback: (totalCommission as number) * 0.9,
+      payback: totalCommission as number,
     };
   }
 }

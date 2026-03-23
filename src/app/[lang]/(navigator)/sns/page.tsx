@@ -1,10 +1,10 @@
 import Container from "@/components/ui/container";
-import Image from "next/image";
 import { Metadata } from "next";
-import { fetchCryptoFeed } from "@/lib/services/social/x-feed.service";
 import { fetchCryptoNews } from "@/lib/services/news/crypto-news.service";
 import { fetchYouTubeFeeds } from "@/lib/services/social/youtube-feed.service";
+import { fetchCryptoFeed } from "@/lib/services/social/x-feed.service";
 import { CommunityTabs } from "./community-tabs";
+import { getDictionary } from "@/i18n";
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -40,27 +40,6 @@ export const metadata: Metadata = {
   ],
 };
 
-// ── Constants ────────────────────────────────────────────────────────
-
-const LIVE_STREAMS = [
-  { title: "Bitcoin Live Price & Trading", channelName: "CoinDesk", embedId: "5KaNRCa1YuE" },
-  { title: "Crypto Market Live", channelName: "CryptosRUs", embedId: "rSS5_P80GEQ" },
-  { title: "Live Bitcoin Trading", channelName: "Ivan on Tech", embedId: "21X5lGlDOfg" },
-];
-
-const YOUTUBE_CHANNEL = "Futures AI";
-
-const ALPHAI_SHORTS = [
-  "1bZZIc2YglI", "3ilalTx5aPM", "78FoZ2PIzfY", "BGga9-UTW14",
-  "BqVLcDRlRB8", "CO5YhZ1VgsQ", "Cy_K5UuMiks", "GySUu12FAq0",
-  "HdlwZWeFUPs", "I-cOt7tYGYs", "IpnDPuQlmos", "REdP3WKp4iE",
-  "UWnsDSqcAeU", "ViOq5IwWcLQ", "Xor9hKNCPOQ", "YoFxQe0xqsQ",
-  "aRkECVfI8AQ", "cdxPv2ciK84", "eZY45Ftjqqs", "fBaRHZgIXbw",
-  "kYRUzjKfluc", "kk2lMxmxU5Y", "n0IbKn8AdC8", "nml6QAMlxmU",
-  "qWy8EiE0to8", "qoKrYblbP5A", "rrJQWec0xsw", "tJuD3h1SbY4",
-  "y-z7mA1CiIk", "yM9cgaUxif4", "ymLoLSnsb5U",
-];
-
 // ── Data Fetching ────────────────────────────────────────────────────
 
 async function fetchKoreanFeed(): Promise<KoreanFeedItem[]> {
@@ -95,12 +74,13 @@ function timeAgo(dateInput: string | Date): string {
 
 // ── Page Component ───────────────────────────────────────────────────
 
-export default async function SnsPage() {
-  const [xFeed, newsItems, youtubeItems, koreanFeed] = await Promise.all([
-    fetchCryptoFeed().catch(() => []),
+export default async function SnsPage({ params: { lang } }: { params: { lang: string } }) {
+  const [newsItems, youtubeItems, koreanFeed, xFeedData, t] = await Promise.all([
     fetchCryptoNews().catch(() => []),
     fetchYouTubeFeeds().catch(() => []),
     fetchKoreanFeed(),
+    fetchCryptoFeed().catch(() => []),
+    getDictionary(lang),
   ]);
 
   // Compute last updated time
@@ -141,29 +121,27 @@ export default async function SnsPage() {
 
         <Container className="relative z-10 flex flex-col gap-6">
           <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-zinc-500">
-            Real-Time Community Intelligence
+            {t.sns_realtime}
           </p>
 
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-[0.9]">
             <span className="text-white">Crypto</span>
             <br />
             <span className="bg-gradient-to-r from-white via-blue-400 to-blue-400 bg-clip-text text-transparent">
-              Community Hub
+              {t.sns_title}
             </span>
           </h1>
 
           <p className="text-base md:text-lg text-zinc-400 max-w-2xl leading-relaxed">
-            Real-time news, social feeds, and market intelligence from the
-            crypto world. All in one place.
+            {t.sns_subtitle}
           </p>
 
           {/* Live Stats Bar */}
           <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-2">
             {[
-              { label: `${xFeed.length} tweets`, color: "bg-blue-500" },
-              { label: `${newsItems.length} articles`, color: "bg-emerald-500" },
-              { label: `${youtubeItems.length} videos`, color: "bg-red-500" },
-              { label: `Updated ${updatedAgo}`, color: "bg-amber-500" },
+              { label: `${newsItems.length} ${t.sns_articles}`, color: "bg-emerald-500" },
+              { label: `${youtubeItems.length} ${t.sns_videos}`, color: "bg-red-500" },
+              { label: `${t.sns_updated} ${updatedAgo}`, color: "bg-amber-500" },
             ].map((stat, i) => (
               <div key={i} className="flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
@@ -177,7 +155,7 @@ export default async function SnsPage() {
                 <span className="text-xs text-zinc-400 font-mono tracking-wide">
                   {stat.label}
                 </span>
-                {i < 3 && (
+                {i < 2 && (
                   <div className="h-4 w-px bg-zinc-800 ml-2 hidden sm:block" />
                 )}
               </div>
@@ -239,176 +217,11 @@ export default async function SnsPage() {
       {/* ── Main Content Tabs ────────────────────────────────────── */}
       <CommunityTabs
         newsItems={serializedNews}
-        xFeedItems={xFeed}
+        xFeedItems={xFeedData}
         youtubeItems={serializedYoutube}
         koreanFeedItems={koreanFeed}
       />
 
-      {/* ── Divider ──────────────────────────────────────────────── */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
-
-      {/* ── Live Streams Section ─────────────────────────────────── */}
-      <section className="py-16">
-        <Container className="flex flex-col gap-8">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
-              </span>
-              <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-                Live Crypto Streams
-              </h2>
-            </div>
-            <p className="text-zinc-500 text-sm">
-              Live trading and analysis from top crypto channels
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
-            {LIVE_STREAMS.map((stream) => (
-              <div
-                key={stream.embedId}
-                className="group rounded-xl overflow-hidden bg-white/[0.03] border border-white/[0.06] hover:border-blue-500/25 hover:shadow-[0_0_30px_-5px_rgba(37,99,235,0.12)] transition-all duration-300"
-              >
-                <div className="aspect-video relative">
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src={`https://www.youtube.com/embed/${stream.embedId}?autoplay=0`}
-                    title={stream.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="border-0"
-                  />
-                  {/* Live badge */}
-                  <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-red-600/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md">
-                    <span className="relative flex h-1.5 w-1.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
-                    </span>
-                    Live
-                  </div>
-                </div>
-                <div className="px-4 py-3.5">
-                  <h3 className="font-medium text-zinc-100 text-sm">{stream.title}</h3>
-                  <p className="text-zinc-500 text-xs mt-1">{stream.channelName}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </section>
-
-      {/* ── Divider ──────────────────────────────────────────────── */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent" />
-
-      {/* ── Futures AI Shorts Section ────────────────────────────── */}
-      <section className="py-16 pb-24">
-        <Container className="flex flex-col gap-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-                Futures AI Shorts
-              </h2>
-              <p className="text-zinc-500 text-sm mt-2">
-                @{YOUTUBE_CHANNEL} -- Quick trading insights and market analysis
-              </p>
-            </div>
-            <a
-              href={`https://www.youtube.com/@${YOUTUBE_CHANNEL}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-zinc-200 text-sm font-medium hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-200"
-            >
-              <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-              </svg>
-              Subscribe
-            </a>
-          </div>
-
-          {/* Horizontal scroll on mobile, grid on larger screens */}
-          <div className="relative">
-            {/* Mobile: horizontal scroll */}
-            <div className="flex gap-3 overflow-x-auto pb-4 no-scrollbar sm:hidden">
-              {ALPHAI_SHORTS.slice(0, 12).map((id) => (
-                <a
-                  key={id}
-                  href={`https://www.youtube.com/shorts/${id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative rounded-xl overflow-hidden bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300 shrink-0 w-[140px]"
-                >
-                  <div className="aspect-[9/16] relative">
-                    <Image
-                      src={`https://i.ytimg.com/vi/${id}/oar2.jpg`}
-                      alt="Futures AI Short"
-                      fill
-                      sizes="140px"
-                      className="object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <svg className="w-10 h-10 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </div>
-                  <div className="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm border border-white/10">
-                    Shorts
-                  </div>
-                </a>
-              ))}
-            </div>
-
-            {/* Desktop: grid */}
-            <div className="hidden sm:grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-              {ALPHAI_SHORTS.map((id) => (
-                <a
-                  key={id}
-                  href={`https://www.youtube.com/shorts/${id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative rounded-xl overflow-hidden bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300 hover:scale-[1.03]"
-                >
-                  <div className="aspect-[9/16] relative">
-                    <Image
-                      src={`https://i.ytimg.com/vi/${id}/oar2.jpg`}
-                      alt="Futures AI Short"
-                      fill
-                      sizes="(max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw"
-                      className="object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <svg className="w-10 h-10 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </div>
-                  <div className="absolute bottom-2 left-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm border border-white/10">
-                    Shorts
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Mobile subscribe button */}
-          <a
-            href={`https://www.youtube.com/@${YOUTUBE_CHANNEL}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="sm:hidden flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-zinc-200 text-sm font-medium hover:bg-white/[0.08] transition-all duration-200"
-          >
-            <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-            </svg>
-            Subscribe to Futures AI
-          </a>
-        </Container>
-      </section>
     </div>
   );
 }

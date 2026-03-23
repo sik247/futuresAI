@@ -53,10 +53,10 @@ async function getCryptoEvents() {
   }
 }
 
-async function getTrendingEvents() {
+async function getPoliticsEvents() {
   try {
     const res = await fetch(
-      "https://gamma-api.polymarket.com/events?closed=false&order=volume&ascending=false&limit=10",
+      "https://gamma-api.polymarket.com/events?closed=false&tag=politics&order=volume&ascending=false&limit=12",
       { next: { revalidate: 300 } }
     );
     const events = await res.json();
@@ -76,10 +76,28 @@ function formatDate(dateStr: string) {
   });
 }
 
+function groupByTimeframe(events: any[]) {
+  const now = Date.now();
+  const daily: any[] = [];
+  const weekly: any[] = [];
+  const monthly: any[] = [];
+  const later: any[] = [];
+
+  for (const e of events) {
+    if (!e.endDate) { later.push(e); continue; }
+    const daysLeft = (new Date(e.endDate).getTime() - now) / (1000 * 60 * 60 * 24);
+    if (daysLeft <= 1) daily.push(e);
+    else if (daysLeft <= 7) weekly.push(e);
+    else if (daysLeft <= 30) monthly.push(e);
+    else later.push(e);
+  }
+  return { daily, weekly, monthly, later };
+}
+
 export default async function MarketsPage() {
-  const [cryptoEvents, trendingEvents] = await Promise.all([
+  const [cryptoEvents, politicsEvents] = await Promise.all([
     getCryptoEvents(),
-    getTrendingEvents(),
+    getPoliticsEvents(),
   ]);
 
   const totalMarkets = cryptoEvents.reduce(
@@ -153,19 +171,53 @@ export default async function MarketsPage() {
         </Container>
       </section>
 
-      {/* Crypto Markets Section */}
-      <section className="pb-16">
+      {/* Crypto Markets — Daily */}
+      <CryptoTimeframeSection
+        title="Crypto — Daily"
+        color="bg-red-500/70"
+        badge="Closing Today"
+        events={groupByTimeframe(cryptoEvents).daily}
+        formatVolume={formatVolume}
+        formatDate={formatDate}
+      />
+
+      {/* Crypto Markets — Weekly */}
+      <CryptoTimeframeSection
+        title="Crypto — Weekly"
+        color="bg-amber-500/70"
+        badge="This Week"
+        events={groupByTimeframe(cryptoEvents).weekly}
+        formatVolume={formatVolume}
+        formatDate={formatDate}
+      />
+
+      {/* Crypto Markets — Monthly */}
+      <CryptoTimeframeSection
+        title="Crypto — Monthly"
+        color="bg-emerald-500/70"
+        badge="This Month"
+        events={[...groupByTimeframe(cryptoEvents).monthly, ...groupByTimeframe(cryptoEvents).later]}
+        formatVolume={formatVolume}
+        formatDate={formatDate}
+      />
+
+      {/* Divider */}
+      <Container>
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+      </Container>
+
+      {/* All Crypto (Sortable) */}
+      <section className="py-16">
         <Container>
           <div className="flex items-center gap-3 mb-8">
             <div className="w-1.5 h-6 rounded-full bg-emerald-500/70" />
             <h2 className="text-xl font-semibold text-zinc-200 tracking-tight">
-              Crypto Markets
+              All Crypto Markets
             </h2>
             <span className="ml-2 px-2 py-0.5 rounded bg-white/[0.05] text-[11px] font-mono text-zinc-500">
               {cryptoEvents.length} events
             </span>
           </div>
-
           {cryptoEvents.length > 0 ? (
             <MarketsClient events={cryptoEvents} />
           ) : (
@@ -181,156 +233,23 @@ export default async function MarketsPage() {
         <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
       </Container>
 
-      {/* Trending Markets Section */}
+      {/* Politics Markets */}
       <section className="py-16">
         <Container>
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-1.5 h-6 rounded-full bg-amber-500/70" />
+            <div className="w-1.5 h-6 rounded-full bg-violet-500/70" />
             <h2 className="text-xl font-semibold text-zinc-200 tracking-tight">
-              Trending Markets
+              Politics Markets
             </h2>
             <span className="ml-2 px-2 py-0.5 rounded bg-white/[0.05] text-[11px] font-mono text-zinc-500">
-              Top Volume
+              {politicsEvents.length} events
             </span>
           </div>
-
-          {trendingEvents.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {trendingEvents.map((event: any) => (
-                <div
-                  key={event.id}
-                  className="rounded-xl backdrop-blur-md bg-white/[0.03] border border-white/[0.08] p-5 flex flex-col transition-all duration-300 hover:border-white/[0.18] hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(255,255,255,0.03)]"
-                >
-                  {/* Header */}
-                  <div className="flex items-start gap-3.5 mb-4">
-                    {event.image && (
-                      <img
-                        src={event.image}
-                        alt=""
-                        className="w-12 h-12 rounded-lg object-cover flex-shrink-0 border border-white/[0.06]"
-                      />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-semibold text-zinc-100 leading-snug line-clamp-2">
-                        {event.title}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-2 flex-wrap">
-                        {event.volume && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded bg-white/[0.06] text-[11px] font-mono text-zinc-400">
-                            VOL {formatVolume(event.volume)}
-                          </span>
-                        )}
-                        {event.liquidity && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded bg-white/[0.06] text-[11px] font-mono text-zinc-400">
-                            LIQ {formatVolume(event.liquidity)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Markets */}
-                  <div className="space-y-3.5 flex-1">
-                    {event.markets
-                      .slice(0, 2)
-                      .map((market: any, mi: number) => {
-                        const yesRaw = market.outcomePrices?.[0]
-                          ? parseFloat(market.outcomePrices[0])
-                          : 0.5;
-                        const noRaw = market.outcomePrices?.[1]
-                          ? parseFloat(market.outcomePrices[1])
-                          : 0.5;
-                        const yesPct = (yesRaw * 100).toFixed(0);
-                        const noPct = (noRaw * 100).toFixed(0);
-                        const yesWidth = yesRaw * 100;
-                        const yesDominant = yesRaw >= noRaw;
-
-                        return (
-                          <div key={mi} className="space-y-1.5">
-                            {event.markets.length > 1 && (
-                              <p className="text-xs text-zinc-500 line-clamp-1">
-                                {market.question}
-                              </p>
-                            )}
-                            <div className="flex items-center gap-2">
-                              <span
-                                className={`text-xs font-mono font-bold w-11 text-right ${
-                                  yesDominant
-                                    ? "text-emerald-400"
-                                    : "text-emerald-400/60"
-                                }`}
-                              >
-                                {yesPct}%
-                              </span>
-                              <div className="flex-1 h-2.5 rounded-full bg-zinc-800/80 overflow-hidden flex">
-                                <div
-                                  className="h-full rounded-l-full transition-all duration-500"
-                                  style={{
-                                    width: `${yesWidth}%`,
-                                    background: yesDominant
-                                      ? "linear-gradient(90deg, #059669, #34d399)"
-                                      : "rgba(52, 211, 153, 0.3)",
-                                  }}
-                                />
-                                <div
-                                  className="h-full rounded-r-full transition-all duration-500"
-                                  style={{
-                                    width: `${100 - yesWidth}%`,
-                                    background: !yesDominant
-                                      ? "linear-gradient(90deg, #f43f5e, #fb7185)"
-                                      : "rgba(244, 63, 94, 0.3)",
-                                  }}
-                                />
-                              </div>
-                              <span
-                                className={`text-xs font-mono font-bold w-11 ${
-                                  !yesDominant
-                                    ? "text-rose-400"
-                                    : "text-rose-400/60"
-                                }`}
-                              >
-                                {noPct}%
-                              </span>
-                            </div>
-                            <div className="flex justify-between px-[calc(2.75rem+0.5rem)]">
-                              <span
-                                className={`text-[10px] ${
-                                  yesDominant
-                                    ? "text-emerald-400/80 font-medium"
-                                    : "text-zinc-600"
-                                }`}
-                              >
-                                {market.outcomes?.[0] || "Yes"}
-                              </span>
-                              <span
-                                className={`text-[10px] ${
-                                  !yesDominant
-                                    ? "text-rose-400/80 font-medium"
-                                    : "text-zinc-600"
-                                }`}
-                              >
-                                {market.outcomes?.[1] || "No"}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                  </div>
-
-                  {/* Footer */}
-                  {event.endDate && (
-                    <div className="mt-4 pt-3 border-t border-white/[0.06]">
-                      <span className="text-[11px] font-mono text-zinc-600">
-                        Closes: {formatDate(event.endDate)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+          {politicsEvents.length > 0 ? (
+            <MarketsClient events={politicsEvents} />
           ) : (
             <div className="text-center py-20 text-zinc-600 font-mono text-sm">
-              No trending markets available.
+              No politics markets available.
             </div>
           )}
         </Container>
@@ -345,6 +264,92 @@ export default async function MarketsPage() {
           </p>
         </Container>
       </section>
+    </div>
+  );
+}
+
+function CryptoTimeframeSection({
+  title, color, badge, events, formatVolume, formatDate,
+}: {
+  title: string; color: string; badge: string;
+  events: any[]; formatVolume: (v: number | string) => string; formatDate: (d: string) => string;
+}) {
+  if (events.length === 0) return null;
+  return (
+    <section className="pb-12">
+      <Container>
+        <div className="flex items-center gap-3 mb-6">
+          <div className={`w-1.5 h-6 rounded-full ${color}`} />
+          <h2 className="text-xl font-semibold text-zinc-200 tracking-tight">{title}</h2>
+          <span className="ml-2 px-2 py-0.5 rounded bg-white/[0.05] text-[11px] font-mono text-zinc-500">
+            {badge} &middot; {events.length}
+          </span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {events.map((event: any) => (
+            <EventCard key={event.id} event={event} formatVolume={formatVolume} formatDate={formatDate} />
+          ))}
+        </div>
+      </Container>
+    </section>
+  );
+}
+
+function EventCard({ event, formatVolume, formatDate }: { event: any; formatVolume: (v: number | string) => string; formatDate: (d: string) => string }) {
+  return (
+    <div className="rounded-xl backdrop-blur-md bg-white/[0.03] border border-white/[0.08] p-5 flex flex-col transition-all duration-300 hover:border-white/[0.18] hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(255,255,255,0.03)]">
+      <div className="flex items-start gap-3.5 mb-4">
+        {event.image && (
+          <img src={event.image} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0 border border-white/[0.06]" />
+        )}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-semibold text-zinc-100 leading-snug line-clamp-2">{event.title}</h3>
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            {event.volume && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded bg-white/[0.06] text-[11px] font-mono text-zinc-400">
+                VOL {formatVolume(event.volume)}
+              </span>
+            )}
+            {event.liquidity && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded bg-white/[0.06] text-[11px] font-mono text-zinc-400">
+                LIQ {formatVolume(event.liquidity)}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="space-y-3.5 flex-1">
+        {event.markets.slice(0, 2).map((market: any, mi: number) => {
+          const yesRaw = market.outcomePrices?.[0] ? parseFloat(market.outcomePrices[0]) : 0.5;
+          const noRaw = market.outcomePrices?.[1] ? parseFloat(market.outcomePrices[1]) : 0.5;
+          const yesPct = (yesRaw * 100).toFixed(0);
+          const noPct = (noRaw * 100).toFixed(0);
+          const yesWidth = yesRaw * 100;
+          const yesDominant = yesRaw >= noRaw;
+          return (
+            <div key={mi} className="space-y-1.5">
+              {event.markets.length > 1 && <p className="text-xs text-zinc-500 line-clamp-1">{market.question}</p>}
+              <div className="flex items-center gap-2">
+                <span className={`text-xs font-mono font-bold w-11 text-right ${yesDominant ? "text-emerald-400" : "text-emerald-400/60"}`}>{yesPct}%</span>
+                <div className="flex-1 h-2.5 rounded-full bg-zinc-800/80 overflow-hidden flex">
+                  <div className="h-full rounded-l-full transition-all duration-500" style={{ width: `${yesWidth}%`, background: yesDominant ? "linear-gradient(90deg, #059669, #34d399)" : "rgba(52, 211, 153, 0.3)" }} />
+                  <div className="h-full rounded-r-full transition-all duration-500" style={{ width: `${100 - yesWidth}%`, background: !yesDominant ? "linear-gradient(90deg, #f43f5e, #fb7185)" : "rgba(244, 63, 94, 0.3)" }} />
+                </div>
+                <span className={`text-xs font-mono font-bold w-11 ${!yesDominant ? "text-rose-400" : "text-rose-400/60"}`}>{noPct}%</span>
+              </div>
+              <div className="flex justify-between px-[calc(2.75rem+0.5rem)]">
+                <span className={`text-[10px] ${yesDominant ? "text-emerald-400/80 font-medium" : "text-zinc-600"}`}>{market.outcomes?.[0] || "Yes"}</span>
+                <span className={`text-[10px] ${!yesDominant ? "text-rose-400/80 font-medium" : "text-zinc-600"}`}>{market.outcomes?.[1] || "No"}</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {event.endDate && (
+        <div className="mt-4 pt-3 border-t border-white/[0.06]">
+          <span className="text-[11px] font-mono text-zinc-600">Closes: {formatDate(event.endDate)}</span>
+        </div>
+      )}
     </div>
   );
 }

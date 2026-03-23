@@ -8,16 +8,16 @@ import PaybackRequest from "./payback-request";
 export const metadata: Metadata = {
   title: "Trading Rebates and Payback",
   description:
-    "Earn up to 50% trading fee rebates on partner exchanges including Bitget, Bybit, BingX, OKX, and Gate.io. Track your payback earnings with Futures AI.",
+    "Earn up to 75% trading fee rebates on partner exchanges including Bitget, Bybit, OKX, Gate.io, and HTX. Track your payback earnings with Futures AI.",
   keywords: ["trading rebates", "crypto payback", "exchange referral", "fee rebates", "Bitget rebate", "Bybit rebate"],
 };
 
 const EXCHANGES = [
-  { name: "Bitget", account: "base03", paybackRate: 50, makerFee: 0.02, takerFee: 0.06, link: "https://www.bitget.com" },
-  { name: "Bybit", account: "BBLL", paybackRate: 40, makerFee: 0.02, takerFee: 0.055, link: "https://www.bybit.com" },
-  { name: "BingX", account: "FCC9QDJK", paybackRate: 45, makerFee: 0.02, takerFee: 0.05, link: "https://www.bingx.com" },
-  { name: "OKX", account: "COINBASE", paybackRate: 40, makerFee: 0.02, takerFee: 0.05, link: "https://www.okx.com" },
-  { name: "Gate.io", account: "COINBASE", paybackRate: 40, makerFee: 0.02, takerFee: 0.05, link: "https://www.gate.io" },
+  { name: "Bitget", account: "base03", paybackRate: 55, makerFee: 0.02, takerFee: 0.06, link: "https://www.bitget.com" },
+  { name: "Bybit", account: "BBLL", paybackRate: 20, makerFee: 0.02, takerFee: 0.055, link: "https://www.bybit.com" },
+  { name: "OKX", account: "COINBASE", paybackRate: 20, makerFee: 0.02, takerFee: 0.05, link: "https://www.okx.com" },
+  { name: "Gate.io", account: "COINBASE", paybackRate: 75, makerFee: 0.02, takerFee: 0.05, link: "https://www.gate.io" },
+  { name: "HTX", account: "COINBASE", paybackRate: 54, makerFee: 0.02, takerFee: 0.05, link: "https://www.htx.com" },
 ];
 
 export default async function PaybackPage({
@@ -68,7 +68,7 @@ export default async function PaybackPage({
           <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-3xl">
             {[
               { value: "5+", label: "Exchanges" },
-              { value: "50%", label: "Max Payback" },
+              { value: "75%", label: "Max Payback" },
               { value: "24/7", label: "Support" },
               { value: "$2M+", label: "Paid Out" },
             ].map((stat, i) => (
@@ -204,16 +204,31 @@ export default async function PaybackPage({
             <p data-anim="cta-child" className="text-zinc-400 text-lg mb-10 leading-relaxed">
               See how much you could save on trading fees with our partner exchanges.
             </p>
-            <div data-anim="cta-child">
+            <div data-anim="cta-child" className="flex flex-col items-center gap-6">
               <Link
                 href={`/${lang}/calculator`}
                 className="group inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-10 py-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-blue-500 hover:shadow-[0_0_30px_-8px_rgba(37,99,235,0.4)]"
               >
-                Run New Calculation
+                Sign Up Now
                 <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 16 16" stroke="currentColor" strokeWidth="2">
                   <path d="M1 8h14M9 2l6 6-6 6" />
                 </svg>
               </Link>
+              <div className="flex items-center gap-4">
+                {EXCHANGES.map((ex) => (
+                  <a
+                    key={ex.name}
+                    href={ex.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-lg font-bold text-blue-400 transition-all hover:bg-white/[0.12] hover:border-blue-500/30 hover:scale-110"
+                    title={`${ex.name} — ${ex.paybackRate}% payback`}
+                  >
+                    {ex.name[0]}
+                  </a>
+                ))}
+              </div>
+              <p className="text-zinc-600 text-xs">Click an exchange to sign up with our referral</p>
             </div>
           </div>
         </Container>

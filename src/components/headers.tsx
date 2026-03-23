@@ -4,7 +4,21 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowRightEndOnRectangleIcon, UserIcon, SunIcon, MoonIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowRightEndOnRectangleIcon,
+  UserIcon,
+  SunIcon,
+  MoonIcon,
+  ChartBarIcon,
+  PresentationChartLineIcon,
+  BoltIcon,
+  GlobeAltIcon,
+  CurrencyDollarIcon,
+  ChatBubbleLeftRightIcon,
+  NewspaperIcon,
+  CalculatorIcon,
+  LightBulbIcon,
+} from "@heroicons/react/24/outline";
 
 import Logo from "@/components/logo";
 import HeaderHamburger from "@/components/header-hamburger";
@@ -23,15 +37,15 @@ const LanguageSwitcher = dynamic(
 type THeaders = { lang: string; translations: Dictionary };
 
 const NAV_ITEMS = [
-  { path: "dashboard", key: "dashboard" as const },
-  { path: "charts", key: "charts" as const },
-  { path: "signals", key: "signals" as const },
-  { path: "markets", key: "markets" as const },
-  { path: "whales", key: "whales" as const },
-  { path: "sns", key: "sns" as const },
-  { path: "news", key: "news" as const },
-  { path: "calculator", key: "calculator" as const },
-  { path: "chart-ideas", key: "chartIdeas" as const },
+  { path: "dashboard", key: "dashboard" as const, icon: ChartBarIcon, group: 0 },
+  { path: "charts", key: "charts" as const, icon: PresentationChartLineIcon, group: 1 },
+  { path: "signals", key: "signals" as const, icon: BoltIcon, group: 1 },
+  { path: "markets", key: "markets" as const, icon: GlobeAltIcon, group: 1 },
+  { path: "whales", key: "whales" as const, icon: CurrencyDollarIcon, group: 2 },
+  { path: "sns", key: "sns" as const, icon: ChatBubbleLeftRightIcon, group: 2 },
+  { path: "news", key: "news" as const, icon: NewspaperIcon, group: 2 },
+  { path: "calculator", key: "calculator" as const, icon: CalculatorIcon, group: 3 },
+  { path: "chart-ideas", key: "chartIdeas" as const, icon: LightBulbIcon, group: 3 },
 ] as const;
 
 const Headers: React.FC<THeaders> = ({ lang, translations }) => {
@@ -50,6 +64,9 @@ const Headers: React.FC<THeaders> = ({ lang, translations }) => {
   }, []);
 
   const isActive = (path: string) => pathname?.includes(`/${path}`);
+
+  // Group items with separators
+  let lastGroup = -1;
 
   return (
     <header
@@ -74,31 +91,44 @@ const Headers: React.FC<THeaders> = ({ lang, translations }) => {
 
         {/* Center nav (hidden on mobile) */}
         <nav className="hidden lg:flex items-center gap-0.5">
-          {NAV_ITEMS.map(({ path, key }) => (
-            <Link key={path} href={`/${lang}/${path}`}>
-              <span
-                className={`relative px-3 py-2 text-[13px] font-medium tracking-wide transition-all duration-200 rounded-lg ${
-                  isActive(path)
-                    ? "text-white bg-white/[0.08]"
-                    : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
-                }`}
-              >
-                {translations[key]}
-                {/* Active indicator line with glow */}
-                <span
-                  className={`absolute -bottom-[7px] left-1/2 -translate-x-1/2 h-[2px] rounded-full transition-all duration-300 ${
-                    isActive(path)
-                      ? "w-5 opacity-100 bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"
-                      : "w-0 opacity-0 bg-blue-500"
-                  }`}
-                />
-                {/* Subtle active glow behind the text */}
-                {isActive(path) && (
-                  <span className="absolute inset-0 rounded-lg bg-blue-500/[0.06] blur-[2px] pointer-events-none" />
+          {NAV_ITEMS.map(({ path, key, icon: Icon, group }) => {
+            const showSeparator = lastGroup !== -1 && group !== lastGroup;
+            lastGroup = group;
+            const active = isActive(path);
+
+            return (
+              <React.Fragment key={path}>
+                {showSeparator && (
+                  <div className="mx-1 h-4 w-px bg-zinc-700/40" aria-hidden="true" />
                 )}
-              </span>
-            </Link>
-          ))}
+                <Link href={`/${lang}/${path}`} className="group relative">
+                  <span
+                    className={`relative flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold tracking-wide uppercase rounded-full transition-all duration-300 ${
+                      active
+                        ? "text-white bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border border-blue-500/30 shadow-[0_0_12px_rgba(59,130,246,0.25)]"
+                        : "text-zinc-400 border border-transparent hover:text-zinc-100 hover:bg-white/[0.05] hover:border-white/[0.06]"
+                    }`}
+                  >
+                    {/* Icon */}
+                    <Icon
+                      className={`w-3.5 h-3.5 flex-shrink-0 transition-all duration-300 ${
+                        active
+                          ? "text-blue-400"
+                          : "text-zinc-500 group-hover:text-zinc-300 group-hover:scale-110"
+                      }`}
+                    />
+                    {/* Label */}
+                    <span className="leading-none">{translations[key]}</span>
+
+                    {/* Active glow layer behind pill */}
+                    {active && (
+                      <span className="absolute inset-0 rounded-full bg-blue-500/[0.08] blur-sm pointer-events-none animate-pulse-subtle" />
+                    )}
+                  </span>
+                </Link>
+              </React.Fragment>
+            );
+          })}
         </nav>
 
         {/* Auth, theme toggle & mobile menu */}

@@ -14,10 +14,10 @@ datasource db {
 model User {
   id               String            @id @default(cuid())
   email            String            @unique
-  password         String
+  password         String?
   name             String
-  nickname         String
-  phoneNumber      String
+  nickname         String            @default("")
+  phoneNumber      String            @default("")
   imageUrl         String            @default("/images/profile.png")
   role             Role              @default(USER)
   credits          Float             @default(0)
@@ -33,6 +33,27 @@ model User {
   chartIdeas       ChartIdea[]
   withdrawals      Withdrawal[]
   chartAnalyses    ChartAnalysis[]
+  accounts         Account[]
+  subscriptions    Subscription[]
+  analysisUsages   AnalysisUsage[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
 }
 
 model Post {
@@ -281,6 +302,8 @@ model ChartAnalysis {
   indicators      String         @db.Text
   tradeSetup      String         @db.Text
   analysisData    String?        @db.Text
+  newsContext     String?        @db.Text
+  priceContext    String?        @db.Text
   riskScore       Int            @default(0)
   confidence      Int            @default(0)
   userId          String
@@ -323,4 +346,32 @@ model ContentBotLog {
 
   @@index([action])
   @@index([createdAt])
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+}
+
+model Subscription {
+  id                 String             @id @default(cuid())
+  userId             String
+  user               User               @relation(fields: [userId], references: [id])
+  status             SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart DateTime           @db.Timestamptz()
+  currentPeriodEnd   DateTime           @db.Timestamptz()
+  createdAt          DateTime           @default(now()) @db.Timestamptz()
+
+  @@index([userId, status])
+}
+
+model AnalysisUsage {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  periodStart DateTime @db.Timestamptz()
+  usageCount  Int      @default(0)
+
+  @@unique([userId, periodStart])
 }

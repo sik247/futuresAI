@@ -1,6 +1,15 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import type { PriceAgentResult } from "./agents/price.agent";
+import type { WebSearchResult } from "./agents/web-search.agent";
 
-const ANALYSIS_COST = 50.0; // 50 USDT per analysis
+export type LiveContext = {
+  currentPrice: number;
+  change24h: number;
+  volume24h: number;
+  sentiment: string;
+  keyNews: { title: string; snippet: string }[];
+  orderBookBias: "BUY_PRESSURE" | "SELL_PRESSURE" | "BALANCED";
+};
 
 export type ChartAnalysisResult = {
   summary: string;
@@ -39,6 +48,7 @@ export type ChartAnalysisResult = {
     statisticalTargets: { price: number; probability: number; timeframe: string }[];
   };
   lines: ChartLine[];
+  liveContext?: LiveContext;
 };
 
 export type ChartLine = {
@@ -156,8 +166,96 @@ async function fetchImageAsBase64(url: string): Promise<{ base64: string; mimeTy
   return { base64, mimeType: contentType };
 }
 
+function buildLiveContextBlock(
+  priceData: PriceAgentResult | null,
+  webResults: WebSearchResult[] | null
+): string {
+  if (!priceData && !webResults) return "";
+
+  let block = `\n\nLIVE MARKET CONTEXT (from real-time data feeds — use this to validate and enhance your chart reading):\n`;
+
+  if (priceData) {
+    const last10 = priceData.recentCandles.slice(-10);
+    const candleStr = last10
+      .map((c) => `O:${c.open} H:${c.high} L:${c.low} C:${c.close} V:${c.volume.toFixed(0)}`)
+      .join(" | ");
+
+    block += `
+PRICE DATA:
+- Current Price: $${priceData.currentPrice.toLocaleString()}
+- 24h Change: ${priceData.changePercent24h >= 0 ? "+" : ""}${priceData.changePercent24h.toFixed(2)}%
+- 24h Volume: $${(priceData.volume24h / 1e6).toFixed(1)}M
+- 24h High/Low: $${priceData.high24h.toLocaleString()} / $${priceData.low24h.toLocaleString()}
+- Order Book: Bid depth $${(priceData.orderBook.bidDepthTotal / 1e6).toFixed(2)}M, Ask depth $${(priceData.orderBook.askDepthTotal / 1e6).toFixed(2)}M, Spread: $${priceData.orderBook.bidAskSpread.toFixed(2)}
+- Recent 4H Candles (last 10): ${candleStr}
+`;
+  }
+
+  if (webResults && webResults.length > 0) {
+    const allResults = webResults.flatMap((w) => w.results);
+    const headlines = allResults
+      .slice(0, 5)
+      .map((r) => `- ${r.title}: ${r.snippet}`)
+      .join("\n");
+    const sentiments = webResults.map((w) => w.sentiment);
+    const overallSentiment = sentiments.includes("BULLISH") && sentiments.includes("BEARISH")
+      ? "MIXED"
+      : sentiments.find((s) => s !== "NEUTRAL") || "NEUTRAL";
+    const keyEvents = webResults
+      .flatMap((w) => w.keyEvents)
+      .slice(0, 5)
+      .map((e) => `- ${e}`)
+      .join("\n");
+
+    block += `
+NEWS & SENTIMENT:
+${headlines}
+Overall Market Sentiment: ${overallSentiment}
+Key Events:
+${keyEvents}
+`;
+  }
+
+  block += `
+IMPORTANT: Cross-reference the chart's OCR price with the live current price.
+If they diverge significantly, the chart may be stale — note this in your summary.
+Factor news sentiment and order book imbalance into your probability estimates.`;
+
+  return block;
+}
+
+function buildLiveContext(
+  priceData: PriceAgentResult | null,
+  webResults: WebSearchResult[] | null
+): LiveContext | undefined {
+  if (!priceData) return undefined;
+
+  const allResults = webResults?.flatMap((w) => w.results) || [];
+  const sentiments = webResults?.map((w) => w.sentiment) || [];
+  const overallSentiment = sentiments.includes("BULLISH") && sentiments.includes("BEARISH")
+    ? "MIXED"
+    : sentiments.find((s) => s !== "NEUTRAL") || "NEUTRAL";
+
+  const bidTotal = priceData.orderBook.bidDepthTotal;
+  const askTotal = priceData.orderBook.askDepthTotal;
+  const ratio = bidTotal / (askTotal || 1);
+  const orderBookBias: LiveContext["orderBookBias"] =
+    ratio > 1.3 ? "BUY_PRESSURE" : ratio < 0.7 ? "SELL_PRESSURE" : "BALANCED";
+
+  return {
+    currentPrice: priceData.currentPrice,
+    change24h: priceData.changePercent24h,
+    volume24h: priceData.volume24h,
+    sentiment: overallSentiment,
+    keyNews: allResults.slice(0, 3).map((r) => ({ title: r.title, snippet: r.snippet })),
+    orderBookBias,
+  };
+}
+
 export async function analyzeChart(
-  imageUrl: string
+  imageUrl: string,
+  priceData?: PriceAgentResult | null,
+  webResults?: WebSearchResult[] | null
 ): Promise<ChartAnalysisResult> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -174,8 +272,13 @@ export async function analyzeChart(
 
   const { base64, mimeType } = await fetchImageAsBase64(imageUrl);
 
+  const liveBlock = buildLiveContextBlock(priceData || null, webResults || null);
+  const fullPrompt = liveBlock
+    ? CHART_ANALYSIS_PROMPT + liveBlock
+    : CHART_ANALYSIS_PROMPT;
+
   const result = await model.generateContent([
-    CHART_ANALYSIS_PROMPT,
+    fullPrompt,
     {
       inlineData: {
         data: base64,
@@ -189,11 +292,11 @@ export async function analyzeChart(
     throw new Error("No analysis returned from AI");
   }
 
-  // Parse JSON (responseMimeType should give clean JSON, but strip markdown as fallback)
   const jsonStr = content.replace(/```json?\n?/g, "").replace(/```\n?/g, "").trim();
   const parsed: ChartAnalysisResult = JSON.parse(jsonStr);
 
+  // Attach live context to the result
+  parsed.liveContext = buildLiveContext(priceData || null, webResults || null);
+
   return parsed;
 }
-
-export { ANALYSIS_COST };

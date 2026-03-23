@@ -14,6 +14,10 @@ class UsersService extends CoreService {
       throw new Error("User not found");
     }
 
+    if (!user.password) {
+      throw new Error("Please use social login");
+    }
+
     const isValid = await this.verifyPassword(password, user.password);
 
     if (!isValid) {
@@ -50,7 +54,7 @@ class UsersService extends CoreService {
     return this.db.user.create({
       data: {
         ...data,
-        password: await this.hashPassword(data.password),
+        password: data.password ? await this.hashPassword(data.password) : undefined,
       },
     });
   }

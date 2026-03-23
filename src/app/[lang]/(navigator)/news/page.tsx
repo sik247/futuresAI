@@ -103,10 +103,10 @@ export default async function NewsList({
         <section className="pt-10 pb-4 flex flex-col gap-6">
           <div className="flex flex-col gap-3">
             <span className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-blue-400">
-              Market Intelligence
+              {dict.news_marketIntelligence}
             </span>
             <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight">
-              Crypto News
+              {dict.news_title}
             </h1>
           </div>
 
@@ -114,7 +114,7 @@ export default async function NewsList({
           <div className="flex items-center gap-6 flex-wrap">
             <div className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white/[0.03] border border-white/[0.06]">
               <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
-                Articles
+                {dict.news_articles}
               </span>
               <span className="font-mono text-sm font-semibold text-white">
                 {news.length}
@@ -122,7 +122,7 @@ export default async function NewsList({
             </div>
             <div className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white/[0.03] border border-white/[0.06]">
               <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
-                Sources
+                {dict.news_sources}
               </span>
               <span className="font-mono text-sm font-semibold text-white">
                 {uniqueSources.size}
@@ -130,7 +130,7 @@ export default async function NewsList({
             </div>
             <div className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white/[0.03] border border-white/[0.06]">
               <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
-                Updated
+                {dict.news_updated}
               </span>
               <span className="font-mono text-sm font-semibold text-white">
                 {lastUpdated}

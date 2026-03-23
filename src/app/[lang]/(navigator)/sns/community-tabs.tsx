@@ -4,8 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import gsap from "gsap";
 import Container from "@/components/ui/container";
-import type { XFeedItem } from "@/lib/services/social/x-feed.service";
 import type { KoreanFeedItem } from "./page";
+import type { XFeedItem } from "@/lib/services/social/x-feed.service";
 
 // ── Tab Skeleton (loading placeholder) ───────────────────────────────
 
@@ -36,16 +36,15 @@ const NewsTab = dynamic(() => import("./tabs/news-tab"), {
   loading: () => <TabSkeleton />,
 });
 
-const XFeedTab = dynamic(() => import("./tabs/x-feed-tab"), {
-  ssr: false,
-  loading: () => <TabSkeleton />,
-});
-
 const YouTubeTab = dynamic(() => import("./tabs/youtube-tab"), {
   loading: () => <TabSkeleton />,
 });
 
 const KoreanTab = dynamic(() => import("./tabs/korean-tab"), {
+  loading: () => <TabSkeleton />,
+});
+
+const XFeedTab = dynamic(() => import("./tabs/x-feed-tab"), {
   loading: () => <TabSkeleton />,
 });
 
@@ -87,32 +86,13 @@ interface CommunityTabsProps {
 
 const TABS = [
   { key: "all", label: "All" },
-  { key: "news", label: "News" },
   { key: "xfeed", label: "X Feed" },
+  { key: "news", label: "News" },
   { key: "youtube", label: "YouTube" },
   { key: "korean", label: "Korean" },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
-
-const X_CATEGORY_COLORS: Record<string, string> = {
-  news: "bg-rose-500/20 text-rose-400 border-rose-500/30",
-  analyst: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  onchain: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-  analytics: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
-  exchange: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  whales: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
-};
-
-const X_CATEGORY_LABELS: Record<string, string> = {
-  all: "All",
-  news: "News",
-  analyst: "Analysts",
-  onchain: "On-Chain",
-  analytics: "Analytics",
-  exchange: "Exchanges",
-  whales: "Whales",
-};
 
 const KOREAN_TYPE_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
   tweet: {
@@ -156,9 +136,9 @@ function timeAgo(dateStr: string): string {
 
 interface UnifiedItem {
   id: string;
-  type: "news" | "tweet" | "youtube" | "korean";
+  type: "news" | "youtube" | "korean";
   timestamp: number;
-  data: SerializedNewsItem | XFeedItem | SerializedYouTubeItem | KoreanFeedItem;
+  data: SerializedNewsItem | SerializedYouTubeItem | KoreanFeedItem;
 }
 
 // ── Component ────────────────────────────────────────────────────────
@@ -187,15 +167,6 @@ export function CommunityTabs({
       });
     });
 
-    xFeedItems.slice(0, 6).forEach((x) => {
-      items.push({
-        id: `tweet-${x.tweetId}`,
-        type: "tweet",
-        timestamp: parseInt(x.tweetId) / 1000000, // approximate from snowflake
-        data: x,
-      });
-    });
-
     youtubeItems.slice(0, 6).forEach((y) => {
       items.push({
         id: `yt-${y.videoId}`,
@@ -215,13 +186,12 @@ export function CommunityTabs({
     });
 
     // Interleave by type for visual variety rather than strict chronological
-    const byType: Record<string, UnifiedItem[]> = { news: [], tweet: [], youtube: [], korean: [] };
+    const byType: Record<string, UnifiedItem[]> = { news: [], youtube: [], korean: [] };
     items.forEach((item) => byType[item.type].push(item));
     const interleaved: UnifiedItem[] = [];
     const maxLen = Math.max(...Object.values(byType).map((a) => a.length));
     for (let i = 0; i < maxLen; i++) {
       if (byType.news[i]) interleaved.push(byType.news[i]);
-      if (byType.tweet[i]) interleaved.push(byType.tweet[i]);
       if (byType.youtube[i]) interleaved.push(byType.youtube[i]);
       if (byType.korean[i]) interleaved.push(byType.korean[i]);
     }
@@ -383,48 +353,6 @@ export function CommunityTabs({
                   );
                 }
 
-                if (item.type === "tweet") {
-                  const tweet = item.data as XFeedItem;
-                  return (
-                    <div
-                      key={item.id}
-                      className="community-card group relative rounded-xl bg-white/[0.03] border border-white/[0.06] overflow-hidden hover:border-blue-500/25 transition-all duration-300"
-                    >
-                      {/* Type indicator */}
-                      <div className="absolute top-3 right-3 z-10 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-blue-500/15 text-blue-400 border border-blue-500/25">
-                        Tweet
-                      </div>
-                      <div className="px-4 pt-4 pb-2 flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center text-xs font-bold text-blue-400">
-                          {tweet.username.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <span className="text-sm font-semibold text-zinc-200">
-                            @{tweet.username}
-                          </span>
-                          <span
-                            className={`ml-2 text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border ${
-                              X_CATEGORY_COLORS[tweet.category] ?? "bg-zinc-800/50 text-zinc-400 border-zinc-700/50"
-                            }`}
-                          >
-                            {X_CATEGORY_LABELS[tweet.category] ?? tweet.category}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="px-4 pb-3 text-sm text-zinc-400">
-                        <a
-                          href={`https://x.com/${tweet.username}/status/${tweet.tweetId}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="hover:text-blue-400 transition-colors"
-                        >
-                          View tweet on X &rarr;
-                        </a>
-                      </div>
-                    </div>
-                  );
-                }
-
                 if (item.type === "youtube") {
                   const video = item.data as SerializedYouTubeItem;
                   return (
@@ -529,8 +457,8 @@ export function CommunityTabs({
           )}
 
           {/* ── Lazy-loaded tabs ───────────────────────────────────── */}
-          {activeTab === "news" && <NewsTab newsItems={newsItems} />}
           {activeTab === "xfeed" && <XFeedTab xFeedItems={xFeedItems} />}
+          {activeTab === "news" && <NewsTab newsItems={newsItems} />}
           {activeTab === "youtube" && <YouTubeTab youtubeItems={youtubeItems} />}
           {activeTab === "korean" && <KoreanTab koreanFeedItems={koreanFeedItems} />}
         </div>

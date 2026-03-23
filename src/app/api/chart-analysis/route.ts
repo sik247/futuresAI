@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
+import { runMultiAgentAnalysis } from "@/lib/services/chart-analysis/orchestrator";
 import {
-  analyzeChart,
-  ANALYSIS_COST,
-} from "@/lib/services/chart-analysis/chart-analysis.service";
+  checkUsageAllowance,
+  incrementUsage,
+} from "@/lib/services/chart-analysis/subscription.service";
 import {
   notifyAdmin,
   formatChartAnalysisNotification,
@@ -17,15 +18,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { imageUrl } = await req.json();
+    const { imageUrl, pair } = await req.json();
     if (!imageUrl) {
       return NextResponse.json(
         { error: "Image URL is required" },
         { status: 400 }
       );
     }
+    if (!pair) {
+      return NextResponse.json(
+        { error: "Trading pair is required" },
+        { status: 400 }
+      );
+    }
 
-    // Get user
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
@@ -33,16 +39,40 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Run AI analysis
-    const analysis = await analyzeChart(imageUrl);
+    // Check subscription & usage
+    const { allowed, subscription, periodEnd } = await checkUsageAllowance(
+      user.id
+    );
+    if (!subscription) {
+      return NextResponse.json(
+        { error: "Active subscription required", code: "NO_SUBSCRIPTION" },
+        { status: 403 }
+      );
+    }
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          error: "Analysis limit reached",
+          code: "LIMIT_REACHED",
+          periodEnd,
+        },
+        { status: 429 }
+      );
+    }
 
-    // Create analysis record (PENDING status - will be charged once approved)
+    // Run multi-agent analysis
+    const { analysis, priceData, webResults } = await runMultiAgentAnalysis(
+      imageUrl,
+      pair
+    );
+
+    // Create analysis record (auto-charged for subscribers)
     const chartAnalysis = await prisma.chartAnalysis.create({
       data: {
         imageUrl,
-        pair: null,
-        cost: ANALYSIS_COST,
-        status: "PENDING",
+        pair,
+        cost: 0,
+        status: "CHARGED",
         summary: analysis.summary,
         trend: analysis.trend,
         patterns: JSON.stringify(analysis.patterns),
@@ -51,20 +81,26 @@ export async function POST(req: NextRequest) {
         indicators: JSON.stringify(analysis.indicators),
         tradeSetup: JSON.stringify(analysis.tradeSetup),
         analysisData: JSON.stringify(analysis),
+        newsContext: webResults ? JSON.stringify(webResults) : null,
+        priceContext: priceData ? JSON.stringify(priceData) : null,
         riskScore: analysis.riskScore,
         confidence: analysis.confidence,
         userId: user.id,
+        chargedAt: new Date(),
       },
     });
 
-    // Notify admin via Telegram
+    // Increment usage count
+    await incrementUsage(user.id);
+
+    // Notify admin
     try {
       await notifyAdmin(
         formatChartAnalysisNotification({
           userName: user.name || user.nickname,
           trend: analysis.trend,
           confidence: analysis.confidence,
-          cost: ANALYSIS_COST,
+          cost: 0,
         })
       );
     } catch {
@@ -74,8 +110,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       id: chartAnalysis.id,
       analysis,
-      cost: ANALYSIS_COST,
-      status: "PENDING",
+      status: "CHARGED",
     });
   } catch (error) {
     console.error("Chart analysis error:", error);
@@ -86,7 +121,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Admin endpoint to approve and charge for analysis
+// Admin endpoint to approve/refund legacy analyses
 export async function PATCH(req: NextRequest) {
   try {
     const session = await auth();
@@ -94,7 +129,6 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Check admin
     const admin = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
@@ -116,30 +150,22 @@ export async function PATCH(req: NextRequest) {
     }
 
     if (action === "approve") {
-      // Charge user's account
       await prisma.$transaction([
         prisma.chartAnalysis.update({
           where: { id: analysisId },
-          data: {
-            status: "CHARGED",
-            chargedAt: new Date(),
-          },
+          data: { status: "CHARGED", chargedAt: new Date() },
         }),
         prisma.user.update({
           where: { id: analysis.userId },
-          data: {
-            credits: { decrement: analysis.cost },
-          },
+          data: { credits: { decrement: analysis.cost } },
         }),
       ]);
-
       return NextResponse.json({ status: "CHARGED", cost: analysis.cost });
     } else if (action === "refund") {
       await prisma.chartAnalysis.update({
         where: { id: analysisId },
         data: { status: "REFUNDED" },
       });
-
       return NextResponse.json({ status: "REFUNDED" });
     }
 
