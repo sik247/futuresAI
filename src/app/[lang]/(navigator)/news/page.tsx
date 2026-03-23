@@ -3,6 +3,7 @@ import { getCryptoNews } from "./actions";
 import { NewsListSection } from "./news-list-section";
 import { getDictionary } from "@/i18n";
 import { Metadata } from "next";
+import { translateBatch } from "@/lib/services/social/korean-translator.service";
 
 export const metadata: Metadata = {
   title: "Crypto News and Market Updates",
@@ -51,13 +52,34 @@ export default async function NewsList({
   const trending =
     trendingFromNews.length > 0 ? trendingFromNews : TRENDING_TICKERS;
 
+  // Translate news titles and bodies for Korean
+  const translatedNews = lang === "ko" && news.length > 0
+    ? await (async () => {
+        try {
+          const titles = news.map((n) => n.title);
+          const bodies = news.map((n) => n.body);
+          const [translatedTitles, translatedBodies] = await Promise.all([
+            translateBatch(titles, "en", "ko"),
+            translateBatch(bodies, "en", "ko"),
+          ]);
+          return news.map((n, i) => ({
+            ...n,
+            title: translatedTitles[i]?.translated || n.title,
+            body: translatedBodies[i]?.translated || n.body,
+          }));
+        } catch {
+          return news; // Fallback to English on error
+        }
+      })()
+    : news;
+
   // Collect unique sources
-  const uniqueSources = new Set(news.map((item) => item.source));
+  const uniqueSources = new Set(translatedNews.map((item) => item.source));
 
   // Last updated timestamp
-  const lastUpdated = news.length > 0
+  const lastUpdated = translatedNews.length > 0
     ? new Date(
-        Math.max(...news.map((n) => new Date(n.publishedAt).getTime()))
+        Math.max(...translatedNews.map((n) => new Date(n.publishedAt).getTime()))
       ).toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
@@ -139,7 +161,7 @@ export default async function NewsList({
           </div>
         </section>
 
-        <NewsListSection news={news} />
+        <NewsListSection news={translatedNews} />
       </Container>
     </div>
   );

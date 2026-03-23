@@ -5,6 +5,7 @@ import { fetchYouTubeFeeds } from "@/lib/services/social/youtube-feed.service";
 import { fetchCryptoFeed } from "@/lib/services/social/x-feed.service";
 import { CommunityTabs } from "./community-tabs";
 import { getDictionary } from "@/i18n";
+import { translateBatch } from "@/lib/services/social/korean-translator.service";
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -91,8 +92,29 @@ export default async function SnsPage({ params: { lang } }: { params: { lang: st
   const lastUpdatedMs = allTimestamps.length > 0 ? Math.max(...allTimestamps) : Date.now();
   const updatedAgo = timeAgo(new Date(lastUpdatedMs).toISOString());
 
+  // Translate news for Korean users
+  const translatedNewsItems = lang === "ko" && newsItems.length > 0
+    ? await (async () => {
+        try {
+          const titles = newsItems.map((n) => n.title);
+          const bodies = newsItems.map((n) => n.body);
+          const [trTitles, trBodies] = await Promise.all([
+            translateBatch(titles, "en", "ko"),
+            translateBatch(bodies, "en", "ko"),
+          ]);
+          return newsItems.map((n, i) => ({
+            ...n,
+            title: trTitles[i]?.translated || n.title,
+            body: trBodies[i]?.translated || n.body,
+          }));
+        } catch {
+          return newsItems;
+        }
+      })()
+    : newsItems;
+
   // Serialize dates for the client component
-  const serializedNews = newsItems.map((n) => ({
+  const serializedNews = translatedNewsItems.map((n) => ({
     ...n,
     publishedAt: new Date(n.publishedAt).toISOString(),
   }));
