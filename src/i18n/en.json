@@ -111,5 +111,22 @@
     "sns_updated": "Updated",
     "sns_subscribe": "Subscribe",
     "sns_shorts": "Shorts",
-    "sns_shortsCta": "Subscribe to Futures AI"
+    "sns_shortsCta": "Subscribe to Futures AI",
+    "quant": "Quant",
+    "quant_title": "AI Quant Terminal",
+    "quant_subtitle": "Quantitative Intelligence",
+    "quant_description": "Real-time AI signals, chart analysis, and quantitative insights for professional traders.",
+    "quant_signals": "AI Signals",
+    "quant_chartAnalysis": "Chart Analysis",
+    "quant_marketOverview": "Market Overview",
+    "quant_fearGreed": "Fear & Greed",
+    "quant_btcTrend": "BTC Trend",
+    "quant_aboveSma": "Above SMA",
+    "quant_belowSma": "Below SMA",
+    "quant_autoRefresh": "Auto-refresh",
+    "quant_refreshNow": "Refresh Now",
+    "quant_confidence": "Confidence",
+    "quant_assetSignals": "Asset Signals",
+    "quant_marketSummary": "Market Summary",
+    "quant_disclaimer": "Signals are generated from publicly available market data and simple technical indicators. This is not financial advice. Always do your own research."
   }

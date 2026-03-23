@@ -111,5 +111,22 @@
     "sns_updated": "업데이트",
     "sns_subscribe": "구독하기",
     "sns_shorts": "쇼츠",
-    "sns_shortsCta": "Futures AI 구독하기"
+    "sns_shortsCta": "Futures AI 구독하기",
+    "quant": "퀀트",
+    "quant_title": "AI 퀀트 터미널",
+    "quant_subtitle": "정량적 인텔리전스",
+    "quant_description": "전문 트레이더를 위한 실시간 AI 시그널, 차트 분석, 정량적 인사이트.",
+    "quant_signals": "AI 시그널",
+    "quant_chartAnalysis": "차트 분석",
+    "quant_marketOverview": "시장 개요",
+    "quant_fearGreed": "공포&탐욕",
+    "quant_btcTrend": "BTC 트렌드",
+    "quant_aboveSma": "SMA 상향",
+    "quant_belowSma": "SMA 하향",
+    "quant_autoRefresh": "자동 새로고침",
+    "quant_refreshNow": "새로고침",
+    "quant_confidence": "신뢰도",
+    "quant_assetSignals": "자산 시그널",
+    "quant_marketSummary": "시장 요약",
+    "quant_disclaimer": "시그널은 공개된 시장 데이터와 단순 기술 지표를 기반으로 생성됩니다. 투자 조언이 아닙니다. 항상 직접 조사하세요."
   }

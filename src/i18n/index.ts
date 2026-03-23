@@ -110,6 +110,23 @@ export type Dictionary = {
   sns_subscribe: string;
   sns_shorts: string;
   sns_shortsCta: string;
+  quant: string;
+  quant_title: string;
+  quant_subtitle: string;
+  quant_description: string;
+  quant_signals: string;
+  quant_chartAnalysis: string;
+  quant_marketOverview: string;
+  quant_fearGreed: string;
+  quant_btcTrend: string;
+  quant_aboveSma: string;
+  quant_belowSma: string;
+  quant_autoRefresh: string;
+  quant_refreshNow: string;
+  quant_confidence: string;
+  quant_assetSignals: string;
+  quant_marketSummary: string;
+  quant_disclaimer: string;
 }
 
 const dictionaries = {

@@ -11,13 +11,12 @@ import {
   MoonIcon,
   ChartBarIcon,
   PresentationChartLineIcon,
-  BoltIcon,
+  BeakerIcon,
   GlobeAltIcon,
   CurrencyDollarIcon,
   ChatBubbleLeftRightIcon,
   NewspaperIcon,
   CalculatorIcon,
-  LightBulbIcon,
 } from "@heroicons/react/24/outline";
 
 import Logo from "@/components/logo";
@@ -39,13 +38,12 @@ type THeaders = { lang: string; translations: Dictionary };
 const NAV_ITEMS = [
   { path: "dashboard", key: "dashboard" as const, icon: ChartBarIcon, group: 0 },
   { path: "charts", key: "charts" as const, icon: PresentationChartLineIcon, group: 1 },
-  { path: "signals", key: "signals" as const, icon: BoltIcon, group: 1 },
+  { path: "quant", key: "quant" as const, icon: BeakerIcon, group: 1 },
   { path: "markets", key: "markets" as const, icon: GlobeAltIcon, group: 1 },
   { path: "whales", key: "whales" as const, icon: CurrencyDollarIcon, group: 2 },
   { path: "sns", key: "sns" as const, icon: ChatBubbleLeftRightIcon, group: 2 },
   { path: "news", key: "news" as const, icon: NewspaperIcon, group: 2 },
   { path: "calculator", key: "calculator" as const, icon: CalculatorIcon, group: 3 },
-  { path: "chart-ideas", key: "chartIdeas" as const, icon: LightBulbIcon, group: 3 },
 ] as const;
 
 const Headers: React.FC<THeaders> = ({ lang, translations }) => {
