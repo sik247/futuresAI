@@ -4,7 +4,6 @@ import {
 } from "@/lib/services/news/crypto-news.service";
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
 export const revalidate = 120; // 2 minutes
 
 /**

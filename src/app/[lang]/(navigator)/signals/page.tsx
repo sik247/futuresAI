@@ -10,7 +10,6 @@ export const metadata: Metadata = {
   keywords: ["AI trading signals", "crypto signals", "trading strategies", "market sentiment", "fear greed index", "bitcoin signals"],
 };
 
-export const dynamic = "force-dynamic";
 export const revalidate = 300;
 
 export default async function SignalsPage() {

@@ -303,43 +303,41 @@ async function fetchTweetIdsFromRSSHub(
   username: string,
   limit: number = 5
 ): Promise<string[]> {
-  for (const instance of RSSHUB_INSTANCES) {
-    try {
-      const url = `${instance}/twitter/user/${username}?format=json&limit=${limit}`;
-      const res = await fetch(url, {
-        signal: AbortSignal.timeout(8000),
-        headers: {
-          "User-Agent": "CryptoX/1.0",
-          Accept: "application/json",
-        },
-      });
+  try {
+    return await Promise.any(
+      RSSHUB_INSTANCES.map(async (instance) => {
+        const url = `${instance}/twitter/user/${username}?format=json&limit=${limit}`;
+        const res = await fetch(url, {
+          signal: AbortSignal.timeout(8000),
+          headers: {
+            "User-Agent": "CryptoX/1.0",
+            Accept: "application/json",
+          },
+        });
 
-      if (!res.ok) continue;
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      const data = await res.json();
-      const items: Array<{ url?: string; id?: string; link?: string }> =
-        data?.items ?? data?.entries ?? [];
+        const data = await res.json();
+        const items: Array<{ url?: string; id?: string; link?: string }> =
+          data?.items ?? data?.entries ?? [];
 
-      const tweetIds: string[] = [];
-      for (const item of items) {
-        const link = item.url ?? item.link ?? item.id ?? "";
-        // Extract tweet ID from URL like https://twitter.com/user/status/123456
-        const match = link.match(/\/status\/(\d+)/);
-        if (match?.[1]) {
-          tweetIds.push(match[1]);
+        const tweetIds: string[] = [];
+        for (const item of items) {
+          const link = item.url ?? item.link ?? item.id ?? "";
+          // Extract tweet ID from URL like https://twitter.com/user/status/123456
+          const match = link.match(/\/status\/(\d+)/);
+          if (match?.[1]) {
+            tweetIds.push(match[1]);
+          }
         }
-      }
 
-      if (tweetIds.length > 0) {
+        if (tweetIds.length === 0) throw new Error("empty");
         return tweetIds.slice(0, limit);
-      }
-    } catch {
-      // Try next instance
-      continue;
-    }
+      })
+    );
+  } catch {
+    return [];
   }
-
-  return [];
 }
 
 // ── Twitter syndication timeline (undocumented endpoint) ─────────────
@@ -396,40 +394,39 @@ async function fetchTweetIdsFromNitter(
   username: string,
   limit: number = 5
 ): Promise<string[]> {
-  for (const instance of NITTER_INSTANCES) {
-    try {
-      // Nitter RSS feeds
-      const url = `${instance}/${username}/rss`;
-      const res = await fetch(url, {
-        signal: AbortSignal.timeout(8000),
-        headers: {
-          "User-Agent": "CryptoX/1.0",
-          Accept: "application/rss+xml, application/xml, text/xml",
-        },
-      });
+  try {
+    return await Promise.any(
+      NITTER_INSTANCES.map(async (instance) => {
+        // Nitter RSS feeds
+        const url = `${instance}/${username}/rss`;
+        const res = await fetch(url, {
+          signal: AbortSignal.timeout(8000),
+          headers: {
+            "User-Agent": "CryptoX/1.0",
+            Accept: "application/rss+xml, application/xml, text/xml",
+          },
+        });
 
-      if (!res.ok) continue;
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      const xml = await res.text();
-      // Extract tweet IDs from Nitter RSS <link> or <guid> elements
-      const idPattern = /\/status\/(\d{15,22})/g;
-      const tweetIds: string[] = [];
-      let match: RegExpExecArray | null;
-      while ((match = idPattern.exec(xml)) !== null) {
-        if (!tweetIds.includes(match[1])) {
-          tweetIds.push(match[1]);
+        const xml = await res.text();
+        // Extract tweet IDs from Nitter RSS <link> or <guid> elements
+        const idPattern = /\/status\/(\d{15,22})/g;
+        const tweetIds: string[] = [];
+        let match: RegExpExecArray | null;
+        while ((match = idPattern.exec(xml)) !== null) {
+          if (!tweetIds.includes(match[1])) {
+            tweetIds.push(match[1]);
+          }
         }
-      }
 
-      if (tweetIds.length > 0) {
+        if (tweetIds.length === 0) throw new Error("empty");
         return tweetIds.slice(0, limit);
-      }
-    } catch {
-      continue;
-    }
+      })
+    );
+  } catch {
+    return [];
   }
-
-  return [];
 }
 
 // ── Main feed fetcher ────────────────────────────────────────────────
@@ -445,33 +442,23 @@ async function fetchAccountTweetIds(
 ): Promise<string[]> {
   const { username } = account;
 
-  // Strategy 1: Twitter syndication timeline (most direct, no third party)
-  let ids = await fetchTweetIdsFromSyndication(username, maxTweets);
-  if (ids.length > 0) {
-    console.log(`[x-feed] Syndication: got ${ids.length} tweets for @${username}`);
+  // Race all strategies in parallel — first non-empty result wins
+  try {
+    const ids = await Promise.any([
+      fetchTweetIdsFromSyndication(username, maxTweets).then(ids => ids.length > 0 ? ids : Promise.reject(new Error('empty'))),
+      fetchTweetIdsFromRSSHub(username, maxTweets).then(ids => ids.length > 0 ? ids : Promise.reject(new Error('empty'))),
+      fetchTweetIdsFromNitter(username, maxTweets).then(ids => ids.length > 0 ? ids : Promise.reject(new Error('empty'))),
+    ]);
+    console.log(`[x-feed] Got ${ids.length} tweets for @${username}`);
     return ids.slice(0, maxTweets);
+  } catch {
+    // All strategies failed — use fallback hardcoded tweet IDs
+    const fallback = FALLBACK_TWEET_IDS[username] ?? [];
+    if (fallback.length > 0) {
+      console.log(`[x-feed] Fallback: using ${fallback.length} cached tweets for @${username}`);
+    }
+    return fallback.slice(0, maxTweets);
   }
-
-  // Strategy 2: RSSHub (popular, many mirrors)
-  ids = await fetchTweetIdsFromRSSHub(username, maxTweets);
-  if (ids.length > 0) {
-    console.log(`[x-feed] RSSHub: got ${ids.length} tweets for @${username}`);
-    return ids.slice(0, maxTweets);
-  }
-
-  // Strategy 3: Nitter RSS
-  ids = await fetchTweetIdsFromNitter(username, maxTweets);
-  if (ids.length > 0) {
-    console.log(`[x-feed] Nitter: got ${ids.length} tweets for @${username}`);
-    return ids.slice(0, maxTweets);
-  }
-
-  // Fallback: hardcoded tweet IDs
-  const fallback = FALLBACK_TWEET_IDS[username] ?? [];
-  if (fallback.length > 0) {
-    console.log(`[x-feed] Fallback: using ${fallback.length} cached tweets for @${username}`);
-  }
-  return fallback.slice(0, maxTweets);
 }
 
 /**

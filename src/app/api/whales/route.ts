@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // 5 minutes
 
 const WALLETS = [
   { name: "WLFI Treasury", address: "0x5be9a4959308A0D0c7bC0870E319314d8D957dBB", entity: "World Liberty Financial", type: "treasury" },

@@ -5,7 +5,7 @@
 import { fetchCryptoFeed, type XFeedItem } from './x-feed.service';
 import { fetchYouTubeFeeds, type YouTubeVideoItem } from './youtube-feed.service';
 import { fetchCryptoNews, type CryptoNewsItem } from '../news/crypto-news.service';
-import { translateText, translateBatch } from './korean-translator.service';
+import { translateText } from './korean-translator.service';
 
 export interface ManagedContent {
   id: string;
@@ -258,35 +258,39 @@ export async function translatePendingContent(): Promise<number> {
 
   let translatedCount = 0;
 
-  for (const item of pendingItems) {
-    try {
-      // Skip items that already have Korean text (e.g., Korean YouTube channels)
-      const isKorean = /[\uac00-\ud7af]/.test(item.title);
+  const BATCH_SIZE = 5;
+  const separator = '\n|||SPLIT|||\n';
 
-      if (isKorean) {
-        // Already Korean - copy as-is
-        item.titleKo = item.title;
-        item.descriptionKo = item.description;
-      } else {
-        // Translate title and description in batch
-        const [titleResult, descResult] = await translateBatch(
-          [item.title, item.description],
-          'en',
-          'ko'
+  for (let i = 0; i < pendingItems.length; i += BATCH_SIZE) {
+    const batch = pendingItems.slice(i, i + BATCH_SIZE);
+    await Promise.all(batch.map(async (item) => {
+      try {
+        // Skip items that already have Korean text (e.g., Korean YouTube channels)
+        const isKorean = /[\uac00-\ud7af]/.test(item.title);
+
+        if (isKorean) {
+          // Already Korean - copy as-is
+          item.titleKo = item.title;
+          item.descriptionKo = item.description;
+        } else {
+          // Combine title and description into a single translation request
+          const combined = `${item.title}${separator}${item.description}`;
+          const result = await translateText(combined, 'en', 'ko');
+          const parts = result.translated.split('|||SPLIT|||').map(s => s.trim());
+          item.titleKo = parts[0] || result.translated;
+          item.descriptionKo = parts[1] || '';
+        }
+
+        item.status = 'translated';
+        contentStore.set(item.id, item);
+        translatedCount++;
+      } catch (err) {
+        console.log(
+          `[content-bot] Failed to translate ${item.id}: ${err instanceof Error ? err.message : 'unknown'}`
         );
-        item.titleKo = titleResult.translated;
-        item.descriptionKo = descResult.translated;
+        // Keep as pending for retry
       }
-
-      item.status = 'translated';
-      contentStore.set(item.id, item);
-      translatedCount++;
-    } catch (err) {
-      console.log(
-        `[content-bot] Failed to translate ${item.id}: ${err instanceof Error ? err.message : 'unknown'}`
-      );
-      // Keep as pending for retry
-    }
+    }));
   }
 
   console.log(`[content-bot] Translation complete: ${translatedCount}/${pendingItems.length} items`);

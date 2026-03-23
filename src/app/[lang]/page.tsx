@@ -5,5 +5,5 @@ export default function LangRoot({
 }: {
   params: { lang: string };
 }) {
-  redirect(`/${lang}/dashboard`);
+  redirect(`/${lang}/sns`);
 }

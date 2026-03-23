@@ -1,4 +1,5 @@
 import Container from "@/components/ui/container";
+import Image from "next/image";
 import { Metadata } from "next";
 import { fetchCryptoFeed } from "@/lib/services/social/x-feed.service";
 import { fetchCryptoNews } from "@/lib/services/news/crypto-news.service";
@@ -21,6 +22,8 @@ export interface KoreanFeedItem {
 }
 
 // ── Metadata ─────────────────────────────────────────────────────────
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Crypto Community Hub - Social Feed & Live Streams",
@@ -337,11 +340,13 @@ export default async function SnsPage() {
                   rel="noopener noreferrer"
                   className="group relative rounded-xl overflow-hidden bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300 shrink-0 w-[140px]"
                 >
-                  <div className="aspect-[9/16]">
-                    <img
+                  <div className="aspect-[9/16] relative">
+                    <Image
                       src={`https://i.ytimg.com/vi/${id}/oar2.jpg`}
                       alt="Futures AI Short"
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="140px"
+                      className="object-cover"
                       loading="lazy"
                     />
                   </div>
@@ -367,11 +372,13 @@ export default async function SnsPage() {
                   rel="noopener noreferrer"
                   className="group relative rounded-xl overflow-hidden bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.12] transition-all duration-300 hover:scale-[1.03]"
                 >
-                  <div className="aspect-[9/16]">
-                    <img
+                  <div className="aspect-[9/16] relative">
+                    <Image
                       src={`https://i.ytimg.com/vi/${id}/oar2.jpg`}
                       alt="Futures AI Short"
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="(max-width: 768px) 33vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw"
+                      className="object-cover"
                       loading="lazy"
                     />
                   </div>

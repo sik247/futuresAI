@@ -270,7 +270,7 @@ model ChartAnalysis {
   id              String         @id @default(cuid())
   imageUrl        String
   pair            String?
-  cost            Float          @default(5.0)
+  cost            Float          @default(50.0)
   status          AnalysisStatus @default(PENDING)
   // AI analysis results (stored as JSON)
   summary         String
@@ -280,6 +280,7 @@ model ChartAnalysis {
   resistanceLevels String        @db.Text
   indicators      String         @db.Text
   tradeSetup      String         @db.Text
+  analysisData    String?        @db.Text
   riskScore       Int            @default(0)
   confidence      Int            @default(0)
   userId          String

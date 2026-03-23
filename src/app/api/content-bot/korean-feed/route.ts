@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
@@ -74,8 +74,8 @@ export async function GET(request: NextRequest) {
     // Fallback to in-memory store
     // Auto-populate if store is empty (serverless cold start / dev hot reload)
     if (isStoreEmpty()) {
-      console.log("[content-bot] Korean feed store empty, auto-aggregating...");
-      await runContentPipeline();
+      console.log("[content-bot] Korean feed store empty, triggering background aggregation...");
+      runContentPipeline().catch(err => console.error("[content-bot] Background pipeline error:", err));
     }
 
     let items = getLiveKoreanFeed(limit);

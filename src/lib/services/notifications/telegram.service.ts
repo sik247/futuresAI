@@ -139,6 +139,6 @@ export function formatChartAnalysisNotification(data: {
     `<b>User:</b> ${data.userName}\n` +
     `<b>Trend:</b> ${data.trend}\n` +
     `<b>Confidence:</b> ${data.confidence}%\n` +
-    `<b>Charge:</b> $${data.cost.toFixed(2)} (pending approval)\n`
+    `<b>Charge:</b> ${data.cost.toFixed(0)} USDT (pending approval)\n`
   );
 }

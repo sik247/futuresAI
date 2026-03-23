@@ -32,7 +32,7 @@ export default async function ChartIdeasPage({
           <div className="flex items-center gap-3">
             <Link href={`/${lang}/chart-ideas/analyze`}>
               <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20">
-                {translations.chartAnalysis || "AI Analysis"} — $5
+                {translations.chartAnalysis || "AI Analysis"} — 50 USDT
               </Button>
             </Link>
             <Link href={`/${lang}/chart-ideas/new`}>

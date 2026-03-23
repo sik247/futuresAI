@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* react-tweet dark theme overrides */
+[data-theme="dark"] .react-tweet-theme {
+  --tweet-bg-color: transparent !important;
+  --tweet-border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  --tweet-font-color: #e4e4e7 !important;
+  --tweet-font-color-secondary: #a1a1aa !important;
+  --tweet-color-blue-secondary: #3b82f6 !important;
+}
+
+/* Fix tweet container sizing */
+[data-theme="dark"] .react-tweet-theme,
+[data-theme="dark"] > div {
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Skeleton loading state for tweets */
+.react-tweet-theme > div:empty {
+  min-height: 120px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  border-radius: 12px;
+}
+
 @layer base {
   html, body {
     margin: 0;

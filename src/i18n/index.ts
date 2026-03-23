@@ -78,6 +78,13 @@ export type Dictionary = {
   chartAnalysis_chargeNotice: string;
   chartAnalysis_paymentMethod: string;
   chartAnalysis_pending: string;
+  chartAnalysis_ocrData: string;
+  chartAnalysis_quantAnalysis: string;
+  chartAnalysis_fibonacci: string;
+  chartAnalysis_hitProbability: string;
+  chartAnalysis_currentPrice: string;
+  chartAnalysis_timeframe: string;
+  chartAnalysis_statisticalTargets: string;
   koreanFeed: string;
   contentBot: string;
   autoTranslated: string;

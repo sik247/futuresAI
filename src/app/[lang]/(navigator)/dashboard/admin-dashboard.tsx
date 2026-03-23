@@ -470,7 +470,7 @@ export default function AdminDashboard() {
           <div className="px-6 py-4 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-zinc-300">Chart Analysis Charges</h2>
-              <p className="text-xs text-zinc-500 mt-0.5">$5 / analysis — approve to charge user account</p>
+              <p className="text-xs text-zinc-500 mt-0.5">50 USDT / analysis — approve to charge user account</p>
             </div>
             <div className="flex gap-1">
               {(["ALL", "PENDING", "CHARGED", "REFUNDED"] as const).map((f) => (
@@ -547,7 +547,7 @@ export default function AdminDashboard() {
                               disabled={actionLoading === a.id}
                               className="px-3 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-400 text-xs font-medium hover:bg-emerald-600/30 transition-colors disabled:opacity-50"
                             >
-                              {actionLoading === a.id ? "..." : "Charge $5"}
+                              {actionLoading === a.id ? "..." : "Charge 50 USDT"}
                             </button>
                             <button
                               onClick={() => handleRefundAnalysis(a.id)}

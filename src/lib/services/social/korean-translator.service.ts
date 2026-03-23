@@ -298,11 +298,15 @@ export async function translateBatch(
   from: string = 'en',
   to: string = 'ko'
 ): Promise<TranslatedContent[]> {
+  const CONCURRENCY = 5;
   const results: TranslatedContent[] = [];
 
-  for (const text of texts) {
-    const result = await translateText(text, from, to);
-    results.push(result);
+  for (let i = 0; i < texts.length; i += CONCURRENCY) {
+    const chunk = texts.slice(i, i + CONCURRENCY);
+    const chunkResults = await Promise.all(
+      chunk.map(text => translateText(text, from, to))
+    );
+    results.push(...chunkResults);
   }
 
   return results;

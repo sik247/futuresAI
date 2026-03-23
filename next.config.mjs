@@ -6,6 +6,7 @@ const nextConfig = {
       { hostname: "resources.cryptocompare.com" },
       { hostname: "images.cryptocompare.com" },
       { hostname: "**.cryptocompare.com" },
+      { hostname: "i.ytimg.com" },
     ],
   },
   async redirects() {

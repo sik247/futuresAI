@@ -48,7 +48,14 @@ export async function GET(request: NextRequest) {
             : item.description,
       }));
 
-      return NextResponse.json({ items: mappedItems, total, page });
+      return NextResponse.json(
+        { items: mappedItems, total, page },
+        {
+          headers: {
+            "Cache-Control": "public, s-maxage=300, stale-while-revalidate=150",
+          },
+        }
+      );
     } catch {
       // Database unavailable, fall back to in-memory store
       console.log("[content-bot] DB unavailable, using in-memory store");
@@ -57,8 +64,8 @@ export async function GET(request: NextRequest) {
     // Fallback to in-memory store
     // Auto-populate if store is empty (serverless cold start / dev hot reload)
     if (isStoreEmpty()) {
-      console.log("[content-bot] Store empty, auto-aggregating...");
-      await runContentPipeline();
+      console.log("[content-bot] Store empty, triggering background aggregation...");
+      runContentPipeline().catch(err => console.error("[content-bot] Background pipeline error:", err));
     }
 
     const feedItems = getContentFeed({
@@ -68,11 +75,18 @@ export async function GET(request: NextRequest) {
       lang: lang as "en" | "ko",
     });
 
-    return NextResponse.json({
-      items: feedItems,
-      total: feedItems.length,
-      page,
-    });
+    return NextResponse.json(
+      {
+        items: feedItems,
+        total: feedItems.length,
+        page,
+      },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=150",
+        },
+      }
+    );
   } catch (error) {
     console.error("[content-bot] GET error:", error);
     return NextResponse.json(

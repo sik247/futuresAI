@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
         resistanceLevels: JSON.stringify(analysis.resistanceLevels),
         indicators: JSON.stringify(analysis.indicators),
         tradeSetup: JSON.stringify(analysis.tradeSetup),
+        analysisData: JSON.stringify(analysis),
         riskScore: analysis.riskScore,
         confidence: analysis.confidence,
         userId: user.id,

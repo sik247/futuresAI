@@ -14,7 +14,7 @@ type Props = {
   translations: Dictionary;
 };
 
-const ANALYSIS_COST = 5;
+const ANALYSIS_COST = 50;
 
 const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -24,14 +24,12 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
   const [analysisId, setAnalysisId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
-  // Canvas refs for drawing lines
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  // Upload file (shared logic)
   const uploadFile = async (file: File) => {
     if (file.size > 10 * 1024 * 1024) {
       toast({ variant: "destructive", title: "Error", description: "File must be less than 10MB" });
@@ -41,7 +39,6 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
       toast({ variant: "destructive", title: "Error", description: "Please upload an image file" });
       return;
     }
-
     setUploading(true);
     setAnalysis(null);
     setAnalysisId(null);
@@ -58,48 +55,25 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     }
   };
 
-  // Drag and drop handlers
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(true);
-  }, []);
+  const handleDragOver = useCallback((e: React.DragEvent) => { e.preventDefault(); setDragOver(true); }, []);
+  const handleDragLeave = useCallback(() => { setDragOver(false); }, []);
+  const handleDrop = useCallback((e: React.DragEvent) => { e.preventDefault(); setDragOver(false); const file = e.dataTransfer.files[0]; if (file) uploadFile(file); }, []);
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (file) uploadFile(file); };
 
-  const handleDragLeave = useCallback(() => {
-    setDragOver(false);
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (file) uploadFile(file);
-  }, []);
-
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) uploadFile(file);
-  };
-
-  // Load image for canvas
   useEffect(() => {
     if (!imageUrl) return;
     const img = new Image();
     img.crossOrigin = "anonymous";
-    img.onload = () => {
-      imgRef.current = img;
-      setImageLoaded(true);
-    };
+    img.onload = () => { imgRef.current = img; setImageLoaded(true); };
     img.src = imageUrl;
   }, [imageUrl]);
 
-  // Handle resize
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current && imgRef.current) {
         const containerWidth = containerRef.current.clientWidth;
         const aspectRatio = imgRef.current.naturalHeight / imgRef.current.naturalWidth;
-        const height = containerWidth * aspectRatio;
-        setDimensions({ width: containerWidth, height });
+        setDimensions({ width: containerWidth, height: containerWidth * aspectRatio });
       }
     };
     if (imageLoaded) {
@@ -109,20 +83,14 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     }
   }, [imageLoaded]);
 
-  // Draw canvas with image + analysis lines
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     const img = imgRef.current;
     if (!canvas || !ctx || !img || dimensions.width === 0) return;
-
     canvas.width = dimensions.width;
     canvas.height = dimensions.height;
-
-    // Draw chart image
     ctx.drawImage(img, 0, 0, dimensions.width, dimensions.height);
-
-    // Draw analysis lines if available
     if (analysis?.lines) {
       analysis.lines.forEach((line) => {
         const y = (line.yPercent / 100) * dimensions.height;
@@ -131,9 +99,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     }
   }, [dimensions, analysis]);
 
-  useEffect(() => {
-    drawCanvas();
-  }, [drawCanvas]);
+  useEffect(() => { drawCanvas(); }, [drawCanvas]);
 
   const drawAnalysisLine = (
     ctx: CanvasRenderingContext2D,
@@ -141,7 +107,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     line: ChartLine,
     width: number
   ) => {
-    // Line
+    // Draw line
     ctx.strokeStyle = line.color;
     ctx.lineWidth = 2;
     ctx.setLineDash(line.dashed ? [8, 4] : []);
@@ -152,7 +118,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Label
+    // Draw label
     ctx.font = "bold 11px Inter, system-ui, sans-serif";
     const textWidth = ctx.measureText(line.label).width;
     const padding = 6;
@@ -166,12 +132,31 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     ctx.roundRect(labelX, labelY, textWidth + padding * 2, labelHeight, 3);
     ctx.fill();
     ctx.globalAlpha = 1;
-
     ctx.fillStyle = "#ffffff";
     ctx.fillText(line.label, labelX + padding, labelY + 14);
+
+    // Draw probability badge
+    if (line.hitProbability != null && line.hitProbability > 0) {
+      const probText = `${line.hitProbability}%`;
+      ctx.font = "bold 10px Inter, system-ui, sans-serif";
+      const probWidth = ctx.measureText(probText).width;
+      const badgeX = labelX + textWidth + padding * 2 + 4;
+
+      // Badge background
+      const probColor = line.hitProbability >= 70 ? "#22c55e" : line.hitProbability >= 40 ? "#f59e0b" : "#ef4444";
+      ctx.fillStyle = probColor;
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath();
+      ctx.roundRect(badgeX, labelY, probWidth + padding * 2, labelHeight, 3);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // Badge text
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(probText, badgeX + padding, labelY + 13);
+    }
   };
 
-  // Run AI analysis
   const runAnalysis = async () => {
     if (!imageUrl) return;
     setAnalyzing(true);
@@ -181,19 +166,16 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imageUrl }),
       });
-
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || "Analysis failed");
       }
-
       const data = await res.json();
       setAnalysis(data.analysis);
       setAnalysisId(data.id);
-
       toast({
         title: translations.chartAnalysis_complete || "Analysis Complete",
-        description: `$${ANALYSIS_COST} ${translations.chartAnalysis_pendingCharge || "will be charged upon approval"}`,
+        description: `${ANALYSIS_COST} USDT ${translations.chartAnalysis_pendingCharge || "will be charged upon approval"}`,
       });
     } catch (err) {
       toast({
@@ -207,12 +189,9 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
   };
 
   const trendColors: Record<string, string> = {
-    BULLISH: "text-green-400",
-    BEARISH: "text-red-400",
-    NEUTRAL: "text-yellow-400",
-    CONSOLIDATING: "text-blue-400",
+    BULLISH: "text-green-400", BEARISH: "text-red-400",
+    NEUTRAL: "text-yellow-400", CONSOLIDATING: "text-blue-400",
   };
-
   const signalColors: Record<string, string> = {
     BUY: "text-green-400 bg-green-500/10 border-green-500/30",
     SELL: "text-red-400 bg-red-500/10 border-red-500/30",
@@ -231,11 +210,11 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
             {translations.chartAnalysis_subtitle || "Drop your chart and get instant quant analysis with key levels"}
           </p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30">
-          <span className="text-amber-400 text-sm font-semibold">
-            ${ANALYSIS_COST}
+        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+          <span className="text-emerald-400 text-sm font-semibold">
+            {ANALYSIS_COST} USDT
           </span>
-          <span className="text-amber-400/70 text-xs">
+          <span className="text-emerald-400/70 text-xs">
             / {translations.chartAnalysis_perAnalysis || "per analysis"}
           </span>
         </div>
@@ -250,70 +229,38 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             className={`flex flex-col items-center justify-center gap-4 p-20 cursor-pointer transition-all ${
-              dragOver
-                ? "bg-blue-500/10 border-blue-500/40"
-                : "hover:bg-white/[0.02]"
+              dragOver ? "bg-blue-500/10 border-blue-500/40" : "hover:bg-white/[0.02]"
             }`}
           >
-            <input
-              type="file"
-              id="chart-analysis-upload"
-              className="hidden"
-              accept="image/*"
-              onChange={handleFileInput}
-            />
+            <input type="file" id="chart-analysis-upload" className="hidden" accept="image/*" onChange={handleFileInput} />
             <div className="w-20 h-20 rounded-2xl bg-zinc-800/50 border border-white/10 flex items-center justify-center">
               <CloudArrowUpIcon className="w-10 h-10 text-zinc-500" />
             </div>
             <span className="text-zinc-300 text-lg font-medium">
-              {uploading
-                ? "Uploading..."
-                : translations.chartAnalysis_dropChart || "Drop your chart here or click to upload"}
+              {uploading ? "Uploading..." : translations.chartAnalysis_dropChart || "Drop your chart here or click to upload"}
             </span>
-            <span className="text-zinc-600 text-sm">
-              PNG, JPG up to 10MB
-            </span>
+            <span className="text-zinc-600 text-sm">PNG, JPG up to 10MB</span>
           </label>
         ) : (
           <div className="relative">
             <div ref={containerRef} className="w-full">
               {imageLoaded ? (
-                <canvas
-                  ref={canvasRef}
-                  width={dimensions.width}
-                  height={dimensions.height}
-                  className="w-full block"
-                  style={{ height: dimensions.height > 0 ? dimensions.height : "auto" }}
-                />
+                <canvas ref={canvasRef} width={dimensions.width} height={dimensions.height}
+                  className="w-full block" style={{ height: dimensions.height > 0 ? dimensions.height : "auto" }} />
               ) : (
                 <div className="w-full aspect-video flex items-center justify-center bg-zinc-900/50">
                   <div className="animate-pulse text-zinc-500">Loading chart...</div>
                 </div>
               )}
             </div>
-
-            {/* Overlay buttons */}
             <div className="absolute top-4 right-4 flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setImageUrl(null);
-                  setAnalysis(null);
-                  setImageLoaded(false);
-                  setAnalysisId(null);
-                }}
-                className="bg-zinc-950/80 border-white/20 text-zinc-300 hover:bg-zinc-900"
-              >
+              <Button variant="outline" size="sm" onClick={() => { setImageUrl(null); setAnalysis(null); setImageLoaded(false); setAnalysisId(null); }}
+                className="bg-zinc-950/80 border-white/20 text-zinc-300 hover:bg-zinc-900">
                 {translations.chartAnalysis_replace || "Replace"}
               </Button>
               {!analysis && (
-                <Button
-                  size="sm"
-                  onClick={runAnalysis}
-                  disabled={analyzing}
-                  className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20"
-                >
+                <Button size="sm" onClick={runAnalysis} disabled={analyzing}
+                  className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20">
                   {analyzing ? (
                     <span className="flex items-center gap-2">
                       <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
@@ -323,13 +270,11 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
                       {translations.chartAnalysis_analyzing || "Analyzing..."}
                     </span>
                   ) : (
-                    `${translations.chartAnalysis_analyze || "Analyze"} — $${ANALYSIS_COST}`
+                    `${translations.chartAnalysis_analyze || "Analyze"} — ${ANALYSIS_COST} USDT`
                   )}
                 </Button>
               )}
             </div>
-
-            {/* Analyzing overlay */}
             {analyzing && (
               <div className="absolute inset-0 bg-zinc-950/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
                 <div className="relative w-16 h-16">
@@ -341,12 +286,8 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
                     </svg>
                   </div>
                 </div>
-                <p className="text-zinc-300 font-medium">
-                  {translations.chartAnalysis_aiProcessing || "AI is analyzing your chart..."}
-                </p>
-                <p className="text-zinc-500 text-sm">
-                  {translations.chartAnalysis_takeMoment || "This may take a moment"}
-                </p>
+                <p className="text-zinc-300 font-medium">{translations.chartAnalysis_aiProcessing || "AI is analyzing your chart..."}</p>
+                <p className="text-zinc-500 text-sm">{translations.chartAnalysis_takeMoment || "This may take a moment"}</p>
               </div>
             )}
           </div>
@@ -356,17 +297,49 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
       {/* Analysis Results */}
       {analysis && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* OCR Data */}
+          {analysis.ocrData && (
+            <Card className="lg:col-span-3 p-6 bg-zinc-950/50 backdrop-blur-sm border-white/10">
+              <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
+                {translations.chartAnalysis_ocrData || "Chart Data (OCR)"}
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
+                  <p className="text-xs text-zinc-500 mb-1">{translations.chartAnalysis_currentPrice || "Current Price"}</p>
+                  <p className="text-lg font-bold font-mono text-foreground">${analysis.ocrData.currentPrice?.toLocaleString()}</p>
+                </div>
+                <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
+                  <p className="text-xs text-zinc-500 mb-1">{translations.chartAnalysis_timeframe || "Timeframe"}</p>
+                  <p className="text-lg font-bold font-mono text-foreground">{analysis.ocrData.timeframe}</p>
+                </div>
+                <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
+                  <p className="text-xs text-zinc-500 mb-1">Range High</p>
+                  <p className="text-lg font-bold font-mono text-green-400">${analysis.ocrData.priceRange?.high?.toLocaleString()}</p>
+                </div>
+                <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
+                  <p className="text-xs text-zinc-500 mb-1">Range Low</p>
+                  <p className="text-lg font-bold font-mono text-red-400">${analysis.ocrData.priceRange?.low?.toLocaleString()}</p>
+                </div>
+              </div>
+              {analysis.ocrData.visibleIndicators?.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {analysis.ocrData.visibleIndicators.map((ind, i) => (
+                    <span key={i} className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/10 border border-blue-500/30 text-blue-300">
+                      {ind}{analysis.ocrData.readValues?.[ind.split(" ")[0]] ? `: ${analysis.ocrData.readValues[ind.split(" ")[0]]}` : ""}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </Card>
+          )}
+
           {/* Summary + Trend */}
           <Card className="lg:col-span-2 p-6 bg-zinc-950/50 backdrop-blur-sm border-white/10">
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-foreground">
-                  {translations.chartAnalysis_summary || "Analysis Summary"}
-                </h2>
+                <h2 className="text-lg font-bold text-foreground">{translations.chartAnalysis_summary || "Analysis Summary"}</h2>
                 <div className="flex items-center gap-3">
-                  <span className={`text-sm font-bold ${trendColors[analysis.trend] || "text-zinc-400"}`}>
-                    {analysis.trend}
-                  </span>
+                  <span className={`text-sm font-bold ${trendColors[analysis.trend] || "text-zinc-400"}`}>{analysis.trend}</span>
                   <span className="text-xs text-zinc-500">|</span>
                   <span className="text-sm text-zinc-400">
                     {translations.chartAnalysis_confidence || "Confidence"}: <span className="text-foreground font-mono">{analysis.confidence}%</span>
@@ -374,17 +347,10 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
                 </div>
               </div>
               <p className="text-zinc-300 leading-relaxed">{analysis.summary}</p>
-
-              {/* Patterns */}
               {analysis.patterns.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   {analysis.patterns.map((p, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-1 rounded-full text-xs font-medium bg-purple-500/10 border border-purple-500/30 text-purple-300"
-                    >
-                      {p}
-                    </span>
+                    <span key={i} className="px-3 py-1 rounded-full text-xs font-medium bg-purple-500/10 border border-purple-500/30 text-purple-300">{p}</span>
                   ))}
                 </div>
               )}
@@ -394,60 +360,44 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
           {/* Risk Score */}
           <Card className="p-6 bg-zinc-950/50 backdrop-blur-sm border-white/10">
             <div className="flex flex-col items-center gap-4">
-              <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">
-                {translations.chartAnalysis_riskScore || "Risk Score"}
-              </h3>
+              <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">{translations.chartAnalysis_riskScore || "Risk Score"}</h3>
               <div className="relative w-24 h-24">
                 <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
                   <circle cx="50" cy="50" r="42" fill="none" stroke="#27272a" strokeWidth="8" />
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="42"
-                    fill="none"
+                  <circle cx="50" cy="50" r="42" fill="none"
                     stroke={analysis.riskScore <= 3 ? "#22c55e" : analysis.riskScore <= 6 ? "#f59e0b" : "#ef4444"}
-                    strokeWidth="8"
-                    strokeDasharray={`${(analysis.riskScore / 10) * 264} 264`}
-                    strokeLinecap="round"
-                  />
+                    strokeWidth="8" strokeDasharray={`${(analysis.riskScore / 10) * 264} 264`} strokeLinecap="round" />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span className="text-2xl font-bold text-foreground">{analysis.riskScore}</span>
                   <span className="text-xs text-zinc-500">/10</span>
                 </div>
               </div>
-              <span className="text-xs text-zinc-500">
-                {analysis.riskScore <= 3 ? "Low Risk" : analysis.riskScore <= 6 ? "Medium Risk" : "High Risk"}
-              </span>
+              <span className="text-xs text-zinc-500">{analysis.riskScore <= 3 ? "Low Risk" : analysis.riskScore <= 6 ? "Medium Risk" : "High Risk"}</span>
             </div>
           </Card>
 
           {/* Trade Setup */}
           <Card className="p-6 bg-zinc-950/50 backdrop-blur-sm border-white/10">
-            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
-              {translations.chartAnalysis_tradeSetup || "Trade Setup"}
-            </h3>
+            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">{translations.chartAnalysis_tradeSetup || "Trade Setup"}</h3>
             <div className="flex flex-col gap-3">
               <div className="flex justify-between items-center">
                 <span className="text-zinc-500 text-sm">Direction</span>
-                <span className={`font-bold text-sm ${
-                  analysis.tradeSetup.direction === "LONG" ? "text-green-400" :
-                  analysis.tradeSetup.direction === "SHORT" ? "text-red-400" : "text-zinc-400"
-                }`}>
+                <span className={`font-bold text-sm ${analysis.tradeSetup.direction === "LONG" ? "text-green-400" : analysis.tradeSetup.direction === "SHORT" ? "text-red-400" : "text-zinc-400"}`}>
                   {analysis.tradeSetup.direction}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-blue-400 text-sm">Entry</span>
-                <span className="text-foreground font-mono text-sm">${analysis.tradeSetup.entry.toLocaleString()}</span>
+                <span className="text-foreground font-mono text-sm">${analysis.tradeSetup.entry?.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-red-400 text-sm">Stop Loss</span>
-                <span className="text-foreground font-mono text-sm">${analysis.tradeSetup.stopLoss.toLocaleString()}</span>
+                <span className="text-foreground font-mono text-sm">${analysis.tradeSetup.stopLoss?.toLocaleString()}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-green-400 text-sm">Take Profit</span>
-                <span className="text-foreground font-mono text-sm">${analysis.tradeSetup.takeProfit.toLocaleString()}</span>
+                <span className="text-foreground font-mono text-sm">${analysis.tradeSetup.takeProfit?.toLocaleString()}</span>
               </div>
               <div className="h-px bg-white/10 my-1" />
               <div className="flex justify-between items-center">
@@ -463,9 +413,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
 
           {/* Indicators */}
           <Card className="p-6 bg-zinc-950/50 backdrop-blur-sm border-white/10">
-            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
-              {translations.chartAnalysis_indicators || "Technical Indicators"}
-            </h3>
+            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">{translations.chartAnalysis_indicators || "Technical Indicators"}</h3>
             <div className="flex flex-col gap-3">
               {analysis.indicators.map((ind, i) => (
                 <div key={i} className="flex items-center justify-between">
@@ -473,29 +421,102 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
                     <span className="text-foreground text-sm font-medium">{ind.name}</span>
                     <span className="text-zinc-500 text-xs">{ind.value}</span>
                   </div>
-                  <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${signalColors[ind.signal]}`}>
-                    {ind.signal}
-                  </span>
+                  <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${signalColors[ind.signal]}`}>{ind.signal}</span>
                 </div>
               ))}
             </div>
           </Card>
 
+          {/* Quant Analysis */}
+          {analysis.quantAnalysis && (
+            <Card className="lg:col-span-3 p-6 bg-zinc-950/50 backdrop-blur-sm border-white/10">
+              <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
+                {translations.chartAnalysis_quantAnalysis || "Quantitative Analysis"}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Fibonacci */}
+                <div>
+                  <h4 className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-3">
+                    {translations.chartAnalysis_fibonacci || "Fibonacci Levels"}
+                  </h4>
+                  <div className="space-y-2">
+                    {analysis.quantAnalysis.fibonacciLevels?.map((fib, i) => (
+                      <div key={i} className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="text-amber-400/70 font-mono text-xs w-12">{fib.level}</span>
+                          <span className="text-zinc-400 text-xs">{fib.significance}</span>
+                        </div>
+                        <span className="text-foreground font-mono">${fib.price?.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Statistical Targets */}
+                <div>
+                  <h4 className="text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-3">
+                    {translations.chartAnalysis_statisticalTargets || "Statistical Targets"}
+                  </h4>
+                  <div className="space-y-2">
+                    {analysis.quantAnalysis.statisticalTargets?.map((target, i) => (
+                      <div key={i} className="flex items-center justify-between text-sm">
+                        <span className="text-foreground font-mono">${target.price?.toLocaleString()}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-20 h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+                            <div
+                              className="h-full rounded-full"
+                              style={{
+                                width: `${target.probability}%`,
+                                backgroundColor: target.probability >= 70 ? "#22c55e" : target.probability >= 40 ? "#f59e0b" : "#ef4444",
+                              }}
+                            />
+                          </div>
+                          <span className="text-zinc-400 font-mono text-xs w-8">{target.probability}%</span>
+                          <span className="text-zinc-600 text-xs">{target.timeframe}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Bollinger & RSI */}
+                <div>
+                  <h4 className="text-xs font-semibold text-purple-400 uppercase tracking-wider mb-2">Bollinger Bands</h4>
+                  <p className="text-zinc-300 text-sm">{analysis.quantAnalysis.bollingerPosition}</p>
+                  {analysis.quantAnalysis.rsiDivergence && (
+                    <div className="mt-3">
+                      <h4 className="text-xs font-semibold text-orange-400 uppercase tracking-wider mb-2">RSI Divergence</h4>
+                      <p className="text-zinc-300 text-sm">{analysis.quantAnalysis.rsiDivergence}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Volume Profile */}
+                <div>
+                  <h4 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">Volume Profile</h4>
+                  <p className="text-zinc-300 text-sm">{analysis.quantAnalysis.volumeProfile}</p>
+                  <div className="mt-3 flex items-center gap-2">
+                    <span className="text-zinc-500 text-xs">RSI:</span>
+                    <span className={`font-mono font-bold text-sm ${
+                      analysis.quantAnalysis.rsiValue < 30 ? "text-green-400" :
+                      analysis.quantAnalysis.rsiValue > 70 ? "text-red-400" : "text-zinc-300"
+                    }`}>{analysis.quantAnalysis.rsiValue}</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
+
           {/* Key Levels */}
           <Card className="p-6 bg-zinc-950/50 backdrop-blur-sm border-white/10">
-            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
-              {translations.chartAnalysis_keyLevels || "Key Price Levels"}
-            </h3>
+            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">{translations.chartAnalysis_keyLevels || "Key Price Levels"}</h3>
             <div className="flex flex-col gap-4">
               <div>
                 <span className="text-green-400 text-xs font-semibold uppercase tracking-wider">Support</span>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {analysis.supportLevels.map((level, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-1 rounded bg-green-500/10 border border-green-500/30 text-green-300 font-mono text-sm"
-                    >
-                      ${level.toLocaleString()}
+                    <span key={i} className="px-3 py-1 rounded bg-green-500/10 border border-green-500/30 text-green-300 font-mono text-sm">
+                      ${level?.toLocaleString()}
                     </span>
                   ))}
                 </div>
@@ -504,11 +525,8 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
                 <span className="text-red-400 text-xs font-semibold uppercase tracking-wider">Resistance</span>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {analysis.resistanceLevels.map((level, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-1 rounded bg-red-500/10 border border-red-500/30 text-red-300 font-mono text-sm"
-                    >
-                      ${level.toLocaleString()}
+                    <span key={i} className="px-3 py-1 rounded bg-red-500/10 border border-red-500/30 text-red-300 font-mono text-sm">
+                      ${level?.toLocaleString()}
                     </span>
                   ))}
                 </div>
@@ -516,23 +534,45 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
             </div>
           </Card>
 
+          {/* Line Probabilities */}
+          <Card className="lg:col-span-2 p-6 bg-zinc-950/50 backdrop-blur-sm border-white/10">
+            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
+              {translations.chartAnalysis_hitProbability || "Hit Probability"}
+            </h3>
+            <div className="space-y-3">
+              {analysis.lines.filter(l => l.hitProbability > 0).map((line, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: line.color }} />
+                  <span className="text-zinc-300 text-sm flex-1">{line.label}</span>
+                  <div className="w-32 h-2 rounded-full bg-zinc-800 overflow-hidden">
+                    <div className="h-full rounded-full transition-all" style={{
+                      width: `${line.hitProbability}%`,
+                      backgroundColor: line.hitProbability >= 70 ? "#22c55e" : line.hitProbability >= 40 ? "#f59e0b" : "#ef4444",
+                    }} />
+                  </div>
+                  <span className="text-foreground font-mono font-bold text-sm w-10 text-right">{line.hitProbability}%</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+
           {/* Billing Notice */}
-          <Card className="lg:col-span-3 p-4 bg-amber-500/5 border-amber-500/20">
+          <Card className="lg:col-span-3 p-4 bg-emerald-500/5 border-emerald-500/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
-                  <span className="text-amber-400 text-sm">$</span>
+                <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                  <span className="text-emerald-400 text-xs font-bold">T</span>
                 </div>
                 <div>
-                  <p className="text-amber-300 text-sm font-medium">
-                    {translations.chartAnalysis_chargeNotice || `$${ANALYSIS_COST}.00 will be charged to your account once approved`}
+                  <p className="text-emerald-300 text-sm font-medium">
+                    {translations.chartAnalysis_chargeNotice || `${ANALYSIS_COST} USDT will be charged to your account once approved`}
                   </p>
-                  <p className="text-amber-400/50 text-xs">
-                    {translations.chartAnalysis_paymentMethod || "Payment: USD or USDT"}
+                  <p className="text-emerald-400/50 text-xs">
+                    {translations.chartAnalysis_paymentMethod || "Payment: USDT"}
                   </p>
                 </div>
               </div>
-              <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 border border-amber-500/30 text-amber-400">
+              <span className="px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
                 {translations.chartAnalysis_pending || "PENDING"}
               </span>
             </div>

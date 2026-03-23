@@ -4,7 +4,6 @@ import {
 } from "@/lib/services/social/x-feed.service";
 import { NextRequest, NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
 export const revalidate = 600; // 10 minutes
 
 export async function GET(request: NextRequest) {
