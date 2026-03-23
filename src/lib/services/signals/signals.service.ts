@@ -3,6 +3,7 @@ export type SignalItem = {
   symbol: string;
   price: number;
   change24h: number;
+  volume24h: number;
   signal: "Strong Buy" | "Buy" | "Neutral" | "Sell" | "Strong Sell";
   confidence: number;
   reasons: string[];
@@ -121,6 +122,7 @@ export async function fetchMarketSignals(): Promise<MarketSignals> {
     const data = priceData[coin.id];
     const price: number = data?.usd ?? 0;
     const change24h: number = data?.usd_24h_change ?? 0;
+    const volume24h: number = data?.usd_24h_vol ?? 0;
     const isBtc = coin.id === "bitcoin";
 
     return {
@@ -128,6 +130,7 @@ export async function fetchMarketSignals(): Promise<MarketSignals> {
       symbol: coin.symbol,
       price,
       change24h,
+      volume24h,
       signal: getSignalFromChange(change24h),
       confidence: getConfidence(change24h, fearGreedValue, isBtc, btcAboveSma),
       reasons: buildReasons(change24h, fearGreedValue, fearGreedClass, isBtc, btcAboveSma),

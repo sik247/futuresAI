@@ -59,9 +59,10 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   *:focus {
@@ -125,11 +126,23 @@
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid hsl(var(--border) / 0.5);
     border-radius: var(--radius);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  }
+
+  .glass-card:hover {
+    border-color: hsl(var(--border) / 0.8);
+    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.2);
   }
 
   .dark .glass-card {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .dark .glass-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.4);
   }
 
   /* Glow border effect */
@@ -187,11 +200,58 @@
       linear-gradient(90deg, hsl(var(--border) / 0.3) 1px, transparent 1px);
     background-size: 48px 48px;
   }
+
+  /* Premium glass surface - heavier frost for modals/cards */
+  .glass-surface {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(24px) saturate(1.2);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  /* Accent text with subtle glow */
+  .text-glow-blue {
+    color: #3b82f6;
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+
+  /* Section divider with gradient fade */
+  .divider-glow {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(59, 130, 246, 0.2) 30%,
+      rgba(59, 130, 246, 0.3) 50%,
+      rgba(59, 130, 246, 0.2) 70%,
+      transparent 100%
+    );
+  }
 }
 
 /* ============================================
    Custom Keyframe Animations
    ============================================ */
+
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 0.04;
+  }
+  50% {
+    opacity: 0.08;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 @keyframes shimmer {
   0% {
@@ -274,5 +334,12 @@
   }
   .animate-rotate-slow {
     animation: rotate-slow 20s linear infinite;
+  }
+  .animate-skeleton-pulse {
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+    background: hsl(var(--muted-foreground) / 0.06);
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up 0.5s ease-out both;
   }
 }

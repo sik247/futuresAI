@@ -59,8 +59,8 @@ const PostCard: React.FC<TPostCard> = ({
     if (navigator.share) {
       navigator
         .share({
-          title: "당신의 트레이딩 메이트, 크립토엑스",
-          text: "크립토엑스에서 최고의 트레이딩을 경험해보세요!",
+          title: "당신의 트레이딩 메이트, Futures AI",
+          text: "Futures AI에서 최고의 트레이딩을 경험해보세요!",
           url: url,
         })
         .then(() => console.log("Successful share"))

@@ -3,9 +3,9 @@ import { getDictionary } from "@/i18n";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Our Team | Futures & AI",
+  title: "Our Team | Futures AI",
   description:
-    "Meet the team behind Futures & AI. Experienced traders and developers building the future of crypto trading.",
+    "Meet the team behind Futures AI. Experienced traders and developers building the future of crypto trading.",
 };
 
 const TEAM_MEMBERS = [

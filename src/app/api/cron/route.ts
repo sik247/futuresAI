@@ -21,7 +21,15 @@ type TExchangeAccount = Prisma.ExchangeAccountGetPayload<{
   };
 }>;
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Validate cron secret in production
+  if (process.env.CRON_SECRET) {
+    const authHeader = request.headers.get("authorization");
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+  }
+
   const data = {};
   const exchangeAccounts = await exchangeAccountsService.getAll();
   console.log(exchangeAccounts.length);

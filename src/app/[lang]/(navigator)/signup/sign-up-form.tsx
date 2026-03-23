@@ -13,19 +13,21 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { EmailCodeModal } from "./email-code-modal";
-import { getAnimationProps } from "@/lib/utils/get-animation-props";
 import { createUser } from "./actions";
 import { useRouter } from "next/navigation";
 import { useAction } from "@/hooks/use-action";
 import { sendVerificationEmail } from "@/lib/utils/send-mail";
 import FileUploader from "@/components/file-uploader";
 import { FileUploadModule } from "@/lib/modules/file-upload";
+import { Dictionary } from "@/i18n";
 
-type TSignUpForm = {};
+type TSignUpForm = {
+  translations: Dictionary;
+  lang: string;
+};
 
 function getRandomCode() {
   return Math.floor(Math.random() * 10000)
@@ -33,10 +35,13 @@ function getRandomCode() {
     .padStart(4, "0");
 }
 
+const inputClasses =
+  "h-11 bg-white/[0.03] border-white/[0.08] text-white placeholder:text-zinc-600 rounded-lg focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 focus:bg-white/[0.05] transition-all duration-200";
+
 const SignUpForm = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & TSignUpForm
->((props, ref) => {
+>(({ translations: t, lang, ...props }, ref) => {
   const [isCheck, setIsCheck] = useState<boolean>(false);
   const [isEmailCodeModalOpen, setIsEmailCodeModalOpen] =
     useState<boolean>(false);
@@ -119,7 +124,7 @@ const SignUpForm = React.forwardRef<
 
     if (response) {
       alert("회원가입이 완료되었습니다.");
-      router.push("/login");
+      router.push(`/${lang}/login`);
     } else {
       alert("아이디 또는 비밀번호가 일치하지 않습니다.");
     }
@@ -142,195 +147,229 @@ const SignUpForm = React.forwardRef<
   return (
     <div ref={ref} {...props}>
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          {...getAnimationProps("fade", 500, 0)}
-          className="pb-12"
-        >
-          <Label htmlFor="email" className="inline-block pb-2">
-            프로필 이미지
-          </Label>
-          <FormField
-            control={form.control}
-            name="imageUrl"
-            render={({ field }) => (
-              <FormItem className="mb-3">
-                <FormControl>
-                  <FileUploader
-                    onChange={async (files) => {
-                      if (files.length < 1) return;
-                      const file = files[0];
-                      if (
-                        file.name.includes(
-                          "https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/"
-                        )
-                      ) {
-                        field.onChange({ target: { value: file.name } });
-                        return;
-                      }
-                      const fileUploader = new FileUploadModule();
-                      const data = await fileUploader.upload(file);
-                      const fileUrl =
-                        ("https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/" +
-                          data.path) as string;
-                      field.onChange({ target: { value: fileUrl } });
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {/* Profile Image */}
+          <div>
+            <label className="block text-xs font-mono text-zinc-400 mb-1.5 uppercase tracking-wider">
+              {t.signup_profile_image}
+            </label>
+            <FormField
+              control={form.control}
+              name="imageUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <FileUploader
+                      onChange={async (files) => {
+                        if (files.length < 1) return;
+                        const file = files[0];
+                        if (
+                          file.name.includes(
+                            "https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/"
+                          )
+                        ) {
+                          field.onChange({ target: { value: file.name } });
+                          return;
+                        }
+                        const fileUploader = new FileUploadModule();
+                        const data = await fileUploader.upload(file);
+                        const fileUrl =
+                          ("https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/" +
+                            data.path) as string;
+                        field.onChange({ target: { value: fileUrl } });
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage className="text-red-400 text-xs" />
+                </FormItem>
+              )}
+            />
+          </div>
 
-          <Label htmlFor="email" className="inline-block pb-2">
-            이메일
-          </Label>
+          {/* Email */}
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem className="mb-3">
+              <FormItem>
+                <label className="block text-xs font-mono text-zinc-400 mb-1.5 uppercase tracking-wider">
+                  {t.signup_email}
+                </label>
                 <FormControl>
                   <Input
                     {...field}
                     id="email"
                     placeholder="example@example.com"
+                    className={inputClasses}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-400 text-xs" />
               </FormItem>
             )}
           />
-          <Label htmlFor="name" className="inline-block pb-2">
-            이름
-          </Label>
+
+          {/* Name */}
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem className="mb-3">
+              <FormItem>
+                <label className="block text-xs font-mono text-zinc-400 mb-1.5 uppercase tracking-wider">
+                  {t.signup_name}
+                </label>
                 <FormControl>
-                  <Input {...field} id="name" placeholder="홍길동" />
+                  <Input
+                    {...field}
+                    id="name"
+                    placeholder="홍길동"
+                    className={inputClasses}
+                  />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-400 text-xs" />
               </FormItem>
             )}
           />
-          <Label htmlFor="name" className="inline-block pb-2">
-            닉네임
-          </Label>
+
+          {/* Nickname */}
           <FormField
             control={form.control}
             name="nickname"
             render={({ field }) => (
-              <FormItem className="mb-3">
+              <FormItem>
+                <label className="block text-xs font-mono text-zinc-400 mb-1.5 uppercase tracking-wider">
+                  {t.signup_nickname}
+                </label>
                 <FormControl>
-                  <Input {...field} id="nickname" placeholder="홍길동" />
+                  <Input
+                    {...field}
+                    id="nickname"
+                    placeholder="홍길동"
+                    className={inputClasses}
+                  />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-400 text-xs" />
               </FormItem>
             )}
           />
-          <Label htmlFor="password" className="inline-block pb-2">
-            비밀번호
-          </Label>
+
+          {/* Password */}
           <FormField
             control={form.control}
             name="password"
             render={({ field }) => (
-              <FormItem className="mb-3">
+              <FormItem>
+                <label className="block text-xs font-mono text-zinc-400 mb-1.5 uppercase tracking-wider">
+                  {t.signup_password}
+                </label>
                 <FormControl>
                   <Input
                     {...field}
                     id="password"
                     type="password"
-                    placeholder="비밀번호를 입력해주세요."
+                    placeholder="********"
+                    className={inputClasses}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-400 text-xs" />
               </FormItem>
             )}
           />
-          <Label htmlFor="confirmPassword" className="inline-block pb-2">
-            비밀번호 확인
-          </Label>
+
+          {/* Confirm Password */}
           <FormField
             control={form.control}
             name="confirmPassword"
             render={({ field }) => (
-              <FormItem className="mb-3">
+              <FormItem>
+                <label className="block text-xs font-mono text-zinc-400 mb-1.5 uppercase tracking-wider">
+                  {t.signup_confirm_password}
+                </label>
                 <FormControl>
                   <Input
                     {...field}
                     type="password"
                     id="confirmPassword"
-                    placeholder="비밀번호를 다시 입력해주세요."
+                    placeholder="********"
+                    className={inputClasses}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-400 text-xs" />
               </FormItem>
             )}
           />
-          <Label htmlFor="phoneNumber" className="inline-block pb-2">
-            전화번호
-          </Label>
+
+          {/* Phone Number */}
           <FormField
             control={form.control}
             name="phoneNumber"
             render={({ field }) => (
-              <FormItem className="mb-12">
+              <FormItem>
+                <label className="block text-xs font-mono text-zinc-400 mb-1.5 uppercase tracking-wider">
+                  {t.signup_phone}
+                </label>
                 <FormControl>
                   <Input
                     {...field}
                     id="phoneNumber"
                     placeholder="010-1234-1234"
+                    className={inputClasses}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-400 text-xs" />
               </FormItem>
             )}
           />
-          <div className="flex justify-start items-center mb-12 text-sm max-md:text-xs font-medium text-foreground rounded-xl border border-border bg-background p-4">
+
+          {/* Terms checkbox */}
+          <div className="pt-2">
             <div
-              className={`inline-block rounded-sm p-1 mr-3 ${
-                isCheck ? "bg-foreground" : "bg-muted-foreground"
-              }`}
-              onClick={() => setIsCheck((prev) => (prev ? false : true))}
+              className="flex items-start gap-3 rounded-lg border border-white/[0.08] bg-white/[0.03] p-4 cursor-pointer select-none"
+              onClick={() => setIsCheck((prev) => !prev)}
             >
-              <CheckIcon className="text-background w-3" />
+              <div
+                className={`flex-shrink-0 mt-0.5 w-5 h-5 rounded flex items-center justify-center transition-all duration-200 ${
+                  isCheck
+                    ? "bg-blue-600 border-blue-600"
+                    : "bg-white/[0.05] border border-white/[0.15]"
+                }`}
+              >
+                {isCheck && <CheckIcon className="text-white w-3.5 h-3.5" />}
+              </div>
+              <span className="text-sm text-zinc-300 leading-relaxed">
+                {t.signup_terms_agree}{" "}
+                <span className="text-zinc-500 hover:text-zinc-300 transition-colors">
+                  {t.signup_terms}
+                </span>{" "}
+                {t.signup_and}{" "}
+                <span className="text-zinc-500 hover:text-zinc-300 transition-colors">
+                  {t.signup_privacy}
+                </span>
+              </span>
             </div>
-            <span>
-              저는 크립토엑스의{" "}
-              <p className="inline-block text-muted-foreground">이용약관</p> 및{" "}
-              <br className="md:invisible visible" />
-              <p className="inline-block text-muted-foreground">
-                개인정보 보호 정책
-              </p>{" "}
-              을 읽고 동의합니다.
-            </span>
           </div>
-          <div className="mb-12 text-sm font-medium text-muted-foreground text-center">
-            <p>이미 계정이 있으신가요?</p>
-            <Link href={"/login"}>
-              <p className="text-foreground">로그인</p>
-            </Link>
+
+          {/* Submit / Verify button */}
+          <div className="pt-2">
+            {isEmailAuthentication ? (
+              <Button
+                type="submit"
+                className="group relative w-full h-11 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20 hover:shadow-[0_0_24px_rgba(59,130,246,0.35)] transition-all duration-300 overflow-hidden"
+              >
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <span className="relative">{t.signup_submit}</span>
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                className="group relative w-full h-11 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20 hover:shadow-[0_0_24px_rgba(59,130,246,0.35)] transition-all duration-300 overflow-hidden"
+                onClick={checkEmailHandler}
+              >
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <span className="relative">{t.signup_verify}</span>
+              </Button>
+            )}
           </div>
-          {isEmailAuthentication ? (
-            <Button
-              type="submit"
-              className="w-full text-base font-bold text-background bg-primary-foreground rounded-full"
-            >
-              가입하기
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              className="w-full text-base font-bold text-background bg-foreground rounded-full "
-              onClick={checkEmailHandler}
-            >
-              인증하기
-            </Button>
-          )}
+
           <EmailCodeModal
             form={form}
             onSubmit={onSubmit}

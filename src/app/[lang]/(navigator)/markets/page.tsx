@@ -3,9 +3,10 @@ import { Metadata } from "next";
 import MarketsClient from "./markets-client";
 
 export const metadata: Metadata = {
-  title: "Prediction Markets | CryptoX",
+  title: "Crypto Prediction Markets",
   description:
-    "Live prediction markets from Polymarket — track probabilities, volume, and trends across crypto and global events.",
+    "Live prediction markets from Polymarket. Track real-time probabilities, volume, and trends across crypto and global events. Market intelligence by Futures AI.",
+  keywords: ["prediction markets", "Polymarket", "crypto predictions", "market probabilities", "event trading"],
 };
 
 function formatVolume(vol: number | string) {

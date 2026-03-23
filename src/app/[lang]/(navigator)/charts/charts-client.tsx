@@ -76,26 +76,22 @@ export function MultiChartTerminal() {
       {/* Tab Selector */}
       <div
         ref={tabsRef}
-        className="flex flex-wrap gap-2 mb-6"
+        className="flex flex-wrap gap-1.5 mb-5"
       >
         {SYMBOLS.map((s, i) => (
           <button
             key={s.value}
             onClick={() => handleTabSwitch(i)}
             className={`
-              relative px-5 py-2.5 rounded-lg font-mono text-sm font-medium
+              relative px-4 py-2 rounded-lg font-mono text-sm font-medium
               transition-all duration-200 border
               ${
                 i === activeIndex
-                  ? "bg-blue-500/15 border-blue-500/40 text-blue-400 shadow-[0_0_20px_rgba(37,99,235,0.15)]"
-                  : "bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:bg-white/[0.06] hover:border-white/[0.1] hover:text-zinc-300"
+                  ? "bg-blue-500/12 border-blue-500/30 text-blue-400"
+                  : "bg-white/[0.02] border-white/[0.06] text-zinc-400 hover:bg-white/[0.05] hover:border-white/[0.1] hover:text-zinc-300"
               }
-              backdrop-blur-md
             `}
           >
-            {i === activeIndex && (
-              <span className="absolute inset-0 rounded-lg bg-blue-500/5 animate-pulse" />
-            )}
             <span className="relative">{s.label}</span>
           </button>
         ))}
@@ -104,17 +100,17 @@ export function MultiChartTerminal() {
       {/* Chart Container */}
       <div
         ref={chartWrapRef}
-        className="rounded-xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-md overflow-hidden"
+        className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden"
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06]">
           <div className="flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-mono text-sm text-zinc-300">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="font-mono text-sm text-zinc-300 tabular-nums">
               {SYMBOLS[activeIndex].label}
             </span>
-            <span className="font-mono text-xs text-zinc-500">LIVE</span>
+            <span className="font-mono text-[10px] text-zinc-600 uppercase tracking-wider">Live</span>
           </div>
-          <span className="font-mono text-xs text-zinc-600">TradingView</span>
+          <span className="font-mono text-[10px] text-zinc-600 uppercase tracking-wider">TradingView</span>
         </div>
         <TradingViewChart symbol={SYMBOLS[activeIndex].value} />
       </div>

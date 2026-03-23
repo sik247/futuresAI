@@ -41,19 +41,19 @@ const SecondSection = React.forwardRef<
           className="text-2xl max-md:text-sm max-md:font-semibold font-medium text-foreground"
           {...getAnimationProps("fade", 500, 0)}
         >
-          크립토엑스
+          Futures AI
         </p>
         <p
           className="text-4xl max-md:text-xl font-bold text-foreground"
           {...getAnimationProps("fade", 500, 200)}
         >
-          크립토엑스를 사용해야하는 이유
+          Futures AI를 사용해야하는 이유
         </p>
         <p
           className="text-lg font-normal max-md:text-xs max-md:font-medium text-foreground"
           {...getAnimationProps("fade", 500, 300)}
         >
-          크립토엑스는 다릅니다.
+          Futures AI는 다릅니다.
         </p>
       </div>
       <div className="flex max-md:flex-col max-md:gap-10 justify-evenly items-center">

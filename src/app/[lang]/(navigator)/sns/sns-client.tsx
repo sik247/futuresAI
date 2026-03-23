@@ -129,12 +129,12 @@ export default function SnsClient({ feedItems }: Props) {
       {/* Tweet Grid */}
       <div
         ref={gridRef}
-        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
+        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-5"
       >
         {filteredItems.map((item) => (
           <div
             key={`${item.tweetId}-${item.username}`}
-            className="feed-card group relative rounded-2xl border border-zinc-800/60 bg-zinc-900/40 backdrop-blur-md overflow-hidden hover:border-zinc-700/80 transition-all duration-300"
+            className="feed-card group relative rounded-2xl border border-zinc-800/50 bg-zinc-900/30 backdrop-blur-md overflow-hidden hover:border-zinc-700/60 hover:bg-zinc-900/50 transition-all duration-300"
           >
             {/* Card header with account info */}
             <div className="flex items-center justify-between px-4 pt-4 pb-2">
@@ -152,8 +152,8 @@ export default function SnsClient({ feedItems }: Props) {
               </span>
             </div>
 
-            {/* Subtle glow effect on hover */}
-            <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-b from-blue-500/5 via-transparent to-transparent" />
+            {/* Subtle top-edge glow on hover */}
+            <div className="absolute top-0 inset-x-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
 
             {/* Tweet embed */}
             <div className="px-2 pb-3 min-w-0 overflow-hidden [&>div]:!my-0 [&_article]:!border-0 [&_article]:!bg-transparent">

@@ -8,9 +8,10 @@ import { MultiChartTerminal } from "./charts-client";
 import { MarketCorrelations, TopCoinsTable } from "./market-data";
 
 export const metadata: Metadata = {
-  title: "Quantitative Analysis | CryptoX",
+  title: "Crypto Charts and Market Analysis",
   description:
-    "Professional quantitative analysis terminal with multi-chart views, market sentiment, correlations, and key metrics.",
+    "Professional crypto charting terminal with multi-chart TradingView views, Fear and Greed index, market correlations, and real-time screener. Powered by Futures AI.",
+  keywords: ["crypto charts", "TradingView", "market analysis", "fear greed index", "crypto screener", "bitcoin chart"],
 };
 
 /* ──────────────────────────── Data fetchers ──────────────────────────── */
@@ -107,7 +108,7 @@ export default async function ChartsPage({
     <div className="min-h-screen bg-zinc-950 pt-20 pb-20">
       <Container className="flex flex-col gap-0">
         {/* ──────── Hero ──────── */}
-        <section className="py-16">
+        <section className="pt-12 pb-14">
           <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-zinc-500 mb-5">
             QUANTITATIVE ANALYSIS
           </p>
@@ -121,12 +122,12 @@ export default async function ChartsPage({
           </p>
 
           {/* Stats Bar */}
-          <div className="mt-10 flex flex-wrap gap-3">
-            <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] backdrop-blur-md px-5 py-3 flex flex-col gap-1">
+          <div className="mt-8 grid grid-cols-2 sm:flex sm:flex-wrap gap-3">
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 sm:px-5 py-3 flex flex-col gap-1">
               <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-600">
                 BTC PRICE
               </span>
-              <span className="font-mono text-lg font-semibold text-zinc-100">
+              <span className="font-mono text-base sm:text-lg font-semibold text-zinc-100 tabular-nums">
                 $
                 {btcPrice.toLocaleString("en-US", {
                   minimumFractionDigits: 2,
@@ -135,12 +136,12 @@ export default async function ChartsPage({
               </span>
             </div>
 
-            <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] backdrop-blur-md px-5 py-3 flex flex-col gap-1">
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 sm:px-5 py-3 flex flex-col gap-1">
               <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-600">
                 24H CHANGE
               </span>
               <span
-                className={`font-mono text-lg font-semibold ${
+                className={`font-mono text-base sm:text-lg font-semibold tabular-nums ${
                   btcChange >= 0 ? "text-emerald-400" : "text-red-400"
                 }`}
               >
@@ -149,21 +150,21 @@ export default async function ChartsPage({
               </span>
             </div>
 
-            <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] backdrop-blur-md px-5 py-3 flex flex-col gap-1">
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 sm:px-5 py-3 flex flex-col gap-1">
               <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-600">
                 FEAR & GREED
               </span>
-              <span className="font-mono text-lg font-semibold text-zinc-100">
+              <span className="font-mono text-base sm:text-lg font-semibold text-zinc-100 tabular-nums">
                 {fearValue}
               </span>
             </div>
 
-            <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] backdrop-blur-md px-5 py-3 flex flex-col gap-1">
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 sm:px-5 py-3 flex flex-col gap-1">
               <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-600">
                 MARKET TREND
               </span>
               <span
-                className={`font-mono text-lg font-semibold ${getTrendColor(
+                className={`font-mono text-base sm:text-lg font-semibold ${getTrendColor(
                   fearValue
                 )}`}
               >
@@ -177,12 +178,12 @@ export default async function ChartsPage({
         <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
         {/* ──────── Section 1: Multi-Chart Terminal ──────── */}
-        <section className="py-16">
+        <section className="py-14">
           <div className="mb-8">
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-600 mb-2">
-              SECTION 01
+              01
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-zinc-100 tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight">
               Multi-Chart Terminal
             </h2>
             <p className="text-sm text-zinc-500 mt-2">
@@ -195,12 +196,12 @@ export default async function ChartsPage({
         <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
         {/* ──────── Section 2: Fear & Greed Index ──────── */}
-        <section className="py-16">
+        <section className="py-14">
           <div className="mb-8">
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-600 mb-2">
-              SECTION 02
+              02
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-zinc-100 tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight">
               Fear & Greed Index
             </h2>
             <p className="text-sm text-zinc-500 mt-2 max-w-xl">
@@ -214,12 +215,12 @@ export default async function ChartsPage({
         <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
         {/* ──────── Section 3: Market Correlations ──────── */}
-        <section className="py-16">
+        <section className="py-14">
           <div className="mb-8">
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-600 mb-2">
-              SECTION 03
+              03
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-zinc-100 tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight">
               Market Correlations
             </h2>
             <p className="text-sm text-zinc-500 mt-2">
@@ -232,12 +233,12 @@ export default async function ChartsPage({
         <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
         {/* ──────── Section 4: Market Screener ──────── */}
-        <section className="py-16">
+        <section className="py-14">
           <div className="mb-8">
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-600 mb-2">
-              SECTION 04
+              04
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-zinc-100 tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight">
               Market Screener
             </h2>
             <p className="text-sm text-zinc-500 mt-2">
@@ -259,12 +260,12 @@ export default async function ChartsPage({
         <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
         {/* ──────── Section 5: Key Metrics Dashboard ──────── */}
-        <section className="py-16">
+        <section className="py-14">
           <div className="mb-8">
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-600 mb-2">
-              SECTION 05
+              05
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-zinc-100 tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-bold text-zinc-100 tracking-tight">
               Key Metrics Dashboard
             </h2>
             <p className="text-sm text-zinc-500 mt-2">

@@ -13,18 +13,20 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { getAnimationProps } from "@/lib/utils/get-animation-props";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { toast } from "@/components/ui/use-toast";
 import { revalidateAll } from "@/lib/services/revalidate";
+import { Dictionary } from "@/i18n";
 
-type TLoginForm = {};
+type TLoginForm = {
+  translations: Dictionary;
+};
 
 const LoginForm = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & TLoginForm
->((props, ref) => {
+>(({ translations: t, ...props }, ref) => {
   const router = useRouter();
   const formSchema = z.object({
     email: z
@@ -80,16 +82,23 @@ const LoginForm = React.forwardRef<
   return (
     <div ref={ref} {...props}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem className="mb-3" {...getAnimationProps("up", 500, 0)}>
+              <FormItem>
+                <label className="block text-xs font-mono text-zinc-400 mb-1.5 uppercase tracking-wider">
+                  Email
+                </label>
                 <FormControl>
-                  <Input {...field} placeholder="이메일" />
+                  <Input
+                    {...field}
+                    placeholder={t.login_email_placeholder}
+                    className="h-11 bg-white/[0.03] border-white/[0.08] text-white placeholder:text-zinc-600 rounded-lg focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 focus:bg-white/[0.05] transition-all duration-200"
+                  />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-400 text-xs mt-1.5" />
               </FormItem>
             )}
           />
@@ -97,23 +106,28 @@ const LoginForm = React.forwardRef<
             control={form.control}
             name="password"
             render={({ field }) => (
-              <FormItem
-                className="mb-12"
-                {...getAnimationProps("up", 500, 200)}
-              >
+              <FormItem>
+                <label className="block text-xs font-mono text-zinc-400 mb-1.5 uppercase tracking-wider">
+                  Password
+                </label>
                 <FormControl>
-                  <Input {...field} type="password" placeholder="비밀번호" />
+                  <Input
+                    {...field}
+                    type="password"
+                    placeholder={t.login_password_placeholder}
+                    className="h-11 bg-white/[0.03] border-white/[0.08] text-white placeholder:text-zinc-600 rounded-lg focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 focus:bg-white/[0.05] transition-all duration-200"
+                  />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-400 text-xs mt-1.5" />
               </FormItem>
             )}
           />
           <Button
-            {...getAnimationProps("up", 500, 300)}
             type="submit"
-            className="w-full text-base font-bold text-background bg-foreground rounded-full"
+            className="group relative w-full h-11 mt-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20 hover:shadow-[0_0_24px_rgba(59,130,246,0.35)] transition-all duration-300 overflow-hidden"
           >
-            로그인
+            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+            <span className="relative">{t.login_submit}</span>
           </Button>
         </form>
       </Form>

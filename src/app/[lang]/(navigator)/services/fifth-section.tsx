@@ -40,7 +40,7 @@ const FifthSection = React.forwardRef<
           className="text-4xl max-md:text-xl font-bold text-foreground"
           {...getAnimationProps("fade", 500, 0)}
         >
-          <p className="inline-block text-foreground">크립토엑스</p>를{" "}
+          <p className="inline-block text-foreground">Futures AI</p>를{" "}
           <br className="max-md:hidden" />
           통해
           <br className="md:hidden" /> 매일 거래수수료를 돌려받아요

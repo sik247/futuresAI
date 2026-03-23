@@ -2,9 +2,9 @@ import axios from "axios";
 
 export async function sendVerificationEmail(email: string, code: string) {
   const data = {
-    from: "CryptoX <no-reply@cryptoxcorp.com>",
+    from: "Futures AI <no-reply@cryptoxcorp.com>",
     to: email,
-    subject: "[크립토엑스] 메일 인증번호입니다.",
+    subject: "[Futures AI] 메일 인증번호입니다.",
     template: "emailverification",
     "h:X-Mailgun-Variables": JSON.stringify({ code }),
   };

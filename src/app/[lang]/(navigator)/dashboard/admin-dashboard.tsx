@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { getPendingRequests, getAllRequests, approveRequest, rejectRequest } from "./actions";
 
 interface ExchangeData {
   exchange: string;
@@ -26,6 +27,12 @@ function StatusBadge({ status }: { status: string }) {
     ok: { label: "Connected", bg: "bg-emerald-500/10", text: "text-emerald-400", dot: "bg-emerald-400" },
     error: { label: "Error", bg: "bg-red-500/10", text: "text-red-400", dot: "bg-red-400" },
     no_permission: { label: "No Permission", bg: "bg-amber-500/10", text: "text-amber-400", dot: "bg-amber-400" },
+    PENDING: { label: "Pending", bg: "bg-amber-500/10", text: "text-amber-400", dot: "bg-amber-400" },
+    SUCCESS: { label: "Paid", bg: "bg-emerald-500/10", text: "text-emerald-400", dot: "bg-emerald-400" },
+    FAILED: { label: "Rejected", bg: "bg-red-500/10", text: "text-red-400", dot: "bg-red-400" },
+    CHARGED: { label: "Charged", bg: "bg-emerald-500/10", text: "text-emerald-400", dot: "bg-emerald-400" },
+    REFUNDED: { label: "Refunded", bg: "bg-blue-500/10", text: "text-blue-400", dot: "bg-blue-400" },
+    APPROVED: { label: "Approved", bg: "bg-emerald-500/10", text: "text-emerald-400", dot: "bg-emerald-400" },
   }[status] || { label: status, bg: "bg-zinc-500/10", text: "text-zinc-400", dot: "bg-zinc-400" };
 
   return (
@@ -36,10 +43,43 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+interface WithdrawalRequest {
+  id: string;
+  amount: number;
+  status: "PENDING" | "SUCCESS" | "FAILED";
+  network: string;
+  address: string;
+  adminNote?: string | null;
+  createdAt: string;
+  paidAt?: string | null;
+  user?: { name: string; email: string; nickname: string } | null;
+  exchangeAccounts: { exchange: { name: string } }[];
+}
+
+interface ChartAnalysisRequest {
+  id: string;
+  imageUrl: string;
+  pair: string | null;
+  cost: number;
+  status: string;
+  summary: string;
+  trend: string;
+  confidence: number;
+  riskScore: number;
+  createdAt: string;
+  chargedAt: string | null;
+  user: { name: string; email: string; nickname: string };
+}
+
 export default function AdminDashboard() {
   const [data, setData] = useState<PaybackSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [requests, setRequests] = useState<WithdrawalRequest[]>([]);
+  const [requestFilter, setRequestFilter] = useState<"ALL" | "PENDING" | "SUCCESS" | "FAILED">("ALL");
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [chartAnalyses, setChartAnalyses] = useState<ChartAnalysisRequest[]>([]);
+  const [chartFilter, setChartFilter] = useState<"ALL" | "PENDING" | "CHARGED" | "REFUNDED">("ALL");
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -55,15 +95,89 @@ export default function AdminDashboard() {
     }
   }, []);
 
+  const fetchRequests = useCallback(async () => {
+    try {
+      const filter = requestFilter === "ALL" ? undefined : requestFilter;
+      const data = await getAllRequests(filter);
+      setRequests(data as unknown as WithdrawalRequest[]);
+    } catch {
+      // keep previous data
+    }
+  }, [requestFilter]);
+
+  const fetchChartAnalyses = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/chart-analyses");
+      if (res.ok) {
+        const data = await res.json();
+        setChartAnalyses(data.analyses || []);
+      }
+    } catch {
+      // keep previous data
+    }
+  }, []);
+
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+    fetchRequests();
+    fetchChartAnalyses();
+  }, [fetchData, fetchRequests, fetchChartAnalyses]);
+
+  async function handleApprove(id: string) {
+    setActionLoading(id);
+    const result = await approveRequest(id);
+    if (result.success) {
+      await fetchRequests();
+    }
+    setActionLoading(null);
+  }
+
+  async function handleReject(id: string) {
+    const note = prompt("Rejection reason:");
+    if (!note) return;
+    setActionLoading(id);
+    const result = await rejectRequest(id, note);
+    if (result.success) {
+      await fetchRequests();
+    }
+    setActionLoading(null);
+  }
+
+  async function handleChargeAnalysis(id: string) {
+    setActionLoading(id);
+    try {
+      const res = await fetch("/api/chart-analysis", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ analysisId: id, action: "approve" }),
+      });
+      if (res.ok) await fetchChartAnalyses();
+    } catch { /* ignore */ }
+    setActionLoading(null);
+  }
+
+  async function handleRefundAnalysis(id: string) {
+    setActionLoading(id);
+    try {
+      const res = await fetch("/api/chart-analysis", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ analysisId: id, action: "refund" }),
+      });
+      if (res.ok) await fetchChartAnalyses();
+    } catch { /* ignore */ }
+    setActionLoading(null);
+  }
+
+  const filteredChartAnalyses = chartFilter === "ALL"
+    ? chartAnalyses
+    : chartAnalyses.filter((a) => a.status === chartFilter);
 
   const needsPayback = data?.summary.grandTotal && data.summary.grandTotal > 0;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-24 pb-10">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
           <div>
@@ -92,9 +206,20 @@ export default function AdminDashboard() {
         </div>
 
         {/* Summary Cards */}
+        {loading && !data ? (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 animate-pulse">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 space-y-3">
+                <div className="h-3 w-28 rounded bg-zinc-800" />
+                <div className="h-8 w-24 rounded bg-zinc-800" />
+                <div className="h-3 w-20 rounded bg-zinc-800" />
+              </div>
+            ))}
+          </div>
+        ) : (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {/* Grand Total */}
-          <div className={`rounded-xl border p-6 ${needsPayback ? "border-emerald-500/30 bg-emerald-500/5" : "border-zinc-800 bg-zinc-900/50"}`}>
+          <div className={`rounded-xl border p-6 transition-colors duration-200 hover:border-zinc-700/80 ${needsPayback ? "border-emerald-500/30 bg-emerald-500/5" : "border-zinc-800 bg-zinc-900/50"}`}>
             <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-2">
               Total Payback Owed
             </p>
@@ -112,7 +237,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Health */}
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 transition-colors duration-200 hover:border-zinc-700/80">
             <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-2">
               Exchange Health
             </p>
@@ -124,11 +249,11 @@ export default function AdminDashboard() {
           </div>
 
           {/* Last Updated */}
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
+          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 transition-colors duration-200 hover:border-zinc-700/80">
             <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-2">
               Last Refreshed
             </p>
-            <p className="text-lg font-mono text-zinc-300">
+            <p className="text-lg font-mono tabular-nums text-zinc-300">
               {lastRefresh
                 ? lastRefresh.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
                 : "--:--:--"}
@@ -138,6 +263,7 @@ export default function AdminDashboard() {
             </p>
           </div>
         </div>
+        )}
 
         {/* Exchange Table */}
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
@@ -146,11 +272,24 @@ export default function AdminDashboard() {
           </div>
 
           {loading && !data ? (
-            <div className="flex items-center justify-center py-20">
-              <svg className="w-6 h-6 animate-spin text-zinc-600" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" className="opacity-25" />
-                <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
+            <div className="animate-pulse">
+              {/* Skeleton table header */}
+              <div className="border-b border-zinc-800 px-6 py-3 flex gap-6">
+                {[80, 64, 56, 40, 48, 48].map((w, i) => (
+                  <div key={i} className={`h-3 rounded bg-zinc-800`} style={{ width: `${w}px` }} />
+                ))}
+              </div>
+              {/* Skeleton rows */}
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="border-b border-zinc-800/50 px-6 py-4 flex items-center gap-6">
+                  <div className="h-4 w-20 rounded bg-zinc-800" />
+                  <div className="h-4 w-16 rounded bg-zinc-800" />
+                  <div className="h-5 w-20 rounded-full bg-zinc-800" />
+                  <div className="h-4 w-10 rounded bg-zinc-800" />
+                  <div className="h-4 w-16 rounded bg-zinc-800" />
+                  <div className="h-4 w-12 rounded bg-zinc-800" />
+                </div>
+              ))}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -215,6 +354,224 @@ export default function AdminDashboard() {
         <p className="text-xs text-zinc-600 mt-4 text-center">
           Data fetched from live exchange APIs. Payback amounts are for the last 24 hours.
         </p>
+
+        {/* Payback Requests */}
+        <div className="mt-10 rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+          <div className="px-6 py-4 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h2 className="text-sm font-semibold text-zinc-300">Payback Requests</h2>
+            <div className="flex gap-1">
+              {(["ALL", "PENDING", "SUCCESS", "FAILED"] as const).map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setRequestFilter(f)}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                    requestFilter === f
+                      ? "bg-blue-600/20 text-blue-400"
+                      : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
+                  }`}
+                >
+                  {f === "ALL" ? "All" : f === "PENDING" ? "Pending" : f === "SUCCESS" ? "Paid" : "Rejected"}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {requests.length === 0 ? (
+            <div className="flex items-center justify-center py-12 text-zinc-600 text-sm">
+              No payback requests found
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-zinc-800">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">User</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Exchange</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Amount</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Network</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Address</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {requests.map((req) => (
+                    <tr key={req.id} className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-6 py-4">
+                        <div>
+                          <p className="font-medium text-white text-sm">{req.user?.name || req.user?.nickname || "Unknown"}</p>
+                          <p className="text-xs text-zinc-500">{req.user?.email}</p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-zinc-300">
+                        {req.exchangeAccounts.map((ea) => ea.exchange.name).join(", ") || "—"}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="font-mono tabular-nums font-semibold text-emerald-400">
+                          ${req.amount.toFixed(2)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-xs font-mono text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded">
+                          {req.network}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-xs font-mono text-zinc-400 max-w-[120px] truncate block" title={req.address}>
+                          {req.address}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <StatusBadge status={req.status} />
+                      </td>
+                      <td className="px-6 py-4 text-zinc-400 text-xs">
+                        {new Date(req.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        {req.status === "PENDING" ? (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleApprove(req.id)}
+                              disabled={actionLoading === req.id}
+                              className="px-3 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-400 text-xs font-medium hover:bg-emerald-600/30 transition-colors disabled:opacity-50"
+                            >
+                              {actionLoading === req.id ? "..." : "Approve"}
+                            </button>
+                            <button
+                              onClick={() => handleReject(req.id)}
+                              disabled={actionLoading === req.id}
+                              className="px-3 py-1.5 rounded-lg bg-red-600/20 text-red-400 text-xs font-medium hover:bg-red-600/30 transition-colors disabled:opacity-50"
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        ) : req.adminNote ? (
+                          <span className="text-xs text-zinc-500" title={req.adminNote}>
+                            {req.adminNote.substring(0, 30)}
+                          </span>
+                        ) : req.paidAt ? (
+                          <span className="text-xs text-emerald-500">
+                            Paid {new Date(req.paidAt).toLocaleDateString()}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-zinc-600">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+        {/* Chart Analysis Charges */}
+        <div className="mt-10 rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
+          <div className="px-6 py-4 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-zinc-300">Chart Analysis Charges</h2>
+              <p className="text-xs text-zinc-500 mt-0.5">$5 / analysis — approve to charge user account</p>
+            </div>
+            <div className="flex gap-1">
+              {(["ALL", "PENDING", "CHARGED", "REFUNDED"] as const).map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setChartFilter(f)}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                    chartFilter === f
+                      ? "bg-blue-600/20 text-blue-400"
+                      : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
+                  }`}
+                >
+                  {f === "ALL" ? "All" : f === "PENDING" ? "Pending" : f === "CHARGED" ? "Charged" : "Refunded"}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {filteredChartAnalyses.length === 0 ? (
+            <div className="flex items-center justify-center py-12 text-zinc-600 text-sm">
+              No chart analyses found
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-zinc-800">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">User</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Trend</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Confidence</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Cost</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredChartAnalyses.map((a) => (
+                    <tr key={a.id} className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-6 py-4">
+                        <div>
+                          <p className="font-medium text-white text-sm">{a.user?.name || a.user?.nickname || "Unknown"}</p>
+                          <p className="text-xs text-zinc-500">{a.user?.email}</p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`text-xs font-bold ${
+                          a.trend === "BULLISH" ? "text-green-400" :
+                          a.trend === "BEARISH" ? "text-red-400" :
+                          "text-yellow-400"
+                        }`}>
+                          {a.trend}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right font-mono tabular-nums text-zinc-300">
+                        {a.confidence}%
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="font-mono tabular-nums font-semibold text-amber-400">
+                          ${a.cost.toFixed(2)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <StatusBadge status={a.status} />
+                      </td>
+                      <td className="px-6 py-4 text-zinc-400 text-xs">
+                        {new Date(a.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        {a.status === "PENDING" ? (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleChargeAnalysis(a.id)}
+                              disabled={actionLoading === a.id}
+                              className="px-3 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-400 text-xs font-medium hover:bg-emerald-600/30 transition-colors disabled:opacity-50"
+                            >
+                              {actionLoading === a.id ? "..." : "Charge $5"}
+                            </button>
+                            <button
+                              onClick={() => handleRefundAnalysis(a.id)}
+                              disabled={actionLoading === a.id}
+                              className="px-3 py-1.5 rounded-lg bg-red-600/20 text-red-400 text-xs font-medium hover:bg-red-600/30 transition-colors disabled:opacity-50"
+                            >
+                              Refund
+                            </button>
+                          </div>
+                        ) : a.chargedAt ? (
+                          <span className="text-xs text-emerald-500">
+                            Charged {new Date(a.chargedAt).toLocaleDateString()}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-zinc-600">--</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

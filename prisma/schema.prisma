@@ -19,6 +19,8 @@ model User {
   nickname         String
   phoneNumber      String
   imageUrl         String            @default("/images/profile.png")
+  role             Role              @default(USER)
+  credits          Float             @default(0)
   createdAt        DateTime          @default(now()) @db.Timestamptz()
   updatedAt        DateTime          @updatedAt @db.Timestamptz()
   exchangeAccounts ExchangeAccount[]
@@ -28,6 +30,9 @@ model User {
   comments         Comment[]
   postLikes        PostLike[]
   commentLikes     CommentLike[]
+  chartIdeas       ChartIdea[]
+  withdrawals      Withdrawal[]
+  chartAnalyses    ChartAnalysis[]
 }
 
 model Post {
@@ -94,6 +99,11 @@ model Verification {
   code      String
   createdAt DateTime @default(now()) @db.Timestamptz()
   updatedAt DateTime @updatedAt @db.Timestamptz()
+}
+
+enum Role {
+  USER
+  ADMIN
 }
 
 enum BannerType {
@@ -187,6 +197,10 @@ model Withdrawal {
   status           WithdrawalStatus  @default(PENDING)
   network          String            @default("TRC20")
   address          String            @default("")
+  userId           String?
+  user             User?             @relation(fields: [userId], references: [id])
+  paidAt           DateTime?         @db.Timestamptz()
+  adminNote        String?
   createdAt        DateTime          @default(now()) @db.Timestamptz()
   updatedAt        DateTime          @updatedAt @db.Timestamptz()
 }
@@ -223,4 +237,89 @@ model Event {
   endDate   DateTime
   createdAt DateTime @default(now()) @db.Timestamptz()
   updatedAt DateTime @updatedAt @db.Timestamptz()
+}
+
+enum TradeDirection {
+  LONG
+  SHORT
+}
+
+model ChartIdea {
+  id          String         @id @default(cuid())
+  imageUrl    String
+  pair        String
+  direction   TradeDirection
+  entryPrice  Float
+  stopLoss    Float
+  takeProfit  Float
+  description String
+  userId      String
+  user        User           @relation(fields: [userId], references: [id])
+  createdAt   DateTime       @default(now()) @db.Timestamptz()
+  updatedAt   DateTime       @updatedAt @db.Timestamptz()
+}
+
+enum AnalysisStatus {
+  PENDING
+  APPROVED
+  CHARGED
+  REFUNDED
+}
+
+model ChartAnalysis {
+  id              String         @id @default(cuid())
+  imageUrl        String
+  pair            String?
+  cost            Float          @default(5.0)
+  status          AnalysisStatus @default(PENDING)
+  // AI analysis results (stored as JSON)
+  summary         String
+  trend           String
+  patterns        String         @db.Text
+  supportLevels   String         @db.Text
+  resistanceLevels String        @db.Text
+  indicators      String         @db.Text
+  tradeSetup      String         @db.Text
+  riskScore       Int            @default(0)
+  confidence      Int            @default(0)
+  userId          String
+  user            User           @relation(fields: [userId], references: [id])
+  chargedAt       DateTime?      @db.Timestamptz()
+  createdAt       DateTime       @default(now()) @db.Timestamptz()
+  updatedAt       DateTime       @updatedAt @db.Timestamptz()
+}
+
+model ManagedContent {
+  id             String   @id @default(cuid())
+  type           String   // 'tweet' | 'youtube' | 'news' | 'short'
+  sourceUrl      String   @unique
+  title          String
+  titleKo        String   @default("")
+  description    String   @db.Text
+  descriptionKo  String   @default("") @db.Text
+  thumbnailUrl   String?
+  sourceName     String
+  sourceCategory String
+  publishedAt    DateTime
+  fetchedAt      DateTime @default(now())
+  status         String   @default("pending") // 'pending' | 'translated' | 'published' | 'archived'
+  metadata       Json     @default("{}")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([type])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([type, status])
+}
+
+model ContentBotLog {
+  id        String   @id @default(cuid())
+  action    String   // 'aggregate' | 'translate' | 'publish' | 'error'
+  details   String   @db.Text
+  itemCount Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([action])
+  @@index([createdAt])
 }

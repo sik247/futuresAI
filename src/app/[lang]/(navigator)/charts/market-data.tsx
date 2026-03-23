@@ -153,13 +153,13 @@ export function MarketCorrelations({ data }: { data: GlobalMarketData | null }) 
       {stats.map((s) => (
         <div
           key={s.label}
-          className="rounded-xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-md p-4 flex flex-col gap-2"
+          className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 flex flex-col gap-2 hover:bg-white/[0.04] hover:border-white/[0.1] transition-all duration-200"
         >
           <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">
             {s.label}
           </span>
           <span
-            className="text-xl font-mono font-semibold text-zinc-100"
+            className="text-xl font-mono font-semibold text-zinc-100 tabular-nums"
             data-counter={s.value}
             data-prefix={s.prefix}
             data-suffix={s.suffix}

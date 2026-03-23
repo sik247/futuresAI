@@ -1,36 +1,63 @@
-import Container from "@/components/ui/container";
 import React from "react";
+import { Metadata } from "next";
 import { SignUpForm } from "./sign-up-form";
-import { getAnimationProps } from "@/lib/utils/get-animation-props";
+import Link from "next/link";
+import { getDictionary } from "@/i18n";
 
-type TSignUpPage = {};
+export const metadata: Metadata = {
+  title: "Sign Up",
+  description:
+    "Create your free Futures AI account to unlock AI trading signals, whale tracking, real-time charts, and up to 50% trading fee rebates.",
+  keywords: ["sign up", "create account", "crypto trading platform", "trading rebates"],
+};
 
-const SignUpPage: React.FC<TSignUpPage> = ({}) => {
+type TSignUpPage = {
+  params: { lang: string };
+};
+
+const SignUpPage: React.FC<TSignUpPage> = async ({ params: { lang } }) => {
+  const t = await getDictionary(lang);
+
   return (
-    <div className="bg-muted">
-      <Container className="bg-background pt-16 px-6 min-h-screen">
-        <div className="mb-8">
-          <span
-            className="text-xl font-bold text-foreground inline-block mb-3"
-            {...getAnimationProps("fade", 500, 0)}
-          >
-            선물 거래{" "}
-            <p className="text-muted-foreground inline-block">
-              수수료 페이백 크립토엑스
-            </p>
-            에 <br />
-            오신 것을 환영합니다
-          </span>
-          <p
-            className="text-sm max-md:text-xs font-medium text-muted-foreground"
-            {...getAnimationProps("fade", 500, 200)}
-          >
-            크립토엑스는 거래소에서 발생한 수수료를 <br />
-            트레이더님들께 직접 환급해주는 페이백 서비스에요.
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4 py-24">
+      {/* Background effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/[0.04] rounded-full blur-3xl" />
+        <div className="absolute bottom-1/3 right-1/3 w-[400px] h-[400px] bg-cyan-500/[0.03] rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-dot-pattern opacity-20" />
+      </div>
+
+      <div className="relative w-full max-w-md animate-fade-in-up">
+        {/* Header text */}
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-white tracking-tight mb-2">
+            {t.signup_title}
+          </h1>
+          <p className="text-sm text-zinc-400 leading-relaxed max-w-sm mx-auto">
+            {t.signup_subtitle}
           </p>
         </div>
-        <SignUpForm />
-      </Container>
+
+        {/* Glassmorphism card */}
+        <div className="relative rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-6 sm:p-8 shadow-2xl shadow-black/40">
+          {/* Subtle top glow on the card */}
+          <div className="absolute -top-px inset-x-6 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
+          <SignUpForm translations={t} lang={lang} />
+        </div>
+
+        {/* Login link */}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-zinc-500">
+            {t.signup_already_have_account}{" "}
+            <Link
+              href={`/${lang}/login`}
+              className="text-blue-400 hover:text-blue-300 font-medium transition-colors duration-200 hover:underline underline-offset-4"
+            >
+              {t.login}
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

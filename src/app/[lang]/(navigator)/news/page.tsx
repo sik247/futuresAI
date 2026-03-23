@@ -5,9 +5,10 @@ import { getDictionary } from "@/i18n";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Crypto News | Futures & AI",
+  title: "Crypto News and Market Updates",
   description:
-    "Latest cryptocurrency news, market updates, and trading insights.",
+    "Latest cryptocurrency news, Bitcoin and altcoin market updates, and real-time trading insights aggregated from top sources. Stay informed with Futures AI.",
+  keywords: ["crypto news", "bitcoin news", "cryptocurrency updates", "market intelligence", "trading insights"],
 };
 
 const TRENDING_TICKERS = [

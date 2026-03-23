@@ -185,7 +185,7 @@ const IntroSection = React.forwardRef<
       >
         <div className="text-center pb-12">
           <p className="text-3xl font-bold text-white pb-4">
-            Welcome to Futures & AI
+            Welcome to Futures AI
           </p>
           <p className="text-zinc-400">No exchange data available</p>
         </div>
@@ -209,7 +209,7 @@ const IntroSection = React.forwardRef<
       {/* Headline */}
       <div ref={headlineRef} className="text-center pb-12 relative z-10">
         <p className="text-sm md:text-base font-mono font-medium tracking-widest uppercase text-zinc-500 pb-4">
-          Welcome to Futures & AI
+          Welcome to Futures AI
         </p>
         <h1 className="text-4xl md:text-6xl font-bold leading-tight">
           <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent bg-[length:200%_auto] animate-[gradient-shift_4s_ease-in-out_infinite]">

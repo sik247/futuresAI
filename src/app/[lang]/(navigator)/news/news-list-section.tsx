@@ -323,7 +323,10 @@ const FeaturedCard = React.forwardRef<
       <div className="flex flex-col justify-center gap-5 p-8 lg:p-10">
         {/* Source + time */}
         <div className="flex items-center gap-3 text-xs">
-          <span className="px-2.5 py-1 rounded-md bg-blue-500/15 text-blue-400 font-mono text-[10px] font-semibold uppercase tracking-wider border border-blue-500/20">
+          <span className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-blue-500/15 text-blue-400 font-mono text-[10px] font-semibold uppercase tracking-wider border border-blue-500/20">
+            {news.sourceImg && (
+              <img src={news.sourceImg} alt="" className="w-4 h-4 rounded-sm" />
+            )}
             {news.source}
           </span>
           <span className="font-mono text-zinc-500">
@@ -430,7 +433,10 @@ const NewsCard: React.FC<{ news: CryptoNewsItem }> = ({ news }) => {
 
         {/* Source badge overlaid on image */}
         <div className="absolute bottom-3 left-3">
-          <span className="px-2 py-0.5 rounded-md bg-zinc-950/70 backdrop-blur-sm text-[10px] font-mono font-semibold uppercase tracking-wider text-blue-400 border border-white/[0.08]">
+          <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-950/70 backdrop-blur-sm text-[10px] font-mono font-semibold uppercase tracking-wider text-blue-400 border border-white/[0.08]">
+            {news.sourceImg && (
+              <img src={news.sourceImg} alt="" className="w-3.5 h-3.5 rounded-sm" />
+            )}
             {news.source}
           </span>
         </div>

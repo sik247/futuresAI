@@ -9,7 +9,7 @@ const Logo: React.FC = () => {
       <div className="w-32 md:w-36 lg:w-40 h-auto">
         <Image
           src="/images/futures-ai-logo.png"
-          alt="Futures & AI logo"
+          alt="Futures AI logo"
           width={160}
           height={40}
           className="w-full h-auto"

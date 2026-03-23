@@ -1,6 +1,16 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import Container from "@/components/ui/container";
 import PaybackAnimations from "./payback-animations";
+import { auth } from "@/auth";
+import PaybackRequest from "./payback-request";
+
+export const metadata: Metadata = {
+  title: "Trading Rebates and Payback",
+  description:
+    "Earn up to 50% trading fee rebates on partner exchanges including Bitget, Bybit, BingX, OKX, and Gate.io. Track your payback earnings with Futures AI.",
+  keywords: ["trading rebates", "crypto payback", "exchange referral", "fee rebates", "Bitget rebate", "Bybit rebate"],
+};
 
 const EXCHANGES = [
   { name: "Bitget", account: "base03", paybackRate: 50, makerFee: 0.02, takerFee: 0.06, link: "https://www.bitget.com" },
@@ -10,12 +20,13 @@ const EXCHANGES = [
   { name: "Gate.io", account: "COINBASE", paybackRate: 40, makerFee: 0.02, takerFee: 0.05, link: "https://www.gate.io" },
 ];
 
-export default function PaybackPage({
+export default async function PaybackPage({
   params,
 }: {
   params: { lang: string };
 }) {
   const { lang } = params;
+  const session = await auth();
 
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
@@ -152,6 +163,26 @@ export default function PaybackPage({
           </div>
         </Container>
       </section>
+
+      {/* User Payback Request Section */}
+      {session && (
+        <section className="relative border-b border-white/5">
+          <Container className="py-20 md:py-24">
+            <div data-anim="section-heading">
+              <p className="text-emerald-400 text-sm font-medium tracking-wider uppercase mb-3">
+                My Payback
+              </p>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+                Request Payback
+              </h2>
+              <p className="text-zinc-500 mb-12 max-w-xl">
+                View your accumulated payback and submit withdrawal requests.
+              </p>
+            </div>
+            <PaybackRequest />
+          </Container>
+        </section>
+      )}
 
       {/* CTA */}
       <section className="relative overflow-hidden">

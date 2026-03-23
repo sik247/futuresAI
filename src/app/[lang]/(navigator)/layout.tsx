@@ -10,10 +10,27 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   await getDictionary(lang);
 
+  const isKo = lang === "ko";
+
   return {
-    title: "Futures & AI | Payback Admin Dashboard",
-    description:
-      "Monitor affiliate commissions across all exchanges. Track your payback earnings and maximize your returns.",
+    title: isKo
+      ? "Futures AI - AI 기반 암호화폐 트레이딩 인텔리전스"
+      : "Futures AI - AI-Powered Crypto Trading Intelligence",
+    description: isKo
+      ? "Futures AI로 AI 트레이딩 신호, 고래 추적, 실시간 차트, 시장 분석 및 거래 리베이트를 활용하세요."
+      : "Futures AI delivers AI-powered trading signals, whale tracking, real-time charts, market analytics, and trading rebates for crypto traders.",
+    openGraph: {
+      title: "Futures AI - AI-Powered Crypto Trading Intelligence",
+      description:
+        "AI trading signals, whale tracking, real-time charts, and trading rebates for crypto traders.",
+      siteName: "Futures AI",
+    },
+    alternates: {
+      languages: {
+        en: "/en",
+        ko: "/ko",
+      },
+    },
   };
 }
 
@@ -29,8 +46,8 @@ export default async function LanguageLayout({
   return (
     <>
       <Headers lang={lang} translations={dictionary} />
-      <main>{children}</main>
-      <Footer translations={dictionary} />
+      <main className="min-h-screen">{children}</main>
+      <Footer lang={lang} translations={dictionary} />
     </>
   );
 }

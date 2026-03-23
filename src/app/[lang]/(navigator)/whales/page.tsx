@@ -4,9 +4,10 @@ import WhalesAnimations from "./whales-animations";
 import WhaleActivityFeed from "./whale-activity-feed";
 
 export const metadata: Metadata = {
-  title: "Entity Tracker | Futures & AI",
+  title: "Whale and Entity Tracker",
   description:
-    "On-chain intelligence dashboard. Track major crypto entity wallets, institutional funds, and live transaction activity.",
+    "Track crypto whale wallets, institutional funds like BlackRock and MicroStrategy, and live on-chain transaction activity. On-chain intelligence by Futures AI.",
+  keywords: ["whale tracking", "crypto whales", "on-chain analytics", "institutional crypto", "wallet tracker", "ethereum wallets"],
 };
 
 /* ------------------------------------------------------------------ */
@@ -650,7 +651,7 @@ export default async function WhalesPage() {
       <section className="py-10">
         <Container>
           <p className="text-[10px] font-mono text-zinc-700 leading-relaxed text-center max-w-2xl mx-auto">
-            Data sourced from Etherscan. Entity labels curated by Futures & AI.
+            Data sourced from Etherscan. Entity labels curated by Futures AI.
             For comprehensive on-chain intelligence, visit{" "}
             <a
               href="https://www.arkhamintelligence.com"

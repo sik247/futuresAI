@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import { bitgetService } from "@/lib/services/exchanges/bitget.service";
 import { byBitService } from "@/lib/services/exchanges/bybit.service";
 import { bingXService } from "@/lib/services/exchanges/bingx.service";
@@ -128,6 +129,11 @@ async function fetchOkx(): Promise<ExchangeResult> {
 }
 
 export async function GET() {
+  const session = await auth();
+  if (!session || (session.user as { role?: string }).role !== "ADMIN") {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const results = await Promise.allSettled([
     fetchBitget(),
     fetchBybit(),

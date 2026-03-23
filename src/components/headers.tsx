@@ -31,6 +31,7 @@ const NAV_ITEMS = [
   { path: "sns", key: "sns" as const },
   { path: "news", key: "news" as const },
   { path: "calculator", key: "calculator" as const },
+  { path: "chart-ideas", key: "chartIdeas" as const },
 ] as const;
 
 const Headers: React.FC<THeaders> = ({ lang, translations }) => {
@@ -54,51 +55,62 @@ const Headers: React.FC<THeaders> = ({ lang, translations }) => {
     <header
       className={`fixed inset-x-0 top-0 z-50 h-16 transition-all duration-500 ease-out ${
         scrolled
-          ? "bg-zinc-950/80 backdrop-blur-xl border-b border-white/5 shadow-lg shadow-black/10"
+          ? "bg-zinc-950/80 backdrop-blur-2xl border-b border-white/[0.06] shadow-[0_1px_3px_rgba(0,0,0,0.4),0_4px_24px_rgba(0,0,0,0.2)]"
           : "bg-transparent border-b border-transparent"
       }`}
     >
-      <div className="h-full max-w-7xl mx-auto flex items-center justify-between px-6">
+      {/* Subtle top highlight line when scrolled */}
+      <div
+        className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent transition-opacity duration-500 ${
+          scrolled ? "opacity-100" : "opacity-0"
+        }`}
+      />
+
+      <div className="h-full max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6">
         {/* Logo */}
         <div className="flex-shrink-0">
           <Logo />
         </div>
 
         {/* Center nav (hidden on mobile) */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden lg:flex items-center gap-0.5">
           {NAV_ITEMS.map(({ path, key }) => (
             <Link key={path} href={`/${lang}/${path}`}>
               <span
-                className={`relative px-3 py-2 text-sm tracking-wide transition-colors duration-300 ${
+                className={`relative px-3 py-2 text-[13px] font-medium tracking-wide transition-all duration-200 rounded-lg ${
                   isActive(path)
-                    ? "text-white"
-                    : "text-zinc-400 hover:text-zinc-200"
+                    ? "text-white bg-white/[0.08]"
+                    : "text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]"
                 }`}
               >
                 {translations[key]}
-                {/* Active indicator dot */}
+                {/* Active indicator line with glow */}
                 <span
-                  className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-[2px] rounded-full bg-blue-500 transition-all duration-300 ${
+                  className={`absolute -bottom-[7px] left-1/2 -translate-x-1/2 h-[2px] rounded-full transition-all duration-300 ${
                     isActive(path)
-                      ? "w-4 opacity-100 shadow-[0_0_8px_rgba(37,99,235,0.6)]"
-                      : "w-0 opacity-0"
+                      ? "w-5 opacity-100 bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"
+                      : "w-0 opacity-0 bg-blue-500"
                   }`}
                 />
+                {/* Subtle active glow behind the text */}
+                {isActive(path) && (
+                  <span className="absolute inset-0 rounded-lg bg-blue-500/[0.06] blur-[2px] pointer-events-none" />
+                )}
               </span>
             </Link>
           ))}
         </nav>
 
         {/* Auth, theme toggle & mobile menu */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {/* Theme toggle */}
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="relative p-2 rounded-full text-zinc-400 hover:text-white hover:bg-white/5 transition-all duration-300"
+            className="relative p-2 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06] transition-all duration-200"
             aria-label="Toggle theme"
           >
-            <SunIcon className="w-[18px] h-[18px] hidden dark:block transition-transform duration-300" />
-            <MoonIcon className="w-[18px] h-[18px] block dark:hidden transition-transform duration-300" />
+            <SunIcon className="w-[18px] h-[18px] hidden dark:block" />
+            <MoonIcon className="w-[18px] h-[18px] block dark:hidden" />
           </button>
 
           {session?.user ? (
@@ -108,20 +120,20 @@ const Headers: React.FC<THeaders> = ({ lang, translations }) => {
             </>
           ) : (
             <>
-              <Link href={`/${lang}/login`}>
+              <Link href={`/${lang}/login`} className="hidden sm:block">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-8 px-4 text-sm font-medium rounded-full border-zinc-700 bg-transparent text-zinc-300 hover:text-white hover:border-zinc-500 hover:bg-white/5 transition-all duration-300"
+                  className="h-8 px-4 text-[13px] font-medium rounded-lg border-zinc-700/60 bg-transparent text-zinc-300 hover:text-white hover:border-zinc-500 hover:bg-white/[0.06] transition-all duration-200"
                 >
                   <ArrowRightEndOnRectangleIcon className="w-4 h-4" />
                   <span className="ml-1.5">{translations.login}</span>
                 </Button>
               </Link>
-              <Link href={`/${lang}/signup`}>
+              <Link href={`/${lang}/signup`} className="hidden sm:block">
                 <Button
                   size="sm"
-                  className="h-8 px-4 text-sm font-medium rounded-full bg-blue-600 text-white hover:bg-blue-500 shadow-md shadow-blue-600/20 hover:shadow-blue-500/30 transition-all duration-300"
+                  className="h-8 px-4 text-[13px] font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-500 shadow-sm shadow-blue-600/25 hover:shadow-[0_0_20px_rgba(59,130,246,0.35)] transition-all duration-300"
                 >
                   <UserIcon className="w-4 h-4" />
                   <span className="ml-1.5">{translations.signup}</span>
@@ -130,7 +142,7 @@ const Headers: React.FC<THeaders> = ({ lang, translations }) => {
               <LanguageSwitcher />
             </>
           )}
-          <HeaderHamburger lang={lang} translations={translations} className="md:hidden" />
+          <HeaderHamburger lang={lang} translations={translations} className="lg:hidden" />
         </div>
       </div>
     </header>

@@ -5,8 +5,8 @@ import React from "react";
 type TThirdSection = {};
 
 const GuideNavigation = [
-  { id: "1", title: "크립토엑스 코드로 거래소 가입하기" },
-  { id: "2", title: "크립토엑스에 UID 연결하기" },
+  { id: "1", title: "Futures AI 코드로 거래소 가입하기" },
+  { id: "2", title: "Futures AI에 UID 연결하기" },
   { id: "3", title: "트레이딩 마음껏 즐기기" },
   { id: "4", title: "페이백 환급받기!" },
 ];
@@ -22,7 +22,7 @@ const ThirdSection = React.forwardRef<
         {...getAnimationProps("fade", 500, 0)}
       >
         <p className="text-4xl max-md:text-xl font-bold pb-5 max-md:pb-2">
-          크립토엑스 이용가이드
+          Futures AI 이용가이드
         </p>
         <p className="text-lg font-normal max-md:text-xs max-md:font-semibold max-md:text-muted-foreground">
           3분만 투자하면 평생 수수료를 환급받아요.

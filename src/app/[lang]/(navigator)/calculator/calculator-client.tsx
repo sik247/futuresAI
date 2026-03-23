@@ -295,7 +295,7 @@ export default function CalculatorClient({
               Your Savings
             </h3>
             <p className="text-xs text-muted-foreground mb-6">
-              with {exchange?.name} via Futures & AI
+              with {exchange?.name} via Futures AI
             </p>
 
             <div className="space-y-4 flex-1">
@@ -491,7 +491,7 @@ export default function CalculatorClient({
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                 </svg>
               ),
-              title: "Sign Up Through Futures & AI",
+              title: "Sign Up Through Futures AI",
               desc: "Create your exchange account using our referral link. It takes less than 2 minutes.",
             },
             {
@@ -540,7 +540,7 @@ export default function CalculatorClient({
           </h2>
           <p className="text-muted-foreground mb-8 max-w-md mx-auto">
             Join thousands of traders who are getting their fees back through
-            Futures & AI.
+            Futures AI.
           </p>
           <button className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 py-3.5 rounded-lg transition-colors text-lg">
             Sign Up Now

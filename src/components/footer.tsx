@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 type TFooter = {
+  lang?: string;
   translations: any;
 };
 
@@ -27,99 +28,91 @@ const CommunityIconsPathList = [
   { item: "/icons/footer-icons/kakaoTalk.png", alt: "KakaoTalk", href: "#" },
 ];
 
-const Footer: React.FC<TFooter> = ({ translations }) => {
+const QUICK_LINKS = [
+  { href: "calculator", label: "Payback Calculator" },
+  { href: "exchanges", label: "Partner Exchanges" },
+  { href: "team", label: "Our Team" },
+];
+
+const RESOURCE_LINKS = [
+  { href: "news", label: "Crypto News" },
+  { href: "charts", label: "Live Charts" },
+  { href: "markets", label: "Market Data" },
+];
+
+const LEGAL_LINKS = [
+  { href: "terms", label: "Terms of Service" },
+  { href: "privacy", label: "Privacy Policy" },
+  { href: "disclaimer", label: "Disclaimer" },
+];
+
+const Footer: React.FC<TFooter> = ({ lang = "en", translations }) => {
   return (
     <footer className="relative bg-zinc-950 overflow-hidden">
-      {/* Top gradient border */}
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-600/20 to-transparent" />
+      {/* Top gradient border - enhanced */}
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-zinc-700/40 to-transparent" />
 
-      {/* Decorative background elements */}
-      <div className="absolute top-12 left-8 w-px h-24 bg-gradient-to-b from-zinc-800/40 to-transparent" />
-      <div className="absolute top-12 right-8 w-px h-24 bg-gradient-to-b from-zinc-800/40 to-transparent" />
-      <div className="absolute bottom-20 left-16 grid grid-cols-3 gap-1.5 opacity-[0.04]">
-        {Array.from({ length: 9 }).map((_, i) => (
-          <div key={i} className="w-1 h-1 rounded-full bg-white" />
-        ))}
-      </div>
-      <div className="absolute top-16 right-24 grid grid-cols-3 gap-1.5 opacity-[0.04]">
-        {Array.from({ length: 9 }).map((_, i) => (
-          <div key={i} className="w-1 h-1 rounded-full bg-white" />
-        ))}
-      </div>
+      {/* Ambient background glow */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/[0.03] rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-cyan-500/[0.02] rounded-full blur-[100px] pointer-events-none" />
 
-      <Container className="relative py-16 max-md:px-6">
+      <Container className="relative py-16 lg:py-20">
         {/* Main grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
           {/* Brand info */}
-          <div className="lg:col-span-1 flex flex-col gap-4">
-            <span className="text-2xl font-bold bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
-              Futures & AI
+          <div className="lg:col-span-1 flex flex-col gap-5">
+            <span className="text-2xl font-bold bg-gradient-to-r from-white via-blue-100 to-blue-400 bg-clip-text text-transparent animate-gradient-shift bg-[length:200%_200%]">
+              Futures AI
             </span>
             <p className="text-zinc-500 text-sm leading-relaxed max-w-xs">
-              Your premium gateway to crypto markets, analytics, and community insights.
+              AI-powered crypto trading signals, whale tracking, market analytics, and trading rebates.
             </p>
-            <div className="text-zinc-600 text-sm space-y-1 mt-1">
-              <p>support@futuresai.hk</p>
+            <div className="text-zinc-600 text-sm space-y-1.5 mt-1">
+              <p className="hover:text-zinc-400 transition-colors duration-300 cursor-default">support@futuresai.com</p>
               <p>Live Chat Support (24/7)</p>
             </div>
           </div>
 
           {/* Quick Links */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-5">
             <span className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
               Quick Links
             </span>
-            <div className="flex flex-col gap-3">
-              <Link
-                href="/calculator"
-                className="text-sm text-zinc-500 hover:text-white transition-colors duration-300"
-              >
-                Payback Calculator
-              </Link>
-              <Link
-                href="/exchanges"
-                className="text-sm text-zinc-500 hover:text-white transition-colors duration-300"
-              >
-                Partner Exchanges
-              </Link>
-              <Link
-                href="/team"
-                className="text-sm text-zinc-500 hover:text-white transition-colors duration-300"
-              >
-                Our Team
-              </Link>
+            <div className="flex flex-col gap-3.5">
+              {QUICK_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={`/${lang}/${link.href}`}
+                  className="group text-sm text-zinc-500 hover:text-white transition-all duration-300 flex items-center gap-2"
+                >
+                  <span className="w-0 group-hover:w-2 h-px bg-blue-500 transition-all duration-300" />
+                  {link.label}
+                </Link>
+              ))}
             </div>
           </div>
 
           {/* Resources */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-5">
             <span className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
               Resources
             </span>
-            <div className="flex flex-col gap-3">
-              <Link
-                href="/news"
-                className="text-sm text-zinc-500 hover:text-white transition-colors duration-300"
-              >
-                Crypto News
-              </Link>
-              <Link
-                href="/charts"
-                className="text-sm text-zinc-500 hover:text-white transition-colors duration-300"
-              >
-                Live Charts
-              </Link>
-              <Link
-                href="/markets"
-                className="text-sm text-zinc-500 hover:text-white transition-colors duration-300"
-              >
-                Market Data
-              </Link>
+            <div className="flex flex-col gap-3.5">
+              {RESOURCE_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={`/${lang}/${link.href}`}
+                  className="group text-sm text-zinc-500 hover:text-white transition-all duration-300 flex items-center gap-2"
+                >
+                  <span className="w-0 group-hover:w-2 h-px bg-blue-500 transition-all duration-300" />
+                  {link.label}
+                </Link>
+              ))}
             </div>
           </div>
 
           {/* Social */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-5">
             <span className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
               Community
             </span>
@@ -130,7 +123,7 @@ const Footer: React.FC<TFooter> = ({ translations }) => {
                     href={path.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group flex items-center justify-center w-10 h-10 rounded-full bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:bg-blue-600/10 hover:border-blue-500/20 hover:shadow-[0_0_12px_rgba(37,99,235,0.15)] transition-all duration-300"
+                    className="group flex items-center justify-center w-10 h-10 rounded-full bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:bg-blue-600/10 hover:border-blue-500/30 hover:shadow-[0_0_16px_rgba(59,130,246,0.2)] hover:-translate-y-0.5 transition-all duration-300"
                   >
                     <Image
                       src={path.item}
@@ -147,7 +140,7 @@ const Footer: React.FC<TFooter> = ({ translations }) => {
         </div>
 
         {/* Partners section */}
-        <div className="mt-14 pt-8 border-t border-white/[0.04]">
+        <div className="mt-14 pt-8 border-t border-zinc-800/40">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
             <span className="text-xs font-semibold uppercase tracking-widest text-zinc-600 shrink-0">
               Powered By
@@ -160,7 +153,7 @@ const Footer: React.FC<TFooter> = ({ translations }) => {
                     alt={path.alt}
                     width={36}
                     height={36}
-                    className="grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all duration-500"
+                    className="grayscale opacity-30 hover:grayscale-0 hover:opacity-100 hover:scale-110 transition-all duration-500"
                   />
                 </li>
               ))}
@@ -169,29 +162,20 @@ const Footer: React.FC<TFooter> = ({ translations }) => {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-10 pt-6 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-10 pt-6 border-t border-zinc-800/40 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-zinc-600 text-xs">
-            &copy; {new Date().getFullYear()} Futures & AI. All rights reserved.
+            &copy; {new Date().getFullYear()} Futures AI. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            <Link
-              href="/terms"
-              className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors duration-300"
-            >
-              Terms of Service
-            </Link>
-            <Link
-              href="/privacy"
-              className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors duration-300"
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              href="/disclaimer"
-              className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors duration-300"
-            >
-              Disclaimer
-            </Link>
+            {LEGAL_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-xs text-zinc-600 hover:text-zinc-300 transition-colors duration-300"
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
         </div>
       </Container>

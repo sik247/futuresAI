@@ -27,7 +27,7 @@ const ExchangeListSection = React.forwardRef<
               className="text-4xl max-md:text-xl font-bold pb-5 max-md:pb-2"
               {...getAnimationProps("fade", 500, 0)}
             >
-              크립토엑스 추천 거래소
+              Futures AI 추천 거래소
             </p>
           </>
         ) : (
@@ -35,7 +35,7 @@ const ExchangeListSection = React.forwardRef<
             className="text-4xl max-md:text-xl font-bold pb-5 max-md:pb-2"
             {...getAnimationProps("fade", 500, 0)}
           >
-            크립토엑스 신규 거래소
+            Futures AI 신규 거래소
           </p>
         )}
 

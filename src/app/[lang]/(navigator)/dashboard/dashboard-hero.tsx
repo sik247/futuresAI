@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
 import { ArrowDown, ChevronRight } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -128,7 +129,7 @@ function StatCard({
       <div className="flex items-baseline gap-1">
         <span
           ref={numberRef}
-          className="text-4xl md:text-5xl font-bold text-gradient-blue"
+          className="text-4xl md:text-5xl font-bold font-mono tabular-nums text-gradient-blue"
         >
           0
         </span>
@@ -145,6 +146,8 @@ function StatCard({
    Main Hero Component
    ------------------------------------------------ */
 export function DashboardHeroClient() {
+  const pathname = usePathname();
+  const lang = pathname?.split("/")[1] || "en";
   const heroRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const sublineRef = useRef<HTMLParagraphElement>(null);
@@ -467,9 +470,10 @@ export function DashboardHeroClient() {
           {/* Label */}
           <p
             ref={labelRef}
-            className="text-xs font-mono uppercase tracking-[0.25em] text-blue-400/70 mb-8 opacity-0"
+            className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-[0.25em] text-blue-400/70 mb-8 opacity-0"
           >
-            Futures & AI -- Crypto Payback Platform
+            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse-glow" />
+            AI-Powered Crypto Trading Intelligence
           </p>
 
           {/* Headline */}
@@ -499,22 +503,24 @@ export function DashboardHeroClient() {
             ref={sublineRef}
             className="text-lg md:text-xl text-zinc-400 max-w-xl leading-relaxed mb-10 opacity-0"
           >
-            Get up to 50% back on every trade. Connect your exchange, trade as
+            Get up to <span className="text-white font-semibold">50% back</span> on every trade. Connect your exchange, trade as
             usual, and watch your rebates grow automatically.
           </p>
 
           {/* CTA */}
           <div ref={ctaRef} className="flex flex-wrap items-center gap-4 mb-20 opacity-0">
             <Link
-              href="/calculator"
-              className="group inline-flex items-center gap-2 rounded-full bg-blue-600 px-8 py-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-blue-500 hover:shadow-[0_0_30px_rgba(37,99,235,0.4)]"
+              href={`/${lang}/calculator`}
+              className="group relative inline-flex items-center gap-2 rounded-full bg-blue-600 px-8 py-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-blue-500 hover:shadow-[0_0_40px_rgba(59,130,246,0.4)] overflow-hidden"
             >
-              Calculate Your Payback
-              <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              {/* Shimmer sweep on hover */}
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              <span className="relative">Calculate Your Payback</span>
+              <ChevronRight className="relative w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <Link
-              href="/exchanges"
-              className="inline-flex items-center gap-2 rounded-full border border-zinc-700 px-8 py-4 text-sm font-medium text-zinc-300 transition-all duration-300 hover:border-zinc-500 hover:text-white"
+              href={`/${lang}/exchanges`}
+              className="inline-flex items-center gap-2 rounded-full border border-zinc-700 px-8 py-4 text-sm font-medium text-zinc-300 transition-all duration-300 hover:border-zinc-500 hover:text-white hover:bg-white/[0.04]"
             >
               View Exchanges
             </Link>
