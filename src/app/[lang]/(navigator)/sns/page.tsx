@@ -92,21 +92,25 @@ export default async function SnsPage({ params: { lang } }: { params: { lang: st
   const lastUpdatedMs = allTimestamps.length > 0 ? Math.max(...allTimestamps) : Date.now();
   const updatedAgo = timeAgo(new Date(lastUpdatedMs).toISOString());
 
-  // Translate news for Korean users
+  // Translate news for Korean users (limit for speed)
+  const TRANSLATE_LIMIT = 20;
   const translatedNewsItems = lang === "ko" && newsItems.length > 0
     ? await (async () => {
         try {
-          const titles = newsItems.map((n) => n.title);
-          const bodies = newsItems.map((n) => n.body);
+          const toTranslate = newsItems.slice(0, TRANSLATE_LIMIT);
+          const rest = newsItems.slice(TRANSLATE_LIMIT);
+          const titles = toTranslate.map((n) => n.title);
+          const bodies = toTranslate.map((n) => n.body.slice(0, 200));
           const [trTitles, trBodies] = await Promise.all([
             translateBatch(titles, "en", "ko"),
             translateBatch(bodies, "en", "ko"),
           ]);
-          return newsItems.map((n, i) => ({
+          const translated = toTranslate.map((n, i) => ({
             ...n,
             title: trTitles[i]?.translated || n.title,
             body: trBodies[i]?.translated || n.body,
           }));
+          return [...translated, ...rest];
         } catch {
           return newsItems;
         }

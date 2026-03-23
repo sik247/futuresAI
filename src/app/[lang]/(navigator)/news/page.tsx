@@ -5,6 +5,8 @@ import { getDictionary } from "@/i18n";
 import { Metadata } from "next";
 import { translateBatch } from "@/lib/services/social/korean-translator.service";
 
+export const revalidate = 300; // Revalidate every 5 minutes (avoids build-time translation timeout)
+
 export const metadata: Metadata = {
   title: "Crypto News and Market Updates",
   description:
@@ -52,23 +54,27 @@ export default async function NewsList({
   const trending =
     trendingFromNews.length > 0 ? trendingFromNews : TRENDING_TICKERS;
 
-  // Translate news titles and bodies for Korean
+  // Translate top news titles and bodies for Korean (limit to 30 for speed)
+  const TRANSLATE_LIMIT = 30;
   const translatedNews = lang === "ko" && news.length > 0
     ? await (async () => {
         try {
-          const titles = news.map((n) => n.title);
-          const bodies = news.map((n) => n.body);
-          const [translatedTitles, translatedBodies] = await Promise.all([
+          const toTranslate = news.slice(0, TRANSLATE_LIMIT);
+          const rest = news.slice(TRANSLATE_LIMIT);
+          const titles = toTranslate.map((n) => n.title);
+          const bodies = toTranslate.map((n) => n.body.slice(0, 200));
+          const [trTitles, trBodies] = await Promise.all([
             translateBatch(titles, "en", "ko"),
             translateBatch(bodies, "en", "ko"),
           ]);
-          return news.map((n, i) => ({
+          const translated = toTranslate.map((n, i) => ({
             ...n,
-            title: translatedTitles[i]?.translated || n.title,
-            body: translatedBodies[i]?.translated || n.body,
+            title: trTitles[i]?.translated || n.title,
+            body: trBodies[i]?.translated || n.body,
           }));
+          return [...translated, ...rest];
         } catch {
-          return news; // Fallback to English on error
+          return news;
         }
       })()
     : news;
