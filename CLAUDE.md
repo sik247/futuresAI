@@ -49,6 +49,17 @@ npm run build     # Production build
 npm run lint      # ESLint
 ```
 
+## Deployment
+
+- **Vercel** auto-deploys from `kkyungslim/futuresai_x` on GitHub
+- Always push to the `vercel` remote for production deployment:
+  ```bash
+  git push vercel main      # Deploy to Vercel (kkyungslim/futuresai_x)
+  git push origin main      # Backup to sik247/futuresAI
+  ```
+- The `vercel` remote uses SSH key `~/.ssh/id_kkyungslim` via `github-kkyungslim` host alias
+- Environment variables are managed in Vercel dashboard (never commit `.env`)
+
 ## Conventions
 
 - Path alias: `@/*` maps to `./src/*`
