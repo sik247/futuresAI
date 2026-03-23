@@ -3,6 +3,10 @@
 import { auth } from "@/auth";
 import { paybackRequestService } from "@/lib/services/payback/payback-request.service";
 import prisma from "@/lib/prisma";
+import {
+  notifyAdmin,
+  formatWithdrawalRequest,
+} from "@/lib/services/notifications/telegram.service";
 
 export async function getUserPaybackSummary() {
   const session = await auth();
@@ -59,6 +63,13 @@ export async function submitPaybackRequest(data: {
   }
 
   try {
+    // Get exchange names for notification
+    const accounts = await prisma.exchangeAccount.findMany({
+      where: { id: { in: data.exchangeAccountIds } },
+      include: { exchange: true },
+    });
+    const exchangeNames = accounts.map((a) => a.exchange.name);
+
     await paybackRequestService.createRequest(
       session.user.id,
       data.exchangeAccountIds,
@@ -66,6 +77,23 @@ export async function submitPaybackRequest(data: {
       data.address.trim(),
       data.network
     );
+
+    // Notify admin via Telegram
+    try {
+      await notifyAdmin(
+        formatWithdrawalRequest({
+          userName: session.user.name || "Unknown",
+          email: session.user.email || "",
+          amount: data.amount,
+          network: data.network,
+          address: data.address.trim(),
+          exchanges: exchangeNames,
+        })
+      );
+    } catch {
+      // Don't fail the request if notification fails
+    }
+
     return { success: true };
   } catch (error) {
     console.error("Failed to submit payback request:", error);

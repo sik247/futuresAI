@@ -5,6 +5,10 @@ import {
   analyzeChart,
   ANALYSIS_COST,
 } from "@/lib/services/chart-analysis/chart-analysis.service";
+import {
+  notifyAdmin,
+  formatChartAnalysisNotification,
+} from "@/lib/services/notifications/telegram.service";
 
 export async function POST(req: NextRequest) {
   try {
@@ -51,6 +55,20 @@ export async function POST(req: NextRequest) {
         userId: user.id,
       },
     });
+
+    // Notify admin via Telegram
+    try {
+      await notifyAdmin(
+        formatChartAnalysisNotification({
+          userName: user.name || user.nickname,
+          trend: analysis.trend,
+          confidence: analysis.confidence,
+          cost: ANALYSIS_COST,
+        })
+      );
+    } catch {
+      // Don't fail if notification fails
+    }
 
     return NextResponse.json({
       id: chartAnalysis.id,
