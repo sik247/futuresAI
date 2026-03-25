@@ -12,17 +12,18 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Determine period based on UTC hour
-    // 0 UTC = 9 AM KST (morning), 11 UTC = 8 PM KST (evening)
-    const hour = new Date().getUTCHours();
-    const period = hour < 6 ? "morning" : "evening";
+    const success = await sendGroupDigest();
 
-    const success = await sendGroupDigest(period);
+    const kstTime = new Date().toLocaleString("ko-KR", {
+      timeZone: "Asia/Seoul",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
     return NextResponse.json({
       ok: true,
-      period,
       sent: success,
+      kstTime,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

@@ -157,3 +157,34 @@ export async function sendGroupMessage(
 ): Promise<boolean> {
   return sendTelegramMessage(getGroupChatId(), text, parseMode);
 }
+
+export async function sendGroupPhoto(
+  photoUrl: string,
+  caption: string,
+  parseMode: "HTML" | "Markdown" = "HTML"
+): Promise<boolean> {
+  try {
+    const res = await fetch(
+      `${TELEGRAM_API}${getBotToken()}/sendPhoto`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: getGroupChatId(),
+          photo: photoUrl,
+          caption,
+          parse_mode: parseMode,
+        }),
+      }
+    );
+    const data = await res.json();
+    if (!data.ok) {
+      console.error("Telegram sendPhoto failed:", data.description);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("Telegram sendPhoto error:", error);
+    return false;
+  }
+}
