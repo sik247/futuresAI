@@ -3,6 +3,10 @@ import { fetchCryptoNews } from "@/lib/services/news/crypto-news.service";
 import { fetchMarketSignals } from "@/lib/services/signals/signals.service";
 import { translateBatch } from "@/lib/services/social/korean-translator.service";
 import { sendGroupMessage, sendGroupPhoto } from "./telegram.service";
+import {
+  getAnalyzedTweets,
+  formatTweetAnalysisSection,
+} from "./tweet-analysis.service";
 
 /* ------------------------------------------------------------------ */
 /*  TradingView Mini Chart Image URLs (public widget snapshot)          */
@@ -178,9 +182,10 @@ export async function sendGroupDigest(): Promise<boolean> {
     const { greeting, timeLabel } = getKoreanGreeting();
 
     // Fetch all data concurrently
-    const [signals, newsDigest] = await Promise.all([
+    const [signals, newsDigest, analyzedTweets] = await Promise.all([
       fetchMarketSignals(),
       formatKoreanNewsDigest(),
+      getAnalyzedTweets(3),
     ]);
 
     // Generate AI briefing
@@ -192,14 +197,14 @@ export async function sendGroupDigest(): Promise<boolean> {
       signals.btcTrend
     );
 
-    // Format quant analysis
+    // Format sections
     const quantMsg = formatQuantAnalysis(
       signals.signals,
       signals.fearGreed,
       signals.btcTrend
     );
-
     const chartSection = formatChartSection();
+    const tweetSection = formatTweetAnalysisSection(analyzedTweets);
 
     // Build full message
     const now = new Date().toLocaleString("ko-KR", {
@@ -218,15 +223,36 @@ export async function sendGroupDigest(): Promise<boolean> {
     }
 
     message += `${quantMsg}\n`;
+
+    // Tweet analysis section (translated + market influence)
+    if (tweetSection) {
+      message += `${tweetSection}\n`;
+    }
+
     message += `${newsDigest}\n`;
     message += `${chartSection}\n\n`;
     message += `무료 AI 차트 분석: cryptox.co\n`;
     message += `<i>— AlphAi Bot</i>`;
 
-    // Send main message
-    const sent = await sendGroupMessage(message);
+    // Telegram has a 4096 char limit — split if needed
+    if (message.length > 4000) {
+      // Send quant + AI briefing + tweets first
+      let part1 = `<b>${timeLabel}</b> · ${now}\n${greeting}\n\n`;
+      if (aiBriefing) part1 += `<b>AI 마켓 분석</b>\n${aiBriefing}\n\n`;
+      part1 += quantMsg;
+      if (tweetSection) part1 += `\n${tweetSection}`;
 
-    // Send BTC chart image separately (TradingView mini chart)
+      await sendGroupMessage(part1);
+
+      // Send news + charts as second message
+      let part2 = `${newsDigest}\n${chartSection}\n\n`;
+      part2 += `무료 AI 차트 분석: cryptox.co\n<i>— AlphAi Bot</i>`;
+      await sendGroupMessage(part2);
+    } else {
+      await sendGroupMessage(message);
+    }
+
+    // Send BTC chart image separately
     try {
       const btcChartUrl = `https://www.tradingview.com/x/snapshot/?symbol=BINANCE:BTCUSDT&interval=240&theme=dark`;
       await sendGroupPhoto(
@@ -234,10 +260,24 @@ export async function sendGroupDigest(): Promise<boolean> {
         `<b>BTC/USDT 4시간봉</b>\n현재가: $${signals.signals.find(s => s.symbol === "BTC")?.price.toLocaleString() || "N/A"}`,
       );
     } catch {
-      // Chart image is optional, don't fail the digest
+      // Chart image is optional
     }
 
-    return sent;
+    // Send tweet media images if available
+    for (const tweet of analyzedTweets) {
+      if (tweet.hasMedia && tweet.mediaUrl) {
+        try {
+          await sendGroupPhoto(
+            tweet.mediaUrl,
+            `<b>${tweet.displayName}</b> (@${tweet.username})\n${tweet.koreanText.slice(0, 200)}`,
+          );
+        } catch {
+          // Media is optional
+        }
+      }
+    }
+
+    return true;
   } catch (error) {
     console.error("[telegram-group] 그룹 다이제스트 전송 실패:", error);
     return false;
