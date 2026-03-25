@@ -112,7 +112,7 @@ export default async function ChartsPage({
           <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-zinc-500 mb-5">
             QUANTITATIVE ANALYSIS
           </p>
-          <h1 className="text-5xl md:text-7xl font-bold text-zinc-100 tracking-tight leading-[0.95]">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-zinc-100 tracking-tight leading-[0.95]">
             Charts &<br />
             Market Data
           </h1>
@@ -122,8 +122,8 @@ export default async function ChartsPage({
           </p>
 
           {/* Stats Bar */}
-          <div className="mt-8 grid grid-cols-2 sm:flex sm:flex-wrap gap-3">
-            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 sm:px-5 py-3 flex flex-col gap-1">
+          <div className="mt-8 flex flex-wrap gap-2 sm:gap-3">
+            <div className="flex-1 min-w-[140px] rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 sm:px-5 py-3 flex flex-col gap-1 hover:border-white/[0.12] hover:bg-white/[0.04] hover:scale-[1.02] transition-all duration-200">
               <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-600">
                 BTC PRICE
               </span>
@@ -136,7 +136,7 @@ export default async function ChartsPage({
               </span>
             </div>
 
-            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 sm:px-5 py-3 flex flex-col gap-1">
+            <div className="flex-1 min-w-[140px] rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 sm:px-5 py-3 flex flex-col gap-1 hover:border-white/[0.12] hover:bg-white/[0.04] hover:scale-[1.02] transition-all duration-200">
               <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-600">
                 24H CHANGE
               </span>
@@ -150,7 +150,7 @@ export default async function ChartsPage({
               </span>
             </div>
 
-            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 sm:px-5 py-3 flex flex-col gap-1">
+            <div className="flex-1 min-w-[140px] rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 sm:px-5 py-3 flex flex-col gap-1 hover:border-white/[0.12] hover:bg-white/[0.04] hover:scale-[1.02] transition-all duration-200">
               <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-600">
                 FEAR & GREED
               </span>
@@ -159,7 +159,7 @@ export default async function ChartsPage({
               </span>
             </div>
 
-            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 sm:px-5 py-3 flex flex-col gap-1">
+            <div className="flex-1 min-w-[140px] rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 sm:px-5 py-3 flex flex-col gap-1 hover:border-white/[0.12] hover:bg-white/[0.04] hover:scale-[1.02] transition-all duration-200">
               <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-600">
                 MARKET TREND
               </span>

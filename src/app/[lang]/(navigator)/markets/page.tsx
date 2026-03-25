@@ -297,10 +297,10 @@ function CryptoTimeframeSection({
 
 function EventCard({ event, formatVolume, formatDate }: { event: any; formatVolume: (v: number | string) => string; formatDate: (d: string) => string }) {
   return (
-    <div className="rounded-xl backdrop-blur-md bg-white/[0.03] border border-white/[0.08] p-5 flex flex-col transition-all duration-300 hover:border-white/[0.18] hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(255,255,255,0.03)]">
+    <div className="rounded-xl backdrop-blur-md bg-white/[0.03] border border-white/[0.06] p-5 flex flex-col transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(255,255,255,0.03)]">
       <div className="flex items-start gap-3.5 mb-4">
         {event.image && (
-          <img src={event.image} alt="" className="w-12 h-12 rounded-lg object-cover flex-shrink-0 border border-white/[0.06]" />
+          <img src={event.image} alt="" loading="lazy" className="w-12 h-12 rounded-lg object-cover flex-shrink-0 border border-white/[0.06]" />
         )}
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-semibold text-zinc-100 leading-snug line-clamp-2">{event.title}</h3>

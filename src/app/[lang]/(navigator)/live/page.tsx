@@ -60,12 +60,12 @@ export default async function LivePage({
   const dict = await getDictionary(lang);
 
   return (
-    <div className="pt-20 pb-16 min-h-screen">
+    <div className="pt-20 pb-16 min-h-screen bg-zinc-950">
       <Container className="flex flex-col gap-16">
         {/* Hero */}
         <section className="py-16">
           <div className="inline-block mb-6">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-border bg-card text-xs font-medium text-muted-foreground uppercase tracking-widest">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/[0.06] bg-white/[0.03] text-xs font-medium text-zinc-400 uppercase tracking-widest">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -73,19 +73,19 @@ export default async function LivePage({
               Live Data
             </span>
           </div>
-          <h1 className="text-6xl md:text-8xl font-serif font-bold text-foreground tracking-tight leading-[0.9]">
+          <h1 className="text-6xl md:text-8xl font-serif font-bold text-zinc-100 tracking-tight leading-[0.9]">
             Live{" "}
             <span className="bg-gradient-to-r from-emerald-400 via-emerald-300 to-teal-400 bg-clip-text text-transparent">
               Intelligence
             </span>
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mt-8 leading-relaxed">
+          <p className="text-xl text-zinc-400 max-w-2xl mt-8 leading-relaxed">
             Your crypto command center — charts, prediction markets, whale
             tracking, and social feeds.
           </p>
         </section>
 
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
         {/* Section Cards */}
         <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -93,18 +93,18 @@ export default async function LivePage({
             <Link
               key={section.path}
               href={`/${lang}/${section.path}`}
-              className="group rounded-xl bg-card border border-border p-8 hover:border-foreground/20 transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/5 flex flex-col"
+              className="group rounded-xl border border-white/[0.06] bg-white/[0.03] p-8 hover:border-white/[0.12] hover:bg-white/[0.05] transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/5 flex flex-col"
             >
-              <div className="text-muted-foreground group-hover:text-emerald-400 transition-colors mb-6">
+              <div className="text-zinc-400 group-hover:text-emerald-400 transition-colors mb-6">
                 {section.icon}
               </div>
-              <h2 className="text-2xl font-serif font-bold text-foreground mb-2">
+              <h2 className="text-2xl font-serif font-bold text-zinc-100 mb-2">
                 {section.title}
               </h2>
-              <p className="text-muted-foreground flex-1">
+              <p className="text-zinc-500 flex-1">
                 {section.description}
               </p>
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground group-hover:text-emerald-400 transition-colors mt-6">
+              <div className="flex items-center gap-1.5 text-sm text-zinc-500 group-hover:text-emerald-400 transition-colors mt-6">
                 <span>Explore</span>
                 <svg
                   className="w-4 h-4 group-hover:translate-x-1 transition-transform"

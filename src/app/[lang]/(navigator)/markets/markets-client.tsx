@@ -64,7 +64,7 @@ function MarketCard({ event }: { event: Event }) {
   return (
     <div
       ref={cardRef}
-      className="market-card rounded-xl backdrop-blur-md bg-white/[0.03] border border-white/[0.08] p-5 flex flex-col transition-colors duration-300 hover:border-white/[0.18] hover:shadow-[0_0_30px_rgba(255,255,255,0.03)]"
+      className="market-card rounded-xl backdrop-blur-md bg-white/[0.03] border border-white/[0.06] p-5 flex flex-col transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] hover:shadow-[0_0_30px_rgba(255,255,255,0.03)]"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -74,6 +74,7 @@ function MarketCard({ event }: { event: Event }) {
           <img
             src={event.image}
             alt=""
+            loading="lazy"
             className="w-12 h-12 rounded-lg object-cover flex-shrink-0 border border-white/[0.06]"
           />
         )}

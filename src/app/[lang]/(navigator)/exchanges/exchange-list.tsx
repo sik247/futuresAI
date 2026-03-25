@@ -30,7 +30,7 @@ const ExchangeList = React.forwardRef<
         {exchanges.map((exchange, idx) => (
           <Card
             key={exchange.id}
-            className="rounded-3xl bg-background border-none"
+            className="rounded-xl border border-white/[0.06] bg-white/[0.03] hover:border-white/[0.12] hover:bg-white/[0.05] transition-all duration-300"
             {...getAnimationProps("up", 500, idx * 100 + 200)}
           >
             <CardHeader className="p-4">

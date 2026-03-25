@@ -140,7 +140,7 @@ export default function CalculatorClient({
   }
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-20 bg-zinc-950">
       {/* Hero */}
       <section className="pt-16 pb-12 text-center px-4">
         <h1 className="text-4xl md:text-6xl font-serif font-bold text-foreground mb-4">
@@ -164,7 +164,7 @@ export default function CalculatorClient({
       <section className="max-w-5xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Inputs */}
-          <div className="lg:col-span-3 bg-card border border-border rounded-lg p-6">
+          <div className="lg:col-span-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-6">
             {/* Exchange Selector */}
             <label className="block text-sm font-medium text-muted-foreground mb-3">
               Select Exchange
@@ -290,7 +290,7 @@ export default function CalculatorClient({
           </div>
 
           {/* Results Panel */}
-          <div className="lg:col-span-2 bg-card border border-border rounded-lg p-6 flex flex-col">
+          <div className="lg:col-span-2 rounded-xl border border-white/[0.06] bg-white/[0.03] p-6 flex flex-col">
             <h3 className="text-lg font-semibold text-foreground mb-1">
               Your Savings
             </h3>
@@ -356,7 +356,7 @@ export default function CalculatorClient({
           See how each exchange stacks up with your trading profile
         </p>
 
-        <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] overflow-hidden">
           {/* Desktop Table */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
@@ -517,7 +517,7 @@ export default function CalculatorClient({
           ].map((item) => (
             <div
               key={item.step}
-              className="bg-card border border-border rounded-lg p-6 group hover:bg-accent transition-colors"
+              className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-6 group hover:border-white/[0.12] hover:bg-white/[0.05] transition-all duration-300"
             >
               <div className="text-xs text-muted-foreground font-mono mb-4">
                 STEP {item.step}
@@ -534,8 +534,8 @@ export default function CalculatorClient({
 
       {/* CTA */}
       <section className="max-w-3xl mx-auto px-4 mt-16 text-center">
-        <div className="bg-secondary border border-border rounded-lg p-10">
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-3">
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-10">
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-zinc-100 mb-3">
             Start Saving Today
           </h2>
           <p className="text-muted-foreground mb-8 max-w-md mx-auto">

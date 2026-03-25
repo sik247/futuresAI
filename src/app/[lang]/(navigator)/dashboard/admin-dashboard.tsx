@@ -189,7 +189,7 @@ export default function AdminDashboard() {
           <button
             onClick={fetchData}
             disabled={loading}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-700 bg-zinc-900 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-white disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-white/[0.06] bg-white/[0.03] text-sm font-medium text-zinc-300 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-white disabled:opacity-50"
           >
             {loading ? (
               <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -209,7 +209,7 @@ export default function AdminDashboard() {
         {loading && !data ? (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 animate-pulse">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 space-y-3">
+              <div key={i} className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-6 space-y-3">
                 <div className="h-3 w-28 rounded bg-zinc-800" />
                 <div className="h-8 w-24 rounded bg-zinc-800" />
                 <div className="h-3 w-20 rounded bg-zinc-800" />
@@ -219,7 +219,7 @@ export default function AdminDashboard() {
         ) : (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {/* Grand Total */}
-          <div className={`rounded-xl border p-6 transition-colors duration-200 hover:border-zinc-700/80 ${needsPayback ? "border-emerald-500/30 bg-emerald-500/5" : "border-zinc-800 bg-zinc-900/50"}`}>
+          <div className={`rounded-xl border p-6 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] ${needsPayback ? "border-emerald-500/30 bg-emerald-500/5" : "border-white/[0.06] bg-white/[0.03]"}`}>
             <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-2">
               Total Payback Owed
             </p>
@@ -237,7 +237,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Health */}
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 transition-colors duration-200 hover:border-zinc-700/80">
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-6 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05]">
             <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-2">
               Exchange Health
             </p>
@@ -249,7 +249,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Last Updated */}
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 transition-colors duration-200 hover:border-zinc-700/80">
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-6 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05]">
             <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-2">
               Last Refreshed
             </p>
@@ -266,22 +266,22 @@ export default function AdminDashboard() {
         )}
 
         {/* Exchange Table */}
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
-          <div className="px-6 py-4 border-b border-zinc-800">
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] overflow-hidden">
+          <div className="px-6 py-4 border-b border-white/[0.06]">
             <h2 className="text-sm font-semibold text-zinc-300">Exchange Breakdown</h2>
           </div>
 
           {loading && !data ? (
             <div className="animate-pulse">
               {/* Skeleton table header */}
-              <div className="border-b border-zinc-800 px-6 py-3 flex gap-6">
+              <div className="border-b border-white/[0.06] px-6 py-3 flex gap-6">
                 {[80, 64, 56, 40, 48, 48].map((w, i) => (
                   <div key={i} className={`h-3 rounded bg-zinc-800`} style={{ width: `${w}px` }} />
                 ))}
               </div>
               {/* Skeleton rows */}
               {[0, 1, 2].map((i) => (
-                <div key={i} className="border-b border-zinc-800/50 px-6 py-4 flex items-center gap-6">
+                <div key={i} className="border-b border-white/[0.04] px-6 py-4 flex items-center gap-6">
                   <div className="h-4 w-20 rounded bg-zinc-800" />
                   <div className="h-4 w-16 rounded bg-zinc-800" />
                   <div className="h-5 w-20 rounded-full bg-zinc-800" />
@@ -295,7 +295,7 @@ export default function AdminDashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-800">
+                  <tr className="border-b border-white/[0.06]">
                     <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Exchange</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Account</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Status</th>
@@ -306,7 +306,7 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody>
                   {data?.exchanges.map((ex) => (
-                    <tr key={ex.exchange} className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors">
+                    <tr key={ex.exchange} className="border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors">
                       <td className="px-6 py-4">
                         <span className="font-semibold text-white">{ex.exchange}</span>
                       </td>
@@ -356,8 +356,8 @@ export default function AdminDashboard() {
         </p>
 
         {/* Payback Requests */}
-        <div className="mt-10 rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
-          <div className="px-6 py-4 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="mt-10 rounded-xl border border-white/[0.06] bg-white/[0.03] overflow-hidden">
+          <div className="px-6 py-4 border-b border-white/[0.06] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <h2 className="text-sm font-semibold text-zinc-300">Payback Requests</h2>
             <div className="flex gap-1">
               {(["ALL", "PENDING", "SUCCESS", "FAILED"] as const).map((f) => (
@@ -384,7 +384,7 @@ export default function AdminDashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-800">
+                  <tr className="border-b border-white/[0.06]">
                     <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">User</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Exchange</th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Amount</th>
@@ -397,7 +397,7 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody>
                   {requests.map((req) => (
-                    <tr key={req.id} className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors">
+                    <tr key={req.id} className="border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors">
                       <td className="px-6 py-4">
                         <div>
                           <p className="font-medium text-white text-sm">{req.user?.name || req.user?.nickname || "Unknown"}</p>
@@ -466,8 +466,8 @@ export default function AdminDashboard() {
           )}
         </div>
         {/* Chart Analysis Charges */}
-        <div className="mt-10 rounded-xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
-          <div className="px-6 py-4 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="mt-10 rounded-xl border border-white/[0.06] bg-white/[0.03] overflow-hidden">
+          <div className="px-6 py-4 border-b border-white/[0.06] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-zinc-300">Chart Analysis Charges</h2>
               <p className="text-xs text-zinc-500 mt-0.5">50 USDT / analysis — approve to charge user account</p>
@@ -497,7 +497,7 @@ export default function AdminDashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-zinc-800">
+                  <tr className="border-b border-white/[0.06]">
                     <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">User</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Trend</th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Confidence</th>
@@ -509,7 +509,7 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody>
                   {filteredChartAnalyses.map((a) => (
-                    <tr key={a.id} className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors">
+                    <tr key={a.id} className="border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors">
                       <td className="px-6 py-4">
                         <div>
                           <p className="font-medium text-white text-sm">{a.user?.name || a.user?.nickname || "Unknown"}</p>

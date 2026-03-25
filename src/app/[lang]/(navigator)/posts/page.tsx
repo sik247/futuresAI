@@ -17,6 +17,7 @@ export default async function PostList({
     getPostCount(category),
   ]);
   return (
+    <div className="bg-zinc-950 min-h-screen">
     <Container className="flex flex-col gap-16 pb-16 max-md:px-4">
       <PostListSection
         posts={posts}
@@ -24,5 +25,6 @@ export default async function PostList({
         category={category}
       />
     </Container>
+    </div>
   );
 }

@@ -51,13 +51,14 @@ npm run lint      # ESLint
 
 ## Deployment
 
-- **Vercel** auto-deploys from `kkyungslim/futuresai_x` on GitHub
+- **Vercel project**: `tetherbases-projects/futuresai_x` (https://vercel.com/tetherbases-projects/futuresai_x)
+- **GitHub repo**: `kkyungslim/futuresai_x` — Vercel auto-deploys on push to `main`
 - Always push to the `vercel` remote for production deployment:
   ```bash
-  git push vercel main      # Deploy to Vercel (kkyungslim/futuresai_x)
+  git push vercel main      # Deploy to Vercel (tetherbases-projects/futuresai_x)
   git push origin main      # Backup to sik247/futuresAI
   ```
-- The `vercel` remote uses SSH key `~/.ssh/id_kkyungslim` via `github-kkyungslim` host alias
+- The `vercel` remote (`git@github-kkyungslim:kkyungslim/futuresai_x.git`) uses SSH key `~/.ssh/id_kkyungslim` via `github-kkyungslim` host alias
 - Environment variables are managed in Vercel dashboard (never commit `.env`)
 
 ## Conventions

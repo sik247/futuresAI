@@ -255,6 +255,8 @@ export function CommunityTabs({
         {/* ── Sticky Tab Bar ──────────────────────────────────────── */}
         <div className="sticky top-[64px] z-30 -mx-6 px-6 py-3 bg-zinc-950/90 backdrop-blur-xl border-b border-white/[0.04]">
           <div className="relative">
+            {/* Left gradient fade indicator */}
+            <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-zinc-950/90 to-transparent z-20 opacity-0 transition-opacity" />
             <div
               ref={tabsRef}
               className="flex gap-1 p-1 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm overflow-x-auto no-scrollbar"
@@ -286,6 +288,8 @@ export function CommunityTabs({
                 </button>
               ))}
             </div>
+            {/* Right gradient fade indicator */}
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-zinc-950/90 to-transparent z-20" />
           </div>
         </div>
 

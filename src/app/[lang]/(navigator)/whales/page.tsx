@@ -301,7 +301,7 @@ export default async function WhalesPage() {
             <p className="text-[10px] font-mono uppercase tracking-[0.35em] text-zinc-600 mb-5">
               On-Chain Intelligence
             </p>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white tracking-tighter leading-[0.9]">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tighter leading-[0.9]">
               Entity
               <br />
               Tracker

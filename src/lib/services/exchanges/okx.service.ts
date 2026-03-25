@@ -6,7 +6,7 @@ class OkxService extends AffiliateService {
   async getAffiliateData(uid: string) {
     const apikey = process.env.OKX_API_KEY!;
     const secretkey = process.env.OKX_API_SECRET!;
-    const passPhrase = "Cryptox01!";
+    const passPhrase = process.env.OKX_PASSPHRASE || "";
 
     const timestamp = new Date().toISOString();
 

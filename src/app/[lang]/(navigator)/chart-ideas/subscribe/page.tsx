@@ -2,8 +2,8 @@ import Container from "@/components/ui/container";
 import SubscriptionPage from "./subscription-page";
 
 export const metadata = {
-  title: "Pro Chart Analysis - Subscribe",
-  description: "Subscribe to Pro for AI-powered chart analysis with live market data, news sentiment, and quantitative insights.",
+  title: "AI Chart Analysis - Free Access",
+  description: "AI-powered chart analysis with live market data, news sentiment, and quantitative insights. Currently free for all users.",
 };
 
 export default function Page({ params }: { params: { lang: string } }) {

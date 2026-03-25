@@ -133,7 +133,7 @@ export default async function NewsList({
             <span className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-blue-400">
               {dict.news_marketIntelligence}
             </span>
-            <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-white tracking-tight">
               {dict.news_title}
             </h1>
           </div>

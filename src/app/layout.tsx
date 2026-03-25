@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Noto_Sans_KR } from "next/font/google";
+import NextTopLoader from "nextjs-toploader";
 import { resolveMetadataBase } from "@/lib/site-metadata";
 import "@/app/globals.css";
 import { Toaster } from "@/components/ui/toaster";
@@ -13,6 +14,13 @@ import { OrganizationJsonLd, WebsiteJsonLd } from "@/components/structured-data"
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
+});
+
+const notoSansKR = Noto_Sans_KR({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-noto-kr",
   display: "swap",
 });
 
@@ -100,8 +108,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className={inter.variable}>
+    <html suppressHydrationWarning className={`${inter.variable} ${notoSansKR.variable}`}>
       <body className={cn(inter.className, "bg-background text-foreground antialiased")}>
+        <NextTopLoader color="#3b82f6" height={2} showSpinner={false} />
         <OrganizationJsonLd />
         <WebsiteJsonLd />
         <Providers>

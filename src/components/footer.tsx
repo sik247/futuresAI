@@ -17,15 +17,11 @@ const PoweredByIconsPathList = [
 ];
 
 const CommunityIconsPathList = [
-  { item: "/icons/footer-icons/instagram.png", alt: "Instagram", href: "#" },
-  { item: "/icons/footer-icons/facebook.png", alt: "Facebook", href: "#" },
   {
     item: "/icons/footer-icons/youtube.png",
     alt: "YouTube",
     href: "https://www.youtube.com/@TetherBase",
   },
-  { item: "/icons/footer-icons/X.png", alt: "X", href: "#" },
-  { item: "/icons/footer-icons/kakaoTalk.png", alt: "KakaoTalk", href: "#" },
 ];
 
 const QUICK_LINKS = [
@@ -68,7 +64,7 @@ const Footer: React.FC<TFooter> = ({ lang = "en", translations }) => {
               AI-powered crypto trading signals, whale tracking, market analytics, and trading rebates.
             </p>
             <div className="text-zinc-600 text-sm space-y-1.5 mt-1">
-              <p className="hover:text-zinc-400 transition-colors duration-300 cursor-default">support@futuresai.com</p>
+              <a href="mailto:support@futuresai.com" className="hover:text-zinc-400 transition-colors duration-300">support@futuresai.com</a>
               <p>Live Chat Support (24/7)</p>
             </div>
           </div>
@@ -170,7 +166,7 @@ const Footer: React.FC<TFooter> = ({ lang = "en", translations }) => {
             {LEGAL_LINKS.map((link) => (
               <Link
                 key={link.href}
-                href={link.href}
+                href={`/${lang}/${link.href}`}
                 className="text-xs text-zinc-600 hover:text-zinc-300 transition-colors duration-300"
               >
                 {link.label}

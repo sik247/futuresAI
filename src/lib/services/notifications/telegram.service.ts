@@ -142,3 +142,18 @@ export function formatChartAnalysisNotification(data: {
     `<b>Charge:</b> ${data.cost.toFixed(0)} USDT (pending approval)\n`
   );
 }
+
+// -- Group chat helpers --
+
+function getGroupChatId(): string {
+  const chatId = process.env.TELEGRAM_GROUP_CHAT_ID;
+  if (!chatId) throw new Error("TELEGRAM_GROUP_CHAT_ID not configured");
+  return chatId;
+}
+
+export async function sendGroupMessage(
+  text: string,
+  parseMode: "HTML" | "Markdown" = "HTML"
+): Promise<boolean> {
+  return sendTelegramMessage(getGroupChatId(), text, parseMode);
+}

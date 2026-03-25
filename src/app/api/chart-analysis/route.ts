@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { runMultiAgentAnalysis } from "@/lib/services/chart-analysis/orchestrator";
-import {
-  checkUsageAllowance,
-  incrementUsage,
-} from "@/lib/services/chart-analysis/subscription.service";
+// Subscription checks disabled — chart analysis is open for now
 import {
   notifyAdmin,
   formatChartAnalysisNotification,
@@ -39,26 +36,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Check subscription & usage
-    const { allowed, subscription, periodEnd } = await checkUsageAllowance(
-      user.id
-    );
-    if (!subscription) {
-      return NextResponse.json(
-        { error: "Active subscription required", code: "NO_SUBSCRIPTION" },
-        { status: 403 }
-      );
-    }
-    if (!allowed) {
-      return NextResponse.json(
-        {
-          error: "Analysis limit reached",
-          code: "LIMIT_REACHED",
-          periodEnd,
-        },
-        { status: 429 }
-      );
-    }
+    // Chart analysis is currently open/free — no subscription required
 
     // Run multi-agent analysis
     const { analysis, priceData, webResults } = await runMultiAgentAnalysis(
@@ -90,8 +68,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Increment usage count
-    await incrementUsage(user.id);
+    // Usage tracking (informational only — no limits enforced)
 
     // Notify admin
     try {

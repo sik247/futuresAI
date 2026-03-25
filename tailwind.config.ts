@@ -19,7 +19,7 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-inter)", "Inter", "system-ui", "-apple-system", "sans-serif"],
+        sans: ["var(--font-inter)", "var(--font-noto-kr)", "Inter", "system-ui", "-apple-system", "sans-serif"],
         pretendard: ["var(--font-pretendard)"],
         serif: ["Georgia", "Times New Roman", "serif"],
       },

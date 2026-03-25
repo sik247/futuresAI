@@ -52,6 +52,3 @@ export default async function LanguageLayout({
   );
 }
 
-export function generateStaticParams() {
-  return [{ lang: 'en' }, { lang: 'ko' }];
-}

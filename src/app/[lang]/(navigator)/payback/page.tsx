@@ -49,7 +49,7 @@ export default async function PaybackPage({
 
           <h1
             data-anim="hero-title"
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.95]"
+            className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[0.95]"
           >
             <span className="block text-white">Your Payback</span>
             <span className="block mt-2 bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-300 bg-clip-text text-transparent">

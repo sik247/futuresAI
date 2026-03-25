@@ -300,7 +300,7 @@ const FeaturedCard = React.forwardRef<
       rel="noopener noreferrer"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className="group grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-xl bg-white/[0.03] backdrop-blur-md border border-white/[0.08] overflow-hidden transition-all duration-300 hover:border-blue-500/30 hover:shadow-[0_0_30px_-5px_rgba(37,99,235,0.15)]"
+      className="group grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] overflow-hidden transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] hover:shadow-[0_0_30px_-5px_rgba(37,99,235,0.15)]"
     >
       {/* Image */}
       <div
@@ -414,7 +414,7 @@ const NewsCard: React.FC<{ news: CryptoNewsItem }> = ({ news }) => {
       rel="noopener noreferrer"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className="news-card group flex flex-col rounded-xl bg-white/[0.03] backdrop-blur-md border border-white/[0.08] overflow-hidden transition-[border-color,box-shadow] duration-300 hover:border-blue-500/25 hover:shadow-[0_0_25px_-5px_rgba(37,99,235,0.12)]"
+      className="news-card group flex flex-col rounded-xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] overflow-hidden transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] hover:shadow-[0_0_25px_-5px_rgba(37,99,235,0.12)]"
     >
       {/* Image */}
       <div
@@ -427,13 +427,14 @@ const NewsCard: React.FC<{ news: CryptoNewsItem }> = ({ news }) => {
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, 50vw"
+          loading="lazy"
           unoptimized
         />
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/70 via-zinc-950/20 to-transparent" />
 
         {/* Source badge overlaid on image */}
         <div className="absolute bottom-3 left-3">
-          <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-950/70 backdrop-blur-sm text-[10px] font-mono font-semibold uppercase tracking-wider text-blue-400 border border-white/[0.08]">
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-500/15 backdrop-blur-sm text-[10px] font-mono font-semibold uppercase tracking-wider text-blue-400 border border-blue-500/20">
             {news.sourceImg && (
               <img src={news.sourceImg} alt="" className="w-3.5 h-3.5 rounded-sm" />
             )}
@@ -465,7 +466,7 @@ const NewsCard: React.FC<{ news: CryptoNewsItem }> = ({ news }) => {
             {news.categories.slice(0, 3).map((cat) => (
               <span
                 key={cat}
-                className="px-2 py-0.5 text-[10px] font-mono font-medium uppercase tracking-wider rounded-full bg-white/[0.05] text-zinc-500 border border-white/[0.06]"
+                className="px-2 py-0.5 text-[10px] font-mono font-medium uppercase tracking-wider rounded-full bg-white/[0.05] text-zinc-400 border border-white/[0.08]"
               >
                 {cat}
               </span>

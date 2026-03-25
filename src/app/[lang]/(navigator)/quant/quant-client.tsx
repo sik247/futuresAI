@@ -395,7 +395,7 @@ export default function QuantClient({
               className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10"
             >
               {/* Fear & Greed */}
-              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.04]">
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.05]">
                 <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-3">
                   {t.quant_fearGreed} Index
                 </p>
@@ -429,7 +429,7 @@ export default function QuantClient({
               </div>
 
               {/* BTC Trend */}
-              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.04]">
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.05]">
                 <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-3">
                   {t.quant_btcTrend} &middot; 7-Day SMA
                 </p>
@@ -455,7 +455,7 @@ export default function QuantClient({
               </div>
 
               {/* Market Summary */}
-              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.04]">
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.05]">
                 <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-3">
                   {t.quant_marketSummary}
                 </p>
@@ -471,7 +471,10 @@ export default function QuantClient({
                 {t.quant_assetSignals}
               </h2>
               <div className="flex items-center gap-3">
-                <span className="text-xs font-mono text-zinc-600">
+                <span className="text-[10px] font-mono text-zinc-600 hidden sm:inline">
+                  Last updated: {new Date(data.updatedAt).toLocaleTimeString()}
+                </span>
+                <span className="text-[10px] font-mono text-zinc-600">
                   {t.quant_autoRefresh} {countdownDisplay}
                 </span>
                 <button
@@ -501,7 +504,7 @@ export default function QuantClient({
                 return (
                   <div
                     key={s.symbol}
-                    className="group rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 flex flex-col gap-5 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.04] hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+                    className="group rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 flex flex-col gap-5 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
                   >
                     {/* Header row */}
                     <div className="flex items-center justify-between">

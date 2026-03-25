@@ -42,10 +42,7 @@ const MENU_ITEMS = [
 ] as const;
 
 const SOCIAL_LINKS = [
-  { icon: "/icons/footer-icons/X.png", alt: "X", href: "#" },
   { icon: "/icons/footer-icons/youtube.png", alt: "YouTube", href: "https://www.youtube.com/@TetherBase" },
-  { icon: "/icons/footer-icons/instagram.png", alt: "Instagram", href: "#" },
-  { icon: "/icons/footer-icons/kakaoTalk.png", alt: "KakaoTalk", href: "#" },
 ];
 
 const HeaderHamburger: React.FC<HeaderHamburgerProps> = ({

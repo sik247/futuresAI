@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Tweet } from "react-tweet";
 import gsap from "gsap";
 import type { XFeedItem } from "@/lib/services/social/x-feed.service";
@@ -28,39 +28,95 @@ const X_CATEGORY_COLORS: Record<string, string> = {
 
 // ── Tweet Components ─────────────────────────────────────────────────
 
+function TweetSkeleton() {
+  return (
+    <div className="min-h-[200px] flex flex-col gap-3 p-4 animate-pulse">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-white/[0.06]" />
+        <div className="flex flex-col gap-1.5">
+          <div className="h-3.5 w-28 rounded bg-white/[0.06]" />
+          <div className="h-3 w-20 rounded bg-white/[0.04]" />
+        </div>
+      </div>
+      <div className="flex flex-col gap-2 mt-2">
+        <div className="h-3.5 w-full rounded bg-white/[0.06]" />
+        <div className="h-3.5 w-full rounded bg-white/[0.06]" />
+        <div className="h-3.5 w-3/4 rounded bg-white/[0.05]" />
+      </div>
+      <div className="h-3 w-24 rounded bg-white/[0.04] mt-2" />
+    </div>
+  );
+}
+
 function TweetFallback({ username, tweetId }: { username: string; tweetId: string }) {
   return (
     <a
       href={`https://x.com/${username}/status/${tweetId}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="block px-4 py-5 text-center"
+      className="block min-h-[200px] rounded-xl bg-zinc-900/80 border border-white/[0.06] p-6 hover:bg-zinc-900 hover:border-white/[0.1] transition-all duration-200"
     >
-      <div className="flex items-center justify-center gap-2 mb-3">
-        <svg className="w-5 h-5 text-zinc-500" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-        </svg>
-        <span className="text-sm font-medium text-zinc-400">@{username}</span>
+      <div className="flex flex-col items-center justify-center gap-4 py-4">
+        {/* X icon */}
+        <div className="w-12 h-12 rounded-full bg-white/[0.06] flex items-center justify-center">
+          <svg className="w-6 h-6 text-zinc-300" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+          </svg>
+        </div>
+
+        {/* Username */}
+        <span className="text-base font-semibold text-zinc-200">@{username}</span>
+
+        {/* Description */}
+        <p className="text-sm text-zinc-500 text-center">
+          This post couldn&apos;t be loaded directly.
+        </p>
+
+        {/* CTA button */}
+        <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/[0.08] border border-white/[0.1] text-sm font-medium text-zinc-200 hover:bg-white/[0.14] transition-colors">
+          View on X
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+          </svg>
+        </span>
       </div>
-      <p className="text-xs text-zinc-500 mb-3">View this post on X</p>
-      <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/[0.06] border border-white/[0.08] text-xs font-medium text-zinc-300 hover:bg-white/[0.1] transition-colors">
-        Open on X
-        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-        </svg>
-      </span>
     </a>
   );
 }
 
+// ── Error Boundary ───────────────────────────────────────────────────
+
+class TweetErrorBoundary extends React.Component<
+  { children: React.ReactNode; fallback: React.ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    return this.state.hasError ? this.props.fallback : this.props.children;
+  }
+}
+
+// ── Safe Tweet Wrapper ───────────────────────────────────────────────
+
 function SafeTweet({ id, username }: { id: string; username: string }) {
+  const fallback = <TweetFallback username={username} tweetId={id} />;
+
   return (
-    <div data-theme="dark" className="[&>div]:!my-0 [&_article]:!border-0 [&_article]:!bg-transparent [&_.react-tweet-theme]:!bg-transparent">
-      <Tweet
-        id={id}
-        fallback={<TweetFallback username={username} tweetId={id} />}
-      />
-    </div>
+    <TweetErrorBoundary fallback={fallback}>
+      <div
+        data-theme="dark"
+        className="[&>div]:!my-0 [&_article]:!border-0 [&_.react-tweet-theme]:!bg-transparent [&_article]:!bg-transparent [&>div]:!bg-transparent"
+      >
+        <Tweet
+          id={id}
+          apiUrl={`/api/tweet/${id}`}
+          fallback={<TweetSkeleton />}
+        />
+      </div>
+    </TweetErrorBoundary>
   );
 }
 
@@ -129,7 +185,7 @@ export default function XFeedTab({ xFeedItems }: XFeedTabProps) {
         {filteredXFeed.map((item) => (
           <div
             key={`${item.tweetId}-${item.username}`}
-            className="community-card group relative rounded-xl border border-white/[0.06] bg-white/[0.03] overflow-hidden hover:border-blue-500/25 transition-all duration-300"
+            className="community-card group relative rounded-xl border border-white/[0.06] bg-white/[0.03] overflow-hidden hover:border-blue-500/25 hover:bg-white/[0.05] hover:shadow-[0_0_20px_-5px_rgba(59,130,246,0.15)] transition-all duration-300"
           >
             {/* Top glow on hover */}
             <div className="absolute top-0 inset-x-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />

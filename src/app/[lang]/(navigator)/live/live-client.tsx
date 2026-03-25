@@ -42,7 +42,7 @@ export function TradingViewChart({
     <div
       ref={containerRef}
       className="tradingview-widget-container rounded-xl overflow-hidden border border-border"
-      style={{ height: "500px", width: "100%" }}
+      style={{ height: "min(700px, 75vh)", width: "100%" }}
     />
   );
 }
@@ -65,7 +65,7 @@ export function TradingViewScreener() {
     script.async = true;
     script.innerHTML = JSON.stringify({
       width: "100%",
-      height: "490",
+      height: "600",
       defaultColumn: "overview",
       screener_type: "crypto_mkt",
       displayCurrency: "USD",
@@ -79,7 +79,7 @@ export function TradingViewScreener() {
     <div
       ref={containerRef}
       className="tradingview-widget-container rounded-xl overflow-hidden border border-border"
-      style={{ height: "490px", width: "100%" }}
+      style={{ height: "600px", width: "100%" }}
     />
   );
 }

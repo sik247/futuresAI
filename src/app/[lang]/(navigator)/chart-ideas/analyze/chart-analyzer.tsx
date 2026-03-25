@@ -7,7 +7,115 @@ import { FileUploadModule } from "@/lib/modules/file-upload";
 import { CloudArrowUpIcon } from "@heroicons/react/24/outline";
 import { toast } from "@/components/ui/use-toast";
 import { Dictionary } from "@/i18n";
+import { ClipboardDocumentIcon, ShareIcon } from "@heroicons/react/24/outline";
 import type { ChartAnalysisResult, ChartLine } from "@/lib/services/chart-analysis/chart-analysis.service";
+
+/* ------------------------------------------------------------------ */
+/*  Post generator + Grok-style AI commentary                          */
+/* ------------------------------------------------------------------ */
+function generateSharePost(pair: string, a: ChartAnalysisResult): string {
+  const trendEmoji =
+    a.trend === "BULLISH" ? "\u{1F7E2}" :
+    a.trend === "BEARISH" ? "\u{1F534}" :
+    a.trend === "CONSOLIDATING" ? "\u{1F7E1}" : "\u26AA";
+  const dir = a.tradeSetup.direction === "LONG" ? "\u{1F4C8}" : a.tradeSetup.direction === "SHORT" ? "\u{1F4C9}" : "\u2194\uFE0F";
+  const pairFmt = pair.replace("USDT", "/USDT");
+
+  const lines = [
+    `${trendEmoji} $${pair.replace("USDT", "")} AI Analysis \u2014 ${a.trend}`,
+    ``,
+    `${dir} Direction: ${a.tradeSetup.direction}`,
+    `\u{1F3AF} Entry: $${a.tradeSetup.entry?.toLocaleString()}`,
+    `\u{1F6D1} Stop Loss: $${a.tradeSetup.stopLoss?.toLocaleString()}`,
+    `\u2705 Take Profit: $${a.tradeSetup.takeProfit?.toLocaleString()}`,
+    `\u{1F4CA} R:R ${a.tradeSetup.riskReward} | Confidence: ${a.confidence}%`,
+    ``,
+    `Key Levels:`,
+    `\u{1F7E2} Support: ${a.supportLevels.slice(0, 2).map(l => `$${l?.toLocaleString()}`).join(" / ")}`,
+    `\u{1F534} Resistance: ${a.resistanceLevels.slice(0, 2).map(l => `$${l?.toLocaleString()}`).join(" / ")}`,
+  ];
+
+  if (a.patterns.length > 0) {
+    lines.push(`\u{1F50D} Patterns: ${a.patterns.slice(0, 3).join(", ")}`);
+  }
+
+  lines.push(``);
+  lines.push(`Analyzed by CryptoX AI \u2014 Free at cryptox.co`);
+  lines.push(`#${pair.replace("USDT", "")} #Crypto #Trading`);
+
+  return lines.join("\n");
+}
+
+function generateAICommentary(pair: string, a: ChartAnalysisResult): {
+  verdict: string;
+  details: string[];
+  sentiment: "bullish" | "bearish" | "neutral";
+  conviction: "high" | "medium" | "low";
+} {
+  const coin = pair.replace("USDT", "");
+  const rr = parseFloat(a.tradeSetup.riskReward?.replace("1:", "") || "0");
+  const buySignals = a.indicators.filter(i => i.signal === "BUY").length;
+  const sellSignals = a.indicators.filter(i => i.signal === "SELL").length;
+
+  // Determine conviction
+  const conviction =
+    a.confidence >= 70 && rr >= 2 ? "high" :
+    a.confidence >= 50 ? "medium" : "low";
+
+  // Determine sentiment
+  const sentiment =
+    a.trend === "BULLISH" || a.trend === "CONSOLIDATING" && buySignals > sellSignals ? "bullish" :
+    a.trend === "BEARISH" ? "bearish" : "neutral";
+
+  // Generate verdict
+  let verdict = "";
+  if (sentiment === "bullish" && conviction === "high") {
+    verdict = `Strong setup on ${coin}. ${buySignals} of ${a.indicators.length} indicators flashing buy with ${a.confidence}% AI confidence. The R:R at ${a.tradeSetup.riskReward} makes this worth watching.`;
+  } else if (sentiment === "bullish") {
+    verdict = `${coin} is showing bullish structure but conviction isn't overwhelming at ${a.confidence}%. ${buySignals} buy signals out of ${a.indicators.length} indicators. Proceed with caution.`;
+  } else if (sentiment === "bearish" && conviction === "high") {
+    verdict = `${coin} looks weak. ${sellSignals} sell signals firing with ${a.confidence}% confidence. If you're long, the $${a.tradeSetup.stopLoss?.toLocaleString()} stop loss level is critical.`;
+  } else if (sentiment === "bearish") {
+    verdict = `Bearish pressure building on ${coin} but it's not decisive yet. ${a.confidence}% confidence with mixed signals across indicators.`;
+  } else {
+    verdict = `${coin} is in no-man's land. ${a.confidence}% confidence with indicators split ${buySignals}/${sellSignals} buy/sell. Wait for a clearer setup or trade the range.`;
+  }
+
+  // Generate detail bullets
+  const details: string[] = [];
+
+  if (a.quantAnalysis?.rsiValue) {
+    const rsi = a.quantAnalysis.rsiValue;
+    if (rsi > 70) details.push(`RSI at ${rsi} \u2014 overbought territory. Pullback risk is elevated.`);
+    else if (rsi < 30) details.push(`RSI at ${rsi} \u2014 oversold. Watch for a bounce off support.`);
+    else if (rsi > 55) details.push(`RSI at ${rsi} \u2014 healthy bullish momentum, room to run.`);
+    else if (rsi < 45) details.push(`RSI at ${rsi} \u2014 momentum favors bears, not oversold yet.`);
+    else details.push(`RSI at ${rsi} \u2014 right in the middle. Waiting for direction.`);
+  }
+
+  if (rr >= 3) details.push(`${a.tradeSetup.riskReward} risk-reward is excellent. High-quality setup if entry hits.`);
+  else if (rr >= 2) details.push(`${a.tradeSetup.riskReward} risk-reward is solid. Favorable for the trade.`);
+  else if (rr > 0) details.push(`${a.tradeSetup.riskReward} risk-reward is tight. Size your position accordingly.`);
+
+  if (a.liveContext?.sentiment === "BULLISH") details.push(`News sentiment is bullish \u2014 market narrative supports the trade.`);
+  else if (a.liveContext?.sentiment === "BEARISH") details.push(`News sentiment is bearish \u2014 headwinds from market narrative.`);
+
+  if (a.liveContext?.orderBookBias === "BUY_PRESSURE") details.push(`Order book shows buy pressure \u2014 bids stacking up.`);
+  else if (a.liveContext?.orderBookBias === "SELL_PRESSURE") details.push(`Order book shows sell pressure \u2014 walls above.`);
+
+  if (a.patterns.length > 0) {
+    details.push(`${a.patterns[0]} pattern detected \u2014 ${
+      a.trend === "BULLISH" ? "historically a continuation signal" :
+      a.trend === "BEARISH" ? "watch for breakdown confirmation" :
+      "could break either way"
+    }.`);
+  }
+
+  if (a.riskScore >= 7) details.push(`Risk score ${a.riskScore}/10 \u2014 high risk. Don't oversize.`);
+  else if (a.riskScore <= 3) details.push(`Risk score ${a.riskScore}/10 \u2014 relatively low risk setup.`);
+
+  return { verdict, details: details.slice(0, 4), sentiment, conviction };
+}
 
 type Props = {
   lang: string;
@@ -36,12 +144,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
   const [dragOver, setDragOver] = useState(false);
   const [pair, setPair] = useState("BTCUSDT");
   const [customPair, setCustomPair] = useState("");
-
-  // Subscription state
-  const [subscribed, setSubscribed] = useState(false);
-  const [allowed, setAllowed] = useState(false);
-  const [periodEnd, setPeriodEnd] = useState<string | null>(null);
-  const [subLoading, setSubLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   // Analysis stage animation
   const [stageIndex, setStageIndex] = useState(0);
@@ -51,19 +154,6 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
   const imgRef = useRef<HTMLImageElement | null>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
-
-  // Fetch subscription status
-  useEffect(() => {
-    fetch("/api/subscription")
-      .then((res) => res.json())
-      .then((data) => {
-        setSubscribed(data.subscribed || false);
-        setAllowed(data.allowed || false);
-        if (data.periodEnd) setPeriodEnd(data.periodEnd);
-      })
-      .catch(() => {})
-      .finally(() => setSubLoading(false));
-  }, []);
 
   // Cycle analysis stages
   useEffect(() => {
@@ -207,16 +297,6 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
       });
       if (!res.ok) {
         const data = await res.json();
-        if (data.code === "NO_SUBSCRIPTION") {
-          toast({ variant: "destructive", title: "Subscription Required", description: "Subscribe to Pro to use AI chart analysis." });
-          return;
-        }
-        if (data.code === "LIMIT_REACHED") {
-          const resetDate = data.periodEnd ? new Date(data.periodEnd).toLocaleDateString() : "";
-          toast({ variant: "destructive", title: "Analysis Limit Reached", description: `Your analysis limit has been reached. Resets ${resetDate}.` });
-          setAllowed(false);
-          return;
-        }
         throw new Error(data.error || "Analysis failed");
       }
       const data = await res.json();
@@ -265,23 +345,10 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
             {translations.chartAnalysis_subtitle || "Drop your chart and get instant quant analysis with live market data"}
           </p>
         </div>
-        {subLoading ? (
-          <div className="px-4 py-2 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
-            <span className="text-zinc-500 text-sm">Loading...</span>
-          </div>
-        ) : subscribed ? (
-          <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-emerald-400 text-sm font-semibold">Pro Active</span>
-          </div>
-        ) : (
-          <a
-            href={`/${lang}/chart-ideas/subscribe`}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 transition-colors"
-          >
-            <span className="text-white text-sm font-semibold">Subscribe to Pro</span>
-          </a>
-        )}
+        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-emerald-400 text-sm font-semibold">Free Access</span>
+        </div>
       </div>
 
       {/* Pair Selector */}
@@ -312,17 +379,6 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
           />
         </div>
       </div>
-
-      {/* Limit reached notice */}
-      {subscribed && !allowed && !subLoading && (
-        <Card className="p-4 bg-amber-500/5 border-amber-500/20">
-          <div className="flex items-center gap-3">
-            <span className="text-amber-400 text-sm font-medium">
-              Analysis limit reached. Resets {periodEnd ? new Date(periodEnd).toLocaleDateString() : "next billing period"}.
-            </span>
-          </div>
-        </Card>
-      )}
 
       {/* Upload Area / Chart Canvas */}
       <Card className="p-0 bg-zinc-950/50 backdrop-blur-sm border-white/10 overflow-hidden">
@@ -362,7 +418,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
                 className="bg-zinc-950/80 border-white/20 text-zinc-300 hover:bg-zinc-900">
                 {translations.chartAnalysis_replace || "Replace"}
               </Button>
-              {!analysis && subscribed && allowed && (
+              {!analysis && (
                 <Button size="sm" onClick={runAnalysis} disabled={analyzing}
                   className="bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/20">
                   {analyzing ? (
@@ -722,6 +778,128 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
               ))}
             </div>
           </Card>
+
+          {/* ============================================================ */}
+          {/*  AI Commentary + Share Post (Grok-style)                      */}
+          {/* ============================================================ */}
+          {(() => {
+            const commentary = generateAICommentary(selectedPair, analysis);
+            const postText = generateSharePost(selectedPair, analysis);
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(postText)}`;
+
+            const sentimentConfig = {
+              bullish: { bg: "from-emerald-500/20 to-emerald-600/5", border: "border-emerald-500/30", dot: "bg-emerald-400", label: "Bullish", labelColor: "text-emerald-400" },
+              bearish: { bg: "from-red-500/20 to-red-600/5", border: "border-red-500/30", dot: "bg-red-400", label: "Bearish", labelColor: "text-red-400" },
+              neutral: { bg: "from-zinc-500/20 to-zinc-600/5", border: "border-zinc-500/30", dot: "bg-zinc-400", label: "Neutral", labelColor: "text-zinc-400" },
+            };
+            const convictionConfig = {
+              high: { color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30", label: "High Conviction" },
+              medium: { color: "text-amber-400 bg-amber-500/10 border-amber-500/30", label: "Medium Conviction" },
+              low: { color: "text-zinc-400 bg-zinc-500/10 border-zinc-500/30", label: "Low Conviction" },
+            };
+            const sc = sentimentConfig[commentary.sentiment];
+            const cc = convictionConfig[commentary.conviction];
+
+            return (
+              <>
+                {/* AI Commentary Card */}
+                <Card className={`lg:col-span-3 p-0 overflow-hidden bg-gradient-to-br ${sc.bg} backdrop-blur-sm ${sc.border}`}>
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-6 pt-5 pb-0">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-foreground">CryptoX AI</h3>
+                        <p className="text-[10px] text-zinc-500 font-mono">Analysis Commentary</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${cc.color}`}>
+                        {cc.label}
+                      </span>
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/[0.08]">
+                        <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
+                        <span className={`text-[10px] font-bold ${sc.labelColor}`}>{sc.label}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Verdict */}
+                  <div className="px-6 py-4">
+                    <p className="text-zinc-200 text-[15px] leading-relaxed font-medium">
+                      {commentary.verdict}
+                    </p>
+                  </div>
+
+                  {/* Detail bullets */}
+                  {commentary.details.length > 0 && (
+                    <div className="px-6 pb-4 space-y-2.5">
+                      {commentary.details.map((detail, i) => (
+                        <div key={i} className="flex items-start gap-2.5">
+                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-400/60 flex-shrink-0" />
+                          <p className="text-zinc-400 text-sm leading-relaxed">{detail}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Divider */}
+                  <div className="h-px bg-white/[0.06] mx-6" />
+
+                  {/* Share actions */}
+                  <div className="px-6 py-4 flex items-center justify-between">
+                    <p className="text-[11px] text-zinc-600 font-mono">
+                      Share this analysis with your community
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(postText);
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 2000);
+                          toast({ title: "Copied!", description: "Post copied to clipboard" });
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/[0.05] border border-white/[0.08] text-zinc-300 hover:bg-white/[0.1] hover:border-white/[0.15] transition-all"
+                      >
+                        <ClipboardDocumentIcon className="w-3.5 h-3.5" />
+                        {copied ? "Copied!" : "Copy Post"}
+                      </button>
+                      <a
+                        href={twitterUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-lg shadow-blue-600/20"
+                      >
+                        <ShareIcon className="w-3.5 h-3.5" />
+                        Share on X
+                      </a>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Post Preview Card */}
+                <Card className="lg:col-span-3 p-0 overflow-hidden bg-zinc-950/80 backdrop-blur-sm border-white/[0.08]">
+                  <div className="flex items-center justify-between px-6 pt-4 pb-2">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-zinc-500" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                      </svg>
+                      <span className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider">Post Preview</span>
+                    </div>
+                  </div>
+                  <div className="px-6 pb-5">
+                    <pre className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap font-sans">
+                      {postText}
+                    </pre>
+                  </div>
+                </Card>
+              </>
+            );
+          })()}
         </div>
       )}
     </div>
