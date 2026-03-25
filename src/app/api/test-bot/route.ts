@@ -14,6 +14,7 @@ import {
   sendTweetAlert,
   sendDailySentiment,
 } from "@/lib/services/notifications/telegram-group.service";
+import { sendQuantReport } from "@/lib/services/notifications/quant-report.service";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -192,7 +193,24 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // ─── Test 6: LIVE SEND — tweet alert ─────────────────────────
+    // ─── Test 6: LIVE SEND — quant report ──────────────────────
+    if (test === "send-quant") {
+      console.log("[test-bot] SENDING QUANT REPORT...");
+      const start = Date.now();
+      try {
+        const success = await sendQuantReport();
+        results.sendQuant = {
+          status: success ? "SENT" : "SEND_FAILED",
+          duration: `${Date.now() - start}ms`,
+          message: success ? "Quant report sent!" : "Failed",
+        };
+      } catch (error) {
+        const errMsg = error instanceof Error ? error.stack || error.message : String(error);
+        results.sendQuant = { status: "FAIL", error: errMsg, duration: `${Date.now() - start}ms` };
+      }
+    }
+
+    // ─── Test 7: LIVE SEND — tweet alert ─────────────────────────
     if (test === "send-tweet") {
       console.log("[test-bot] SENDING TWEET ALERT...");
       const start = Date.now();

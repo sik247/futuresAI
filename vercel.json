@@ -94,6 +94,19 @@
     {
       "path": "/api/cron-tweet-alert",
       "schedule": "30 17 * * *"
+    },
+
+    {
+      "path": "/api/cron-quant-report",
+      "schedule": "0 23 * * *"
+    },
+    {
+      "path": "/api/cron-quant-report",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron-quant-report",
+      "schedule": "0 11 * * *"
     }
   ]
 }
