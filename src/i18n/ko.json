@@ -128,5 +128,6 @@
     "quant_confidence": "신뢰도",
     "quant_assetSignals": "자산 시그널",
     "quant_marketSummary": "시장 요약",
-    "quant_disclaimer": "시그널은 공개된 시장 데이터와 단순 기술 지표를 기반으로 생성됩니다. 투자 조언이 아닙니다. 항상 직접 조사하세요."
+    "quant_disclaimer": "시그널은 공개된 시장 데이터와 단순 기술 지표를 기반으로 생성됩니다. 투자 조언이 아닙니다. 항상 직접 조사하세요.",
+    "portfolio": "포트폴리오"
   }

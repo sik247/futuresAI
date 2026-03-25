@@ -1,6 +1,27 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { fetchCryptoNews } from "@/lib/services/news/crypto-news.service";
 import { translateBatch } from "@/lib/services/social/korean-translator.service";
 import { sendGroupMessage } from "./telegram.service";
+
+/**
+ * Generate a short Korean market briefing from news headlines using Gemini AI.
+ */
+async function generateAIBriefing(headlines: string[]): Promise<string> {
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return "";
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+    const prompt = `You are a Korean crypto market analyst. Based on these headlines, write a 2-3 sentence market briefing in Korean. Be concise, insightful, and mention the most important trend. Headlines:\n${headlines.join("\n")}`;
+
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim();
+  } catch {
+    return "";
+  }
+}
 
 /**
  * Format a Korean news digest from the latest crypto news.
@@ -14,9 +35,18 @@ async function formatNewsDigest(): Promise<string> {
   }
 
   const titles = top8.map((item) => item.title);
-  const translated = await translateBatch(titles);
+  const [translated, aiBriefing] = await Promise.all([
+    translateBatch(titles),
+    generateAIBriefing(titles),
+  ]);
 
-  let msg = "<b>📰 크립토 뉴스 브리핑</b>\n";
+  let msg = "";
+
+  if (aiBriefing) {
+    msg += `<b>🤖 AI 마켓 브리핑</b>\n${aiBriefing}\n\n`;
+  }
+
+  msg += "<b>📰 크립토 뉴스</b>\n";
 
   top8.forEach((item, i) => {
     const koreanTitle = translated[i]?.translated || item.title;

@@ -127,6 +127,7 @@ export type Dictionary = {
   quant_assetSignals: string;
   quant_marketSummary: string;
   quant_disclaimer: string;
+  portfolio: string;
 }
 
 const dictionaries = {

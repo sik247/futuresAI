@@ -128,5 +128,6 @@
     "quant_confidence": "Confidence",
     "quant_assetSignals": "Asset Signals",
     "quant_marketSummary": "Market Summary",
-    "quant_disclaimer": "Signals are generated from publicly available market data and simple technical indicators. This is not financial advice. Always do your own research."
+    "quant_disclaimer": "Signals are generated from publicly available market data and simple technical indicators. This is not financial advice. Always do your own research.",
+    "portfolio": "Portfolio"
   }

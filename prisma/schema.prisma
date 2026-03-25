@@ -36,6 +36,7 @@ model User {
   accounts         Account[]
   subscriptions    Subscription[]
   analysisUsages   AnalysisUsage[]
+  portfolios       Portfolio[]
 }
 
 model Account {
@@ -374,4 +375,44 @@ model AnalysisUsage {
   usageCount  Int      @default(0)
 
   @@unique([userId, periodStart])
+}
+
+model Portfolio {
+  id        String              @id @default(cuid())
+  name      String              @default("My Portfolio")
+  userId    String
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  holdings  Holding[]
+  snapshots PortfolioSnapshot[]
+  createdAt DateTime            @default(now()) @db.Timestamptz()
+  updatedAt DateTime            @updatedAt @db.Timestamptz()
+
+  @@index([userId])
+}
+
+model Holding {
+  id          String    @id @default(cuid())
+  coinId      String
+  symbol      String
+  name        String
+  quantity    Float
+  avgBuyPrice Float
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now()) @db.Timestamptz()
+  updatedAt   DateTime  @updatedAt @db.Timestamptz()
+
+  @@unique([portfolioId, coinId])
+  @@index([portfolioId])
+}
+
+model PortfolioSnapshot {
+  id          String   @id @default(cuid())
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  totalValue  Float
+  totalCost   Float
+  snapshotAt  DateTime @default(now()) @db.Timestamptz()
+
+  @@index([portfolioId, snapshotAt])
 }

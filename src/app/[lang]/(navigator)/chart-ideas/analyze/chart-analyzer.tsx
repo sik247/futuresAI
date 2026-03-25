@@ -189,9 +189,16 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     }
   };
 
-  const handleDragOver = useCallback((e: React.DragEvent) => { e.preventDefault(); setDragOver(true); }, []);
-  const handleDragLeave = useCallback(() => { setDragOver(false); }, []);
-  const handleDrop = useCallback((e: React.DragEvent) => { e.preventDefault(); setDragOver(false); const file = e.dataTransfer.files[0]; if (file) uploadFile(file); }, []);
+  const handleDragOver = useCallback((e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); setDragOver(true); }, []);
+  const handleDragLeave = useCallback((e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); setDragOver(false); }, []);
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file) uploadFile(file);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uploading]);
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (file) uploadFile(file); };
 
   useEffect(() => {
@@ -388,18 +395,44 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`flex flex-col items-center justify-center gap-4 p-20 cursor-pointer transition-all ${
-              dragOver ? "bg-blue-500/10 border-blue-500/40" : "hover:bg-white/[0.02]"
+            className={`relative flex flex-col items-center justify-center gap-5 p-16 md:p-20 cursor-pointer transition-all duration-300 ${
+              dragOver
+                ? "bg-blue-500/10"
+                : "hover:bg-white/[0.02]"
             }`}
           >
+            {/* Dashed border overlay */}
+            <div className={`absolute inset-4 rounded-2xl border-2 border-dashed transition-all duration-300 pointer-events-none ${
+              dragOver
+                ? "border-blue-500/60 shadow-[inset_0_0_40px_rgba(59,130,246,0.08)]"
+                : "border-white/[0.08] group-hover:border-white/[0.15]"
+            }`} />
+
             <input type="file" id="chart-analysis-upload" className="hidden" accept="image/*" onChange={handleFileInput} />
-            <div className="w-20 h-20 rounded-2xl bg-zinc-800/50 border border-white/10 flex items-center justify-center">
-              <CloudArrowUpIcon className="w-10 h-10 text-zinc-500" />
+
+            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center transition-all duration-300 ${
+              dragOver
+                ? "bg-blue-500/15 border border-blue-500/30 scale-110"
+                : "bg-zinc-800/50 border border-white/10"
+            }`}>
+              <CloudArrowUpIcon className={`w-10 h-10 transition-colors duration-300 ${
+                dragOver ? "text-blue-400" : "text-zinc-500"
+              }`} />
             </div>
-            <span className="text-zinc-300 text-lg font-medium">
-              {uploading ? "Uploading..." : translations.chartAnalysis_dropChart || "Drop your chart here or click to upload"}
-            </span>
-            <span className="text-zinc-600 text-sm">PNG, JPG up to 10MB</span>
+
+            <div className="flex flex-col items-center gap-2 relative z-10">
+              <span className={`text-lg font-medium transition-colors duration-300 ${
+                dragOver ? "text-blue-300" : "text-zinc-300"
+              }`}>
+                {uploading ? "Uploading..." : translations.chartAnalysis_dropChart || "Drop your chart here or click to upload"}
+              </span>
+              <span className="text-zinc-600 text-sm">PNG, JPG up to 10MB</span>
+            </div>
+
+            {/* Drag-over pulse ring */}
+            {dragOver && (
+              <div className="absolute inset-0 rounded-xl bg-blue-500/5 animate-pulse pointer-events-none" />
+            )}
           </label>
         ) : (
           <div className="relative">

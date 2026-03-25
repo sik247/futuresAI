@@ -258,6 +258,19 @@
    Custom Keyframe Animations
    ============================================ */
 
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-ticker {
+  animation: ticker 30s linear infinite;
+}
+
+.animate-ticker:hover {
+  animation-play-state: paused;
+}
+
 @keyframes skeleton-pulse {
   0%, 100% {
     opacity: 0.04;

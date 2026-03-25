@@ -1,6 +1,7 @@
 import { getDictionary } from "@/i18n";
 import Headers from "@/components/headers";
 import Footer from "@/components/footer";
+import { PriceTicker } from "@/components/price-ticker";
 import { Metadata } from "next";
 
 export async function generateMetadata({
@@ -45,6 +46,7 @@ export default async function LanguageLayout({
 
   return (
     <>
+      <PriceTicker />
       <Headers lang={lang} translations={dictionary} />
       <main className="min-h-screen">{children}</main>
       <Footer lang={lang} translations={dictionary} />
