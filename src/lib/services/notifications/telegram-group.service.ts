@@ -51,7 +51,7 @@ export async function sendHourlyNewsAlert(): Promise<boolean> {
       msg += `<i>${picked.reason}</i>\n\n`;
     }
 
-    msg += `<i>— AlphAi</i>`;
+    msg += `<i>— FuturesAI</i>`;
 
     return await sendGroupMessage(msg);
   } catch (error) {
@@ -166,7 +166,7 @@ export async function sendTweetAlert(): Promise<boolean> {
     }
 
     msg += `<a href="${tweet.tweetUrl}">원문 보기</a>\n`;
-    msg += `<i>— AlphAi</i>`;
+    msg += `<i>— FuturesAI</i>`;
 
     const sent = await sendGroupMessage(msg);
 
@@ -312,7 +312,7 @@ export async function sendDailySentiment(): Promise<boolean> {
     msg += `<a href="https://www.tradingview.com/chart/?symbol=BINANCE:SOLUSDT&interval=240">SOL/USDT 4시간봉</a>\n\n`;
 
     msg += `무료 AI 차트 분석: cryptox.co\n`;
-    msg += `<i>— AlphAi 데일리 리포트</i>`;
+    msg += `<i>— FuturesAI 데일리 리포트</i>`;
 
     const sent = await sendGroupMessage(msg);
 

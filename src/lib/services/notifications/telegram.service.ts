@@ -105,7 +105,7 @@ export function formatDailySummary(data: {
     msg += `<b>Pending Chart Analyses:</b> ${data.pendingAnalyses} ($${data.pendingAnalysisRevenue.toFixed(2)})\n`;
   }
 
-  msg += `\n<i>— Futures AI Bot</i>`;
+  msg += `\n<i>— FuturesAI</i>`;
   return msg;
 }
 
