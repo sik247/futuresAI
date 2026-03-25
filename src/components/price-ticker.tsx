@@ -36,8 +36,8 @@ export function PriceTicker() {
   const items = [...prices, ...prices];
 
   return (
-    <div className="fixed inset-x-0 top-0 z-[60] w-full bg-zinc-950 border-b border-white/[0.04] overflow-hidden h-[30px]">
-      <div className="flex animate-ticker whitespace-nowrap py-[7px]">
+    <div className="fixed inset-x-0 top-0 z-[60] w-full bg-zinc-950 border-b border-white/[0.04] overflow-hidden h-[28px] hidden sm:block">
+      <div className="flex animate-ticker whitespace-nowrap py-1">
         {items.map((coin, i) => (
           <div
             key={`${coin.id}-${i}`}

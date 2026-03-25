@@ -253,7 +253,7 @@ export function CommunityTabs({
     <section className="py-10">
       <Container className="flex flex-col gap-8">
         {/* ── Sticky Tab Bar ──────────────────────────────────────── */}
-        <div className="sticky top-[64px] z-30 -mx-6 px-6 py-3 bg-zinc-950/90 backdrop-blur-xl border-b border-white/[0.04]">
+        <div className="sticky top-[64px] sm:top-[92px] z-30 -mx-6 px-6 py-3 bg-zinc-950/90 backdrop-blur-xl border-b border-white/[0.04]">
           <div className="relative">
             {/* Left gradient fade indicator */}
             <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-zinc-950/90 to-transparent z-20 opacity-0 transition-opacity" />

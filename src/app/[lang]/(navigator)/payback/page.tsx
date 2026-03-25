@@ -38,7 +38,7 @@ export default async function PaybackPage({
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-blue-600/8 blur-[120px]" />
         </div>
 
-        <Container className="relative z-10 py-28 md:py-36">
+        <Container className="relative z-10 pt-24 sm:pt-28 pb-28 md:pb-36">
           <div
             data-anim="hero-badge"
             className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 rounded-full border border-blue-500/20 bg-blue-500/10 text-blue-300 text-xs font-medium tracking-wider uppercase"

@@ -10,7 +10,7 @@ type TContainer = {
 const Container: React.FC<TContainer> = ({ children, className }) => {
   return (
     <div className="flex justify-center w-full px-6">
-      <div className={cn("max-w-6xl w-full inner-wrap", className)}>
+      <div className={cn("max-w-7xl w-full inner-wrap", className)}>
         {children}
       </div>
     </div>

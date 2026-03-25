@@ -273,7 +273,7 @@ export default function QuantClient({
       {/* ============================================================ */}
       {/*  HERO                                                        */}
       {/* ============================================================ */}
-      <section ref={heroRef} className="relative pt-28 pb-16 overflow-hidden">
+      <section ref={heroRef} className="relative pt-16 pb-20 overflow-hidden">
         {/* Background gradient orbs */}
         <div className="absolute inset-0 bg-gradient-to-b from-blue-950/20 via-zinc-950 to-zinc-950" />
         <div className="absolute top-[-80px] left-1/4 w-[500px] h-[500px] bg-blue-600/[0.07] rounded-full blur-[120px] animate-pulse" />
@@ -352,7 +352,7 @@ export default function QuantClient({
       {/* ============================================================ */}
       {/*  TAB BAR                                                     */}
       {/* ============================================================ */}
-      <div className="sticky top-[64px] z-30 bg-zinc-950/90 backdrop-blur-xl border-b border-white/[0.04]">
+      <div className="sticky top-[64px] sm:top-[92px] z-30 bg-zinc-950/90 backdrop-blur-xl border-b border-white/[0.04]">
         <div className="max-w-7xl mx-auto px-6 py-3">
           <div className="relative">
             <div
@@ -386,7 +386,7 @@ export default function QuantClient({
       {/* ============================================================ */}
       {/*  TAB CONTENT                                                 */}
       {/* ============================================================ */}
-      <div className="max-w-7xl mx-auto px-6 py-10">
+      <div className="max-w-7xl mx-auto px-6 pt-10 pb-24 sm:pb-32">
         {activeTab === "signals" && (
           <div>
             {/* -- Market Overview ---------------------------------------- */}

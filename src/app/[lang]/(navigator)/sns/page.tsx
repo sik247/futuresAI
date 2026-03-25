@@ -136,9 +136,9 @@ export default async function SnsPage({ params: { lang } }: { params: { lang: st
   }));
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-zinc-950 pt-24 sm:pt-28 pb-24 sm:pb-32">
       {/* ── Hero Section ─────────────────────────────────────────── */}
-      <section className="relative pt-28 pb-16 overflow-hidden">
+      <section className="relative pt-16 pb-20 overflow-hidden">
         {/* Background gradient orbs */}
         <div className="absolute inset-0 bg-gradient-to-b from-blue-950/20 via-zinc-950 to-zinc-950" />
         <div className="absolute top-[-80px] left-1/4 w-[500px] h-[500px] bg-blue-600/[0.07] rounded-full blur-[120px] animate-pulse" />

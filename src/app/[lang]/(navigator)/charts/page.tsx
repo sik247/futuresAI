@@ -105,10 +105,10 @@ export default async function ChartsPage({
   const btcChange = btcData?.usd_24h_change ?? 0;
 
   return (
-    <div className="min-h-screen bg-zinc-950 pt-20 pb-20">
+    <div className="min-h-screen bg-zinc-950 pt-24 sm:pt-28 pb-24 sm:pb-32">
       <Container className="flex flex-col gap-0">
         {/* ──────── Hero ──────── */}
-        <section className="pt-12 pb-14">
+        <section className="pt-16 pb-20">
           <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-zinc-500 mb-5">
             QUANTITATIVE ANALYSIS
           </p>
@@ -178,7 +178,7 @@ export default async function ChartsPage({
         <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
         {/* ──────── Section 1: Multi-Chart Terminal ──────── */}
-        <section className="py-14">
+        <section className="py-16 sm:py-20">
           <div className="mb-8">
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-600 mb-2">
               01
@@ -196,7 +196,7 @@ export default async function ChartsPage({
         <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
         {/* ──────── Section 2: Fear & Greed Index ──────── */}
-        <section className="py-14">
+        <section className="py-16 sm:py-20">
           <div className="mb-8">
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-600 mb-2">
               02
@@ -215,7 +215,7 @@ export default async function ChartsPage({
         <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
         {/* ──────── Section 3: Market Correlations ──────── */}
-        <section className="py-14">
+        <section className="py-16 sm:py-20">
           <div className="mb-8">
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-600 mb-2">
               03
@@ -233,7 +233,7 @@ export default async function ChartsPage({
         <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
         {/* ──────── Section 4: Market Screener ──────── */}
-        <section className="py-14">
+        <section className="py-16 sm:py-20">
           <div className="mb-8">
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-600 mb-2">
               04
@@ -260,7 +260,7 @@ export default async function ChartsPage({
         <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
         {/* ──────── Section 5: Key Metrics Dashboard ──────── */}
-        <section className="py-14">
+        <section className="py-16 sm:py-20">
           <div className="mb-8">
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-600 mb-2">
               05

@@ -302,7 +302,7 @@ export default function SignalsClient({
       {/* ============================================================ */}
       {/*  HERO                                                        */}
       {/* ============================================================ */}
-      <section ref={heroRef} className="pt-24 pb-12 px-6 max-w-7xl mx-auto">
+      <section ref={heroRef} className="pt-16 pb-20 px-6 max-w-7xl mx-auto">
         <p className="font-mono text-xs tracking-[0.3em] text-zinc-500 uppercase mb-3 flex items-center gap-2">
           <span className="relative flex h-2 w-2">
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -406,7 +406,7 @@ export default function SignalsClient({
       {/* ============================================================ */}
       {/*  SIGNAL CARDS GRID                                           */}
       {/* ============================================================ */}
-      <section className="px-6 max-w-7xl mx-auto mb-20">
+      <section className="px-6 max-w-7xl mx-auto mb-16 sm:mb-20">
         <div
           ref={cardsRef}
           className="grid grid-cols-1 md:grid-cols-2 gap-6"
@@ -618,7 +618,7 @@ export default function SignalsClient({
       {/* ============================================================ */}
       {/*  DISCLAIMER                                                  */}
       {/* ============================================================ */}
-      <section className="px-6 max-w-7xl mx-auto pb-20">
+      <section className="px-6 max-w-7xl mx-auto pb-24 sm:pb-32">
         <div className="rounded-2xl border border-white/[0.04] bg-white/[0.015] p-6 text-center">
           <p className="text-[11px] text-zinc-600 leading-relaxed max-w-2xl mx-auto font-mono">
             Signals are generated from publicly available market data and

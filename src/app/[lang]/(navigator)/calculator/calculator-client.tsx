@@ -142,7 +142,7 @@ export default function CalculatorClient({
   return (
     <div className="min-h-screen pb-20 bg-zinc-950">
       {/* Hero */}
-      <section className="pt-16 pb-12 text-center px-4">
+      <section className="pt-24 sm:pt-28 pb-12 text-center px-4">
         <h1 className="text-4xl md:text-6xl font-serif font-bold text-foreground mb-4">
           Stop Losing Money
           <br />

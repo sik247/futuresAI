@@ -133,7 +133,7 @@ export default async function MarketsPage({
   return (
     <div className="min-h-screen bg-zinc-950">
       {/* Hero Section */}
-      <section className="relative pt-24 pb-14 overflow-hidden">
+      <section className="relative pt-16 pb-20 overflow-hidden">
         {/* Decorative geometric elements */}
         <div className="absolute top-16 right-[10%] w-64 h-64 border border-white/[0.03] rotate-45 rounded-3xl" />
         <div className="absolute top-32 right-[15%] w-40 h-40 border border-white/[0.04] rotate-12 rounded-2xl" />
@@ -237,7 +237,7 @@ export default async function MarketsPage({
       </Container>
 
       {/* All Crypto (Sortable) */}
-      <section className="py-16">
+      <section className="py-16 sm:py-20">
         <Container>
           <div className="flex items-center gap-3 mb-8">
             <div className="w-1.5 h-6 rounded-full bg-emerald-500/70" />
@@ -270,7 +270,7 @@ export default async function MarketsPage({
       </Container>
 
       {/* Politics Markets */}
-      <section className="py-16">
+      <section className="py-16 sm:py-20">
         <Container>
           <div className="flex items-center gap-3 mb-8">
             <div className="w-1.5 h-6 rounded-full bg-violet-500/70" />
@@ -298,7 +298,7 @@ export default async function MarketsPage({
       </section>
 
       {/* Attribution */}
-      <section className="pb-16">
+      <section className="pb-24 sm:pb-32">
         <Container>
           <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent mb-6" />
           <p className="text-center text-[11px] font-mono text-zinc-700">
@@ -320,7 +320,7 @@ function CryptoTimeframeSection({
 }) {
   if (events.length === 0) return null;
   return (
-    <section className="pb-12">
+    <section className="pb-16 sm:pb-20">
       <Container>
         <div className="flex items-center gap-3 mb-6">
           <div className={`w-1.5 h-6 rounded-full ${color}`} />

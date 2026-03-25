@@ -285,7 +285,7 @@ export default async function WhalesPage() {
       <WhalesAnimations />
 
       {/* ---- Hero ---- */}
-      <section className="relative pt-28 pb-16 overflow-hidden">
+      <section className="relative pt-16 pb-20 overflow-hidden">
         {/* Background geometry */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute top-20 left-[10%] w-72 h-72 rounded-full bg-blue-500/[0.03] blur-3xl" />
@@ -382,7 +382,7 @@ export default async function WhalesPage() {
       <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
       {/* ---- Entity Cards ---- */}
-      <section className="py-16">
+      <section className="py-16 sm:py-20">
         <Container>
           <div data-whale-heading className="mb-10">
             <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-zinc-600 mb-3">
@@ -535,7 +535,7 @@ export default async function WhalesPage() {
       <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
       {/* ---- Activity Feed ---- */}
-      <section className="py-16">
+      <section className="py-16 sm:py-20">
         <Container>
           <div data-whale-heading className="mb-8">
             <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-zinc-600 mb-3">
@@ -557,7 +557,7 @@ export default async function WhalesPage() {
       <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
       {/* ---- Institutional Funds ---- */}
-      <section className="py-16">
+      <section className="py-16 sm:py-20">
         <Container>
           <div data-whale-heading className="mb-10">
             <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-zinc-600 mb-3">
@@ -667,7 +667,7 @@ export default async function WhalesPage() {
       </section>
 
       {/* ---- Footer spacer ---- */}
-      <div className="pb-12" />
+      <div className="pb-24 sm:pb-32" />
     </div>
   );
 }

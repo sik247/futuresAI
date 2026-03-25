@@ -12,7 +12,7 @@ const ExchangesPage: React.FC<TExchangesPage> = async ({}) => {
   const exchanges = await getExchanges();
   return (
     <div className="bg-zinc-950 min-h-screen">
-      <Container className="py-16 max-md:py-10 grid grid-cols-1 gap-16">
+      <Container className="pt-24 sm:pt-28 pb-16 max-md:pb-10 grid grid-cols-1 gap-16">
         <ExchangeListSection type="recommended" exchanges={exchanges} />
       </Container>
     </div>

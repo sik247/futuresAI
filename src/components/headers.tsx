@@ -70,7 +70,7 @@ const Headers: React.FC<THeaders> = ({ lang, translations }) => {
 
   return (
     <header
-      className={`fixed inset-x-0 top-[30px] z-50 h-16 transition-all duration-500 ease-out ${
+      className={`fixed inset-x-0 top-0 sm:top-[28px] z-50 h-16 transition-all duration-500 ease-out ${
         scrolled
           ? "bg-zinc-950/80 backdrop-blur-2xl border-b border-white/[0.06] shadow-[0_1px_3px_rgba(0,0,0,0.4),0_4px_24px_rgba(0,0,0,0.2)]"
           : "bg-transparent border-b border-transparent"

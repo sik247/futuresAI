@@ -97,7 +97,7 @@ export default async function NewsList({
   const marqueeItems = [...trending, ...trending];
 
   return (
-    <div className="pt-20 pb-16 min-h-screen bg-zinc-950">
+    <div className="pt-24 sm:pt-28 pb-24 sm:pb-32 min-h-screen bg-zinc-950">
       {/* Scrolling ticker bar */}
       <div className="relative border-b border-white/[0.06] bg-white/[0.02] backdrop-blur-xl overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-transparent to-zinc-950 z-10 pointer-events-none" />
@@ -128,7 +128,7 @@ export default async function NewsList({
 
       {/* Hero section */}
       <Container className="flex flex-col gap-10">
-        <section className="pt-10 pb-4 flex flex-col gap-6">
+        <section className="pt-16 pb-20 flex flex-col gap-6">
           <div className="flex flex-col gap-3">
             <span className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-blue-400">
               {dict.news_marketIntelligence}

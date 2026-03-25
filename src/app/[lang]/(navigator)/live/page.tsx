@@ -60,10 +60,10 @@ export default async function LivePage({
   const dict = await getDictionary(lang);
 
   return (
-    <div className="pt-20 pb-16 min-h-screen bg-zinc-950">
+    <div className="pt-24 sm:pt-28 pb-24 sm:pb-32 min-h-screen bg-zinc-950">
       <Container className="flex flex-col gap-16">
         {/* Hero */}
-        <section className="py-16">
+        <section className="pt-16 pb-20">
           <div className="inline-block mb-6">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/[0.06] bg-white/[0.03] text-xs font-medium text-zinc-400 uppercase tracking-widest">
               <span className="relative flex h-2 w-2">
