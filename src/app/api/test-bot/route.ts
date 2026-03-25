@@ -8,7 +8,12 @@ import {
   getAnalyzedTweets,
   formatTweetAnalysisSection,
 } from "@/lib/services/notifications/tweet-analysis.service";
-import { sendGroupDigest } from "@/lib/services/notifications/telegram-group.service";
+import {
+  sendGroupDigest,
+  sendHourlyNewsAlert,
+  sendTweetAlert,
+  sendDailySentiment,
+} from "@/lib/services/notifications/telegram-group.service";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -171,18 +176,63 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // ─── Test 5: LIVE SEND to Telegram ────────────────────────────
+    // ─── Test 5: LIVE SEND — news alert ─────────────────────────
+    if (test === "send-news") {
+      console.log("[test-bot] SENDING NEWS ALERT...");
+      const start = Date.now();
+      try {
+        const success = await sendHourlyNewsAlert();
+        results.sendNews = {
+          status: success ? "SENT" : "SKIP",
+          duration: `${Date.now() - start}ms`,
+          message: success ? "News alert sent!" : "No significant news found",
+        };
+      } catch (error) {
+        results.sendNews = { status: "FAIL", error: String(error), duration: `${Date.now() - start}ms` };
+      }
+    }
+
+    // ─── Test 6: LIVE SEND — tweet alert ─────────────────────────
+    if (test === "send-tweet") {
+      console.log("[test-bot] SENDING TWEET ALERT...");
+      const start = Date.now();
+      try {
+        const success = await sendTweetAlert();
+        results.sendTweet = {
+          status: success ? "SENT" : "SKIP",
+          duration: `${Date.now() - start}ms`,
+          message: success ? "Tweet alert sent!" : "No significant tweets right now",
+        };
+      } catch (error) {
+        results.sendTweet = { status: "FAIL", error: String(error), duration: `${Date.now() - start}ms` };
+      }
+    }
+
+    // ─── Test 7: LIVE SEND — daily sentiment ─────────────────────
+    if (test === "send-sentiment") {
+      console.log("[test-bot] SENDING DAILY SENTIMENT...");
+      const start = Date.now();
+      try {
+        const success = await sendDailySentiment();
+        results.sendSentiment = {
+          status: success ? "SENT" : "SEND_FAILED",
+          duration: `${Date.now() - start}ms`,
+          message: success ? "Daily sentiment sent!" : "Failed to send",
+        };
+      } catch (error) {
+        results.sendSentiment = { status: "FAIL", error: String(error), duration: `${Date.now() - start}ms` };
+      }
+    }
+
+    // ─── Test 8: LIVE SEND ALL (legacy) ──────────────────────────
     if (test === "send") {
-      console.log("[test-bot] SENDING LIVE DIGEST TO TELEGRAM GROUP...");
+      console.log("[test-bot] SENDING ALL (legacy)...");
       const start = Date.now();
       try {
         const success = await sendGroupDigest();
         results.send = {
           status: success ? "SENT" : "SEND_FAILED",
           duration: `${Date.now() - start}ms`,
-          message: success
-            ? "Digest successfully sent to Telegram group!"
-            : "sendGroupDigest returned false — check bot token and group chat ID",
         };
       } catch (error) {
         results.send = { status: "FAIL", error: String(error), duration: `${Date.now() - start}ms` };
