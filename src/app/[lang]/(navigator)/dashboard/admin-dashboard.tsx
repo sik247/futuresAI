@@ -297,24 +297,31 @@ export default function AdminDashboard() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-white/[0.06]">
-                      {["Exchange", "Account", "Status", "Entries", "Payback"].map((h) => (
-                        <th key={h} className="px-6 py-3 text-left text-[10px] font-mono text-zinc-500 uppercase tracking-wider">{h}</th>
+                      {["Exchange", "Account", "Status", "Entries", "Payback", "Details"].map((h) => (
+                        <th key={h} className="px-5 py-3 text-left text-[10px] font-mono text-zinc-500 uppercase tracking-wider">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {data?.exchanges.map((ex) => (
                       <tr key={ex.exchange} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
-                        <td className="px-6 py-4 font-semibold text-white">{ex.exchange}</td>
-                        <td className="px-6 py-4">
+                        <td className="px-5 py-4 font-semibold text-white">{ex.exchange}</td>
+                        <td className="px-5 py-4">
                           <span className="font-mono text-xs text-zinc-400 bg-zinc-800/50 px-2 py-0.5 rounded">{ex.account}</span>
                         </td>
-                        <td className="px-6 py-4"><StatusBadge status={ex.status} /></td>
-                        <td className="px-6 py-4 font-mono text-zinc-400">{ex.entries}</td>
-                        <td className="px-6 py-4">
+                        <td className="px-5 py-4"><StatusBadge status={ex.status} /></td>
+                        <td className="px-5 py-4 font-mono text-zinc-400">{ex.entries}</td>
+                        <td className="px-5 py-4">
                           <span className={`font-mono font-semibold ${ex.totalPayback > 0 ? "text-emerald-400" : "text-zinc-600"}`}>
                             ${ex.totalPayback.toFixed(2)}
                           </span>
+                        </td>
+                        <td className="px-5 py-4">
+                          {ex.error ? (
+                            <span className="text-xs text-red-400/80 max-w-[250px] block truncate" title={ex.error}>{ex.error}</span>
+                          ) : (
+                            <span className="text-xs text-zinc-600">—</span>
+                          )}
                         </td>
                       </tr>
                     ))}

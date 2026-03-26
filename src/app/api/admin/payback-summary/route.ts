@@ -39,34 +39,21 @@ async function fetchBitget(): Promise<ExchangeResult> {
 
 async function fetchBybit(): Promise<ExchangeResult> {
   try {
+    if (!process.env.BYBIT_API_KEY || !process.env.BYBIT_API_SECRET) {
+      return { exchange: "Bybit", account: "BBLL", status: "error", totalPayback: 0, entries: 0, error: "BYBIT_API_KEY or BYBIT_API_SECRET not set in env vars" };
+    }
     const response = await byBitService.getAffiliateData("2391021");
     if (response.retCode === 10005) {
-      return {
-        exchange: "Bybit",
-        account: "BBLL",
-        status: "no_permission",
-        totalPayback: 0,
-        entries: 0,
-        error: "API key needs Affiliate permission enabled",
-      };
+      return { exchange: "Bybit", account: "BBLL", status: "no_permission", totalPayback: 0, entries: 0, error: "API key needs Affiliate permission enabled in Bybit dashboard" };
     }
-    return {
-      exchange: "Bybit",
-      account: "BBLL",
-      status: "ok",
-      totalPayback: 0,
-      entries: 0,
-      rawData: response,
-    };
+    if (response.retCode !== 0) {
+      return { exchange: "Bybit", account: "BBLL", status: "error", totalPayback: 0, entries: 0, error: `API error: ${response.retMsg || response.retCode}` };
+    }
+    const result = response.result as any;
+    const totalCommission = parseFloat(result?.totalCommission || result?.commission || "0");
+    return { exchange: "Bybit", account: "BBLL", status: "ok", totalPayback: totalCommission, entries: 1, rawData: result };
   } catch (error: any) {
-    return {
-      exchange: "Bybit",
-      account: "BBLL",
-      status: "error",
-      totalPayback: 0,
-      entries: 0,
-      error: error.message,
-    };
+    return { exchange: "Bybit", account: "BBLL", status: "error", totalPayback: 0, entries: 0, error: error.message };
   }
 }
 
@@ -107,6 +94,12 @@ async function fetchBingX(): Promise<ExchangeResult> {
 
 async function fetchOkx(): Promise<ExchangeResult> {
   try {
+    if (!process.env.OKX_API_KEY || !process.env.OKX_API_SECRET) {
+      return { exchange: "OKX", account: "COINBASE", status: "error", totalPayback: 0, entries: 0, error: "OKX_API_KEY or OKX_API_SECRET not set in env vars" };
+    }
+    if (!process.env.OKX_PASSPHRASE) {
+      return { exchange: "OKX", account: "COINBASE", status: "error", totalPayback: 0, entries: 0, error: "OKX_PASSPHRASE not set in env vars" };
+    }
     const data = await okxService.getAffiliateData("594436422380389965");
     return {
       exchange: "OKX",
@@ -114,17 +107,10 @@ async function fetchOkx(): Promise<ExchangeResult> {
       status: data.ok ? "ok" : "error",
       totalPayback: data.payback || 0,
       entries: data.ok ? 1 : 0,
-      error: data.ok ? undefined : "API returned error",
+      error: data.ok ? undefined : "OKX API returned error — check API key permissions",
     };
   } catch (error: any) {
-    return {
-      exchange: "OKX",
-      account: "COINBASE",
-      status: "error",
-      totalPayback: 0,
-      entries: 0,
-      error: error.message,
-    };
+    return { exchange: "OKX", account: "COINBASE", status: "error", totalPayback: 0, entries: 0, error: error.message };
   }
 }
 
