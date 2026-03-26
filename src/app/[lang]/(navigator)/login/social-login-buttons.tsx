@@ -12,7 +12,8 @@ export function SocialLoginButtons() {
 
   useEffect(() => {
     // Load Telegram Login Widget script
-    const botName = "FuturesAIAdminbot"; // Your bot username without @
+    // Domain must be set in BotFather: /setdomain → @FuturesAIAdminbot → futuresai.io
+    const botName = "FuturesAIAdminbot";
     const script = document.createElement("script");
     script.src = "https://telegram.org/js/telegram-widget.js?22";
     script.setAttribute("data-telegram-login", botName);
