@@ -42,7 +42,7 @@ export function TradingViewChart({
     <div
       ref={containerRef}
       className="tradingview-widget-container rounded-xl overflow-hidden border border-border"
-      style={{ height: "min(700px, 75vh)", width: "100%" }}
+      style={{ height: "min(900px, 85vh)", width: "100%" }}
     />
   );
 }

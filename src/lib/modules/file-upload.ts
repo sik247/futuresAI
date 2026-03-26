@@ -17,7 +17,8 @@ export class FileUploadModule {
       });
 
     if (error) {
-      throw error;
+      console.error("Supabase upload error:", error.message, error);
+      throw new Error(error.message);
     }
 
     return data;
