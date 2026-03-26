@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Tweet } from "react-tweet";
 import gsap from "gsap";
 import type { XFeedItem } from "@/lib/services/social/x-feed.service";
@@ -106,16 +106,15 @@ function SafeTweet({ id, username }: { id: string; username: string }) {
 
   return (
     <TweetErrorBoundary fallback={fallback}>
-      <div
-        data-theme="dark"
-        className="[&>div]:!my-0 [&_article]:!border-0 [&_.react-tweet-theme]:!bg-transparent [&_article]:!bg-transparent [&>div]:!bg-transparent"
-      >
-        <Tweet
-          id={id}
-          apiUrl={`/api/tweet/${id}`}
-          fallback={<TweetSkeleton />}
-        />
-      </div>
+      <Suspense fallback={<TweetSkeleton />}>
+        <div data-theme="dark" className="[&>div]:!my-0">
+          <Tweet
+            id={id}
+            apiUrl={`/api/tweet/${id}`}
+            fallback={<TweetSkeleton />}
+          />
+        </div>
+      </Suspense>
     </TweetErrorBoundary>
   );
 }
