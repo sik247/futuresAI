@@ -1,9 +1,6 @@
 import type { NextAuthOptions } from "next-auth";
 import { getServerSession } from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
-import GoogleProvider from "next-auth/providers/google";
-import GitHubProvider from "next-auth/providers/github";
-import KakaoProvider from "next-auth/providers/kakao";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import { signInSchema } from "./lib/zod";
@@ -13,18 +10,66 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
   session: { strategy: "jwt" },
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    // Telegram login via credentials (bot token verification)
+    CredentialsProvider({
+      id: "telegram",
+      name: "Telegram",
+      credentials: {
+        id: { label: "Telegram ID", type: "text" },
+        first_name: { label: "First Name", type: "text" },
+        username: { label: "Username", type: "text" },
+        hash: { label: "Hash", type: "text" },
+        auth_date: { label: "Auth Date", type: "text" },
+      },
+      authorize: async (credentials) => {
+        if (!credentials?.id || !credentials?.hash) return null;
+
+        // Verify Telegram auth data
+        const crypto = require("crypto");
+        const botToken = process.env.TELEGRAM_BOT_TOKEN;
+        if (!botToken) return null;
+
+        const secretKey = crypto.createHash("sha256").update(botToken).digest();
+        const checkData = Object.entries(credentials)
+          .filter(([k]) => k !== "hash" && k !== "callbackUrl" && k !== "csrfToken" && k !== "redirect" && k !== "json")
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([k, v]) => `${k}=${v}`)
+          .join("\n");
+
+        const hmac = crypto.createHmac("sha256", secretKey).update(checkData).digest("hex");
+
+        if (hmac !== credentials.hash) {
+          // In dev, allow without hash verification
+          if (process.env.NODE_ENV === "production") return null;
+        }
+
+        // Check auth_date is not too old (1 day)
+        const authDate = parseInt(credentials.auth_date || "0");
+        if (Date.now() / 1000 - authDate > 86400) {
+          if (process.env.NODE_ENV === "production") return null;
+        }
+
+        const telegramId = credentials.id;
+        const name = credentials.first_name || credentials.username || `User ${telegramId}`;
+        const email = `tg_${telegramId}@telegram.user`;
+
+        // Find or create user
+        let user = await prisma.user.findUnique({ where: { email } });
+        if (!user) {
+          user = await prisma.user.create({
+            data: {
+              email,
+              name,
+              nickname: credentials.username || "",
+              role: "USER",
+            },
+          });
+        }
+
+        return { id: user.id, email: user.email, name: user.name, role: user.role };
+      },
     }),
-    GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-    }),
-    KakaoProvider({
-      clientId: process.env.KAKAO_CLIENT_ID!,
-      clientSecret: process.env.KAKAO_CLIENT_SECRET!,
-    }),
+    // Email/password login
     CredentialsProvider({
       credentials: {
         email: { label: "Email", type: "email" },

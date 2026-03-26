@@ -43,10 +43,10 @@ type Props = {
 };
 
 const QUICK_LINKS = [
-  { path: "portfolio", icon: WalletIcon, label: "Portfolio", desc: "Track holdings & P&L" },
-  { path: "quant", icon: BeakerIcon, label: "AI Quant", desc: "Signals & chart analysis" },
-  { path: "charts", icon: PresentationChartLineIcon, label: "Charts", desc: "Live market charts" },
-  { path: "news", icon: NewspaperIcon, label: "News", desc: "Market intelligence" },
+  { path: "portfolio", icon: WalletIcon, label: "Portfolio", labelKo: "포트폴리오", desc: "Track holdings & P&L", descKo: "보유 자산 & 손익 추적" },
+  { path: "quant", icon: BeakerIcon, label: "AI Quant", labelKo: "AI 퀀트", desc: "Signals & chart analysis", descKo: "시그널 & 차트 분석" },
+  { path: "charts", icon: PresentationChartLineIcon, label: "Charts", labelKo: "차트", desc: "Live market charts", descKo: "실시간 시장 차트" },
+  { path: "news", icon: NewspaperIcon, label: "News", labelKo: "뉴스", desc: "Market intelligence", descKo: "시장 인텔리전스" },
 ];
 
 const trendColors: Record<string, string> = {
@@ -94,13 +94,15 @@ export default function UserDashboard({
   const formatUSD = (v: number) =>
     `$${Math.abs(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+  const ko = lang === "ko";
+
   return (
     <div className="max-w-7xl mx-auto px-6 pt-28 pb-16">
       {/* Header */}
       <div className="flex items-center justify-between mb-10 flex-wrap gap-4">
         <div>
           <p className="text-sm text-zinc-500 font-mono mb-1">
-            Welcome back,
+            {ko ? "돌아오셨군요," : "Welcome back,"}
           </p>
           <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
             {user.name}
@@ -113,7 +115,7 @@ export default function UserDashboard({
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-medium hover:bg-amber-500/20 transition-colors"
             >
               <ShieldCheckIcon className="w-4 h-4" />
-              Admin Panel
+              {ko ? "관리자" : "Admin Panel"}
             </Link>
           )}
         </div>
@@ -123,19 +125,19 @@ export default function UserDashboard({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl hover:border-white/[0.12] transition-all">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
-            Portfolio Value
+            {ko ? "포트폴리오 가치" : "Portfolio Value"}
           </p>
           <p className="text-2xl font-mono font-bold text-white">
             {formatUSD(totalValue)}
           </p>
           <p className="text-xs text-zinc-500 font-mono mt-1">
-            {portfolio.holdings.length} assets
+            {portfolio.holdings.length} {ko ? "자산" : "assets"}
           </p>
         </Card>
 
         <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl hover:border-white/[0.12] transition-all">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
-            Total P&L
+            {ko ? "총 손익" : "Total P&L"}
           </p>
           <div className="flex items-end gap-2">
             <p className={`text-2xl font-mono font-bold ${totalPnL >= 0 ? "text-emerald-400" : "text-red-400"}`}>
@@ -149,7 +151,7 @@ export default function UserDashboard({
 
         <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl hover:border-white/[0.12] transition-all">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
-            24h Change
+            {ko ? "24시간 변동" : "24h Change"}
           </p>
           <div className="flex items-center gap-2">
             {change24h >= 0 ? (
@@ -165,7 +167,7 @@ export default function UserDashboard({
 
         <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl hover:border-white/[0.12] transition-all">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
-            Credits
+            {ko ? "크레딧" : "Credits"}
           </p>
           <p className="text-2xl font-mono font-bold text-white">
             {user.credits.toFixed(2)}
@@ -179,24 +181,24 @@ export default function UserDashboard({
         <Card className="lg:col-span-2 p-0 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl overflow-hidden">
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
             <h3 className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em]">
-              Top Holdings
+              {ko ? "상위 보유 자산" : "Top Holdings"}
             </h3>
             <Link
               href={`/${lang}/portfolio`}
               className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
             >
-              View All
+              {ko ? "전체 보기" : "View All"}
             </Link>
           </div>
           {topHoldings.length === 0 ? (
             <div className="p-10 text-center">
               <WalletIcon className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
-              <p className="text-sm text-zinc-500 mb-3">No holdings yet</p>
+              <p className="text-sm text-zinc-500 mb-3">{ko ? "보유 자산이 없습니다" : "No holdings yet"}</p>
               <Link
                 href={`/${lang}/portfolio`}
                 className="text-sm text-blue-400 hover:text-blue-300 font-medium"
               >
-                Add your first holding
+                {ko ? "첫 자산 추가하기" : "Add your first holding"}
               </Link>
             </div>
           ) : (
@@ -235,24 +237,24 @@ export default function UserDashboard({
         <Card className="p-0 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl overflow-hidden">
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
             <h3 className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em]">
-              Recent Analyses
+              {ko ? "최근 분석" : "Recent Analyses"}
             </h3>
             <Link
               href={`/${lang}/chart-ideas/analyze`}
               className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
             >
-              New Analysis
+              {ko ? "새 분석" : "New Analysis"}
             </Link>
           </div>
           {recentAnalyses.length === 0 ? (
             <div className="p-10 text-center">
               <ChartBarSquareIcon className="w-10 h-10 text-zinc-700 mx-auto mb-3" />
-              <p className="text-sm text-zinc-500 mb-3">No analyses yet</p>
+              <p className="text-sm text-zinc-500 mb-3">{ko ? "분석 내역이 없습니다" : "No analyses yet"}</p>
               <Link
                 href={`/${lang}/chart-ideas/analyze`}
                 className="text-sm text-blue-400 hover:text-blue-300 font-medium"
               >
-                Run your first AI analysis
+                {ko ? "첫 AI 분석 실행하기" : "Run your first AI analysis"}
               </Link>
             </div>
           ) : (
@@ -294,9 +296,9 @@ export default function UserDashboard({
             <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl hover:border-blue-500/20 hover:bg-white/[0.05] transition-all group cursor-pointer">
               <link.icon className="w-6 h-6 text-zinc-500 group-hover:text-blue-400 transition-colors mb-3" />
               <p className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors">
-                {link.label}
+                {ko ? link.labelKo : link.label}
               </p>
-              <p className="text-xs text-zinc-500 mt-1">{link.desc}</p>
+              <p className="text-xs text-zinc-500 mt-1">{ko ? link.descKo : link.desc}</p>
             </Card>
           </Link>
         ))}
