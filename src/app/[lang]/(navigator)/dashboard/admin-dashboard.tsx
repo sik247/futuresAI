@@ -22,27 +22,6 @@ interface PaybackSummary {
   exchanges: ExchangeData[];
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const config = {
-    ok: { label: "Connected", bg: "bg-emerald-500/10", text: "text-emerald-400", dot: "bg-emerald-400" },
-    error: { label: "Error", bg: "bg-red-500/10", text: "text-red-400", dot: "bg-red-400" },
-    no_permission: { label: "No Permission", bg: "bg-amber-500/10", text: "text-amber-400", dot: "bg-amber-400" },
-    PENDING: { label: "Pending", bg: "bg-amber-500/10", text: "text-amber-400", dot: "bg-amber-400" },
-    SUCCESS: { label: "Paid", bg: "bg-emerald-500/10", text: "text-emerald-400", dot: "bg-emerald-400" },
-    FAILED: { label: "Rejected", bg: "bg-red-500/10", text: "text-red-400", dot: "bg-red-400" },
-    CHARGED: { label: "Charged", bg: "bg-emerald-500/10", text: "text-emerald-400", dot: "bg-emerald-400" },
-    REFUNDED: { label: "Refunded", bg: "bg-blue-500/10", text: "text-blue-400", dot: "bg-blue-400" },
-    APPROVED: { label: "Approved", bg: "bg-emerald-500/10", text: "text-emerald-400", dot: "bg-emerald-400" },
-  }[status] || { label: status, bg: "bg-zinc-500/10", text: "text-zinc-400", dot: "bg-zinc-400" };
-
-  return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
-      {config.label}
-    </span>
-  );
-}
-
 interface WithdrawalRequest {
   id: string;
   amount: number;
@@ -71,15 +50,78 @@ interface ChartAnalysisRequest {
   user: { name: string; email: string; nickname: string };
 }
 
+/* ------------------------------------------------------------------ */
+/*  Status Badge                                                        */
+/* ------------------------------------------------------------------ */
+function StatusBadge({ status }: { status: string }) {
+  const config: Record<string, { label: string; bg: string; text: string; dot: string }> = {
+    ok: { label: "Connected", bg: "bg-emerald-500/10", text: "text-emerald-400", dot: "bg-emerald-400" },
+    error: { label: "Error", bg: "bg-red-500/10", text: "text-red-400", dot: "bg-red-400" },
+    no_permission: { label: "No Permission", bg: "bg-amber-500/10", text: "text-amber-400", dot: "bg-amber-400" },
+    PENDING: { label: "Pending", bg: "bg-amber-500/10", text: "text-amber-400", dot: "bg-amber-400" },
+    SUCCESS: { label: "Paid", bg: "bg-emerald-500/10", text: "text-emerald-400", dot: "bg-emerald-400" },
+    FAILED: { label: "Rejected", bg: "bg-red-500/10", text: "text-red-400", dot: "bg-red-400" },
+    CHARGED: { label: "Charged", bg: "bg-emerald-500/10", text: "text-emerald-400", dot: "bg-emerald-400" },
+    REFUNDED: { label: "Refunded", bg: "bg-blue-500/10", text: "text-blue-400", dot: "bg-blue-400" },
+  };
+  const c = config[status] || { label: status, bg: "bg-zinc-500/10", text: "text-zinc-400", dot: "bg-zinc-400" };
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${c.bg} ${c.text}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${c.dot}`} />
+      {c.label}
+    </span>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Stat Card                                                           */
+/* ------------------------------------------------------------------ */
+function StatCard({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: boolean }) {
+  return (
+    <div className={`rounded-xl border p-5 transition-all hover:border-white/[0.12] ${accent ? "border-emerald-500/30 bg-emerald-500/5" : "border-white/[0.06] bg-white/[0.03]"}`}>
+      <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">{label}</p>
+      <p className={`text-2xl font-bold font-mono ${accent ? "text-emerald-400" : "text-white"}`}>{value}</p>
+      {sub && <p className="text-[11px] text-zinc-600 mt-1">{sub}</p>}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Section Header                                                      */
+/* ------------------------------------------------------------------ */
+function SectionHeader({ title, subtitle, color = "bg-blue-500/70", badge, children }: {
+  title: string; subtitle?: string; color?: string; badge?: string; children?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+      <div className="flex items-center gap-3">
+        <div className={`w-1.5 h-6 rounded-full ${color}`} />
+        <div>
+          <h2 className="text-base font-semibold text-zinc-200">{title}</h2>
+          {subtitle && <p className="text-xs text-zinc-500 mt-0.5">{subtitle}</p>}
+        </div>
+        {badge && (
+          <span className="px-2 py-0.5 rounded bg-white/[0.05] text-[11px] font-mono text-zinc-500">{badge}</span>
+        )}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Main Admin Dashboard                                                */
+/* ------------------------------------------------------------------ */
 export default function AdminDashboard() {
   const [data, setData] = useState<PaybackSummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [requests, setRequests] = useState<WithdrawalRequest[]>([]);
   const [requestFilter, setRequestFilter] = useState<"ALL" | "PENDING" | "SUCCESS" | "FAILED">("ALL");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [chartAnalyses, setChartAnalyses] = useState<ChartAnalysisRequest[]>([]);
   const [chartFilter, setChartFilter] = useState<"ALL" | "PENDING" | "CHARGED" | "REFUNDED">("ALL");
+  const [testLoading, setTestLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -87,12 +129,8 @@ export default function AdminDashboard() {
       const res = await fetch("/api/admin/payback-summary");
       const json = await res.json();
       setData(json);
-      setLastRefresh(new Date());
-    } catch {
-      // keep previous data on error
-    } finally {
-      setLoading(false);
-    }
+    } catch { /* keep previous */ }
+    finally { setLoading(false); }
   }, []);
 
   const fetchRequests = useCallback(async () => {
@@ -100,9 +138,7 @@ export default function AdminDashboard() {
       const filter = requestFilter === "ALL" ? undefined : requestFilter;
       const data = await getAllRequests(filter);
       setRequests(data as unknown as WithdrawalRequest[]);
-    } catch {
-      // keep previous data
-    }
+    } catch { /* keep previous */ }
   }, [requestFilter]);
 
   const fetchChartAnalyses = useCallback(async () => {
@@ -112,9 +148,7 @@ export default function AdminDashboard() {
         const data = await res.json();
         setChartAnalyses(data.analyses || []);
       }
-    } catch {
-      // keep previous data
-    }
+    } catch { /* keep previous */ }
   }, []);
 
   useEffect(() => {
@@ -126,9 +160,7 @@ export default function AdminDashboard() {
   async function handleApprove(id: string) {
     setActionLoading(id);
     const result = await approveRequest(id);
-    if (result.success) {
-      await fetchRequests();
-    }
+    if (result.success) await fetchRequests();
     setActionLoading(null);
   }
 
@@ -137,9 +169,7 @@ export default function AdminDashboard() {
     if (!note) return;
     setActionLoading(id);
     const result = await rejectRequest(id, note);
-    if (result.success) {
-      await fetchRequests();
-    }
+    if (result.success) await fetchRequests();
     setActionLoading(null);
   }
 
@@ -169,409 +199,318 @@ export default function AdminDashboard() {
     setActionLoading(null);
   }
 
+  async function handleTestPayback() {
+    setTestLoading(true);
+    try {
+      const res = await fetch("/api/admin/test-payback", { method: "POST" });
+      const result = await res.json();
+      if (result.success) {
+        alert(`Test withdrawal created!\nAmount: $${result.amount}\nAddress: ${result.address}\nRefresh to see it in Pending.`);
+        await fetchRequests();
+      } else {
+        alert(`Failed: ${result.error}`);
+      }
+    } catch (e) {
+      alert("Failed to create test payback");
+    } finally {
+      setTestLoading(false);
+    }
+  }
+
   const filteredChartAnalyses = chartFilter === "ALL"
     ? chartAnalyses
     : chartAnalyses.filter((a) => a.status === chartFilter);
 
-  const needsPayback = data?.summary.grandTotal && data.summary.grandTotal > 0;
+  const pendingCount = requests.filter((r) => r.status === "PENDING").length;
+  const pendingAmount = requests.filter((r) => r.status === "PENDING").reduce((s, r) => s + r.amount, 0);
+  const paidTotal = requests.filter((r) => r.status === "SUCCESS").reduce((s, r) => s + r.amount, 0);
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-24 pb-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-16">
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Payback Admin</h1>
-            <p className="text-zinc-500 text-sm mt-1">
-              Monitor affiliate commissions across all exchanges
-            </p>
+            <p className="text-[11px] font-mono uppercase tracking-[0.25em] text-zinc-500 mb-2">Admin Panel</p>
+            <h1 className="text-3xl font-bold tracking-tight">FuturesAI Admin</h1>
           </div>
-          <button
-            onClick={fetchData}
-            disabled={loading}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-white/[0.06] bg-white/[0.03] text-sm font-medium text-zinc-300 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-white disabled:opacity-50"
-          >
-            {loading ? (
-              <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" className="opacity-25" />
-                <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            ) : (
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            )}
-            Refresh
-          </button>
-        </div>
-
-        {/* Summary Cards */}
-        {loading && !data ? (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 animate-pulse">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-6 space-y-3">
-                <div className="h-3 w-28 rounded bg-zinc-800" />
-                <div className="h-8 w-24 rounded bg-zinc-800" />
-                <div className="h-3 w-20 rounded bg-zinc-800" />
-              </div>
-            ))}
-          </div>
-        ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          {/* Grand Total */}
-          <div className={`rounded-xl border p-6 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] ${needsPayback ? "border-emerald-500/30 bg-emerald-500/5" : "border-white/[0.06] bg-white/[0.03]"}`}>
-            <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-2">
-              Total Payback Owed
-            </p>
-            <p className={`text-3xl font-bold font-mono tabular-nums ${needsPayback ? "text-emerald-400" : "text-zinc-300"}`}>
-              ${data?.summary.grandTotal.toFixed(2) || "0.00"}
-            </p>
-            {needsPayback && (
-              <p className="text-xs text-emerald-400/80 mt-2 font-medium">
-                Payback needed
-              </p>
-            )}
-            {data && !needsPayback && (
-              <p className="text-xs text-zinc-600 mt-2">No payback due</p>
-            )}
-          </div>
-
-          {/* Health */}
-          <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-6 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05]">
-            <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-2">
-              Exchange Health
-            </p>
-            <p className="text-3xl font-bold font-mono tabular-nums text-white">
-              {data?.summary.healthyExchanges || 0}
-              <span className="text-zinc-600">/{data?.summary.totalExchanges || 0}</span>
-            </p>
-            <p className="text-xs text-zinc-600 mt-2">Connected exchanges</p>
-          </div>
-
-          {/* Last Updated */}
-          <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-6 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05]">
-            <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-2">
-              Last Refreshed
-            </p>
-            <p className="text-lg font-mono tabular-nums text-zinc-300">
-              {lastRefresh
-                ? lastRefresh.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
-                : "--:--:--"}
-            </p>
-            <p className="text-xs text-zinc-600 mt-2">
-              {lastRefresh ? lastRefresh.toLocaleDateString() : "Not yet loaded"}
-            </p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleTestPayback}
+              disabled={testLoading}
+              className="px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-medium hover:bg-amber-500/20 transition-colors disabled:opacity-50"
+            >
+              {testLoading ? "Creating..." : "Test Payback"}
+            </button>
+            <button
+              onClick={() => { fetchData(); fetchRequests(); fetchChartAnalyses(); }}
+              disabled={loading}
+              className="px-4 py-2 rounded-xl border border-white/[0.06] bg-white/[0.03] text-sm font-medium text-zinc-300 hover:border-white/[0.12] hover:bg-white/[0.05] transition-all disabled:opacity-50"
+            >
+              {loading ? "..." : "Refresh All"}
+            </button>
           </div>
         </div>
-        )}
 
-        {/* Exchange Table */}
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] overflow-hidden">
-          <div className="px-6 py-4 border-b border-white/[0.06]">
-            <h2 className="text-sm font-semibold text-zinc-300">Exchange Breakdown</h2>
-          </div>
+        {/* Overview Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
+          <StatCard
+            label="Total Payback Owed"
+            value={`$${data?.summary.grandTotal.toFixed(2) || "0.00"}`}
+            sub={`${data?.summary.healthyExchanges || 0}/${data?.summary.totalExchanges || 0} exchanges connected`}
+            accent={!!data?.summary.grandTotal && data.summary.grandTotal > 0}
+          />
+          <StatCard
+            label="Pending Withdrawals"
+            value={String(pendingCount)}
+            sub={pendingCount > 0 ? `$${pendingAmount.toFixed(2)} total` : "All clear"}
+            accent={pendingCount > 0}
+          />
+          <StatCard
+            label="Total Paid Out"
+            value={`$${paidTotal.toFixed(2)}`}
+            sub={`${requests.filter(r => r.status === "SUCCESS").length} withdrawals`}
+          />
+          <StatCard
+            label="Chart Analyses"
+            value={String(chartAnalyses.length)}
+            sub={`${chartAnalyses.filter(a => a.status === "PENDING").length} pending review`}
+          />
+        </div>
 
-          {loading && !data ? (
-            <div className="animate-pulse">
-              {/* Skeleton table header */}
-              <div className="border-b border-white/[0.06] px-6 py-3 flex gap-6">
-                {[80, 64, 56, 40, 48, 48].map((w, i) => (
-                  <div key={i} className={`h-3 rounded bg-zinc-800`} style={{ width: `${w}px` }} />
+        {/* ============================================================ */}
+        {/*  EXCHANGE BREAKDOWN                                          */}
+        {/* ============================================================ */}
+        <div className="mb-10">
+          <SectionHeader title="Exchange Breakdown" subtitle="Live affiliate commission data" color="bg-emerald-500/70" badge={`${data?.exchanges?.length || 0} exchanges`} />
+
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] overflow-hidden">
+            {loading && !data ? (
+              <div className="animate-pulse p-6 space-y-4">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="h-12 rounded-lg bg-zinc-800/30" />
                 ))}
               </div>
-              {/* Skeleton rows */}
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="border-b border-white/[0.04] px-6 py-4 flex items-center gap-6">
-                  <div className="h-4 w-20 rounded bg-zinc-800" />
-                  <div className="h-4 w-16 rounded bg-zinc-800" />
-                  <div className="h-5 w-20 rounded-full bg-zinc-800" />
-                  <div className="h-4 w-10 rounded bg-zinc-800" />
-                  <div className="h-4 w-16 rounded bg-zinc-800" />
-                  <div className="h-4 w-12 rounded bg-zinc-800" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/[0.06]">
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Exchange</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Account</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Entries</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Payback</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data?.exchanges.map((ex) => (
-                    <tr key={ex.exchange} className="border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors">
-                      <td className="px-6 py-4">
-                        <span className="font-semibold text-white">{ex.exchange}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="font-mono text-xs text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded">
-                          {ex.account}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <StatusBadge status={ex.status} />
-                      </td>
-                      <td className="px-6 py-4 text-right font-mono tabular-nums text-zinc-400">
-                        {ex.entries}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <span className={`font-mono tabular-nums font-semibold ${ex.totalPayback > 0 ? "text-emerald-400" : "text-zinc-500"}`}>
-                          ${ex.totalPayback.toFixed(2)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        {ex.totalPayback > 0 ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-400">
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Pay
-                          </span>
-                        ) : ex.status === "error" || ex.status === "no_permission" ? (
-                          <span className="text-xs text-zinc-600 max-w-[200px] truncate block" title={ex.error}>
-                            {ex.error}
-                          </span>
-                        ) : (
-                          <span className="text-xs text-zinc-600">No action</span>
-                        )}
-                      </td>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/[0.06]">
+                      {["Exchange", "Account", "Status", "Entries", "Payback"].map((h) => (
+                        <th key={h} className="px-6 py-3 text-left text-[10px] font-mono text-zinc-500 uppercase tracking-wider">{h}</th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  </thead>
+                  <tbody>
+                    {data?.exchanges.map((ex) => (
+                      <tr key={ex.exchange} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
+                        <td className="px-6 py-4 font-semibold text-white">{ex.exchange}</td>
+                        <td className="px-6 py-4">
+                          <span className="font-mono text-xs text-zinc-400 bg-zinc-800/50 px-2 py-0.5 rounded">{ex.account}</span>
+                        </td>
+                        <td className="px-6 py-4"><StatusBadge status={ex.status} /></td>
+                        <td className="px-6 py-4 font-mono text-zinc-400">{ex.entries}</td>
+                        <td className="px-6 py-4">
+                          <span className={`font-mono font-semibold ${ex.totalPayback > 0 ? "text-emerald-400" : "text-zinc-600"}`}>
+                            ${ex.totalPayback.toFixed(2)}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Footer note */}
-        <p className="text-xs text-zinc-600 mt-4 text-center">
-          Data fetched from live exchange APIs. Payback amounts are for the last 24 hours.
-        </p>
-
-        {/* Payback Requests */}
-        <div className="mt-10 rounded-xl border border-white/[0.06] bg-white/[0.03] overflow-hidden">
-          <div className="px-6 py-4 border-b border-white/[0.06] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <h2 className="text-sm font-semibold text-zinc-300">Payback Requests</h2>
-            <div className="flex gap-1">
+        {/* ============================================================ */}
+        {/*  WITHDRAWAL REQUESTS                                         */}
+        {/* ============================================================ */}
+        <div className="mb-10">
+          <SectionHeader
+            title="Payback Requests"
+            subtitle="User withdrawal requests"
+            color={pendingCount > 0 ? "bg-amber-500/70" : "bg-blue-500/70"}
+            badge={pendingCount > 0 ? `${pendingCount} pending` : "up to date"}
+          >
+            <div className="flex gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06]">
               {(["ALL", "PENDING", "SUCCESS", "FAILED"] as const).map((f) => (
                 <button
                   key={f}
                   onClick={() => setRequestFilter(f)}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     requestFilter === f
-                      ? "bg-blue-600/20 text-blue-400"
-                      : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
+                      ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
+                      : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
                   {f === "ALL" ? "All" : f === "PENDING" ? "Pending" : f === "SUCCESS" ? "Paid" : "Rejected"}
                 </button>
               ))}
             </div>
-          </div>
+          </SectionHeader>
 
-          {requests.length === 0 ? (
-            <div className="flex items-center justify-center py-12 text-zinc-600 text-sm">
-              No payback requests found
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/[0.06]">
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">User</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Exchange</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Network</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Address</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {requests.map((req) => (
-                    <tr key={req.id} className="border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors">
-                      <td className="px-6 py-4">
-                        <div>
-                          <p className="font-medium text-white text-sm">{req.user?.name || req.user?.nickname || "Unknown"}</p>
-                          <p className="text-xs text-zinc-500">{req.user?.email}</p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-zinc-300">
-                        {req.exchangeAccounts.map((ea) => ea.exchange.name).join(", ") || "—"}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <span className="font-mono tabular-nums font-semibold text-emerald-400">
-                          ${req.amount.toFixed(2)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-xs font-mono text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded">
-                          {req.network}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-xs font-mono text-zinc-400 max-w-[120px] truncate block" title={req.address}>
-                          {req.address}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <StatusBadge status={req.status} />
-                      </td>
-                      <td className="px-6 py-4 text-zinc-400 text-xs">
-                        {new Date(req.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4">
-                        {req.status === "PENDING" ? (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleApprove(req.id)}
-                              disabled={actionLoading === req.id}
-                              className="px-3 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-400 text-xs font-medium hover:bg-emerald-600/30 transition-colors disabled:opacity-50"
-                            >
-                              {actionLoading === req.id ? "..." : "Approve"}
-                            </button>
-                            <button
-                              onClick={() => handleReject(req.id)}
-                              disabled={actionLoading === req.id}
-                              className="px-3 py-1.5 rounded-lg bg-red-600/20 text-red-400 text-xs font-medium hover:bg-red-600/30 transition-colors disabled:opacity-50"
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        ) : req.adminNote ? (
-                          <span className="text-xs text-zinc-500" title={req.adminNote}>
-                            {req.adminNote.substring(0, 30)}
-                          </span>
-                        ) : req.paidAt ? (
-                          <span className="text-xs text-emerald-500">
-                            Paid {new Date(req.paidAt).toLocaleDateString()}
-                          </span>
-                        ) : (
-                          <span className="text-xs text-zinc-600">—</span>
-                        )}
-                      </td>
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] overflow-hidden">
+            {requests.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <p className="text-zinc-600 text-sm">No payback requests found</p>
+                <button onClick={handleTestPayback} disabled={testLoading} className="mt-3 text-xs text-amber-400 hover:text-amber-300 transition-colors">
+                  {testLoading ? "Creating..." : "Create a test request"}
+                </button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/[0.06]">
+                      {["User", "Exchange", "Amount", "Network", "Address", "Status", "Date", "Actions"].map((h) => (
+                        <th key={h} className="px-5 py-3 text-left text-[10px] font-mono text-zinc-500 uppercase tracking-wider">{h}</th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  </thead>
+                  <tbody>
+                    {requests.map((req) => (
+                      <tr key={req.id} className={`border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors ${req.status === "PENDING" ? "bg-amber-500/[0.02]" : ""}`}>
+                        <td className="px-5 py-4">
+                          <p className="font-medium text-white text-sm">{req.user?.name || req.user?.nickname || "Unknown"}</p>
+                          <p className="text-[11px] text-zinc-500">{req.user?.email}</p>
+                        </td>
+                        <td className="px-5 py-4 text-zinc-300 text-xs">
+                          {req.exchangeAccounts.map((ea) => ea.exchange.name).join(", ") || "—"}
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="font-mono font-semibold text-emerald-400">${req.amount.toFixed(2)}</span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="text-xs font-mono text-zinc-400 bg-zinc-800/50 px-2 py-0.5 rounded">{req.network}</span>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="text-xs font-mono text-zinc-400 max-w-[120px] truncate block" title={req.address}>{req.address}</span>
+                        </td>
+                        <td className="px-5 py-4"><StatusBadge status={req.status} /></td>
+                        <td className="px-5 py-4 text-zinc-500 text-xs">{new Date(req.createdAt).toLocaleDateString()}</td>
+                        <td className="px-5 py-4">
+                          {req.status === "PENDING" ? (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleApprove(req.id)}
+                                disabled={actionLoading === req.id}
+                                className="px-3 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-400 text-xs font-medium hover:bg-emerald-600/30 transition-colors disabled:opacity-50"
+                              >
+                                {actionLoading === req.id ? "..." : "Approve"}
+                              </button>
+                              <button
+                                onClick={() => handleReject(req.id)}
+                                disabled={actionLoading === req.id}
+                                className="px-3 py-1.5 rounded-lg bg-red-600/20 text-red-400 text-xs font-medium hover:bg-red-600/30 transition-colors disabled:opacity-50"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          ) : req.paidAt ? (
+                            <span className="text-xs text-emerald-500">Paid {new Date(req.paidAt).toLocaleDateString()}</span>
+                          ) : req.adminNote ? (
+                            <span className="text-xs text-zinc-500" title={req.adminNote}>{req.adminNote.substring(0, 30)}</span>
+                          ) : (
+                            <span className="text-xs text-zinc-600">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
-        {/* Chart Analysis Charges */}
-        <div className="mt-10 rounded-xl border border-white/[0.06] bg-white/[0.03] overflow-hidden">
-          <div className="px-6 py-4 border-b border-white/[0.06] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <h2 className="text-sm font-semibold text-zinc-300">Chart Analysis Charges</h2>
-              <p className="text-xs text-zinc-500 mt-0.5">50 USDT / analysis — approve to charge user account</p>
-            </div>
-            <div className="flex gap-1">
+
+        {/* ============================================================ */}
+        {/*  CHART ANALYSIS                                              */}
+        {/* ============================================================ */}
+        <div className="mb-10">
+          <SectionHeader
+            title="Chart Analysis Log"
+            subtitle="AI chart analyses from users"
+            color="bg-purple-500/70"
+            badge={`${chartAnalyses.length} total`}
+          >
+            <div className="flex gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06]">
               {(["ALL", "PENDING", "CHARGED", "REFUNDED"] as const).map((f) => (
                 <button
                   key={f}
                   onClick={() => setChartFilter(f)}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     chartFilter === f
-                      ? "bg-blue-600/20 text-blue-400"
-                      : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
+                      ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
+                      : "text-zinc-500 hover:text-zinc-300"
                   }`}
                 >
                   {f === "ALL" ? "All" : f === "PENDING" ? "Pending" : f === "CHARGED" ? "Charged" : "Refunded"}
                 </button>
               ))}
             </div>
-          </div>
+          </SectionHeader>
 
-          {filteredChartAnalyses.length === 0 ? (
-            <div className="flex items-center justify-center py-12 text-zinc-600 text-sm">
-              No chart analyses found
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/[0.06]">
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">User</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Trend</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Confidence</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Cost</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredChartAnalyses.map((a) => (
-                    <tr key={a.id} className="border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors">
-                      <td className="px-6 py-4">
-                        <div>
-                          <p className="font-medium text-white text-sm">{a.user?.name || a.user?.nickname || "Unknown"}</p>
-                          <p className="text-xs text-zinc-500">{a.user?.email}</p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`text-xs font-bold ${
-                          a.trend === "BULLISH" ? "text-green-400" :
-                          a.trend === "BEARISH" ? "text-red-400" :
-                          "text-yellow-400"
-                        }`}>
-                          {a.trend}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right font-mono tabular-nums text-zinc-300">
-                        {a.confidence}%
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <span className="font-mono tabular-nums font-semibold text-amber-400">
-                          ${a.cost.toFixed(2)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <StatusBadge status={a.status} />
-                      </td>
-                      <td className="px-6 py-4 text-zinc-400 text-xs">
-                        {new Date(a.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4">
-                        {a.status === "PENDING" ? (
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleChargeAnalysis(a.id)}
-                              disabled={actionLoading === a.id}
-                              className="px-3 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-400 text-xs font-medium hover:bg-emerald-600/30 transition-colors disabled:opacity-50"
-                            >
-                              {actionLoading === a.id ? "..." : "Charge 50 USDT"}
-                            </button>
-                            <button
-                              onClick={() => handleRefundAnalysis(a.id)}
-                              disabled={actionLoading === a.id}
-                              className="px-3 py-1.5 rounded-lg bg-red-600/20 text-red-400 text-xs font-medium hover:bg-red-600/30 transition-colors disabled:opacity-50"
-                            >
-                              Refund
-                            </button>
-                          </div>
-                        ) : a.chargedAt ? (
-                          <span className="text-xs text-emerald-500">
-                            Charged {new Date(a.chargedAt).toLocaleDateString()}
-                          </span>
-                        ) : (
-                          <span className="text-xs text-zinc-600">--</span>
-                        )}
-                      </td>
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] overflow-hidden">
+            {filteredChartAnalyses.length === 0 ? (
+              <div className="flex items-center justify-center py-16 text-zinc-600 text-sm">
+                No chart analyses found
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/[0.06]">
+                      {["User", "Pair", "Trend", "Confidence", "Status", "Date", "Actions"].map((h) => (
+                        <th key={h} className="px-5 py-3 text-left text-[10px] font-mono text-zinc-500 uppercase tracking-wider">{h}</th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  </thead>
+                  <tbody>
+                    {filteredChartAnalyses.map((a) => (
+                      <tr key={a.id} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
+                        <td className="px-5 py-4">
+                          <p className="font-medium text-white text-sm">{a.user?.name || "Unknown"}</p>
+                          <p className="text-[11px] text-zinc-500">{a.user?.email}</p>
+                        </td>
+                        <td className="px-5 py-4 font-mono text-zinc-300">{a.pair || "—"}</td>
+                        <td className="px-5 py-4">
+                          <span className={`text-xs font-bold ${a.trend === "BULLISH" ? "text-green-400" : a.trend === "BEARISH" ? "text-red-400" : "text-yellow-400"}`}>
+                            {a.trend}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 font-mono text-zinc-300">{a.confidence}%</td>
+                        <td className="px-5 py-4"><StatusBadge status={a.status} /></td>
+                        <td className="px-5 py-4 text-zinc-500 text-xs">{new Date(a.createdAt).toLocaleDateString()}</td>
+                        <td className="px-5 py-4">
+                          {a.status === "PENDING" ? (
+                            <div className="flex gap-2">
+                              <button onClick={() => handleChargeAnalysis(a.id)} disabled={actionLoading === a.id}
+                                className="px-3 py-1.5 rounded-lg bg-emerald-600/20 text-emerald-400 text-xs font-medium hover:bg-emerald-600/30 transition-colors disabled:opacity-50">
+                                {actionLoading === a.id ? "..." : "Charge"}
+                              </button>
+                              <button onClick={() => handleRefundAnalysis(a.id)} disabled={actionLoading === a.id}
+                                className="px-3 py-1.5 rounded-lg bg-red-600/20 text-red-400 text-xs font-medium hover:bg-red-600/30 transition-colors disabled:opacity-50">
+                                Refund
+                              </button>
+                            </div>
+                          ) : a.chargedAt ? (
+                            <span className="text-xs text-emerald-500">Charged {new Date(a.chargedAt).toLocaleDateString()}</span>
+                          ) : (
+                            <span className="text-xs text-zinc-600">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
+
       </div>
     </div>
   );
