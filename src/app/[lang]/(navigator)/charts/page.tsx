@@ -7,6 +7,8 @@ import {
 import { MultiChartTerminal } from "./charts-client";
 import { MarketCorrelations, TopCoinsTable } from "./market-data";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Crypto Charts and Market Analysis",
   description:
@@ -21,8 +23,9 @@ async function getFearGreedIndex() {
     const res = await fetch("https://api.alternative.me/fng/?limit=30", {
       next: { revalidate: 300 },
     });
+    if (!res.ok) return [];
     const json = await res.json();
-    return json.data;
+    return Array.isArray(json?.data) ? json.data : [];
   } catch {
     return [];
   }
@@ -34,8 +37,9 @@ async function getBtcPrice() {
       "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true",
       { next: { revalidate: 300 } }
     );
+    if (!res.ok) return null;
     const json = await res.json();
-    return json.bitcoin;
+    return json?.bitcoin ?? null;
   } catch {
     return null;
   }
@@ -46,8 +50,9 @@ async function getGlobalMarketData() {
     const res = await fetch("https://api.coingecko.com/api/v3/global", {
       next: { revalidate: 300 },
     });
+    if (!res.ok) return null;
     const json = await res.json();
-    return json.data;
+    return json?.data ?? null;
   } catch {
     return null;
   }
@@ -59,7 +64,9 @@ async function getTopCoins() {
       "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&sparkline=false&price_change_percentage=7d",
       { next: { revalidate: 300 } }
     );
-    return await res.json();
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
   } catch {
     return [];
   }
