@@ -109,6 +109,13 @@ export default function RootLayout({
 }) {
   return (
     <html suppressHydrationWarning className={`${inter.variable} ${notoSansKR.variable}`}>
+      <head>
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2718044648644151"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className={cn(inter.className, "bg-background text-foreground antialiased")}>
         <NextTopLoader color="#3b82f6" height={2} showSpinner={false} />
         <OrganizationJsonLd />
