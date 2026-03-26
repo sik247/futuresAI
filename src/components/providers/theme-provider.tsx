@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { ThemeProvider as NextThemeProvider } from "next-themes";
 
 type TThemeProvider = {
@@ -7,21 +7,12 @@ type TThemeProvider = {
 };
 
 const ThemeProvider: React.FC<TThemeProvider> = ({ children }) => {
-  const [mounted, setMounted] = useState<boolean>(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
   return (
     <NextThemeProvider
-      defaultTheme="system"
+      defaultTheme="dark"
       enableSystem={true}
       attribute="class"
+      disableTransitionOnChange
     >
       {children}
     </NextThemeProvider>
