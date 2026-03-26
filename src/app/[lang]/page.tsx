@@ -1,9 +1,11 @@
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 
 export default function LangRoot({
   params: { lang },
 }: {
   params: { lang: string };
 }) {
-  redirect(`/${lang}/sns`);
+  permanentRedirect(`/${lang}/sns`);
 }
