@@ -12,6 +12,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { addHolding, parseCSV, parseScreenshot, searchCoins } from "../actions";
 import { FileUploadModule } from "@/lib/modules/file-upload";
+import { SUPABASE_STORAGE_URL } from "@/lib/utils/get-image-url";
 
 type CoinResult = { id: string; symbol: string; name: string };
 type ParsedRow = {
@@ -135,7 +136,7 @@ export default function AddHoldingDialog({
       const fileUploader = new FileUploadModule();
       const data = await fileUploader.upload(file);
       const url =
-        "https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/" +
+        SUPABASE_STORAGE_URL +
         data.path;
       toast({
         title: "Analyzing screenshot...",

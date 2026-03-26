@@ -4,6 +4,7 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileUploadModule } from "@/lib/modules/file-upload";
+import { SUPABASE_STORAGE_URL } from "@/lib/utils/get-image-url";
 import { CloudArrowUpIcon } from "@heroicons/react/24/outline";
 import { toast } from "@/components/ui/use-toast";
 import { Dictionary } from "@/i18n";
@@ -179,11 +180,11 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     try {
       const fileUploader = new FileUploadModule();
       const data = await fileUploader.upload(file);
-      const url =
-        "https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/" + data.path;
+      const url = SUPABASE_STORAGE_URL + data.path;
       setImageUrl(url);
-    } catch {
-      toast({ variant: "destructive", title: "Upload failed", description: "Please try again." });
+    } catch (err) {
+      console.error("Chart upload error:", err);
+      toast({ variant: "destructive", title: "Upload failed", description: err instanceof Error ? err.message : "Please try again." });
     } finally {
       setUploading(false);
     }

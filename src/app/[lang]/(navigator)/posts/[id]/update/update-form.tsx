@@ -26,6 +26,7 @@ import { updatePostAction } from "./actions";
 import { Post } from "@prisma/client";
 import { X } from "lucide-react";
 import { revalidateAll } from "@/lib/services/revalidate";
+import { SUPABASE_STORAGE_URL } from "@/lib/utils/get-image-url";
 
 type TPostUpdateForm = {
   id: string;
@@ -147,7 +148,7 @@ const PostUpdateForm: React.FC<TPostUpdateForm> = ({ id, post }) => {
                     const file = files[0];
                     if (
                       file.name.includes(
-                        "https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/"
+                        SUPABASE_STORAGE_URL
                       )
                     ) {
                       field.onChange({ target: { value: file.name } });
@@ -156,7 +157,7 @@ const PostUpdateForm: React.FC<TPostUpdateForm> = ({ id, post }) => {
                     const fileUploader = new FileUploadModule();
                     const data = await fileUploader.upload(file);
                     const fileUrl =
-                      ("https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/" +
+                      (SUPABASE_STORAGE_URL +
                         data.path) as string;
                     field.onChange({ target: { value: fileUrl } });
                   }}

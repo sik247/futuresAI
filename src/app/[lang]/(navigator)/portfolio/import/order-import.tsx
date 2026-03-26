@@ -8,6 +8,7 @@ import { CloudArrowUpIcon, DocumentTextIcon, CameraIcon } from "@heroicons/react
 import { FileUploadModule } from "@/lib/modules/file-upload";
 import { analyzeOrderScreenshot, analyzeOrderCSV } from "./actions";
 import type { OCROrder } from "@/lib/services/portfolio/order-ocr.service";
+import { SUPABASE_STORAGE_URL } from "@/lib/utils/get-image-url";
 import Link from "next/link";
 
 type Tab = "screenshot" | "csv";
@@ -27,7 +28,7 @@ export default function OrderImport({ lang }: { lang: string }) {
     try {
       const uploader = new FileUploadModule();
       const data = await uploader.upload(file);
-      const url = "https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/" + data.path;
+      const url = SUPABASE_STORAGE_URL + data.path;
       setUploading(false);
       setAnalyzing(true);
       toast({ title: ko ? "AI가 주문 내역을 분석 중..." : "AI analyzing orders..." });

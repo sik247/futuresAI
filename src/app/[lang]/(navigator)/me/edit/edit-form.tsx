@@ -21,6 +21,7 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { revalidateAll } from "@/lib/services/revalidate";
 import { updateUser } from "../profile/actions";
+import { SUPABASE_STORAGE_URL } from "@/lib/utils/get-image-url";
 
 interface TEditForm {
   user: User;
@@ -86,7 +87,7 @@ const EditForm = React.forwardRef<
                       const file = files[0];
                       if (
                         file.name.includes(
-                          "https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/"
+                          SUPABASE_STORAGE_URL
                         )
                       ) {
                         field.onChange({ target: { value: file.name } });
@@ -95,7 +96,7 @@ const EditForm = React.forwardRef<
                       const fileUploader = new FileUploadModule();
                       const data = await fileUploader.upload(file);
                       const fileUrl =
-                        ("https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/" +
+                        (SUPABASE_STORAGE_URL +
                           data.path) as string;
                       field.onChange({ target: { value: fileUrl } });
                     }}

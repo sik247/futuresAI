@@ -33,6 +33,7 @@ import ChartAnnotationCanvas, {
 import { createChartIdeaAction } from "../actions";
 import { toast } from "@/components/ui/use-toast";
 import { Dictionary } from "@/i18n";
+import { SUPABASE_STORAGE_URL } from "@/lib/utils/get-image-url";
 
 const POPULAR_PAIRS = [
   "BTC/USDT",
@@ -106,7 +107,7 @@ const ChartIdeaForm: React.FC<TChartIdeaForm> = ({ lang, translations }) => {
       const fileUploader = new FileUploadModule();
       const data = await fileUploader.upload(file);
       const fileUrl =
-        "https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/" +
+        SUPABASE_STORAGE_URL +
         data.path;
       form.setValue("imageUrl", fileUrl);
       setImagePreview(fileUrl);

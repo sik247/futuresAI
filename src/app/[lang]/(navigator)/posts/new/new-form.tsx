@@ -22,6 +22,7 @@ import { createPostAction } from "./actions";
 import { useRouter } from "next/navigation";
 import { richTextStore } from "@/lib/stores/rich-text-store";
 import { Checkbox } from "@/components/ui/checkbox";
+import { SUPABASE_STORAGE_URL } from "@/lib/utils/get-image-url";
 
 type TPostNewForm = {};
 
@@ -141,7 +142,7 @@ const PostNewForm: React.FC<TPostNewForm> = ({}) => {
                     const fileUploader = new FileUploadModule();
                     const data = await fileUploader.upload(file);
                     const fileUrl =
-                      ("https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/" +
+                      (SUPABASE_STORAGE_URL +
                         data.path) as string;
                     field.onChange({ target: { value: fileUrl } });
                   }}

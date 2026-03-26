@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { runPriceAgent } from "@/lib/services/chart-analysis/agents/price.agent";
 import { sendGroupMessage } from "./telegram.service";
+import { cachedAI } from "@/lib/services/ai-cache";
 
 const PAIRS = [
   { pair: "BTCUSDT", symbol: "BTC", name: "비트코인" },
@@ -21,16 +22,15 @@ function kstNow(): string {
 }
 
 async function geminiKorean(prompt: string): Promise<string> {
-  try {
+  const cacheKey = `gemini-ko:${prompt.slice(0, 80)}`;
+  return cachedAI(cacheKey, async () => {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return "";
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const result = await model.generateContent(prompt);
     return result.response.text().trim();
-  } catch {
-    return "";
-  }
+  }, 30 * 60 * 1000);
 }
 
 /* ================================================================== */

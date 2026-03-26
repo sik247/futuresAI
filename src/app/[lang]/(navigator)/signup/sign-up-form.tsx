@@ -23,6 +23,7 @@ import { sendVerificationEmail } from "@/lib/utils/send-mail";
 import FileUploader from "@/components/file-uploader";
 import { FileUploadModule } from "@/lib/modules/file-upload";
 import { Dictionary } from "@/i18n";
+import { SUPABASE_STORAGE_URL } from "@/lib/utils/get-image-url";
 
 type TSignUpForm = {
   translations: Dictionary;
@@ -165,7 +166,7 @@ const SignUpForm = React.forwardRef<
                         const file = files[0];
                         if (
                           file.name.includes(
-                            "https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/"
+                            SUPABASE_STORAGE_URL
                           )
                         ) {
                           field.onChange({ target: { value: file.name } });
@@ -174,7 +175,7 @@ const SignUpForm = React.forwardRef<
                         const fileUploader = new FileUploadModule();
                         const data = await fileUploader.upload(file);
                         const fileUrl =
-                          ("https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/" +
+                          (SUPABASE_STORAGE_URL +
                             data.path) as string;
                         field.onChange({ target: { value: fileUrl } });
                       }}

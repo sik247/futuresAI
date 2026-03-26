@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { runPriceAgent, type PriceAgentResult } from "@/lib/services/chart-analysis/agents/price.agent";
 import { sendGroupMessage, sendGroupPhoto } from "./telegram.service";
+import { cachedAI } from "@/lib/services/ai-cache";
 
 /* ------------------------------------------------------------------ */
 /*  Pairs to analyze — rotates through these                           */
@@ -93,7 +94,11 @@ async function generateQuantReport(
     resistances: number[];
   }
 ): Promise<string> {
-  try {
+  // Cache key based on pair + current price bucket (rounds to nearest $100 for BTC)
+  const priceBucket = Math.round(priceData.currentPrice / 100) * 100;
+  const cacheKey = `quant:${pairInfo.symbol}:${priceBucket}`;
+
+  return cachedAI(cacheKey, async () => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return "";
 
@@ -153,10 +158,7 @@ ${candleStr}
 
   const result = await model.generateContent(prompt);
   return result.response.text().trim();
-  } catch (error) {
-    console.error("[quant-report] Gemini generation failed:", error);
-    return "";
-  }
+  }, 20 * 60 * 1000); // 20 min cache — refreshes as price moves
 }
 
 /* ------------------------------------------------------------------ */

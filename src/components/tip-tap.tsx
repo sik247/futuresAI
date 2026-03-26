@@ -41,6 +41,7 @@ import {
 import { ScrollArea } from "./ui/scroll-area";
 import { richTextStore } from "@/lib/stores/rich-text-store";
 import { FileUploadModule } from "@/lib/modules/file-upload";
+import { SUPABASE_STORAGE_URL } from "@/lib/utils/get-image-url";
 import Loading from "./ui/loading";
 // import { emoticons } from "@/lib/constants/emoticons";
 
@@ -143,7 +144,7 @@ const Tiptap: React.FC<{
 
         totalImgHtml =
           totalImgHtml +
-          `<img src="https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/${data.path}" alt="image"/>`;
+          `<img src="${SUPABASE_STORAGE_URL}${data.path}" alt="image"/>`;
       }
       // updateRichText(totalImgHtml + "<br/>");
       editor
@@ -197,7 +198,7 @@ const Tiptap: React.FC<{
           const fileUploader = new FileUploadModule();
           const data = await fileUploader.upload(compressedFile);
 
-          totalImgHtml += `<img src="https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/${data.path}" alt="image"/>`;
+          totalImgHtml += `<img src="${SUPABASE_STORAGE_URL}${data.path}" alt="image"/>`;
         }
       }
 
@@ -247,7 +248,7 @@ const Tiptap: React.FC<{
           const fileUploader = new FileUploadModule();
           const data = await fileUploader.upload(compressedFile);
 
-          totalImgHtml += `<img src="https://nkkuehjtdudabogzwibw.supabase.co/storage/v1/object/public/CryptoX/${data.path}" alt="image"/>`;
+          totalImgHtml += `<img src="${SUPABASE_STORAGE_URL}${data.path}" alt="image"/>`;
         }
       }
 
