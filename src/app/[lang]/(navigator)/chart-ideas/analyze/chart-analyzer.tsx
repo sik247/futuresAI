@@ -358,10 +358,70 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
         </div>
       </div>
 
+      {/* How-To Guide (Collapsible) */}
+      {!analysis && (
+        <details className="group rounded-2xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
+          <summary className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-white/[0.02] transition-colors">
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 text-sm font-bold">?</span>
+              <span className="text-sm font-semibold text-zinc-200">
+                {lang === "ko" ? "차트 분석 사용법" : "How to Use Chart Analysis"}
+              </span>
+            </div>
+            <svg className="w-4 h-4 text-zinc-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+          </summary>
+          <div className="px-6 pb-5 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex flex-col gap-2 p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold text-sm">1</div>
+                <p className="text-sm font-semibold text-zinc-200">
+                  {lang === "ko" ? "차트 스크린샷 촬영" : "Screenshot Your Chart"}
+                </p>
+                <p className="text-xs text-zinc-500 leading-relaxed">
+                  {lang === "ko"
+                    ? "TradingView, 바이낸스 등에서 분석하고 싶은 차트를 캡처하세요. 4시간봉 또는 일봉 추천."
+                    : "Capture a chart from TradingView, Binance, etc. 4H or Daily timeframe recommended."}
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 font-bold text-sm">2</div>
+                <p className="text-sm font-semibold text-zinc-200">
+                  {lang === "ko" ? "이미지 업로드 & 페어 선택" : "Upload & Select Pair"}
+                </p>
+                <p className="text-xs text-zinc-500 leading-relaxed">
+                  {lang === "ko"
+                    ? "차트를 드래그 앤 드롭하거나 클릭하여 업로드하세요. 아래에서 거래 페어를 선택합니다."
+                    : "Drag & drop or click to upload. Select the trading pair below."}
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 font-bold text-sm">3</div>
+                <p className="text-sm font-semibold text-zinc-200">
+                  {lang === "ko" ? "AI 분석 결과 확인" : "Get AI Analysis"}
+                </p>
+                <p className="text-xs text-zinc-500 leading-relaxed">
+                  {lang === "ko"
+                    ? "AI가 지지/저항선, RSI, MACD, 피보나치 등을 분석합니다. 트레이드 설정(진입/손절/목표)도 제공됩니다."
+                    : "AI analyzes support/resistance, RSI, MACD, Fibonacci. Includes trade setup with entry, SL, and TP."}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 px-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400/60" />
+              <p className="text-xs text-zinc-500">
+                {lang === "ko"
+                  ? "팁: 캔들스틱과 지표가 잘 보이는 깨끗한 스크린샷이 더 정확한 분석을 제공합니다."
+                  : "Tip: Clean screenshots with visible candlesticks and indicators give more accurate results."}
+              </p>
+            </div>
+          </div>
+        </details>
+      )}
+
       {/* Pair Selector */}
       <div className="flex flex-col gap-3">
         <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
-          Trading Pair
+          {lang === "ko" ? "거래 페어" : "Trading Pair"}
         </label>
         <div className="flex flex-wrap gap-2">
           {POPULAR_PAIRS.map((p) => (
