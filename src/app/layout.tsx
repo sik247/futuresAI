@@ -10,6 +10,7 @@ import { GlobalAlertDialog } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import SessionProviders from "@/components/providers/session-provider";
 import { OrganizationJsonLd, WebsiteJsonLd } from "@/components/structured-data";
+import Script from "next/script";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -110,10 +111,11 @@ export default function RootLayout({
   return (
     <html suppressHydrationWarning className={`${inter.variable} ${notoSansKR.variable}`}>
       <head>
-        <script
+        <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2718044648644151"
           crossOrigin="anonymous"
+          strategy="afterInteractive"
         />
       </head>
       <body className={cn(inter.className, "bg-background text-foreground antialiased")}>
