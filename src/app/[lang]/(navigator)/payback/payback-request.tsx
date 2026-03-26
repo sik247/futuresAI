@@ -282,47 +282,128 @@ export default function PaybackRequest() {
         </form>
       )}
 
-      {/* Request History */}
+      {/* Request History — Timeline Style */}
       {history.length > 0 && (
-        <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] overflow-hidden">
-          <div className="px-6 py-4 border-b border-white/[0.06]">
-            <h3 className="text-sm font-semibold text-zinc-300">Request History</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/[0.06]">
-                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Exchange</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Network</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {history.map((req) => (
-                  <tr key={req.id} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
-                    <td className="px-6 py-4 text-zinc-400">
-                      {new Date(req.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-white">
-                      {req.exchangeAccounts.map((ea) => ea.exchange.name).join(", ")}
-                    </td>
-                    <td className="px-6 py-4 text-right font-mono tabular-nums text-emerald-400 font-semibold">
-                      ${req.amount.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="text-xs font-mono text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded">
-                        {req.network}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
+        <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-6">
+          <h3 className="text-sm font-semibold text-zinc-300 mb-6">Withdrawal History</h3>
+          <div className="space-y-4">
+            {history.map((req) => {
+              const isPending = req.status === "PENDING";
+              const isPaid = req.status === "SUCCESS";
+              const isRejected = req.status === "FAILED";
+
+              return (
+                <div
+                  key={req.id}
+                  className={`rounded-xl border p-5 transition-all ${
+                    isPending
+                      ? "border-amber-500/20 bg-amber-500/[0.03]"
+                      : isPaid
+                      ? "border-emerald-500/20 bg-emerald-500/[0.03]"
+                      : "border-red-500/20 bg-red-500/[0.03]"
+                  }`}
+                >
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
                       <StatusBadge status={req.status} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      <span className="text-sm font-semibold text-white font-mono">${req.amount.toFixed(2)}</span>
+                    </div>
+                    <span className="text-xs text-zinc-500">
+                      {new Date(req.createdAt).toLocaleDateString("ko-KR", { year: "numeric", month: "short", day: "numeric" })}
+                    </span>
+                  </div>
+
+                  {/* Progress Steps */}
+                  <div className="flex items-center gap-0 mb-4">
+                    {/* Step 1: Submitted */}
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
+                        <svg className="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      </div>
+                      <span className="text-[11px] text-emerald-400 font-medium">제출됨</span>
+                    </div>
+                    <div className={`flex-1 h-px mx-2 ${isPaid || isPending ? "bg-emerald-500/30" : "bg-red-500/30"}`} />
+
+                    {/* Step 2: Under Review */}
+                    <div className="flex items-center gap-2">
+                      <div className={`w-6 h-6 rounded-full border flex items-center justify-center ${
+                        isPending
+                          ? "bg-amber-500/20 border-amber-500/40"
+                          : isPaid
+                          ? "bg-emerald-500/20 border-emerald-500/40"
+                          : "bg-red-500/20 border-red-500/40"
+                      }`}>
+                        {isPending ? (
+                          <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                        ) : isPaid ? (
+                          <svg className="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        ) : (
+                          <svg className="w-3 h-3 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        )}
+                      </div>
+                      <span className={`text-[11px] font-medium ${isPending ? "text-amber-400" : isPaid ? "text-emerald-400" : "text-red-400"}`}>
+                        {isPending ? "검토 중" : isPaid ? "승인됨" : "거절됨"}
+                      </span>
+                    </div>
+                    <div className={`flex-1 h-px mx-2 ${isPaid ? "bg-emerald-500/30" : "bg-zinc-800"}`} />
+
+                    {/* Step 3: Paid */}
+                    <div className="flex items-center gap-2">
+                      <div className={`w-6 h-6 rounded-full border flex items-center justify-center ${
+                        isPaid
+                          ? "bg-emerald-500/20 border-emerald-500/40"
+                          : "bg-zinc-800/50 border-zinc-700/50"
+                      }`}>
+                        {isPaid ? (
+                          <svg className="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        ) : (
+                          <span className="text-[9px] text-zinc-600">3</span>
+                        )}
+                      </div>
+                      <span className={`text-[11px] font-medium ${isPaid ? "text-emerald-400" : "text-zinc-600"}`}>
+                        {isPaid ? "지급 완료" : "지급 대기"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Details */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div>
+                      <span className="text-zinc-600 block mb-0.5">거래소</span>
+                      <span className="text-zinc-300">{req.exchangeAccounts.map((ea) => ea.exchange.name).join(", ") || "—"}</span>
+                    </div>
+                    <div>
+                      <span className="text-zinc-600 block mb-0.5">네트워크</span>
+                      <span className="text-zinc-300 font-mono">{req.network}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-zinc-600 block mb-0.5">지갑 주소</span>
+                      <span className="text-zinc-300 font-mono text-[11px] break-all">{req.address}</span>
+                    </div>
+                  </div>
+
+                  {/* Paid date or rejection note */}
+                  {isPaid && req.paidAt && (
+                    <div className="mt-3 pt-3 border-t border-emerald-500/10">
+                      <span className="text-[11px] text-emerald-400">
+                        {new Date(req.paidAt).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}에 지급 완료
+                      </span>
+                    </div>
+                  )}
+                  {isRejected && req.adminNote && (
+                    <div className="mt-3 pt-3 border-t border-red-500/10">
+                      <span className="text-[11px] text-red-400">사유: {req.adminNote}</span>
+                    </div>
+                  )}
+                  {isPending && (
+                    <div className="mt-3 pt-3 border-t border-amber-500/10">
+                      <span className="text-[11px] text-amber-400">관리자 검토 중입니다. 일반적으로 24시간 이내에 처리됩니다.</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
