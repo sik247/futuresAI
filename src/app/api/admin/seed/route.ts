@@ -20,15 +20,13 @@ export async function GET(req: NextRequest) {
     const existing = await prisma.user.findUnique({ where: { email } });
 
     if (existing) {
-      // Ensure role is ADMIN
-      if (existing.role !== "ADMIN") {
-        await prisma.user.update({
-          where: { email },
-          data: { role: "ADMIN" },
-        });
-        return NextResponse.json({ message: "User upgraded to ADMIN", id: existing.id });
-      }
-      return NextResponse.json({ message: "Admin user already exists", id: existing.id });
+      // Always reset password and ensure ADMIN role
+      const hashedPw = await bcrypt.hash("admin69!", 10);
+      await prisma.user.update({
+        where: { email },
+        data: { role: "ADMIN", password: hashedPw },
+      });
+      return NextResponse.json({ message: "Admin password reset and role confirmed", id: existing.id });
     }
 
     const hashedPassword = await bcrypt.hash("admin69!", 10);
