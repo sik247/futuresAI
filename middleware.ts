@@ -32,6 +32,6 @@ export const config = {
   matcher: [
     // Skip all internal paths (_next)
     // Skip all API routes
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|ads\\.txt|robots\\.txt|sitemap\\.xml|opengraph-image|icon|apple-icon|images|icons).*)',
   ],
 };
