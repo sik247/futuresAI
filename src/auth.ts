@@ -86,12 +86,12 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: "/login",
+    signIn: "/en/login",
   },
   callbacks: {
     async signIn({ user, account }) {
-      // Allow credentials login as-is
-      if (account?.provider === "credentials") return true;
+      // Allow all credential-based logins (email + telegram)
+      if (account?.provider === "credentials" || account?.provider === "telegram") return true;
 
       // For OAuth, PrismaAdapter handles user/account creation automatically
       return true;
