@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileUploadModule } from "@/lib/modules/file-upload";
 import { SUPABASE_STORAGE_URL } from "@/lib/utils/get-image-url";
-import { CloudArrowUpIcon } from "@heroicons/react/24/outline";
+import { CloudArrowUpIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import { toast } from "@/components/ui/use-toast";
 import { Dictionary } from "@/i18n";
 import { ClipboardDocumentIcon, ShareIcon } from "@heroicons/react/24/outline";
@@ -137,6 +138,10 @@ const ANALYSIS_STAGES = [
 ];
 
 const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
+  const { data: session, status } = useSession();
+  const isAdmin = (session?.user as any)?.role === "ADMIN";
+  const isLoggedIn = status === "authenticated";
+
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
@@ -353,10 +358,19 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
             {translations.chartAnalysis_subtitle || "Drop your chart and get instant quant analysis with live market data"}
           </p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-emerald-400 text-sm font-semibold">Free Access</span>
-        </div>
+        {isAdmin ? (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-emerald-400 text-sm font-semibold">Admin Access</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30">
+            <LockClosedIcon className="w-4 h-4 text-amber-400" />
+            <span className="text-amber-400 text-sm font-semibold">
+              {lang === "ko" ? "구독자 전용" : "Subscribers Only"}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* How-To Guide (Collapsible) */}
@@ -419,6 +433,49 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
         </details>
       )}
 
+      {/* Paywall for non-logged-in or non-subscribed users */}
+      {!isLoggedIn ? (
+        <Card className="p-12 bg-zinc-950/50 backdrop-blur-sm border-white/10 flex flex-col items-center gap-6 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+            <LockClosedIcon className="w-8 h-8 text-amber-400" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <h2 className="text-xl font-bold text-zinc-200">
+              {lang === "ko" ? "로그인이 필요합니다" : "Login Required"}
+            </h2>
+            <p className="text-sm text-zinc-500 max-w-md">
+              {lang === "ko"
+                ? "AI 차트 분석을 이용하려면 먼저 로그인하세요."
+                : "Please log in to use AI Chart Analysis."}
+            </p>
+          </div>
+          <a href={`/${lang}/login`}>
+            <Button className="bg-blue-600 hover:bg-blue-500 text-white">
+              {lang === "ko" ? "로그인" : "Log In"}
+            </Button>
+          </a>
+        </Card>
+      ) : !isAdmin ? (
+        <Card className="p-12 bg-zinc-950/50 backdrop-blur-sm border-white/10 flex flex-col items-center gap-6 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+            <LockClosedIcon className="w-8 h-8 text-amber-400" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <h2 className="text-xl font-bold text-zinc-200">
+              {lang === "ko" ? "구독자 전용 기능" : "Subscribers Only"}
+            </h2>
+            <p className="text-sm text-zinc-500 max-w-md">
+              {lang === "ko"
+                ? "AI 차트 분석은 유료 구독자만 이용할 수 있습니다. 구독하여 무제한 분석을 시작하세요."
+                : "AI Chart Analysis is available to paid subscribers. Subscribe to start analyzing your charts with AI."}
+            </p>
+          </div>
+          <Button disabled className="bg-zinc-700 text-zinc-400 cursor-not-allowed">
+            {lang === "ko" ? "구독 준비 중" : "Coming Soon"}
+          </Button>
+        </Card>
+      ) : (
+      <>
       {/* Pair Selector */}
       <div className="flex flex-col gap-3">
         <label className="text-sm font-medium text-zinc-400 uppercase tracking-wider">
@@ -995,6 +1052,8 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
             );
           })()}
         </div>
+      )}
+      </>
       )}
     </div>
   );

@@ -15,9 +15,9 @@ export const metadata: Metadata = {
 const EXCHANGES = [
   { name: "Bitget", account: "base03", paybackRate: 55, makerFee: 0.02, takerFee: 0.06, link: "https://www.bitget.com" },
   { name: "Bybit", account: "BBLL", paybackRate: 20, makerFee: 0.02, takerFee: 0.055, link: "https://www.bybit.com" },
-  { name: "OKX", account: "COINBASE", paybackRate: 20, makerFee: 0.02, takerFee: 0.05, link: "https://www.okx.com" },
+  { name: "BingX", account: "FCC9QDJK", paybackRate: 50, makerFee: 0.02, takerFee: 0.05, link: "https://www.bingx.com" },
   { name: "Gate.io", account: "COINBASE", paybackRate: 75, makerFee: 0.02, takerFee: 0.05, link: "https://www.gate.io" },
-  { name: "HTX", account: "COINBASE", paybackRate: 54, makerFee: 0.02, takerFee: 0.05, link: "https://www.htx.com" },
+  { name: "HTX", account: "miqkc223", paybackRate: 54, makerFee: 0.02, takerFee: 0.05, link: "https://www.htx.com" },
 ];
 
 export default async function PaybackPage({

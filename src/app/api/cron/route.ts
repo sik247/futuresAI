@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { exchangeAccountsService } from "@/lib/services/exchange-accounts/exchange-accounts.service";
 import { bingXService } from "@/lib/services/exchanges/bingx.service";
 import { bitgetService } from "@/lib/services/exchanges/bitget.service";
-import { okxService } from "@/lib/services/exchanges/okx.service";
+// OKX removed — HTX added
 import { Prisma, Trade } from "@prisma/client";
 import {
   notifyAdmin,
@@ -87,8 +87,7 @@ function getHandler(exchangeAccount: TExchangeAccount): IHandler | null {
   switch (exchange.id) {
     case "3":
       return handleBitget;
-    case "5":
-      return handleOkx;
+    // case "5": OKX removed
     case "2":
       return handleBingx;
     // case "4":
@@ -98,30 +97,7 @@ function getHandler(exchangeAccount: TExchangeAccount): IHandler | null {
   }
 }
 
-const handleOkx: IHandler = async (exchangeAccount: TExchangeAccount) => {
-  let result: IHandlerReturn = { newTrades: [] };
-  const data = await okxService.getAffiliateData(exchangeAccount.uid);
-  if (data === undefined || data.payback === undefined) return result;
-  if (exchangeAccount.status !== "ACTIVE") {
-    exchangeAccountsService.activate(exchangeAccount.id);
-  }
-  if (data.payback === 0) return result;
-  const totalCommission = exchangeAccount.totalCommission;
-  const delta = data.payback - totalCommission;
-  if (delta === 0) return result;
-  const newTrades = await exchangeAccountsService.addTrades([
-    {
-      amount: delta,
-      exchangeAccount: {
-        connect: {
-          id: exchangeAccount.id,
-        },
-      },
-      payback: delta,
-    },
-  ]);
-  return { newTrades };
-};
+// OKX handler removed
 
 const handleBitget: IHandler = async (exchangeAccount: TExchangeAccount) => {
   let result: IHandlerReturn = { newTrades: [] };

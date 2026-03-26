@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import { bitgetService } from "@/lib/services/exchanges/bitget.service";
 import { byBitService } from "@/lib/services/exchanges/bybit.service";
 import { bingXService } from "@/lib/services/exchanges/bingx.service";
-import { okxService } from "@/lib/services/exchanges/okx.service";
+import { htxService } from "@/lib/services/exchanges/htx.service";
 
 interface ExchangeResult {
   exchange: string;
@@ -92,25 +92,22 @@ async function fetchBingX(): Promise<ExchangeResult> {
   }
 }
 
-async function fetchOkx(): Promise<ExchangeResult> {
+async function fetchHtx(): Promise<ExchangeResult> {
   try {
-    if (!process.env.OKX_API_KEY || !process.env.OKX_API_SECRET) {
-      return { exchange: "OKX", account: "COINBASE", status: "error", totalPayback: 0, entries: 0, error: "OKX_API_KEY or OKX_API_SECRET not set in env vars" };
+    if (!process.env.HTX_API_KEY || !process.env.HTX_API_SECRET) {
+      return { exchange: "HTX", account: "miqkc223", status: "error", totalPayback: 0, entries: 0, error: "HTX_API_KEY or HTX_API_SECRET not set in env vars" };
     }
-    if (!process.env.OKX_PASSPHRASE) {
-      return { exchange: "OKX", account: "COINBASE", status: "error", totalPayback: 0, entries: 0, error: "OKX_PASSPHRASE not set in env vars" };
-    }
-    const data = await okxService.getAffiliateData("594436422380389965");
+    const data = await htxService.getAffiliateData("miqkc223");
     return {
-      exchange: "OKX",
-      account: "COINBASE",
+      exchange: "HTX",
+      account: "miqkc223",
       status: data.ok ? "ok" : "error",
       totalPayback: data.payback || 0,
       entries: data.ok ? 1 : 0,
-      error: data.ok ? undefined : "OKX API returned error — check API key permissions",
+      error: data.ok ? undefined : (data as any).error || "HTX API error",
     };
   } catch (error: any) {
-    return { exchange: "OKX", account: "COINBASE", status: "error", totalPayback: 0, entries: 0, error: error.message };
+    return { exchange: "HTX", account: "miqkc223", status: "error", totalPayback: 0, entries: 0, error: error.message };
   }
 }
 
@@ -124,7 +121,7 @@ export async function GET() {
     fetchBitget(),
     fetchBybit(),
     fetchBingX(),
-    fetchOkx(),
+    fetchHtx(),
   ]);
 
   const exchanges = results.map((r) =>
