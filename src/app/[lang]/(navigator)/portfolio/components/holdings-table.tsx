@@ -22,6 +22,7 @@ type Props = {
   prices: Record<string, CoinPrice>;
   onDelete: () => void;
   onEdit: () => void;
+  lang?: string;
 };
 
 export default function HoldingsTable({
@@ -29,7 +30,9 @@ export default function HoldingsTable({
   prices,
   onDelete,
   onEdit,
+  lang,
 }: Props) {
+  const ko = lang === "ko";
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editQty, setEditQty] = useState("");
   const [editPrice, setEditPrice] = useState("");
@@ -98,34 +101,24 @@ export default function HoldingsTable({
     <Card className="p-0 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl overflow-hidden">
       <div className="px-6 py-4 border-b border-white/[0.06]">
         <h3 className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em]">
-          Holdings
+          {ko ? "보유 자산" : "Holdings"}
         </h3>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-white/[0.04]">
-              <th className="text-left text-[10px] text-zinc-600 font-mono uppercase tracking-wider px-6 py-3">
-                Asset
-              </th>
-              <th className="text-right text-[10px] text-zinc-600 font-mono uppercase tracking-wider px-4 py-3">
-                Price
-              </th>
-              <th className="text-right text-[10px] text-zinc-600 font-mono uppercase tracking-wider px-4 py-3">
-                24h
-              </th>
-              <th className="text-right text-[10px] text-zinc-600 font-mono uppercase tracking-wider px-4 py-3">
-                Qty
-              </th>
-              <th className="text-right text-[10px] text-zinc-600 font-mono uppercase tracking-wider px-4 py-3">
-                Value
-              </th>
-              <th className="text-right text-[10px] text-zinc-600 font-mono uppercase tracking-wider px-4 py-3">
-                P&L
-              </th>
-              <th className="text-right text-[10px] text-zinc-600 font-mono uppercase tracking-wider px-6 py-3">
-                Actions
-              </th>
+              {[
+                { label: ko ? "자산" : "Asset", align: "text-left", px: "px-6" },
+                { label: ko ? "가격" : "Price", align: "text-right", px: "px-4" },
+                { label: "24h", align: "text-right", px: "px-4" },
+                { label: ko ? "수량" : "Qty", align: "text-right", px: "px-4" },
+                { label: ko ? "가치" : "Value", align: "text-right", px: "px-4" },
+                { label: ko ? "손익" : "P&L", align: "text-right", px: "px-4" },
+                { label: ko ? "관리" : "Actions", align: "text-right", px: "px-6" },
+              ].map((h) => (
+                <th key={h.label} className={`${h.align} text-[10px] text-zinc-600 font-mono uppercase tracking-wider ${h.px} py-3`}>{h.label}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -215,7 +208,7 @@ export default function HoldingsTable({
                           disabled={loading === h.id}
                           className="text-xs border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 h-7 px-2"
                         >
-                          Save
+                          {ko ? "저장" : "Save"}
                         </Button>
                         <Button
                           size="sm"
@@ -223,7 +216,7 @@ export default function HoldingsTable({
                           onClick={() => setEditingId(null)}
                           className="text-xs border-zinc-700 text-zinc-400 h-7 px-2"
                         >
-                          Cancel
+                          {ko ? "취소" : "Cancel"}
                         </Button>
                       </>
                     ) : (

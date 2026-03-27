@@ -10,6 +10,10 @@ import { getAnalyzedTweets } from "./tweet-analysis.service";
 /*  1. HOURLY NEWS ALERT — one significant news item per hour          */
 /* ================================================================== */
 
+// Track recently sent news to avoid repeats (in-memory, resets on cold start)
+const recentlySentNews = new Set<string>();
+const MAX_SENT_HISTORY = 50;
+
 /**
  * Pick the single most important crypto news, translate to Korean,
  * add a brief AI analysis, and send as one clean message.
@@ -19,8 +23,12 @@ export async function sendHourlyNewsAlert(): Promise<boolean> {
     const allNews = await fetchCryptoNews();
     if (allNews.length === 0) return false;
 
+    // Filter out recently sent news
+    const freshNews = allNews.filter((n) => !recentlySentNews.has(n.title));
+    if (freshNews.length === 0) return false;
+
     // Use Gemini to pick the most market-significant news
-    const top10 = allNews.slice(0, 10);
+    const top10 = freshNews.slice(0, 10);
     const picked = await pickMostSignificantNews(
       top10.map((n) => ({ title: n.title, source: n.source, url: n.url }))
     );
@@ -54,7 +62,16 @@ export async function sendHourlyNewsAlert(): Promise<boolean> {
 
     msg += `<i>— FuturesAI</i>`;
 
-    return await sendGroupMessage(msg);
+    const sent = await sendGroupMessage(msg);
+    if (sent) {
+      recentlySentNews.add(newsItem.title);
+      // Evict old entries
+      if (recentlySentNews.size > MAX_SENT_HISTORY) {
+        const first = recentlySentNews.values().next().value;
+        if (first) recentlySentNews.delete(first);
+      }
+    }
+    return sent;
   } catch (error) {
     console.error("[telegram-group] 뉴스 알림 실패:", error);
     return false;

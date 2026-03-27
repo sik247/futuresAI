@@ -47,6 +47,8 @@
     { "path": "/api/cron-weekly-summary", "schedule": "0 0 * * 0" },
 
     { "path": "/api/cron-polymarket", "schedule": "0 23 * * *" },
-    { "path": "/api/cron-polymarket", "schedule": "0 9 * * *" }
+    { "path": "/api/cron-polymarket", "schedule": "0 9 * * *" },
+
+    { "path": "/api/cron-portfolio-snapshot", "schedule": "0 15 * * *" }
   ]
 }

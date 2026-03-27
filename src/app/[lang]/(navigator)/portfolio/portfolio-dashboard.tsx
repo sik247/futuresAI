@@ -143,16 +143,18 @@ export default function PortfolioDashboard({
   const formatUSD = (v: number) =>
     `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+  const ko = lang === "ko";
+
   return (
     <div className="max-w-7xl mx-auto px-6 pt-28 pb-16">
       {/* Header */}
       <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-            Portfolio
+            {ko ? "포트폴리오" : "Portfolio"}
           </h1>
           <p className="text-zinc-500 text-sm mt-1 font-mono">
-            Live tracking with real-time prices
+            {ko ? "실시간 가격으로 자산 추적" : "Live tracking with real-time prices"}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -166,7 +168,7 @@ export default function PortfolioDashboard({
             <ArrowPathIcon
               className={`w-4 h-4 mr-1.5 ${refreshing ? "animate-spin" : ""}`}
             />
-            Refresh
+            {ko ? "새로고침" : "Refresh"}
           </Button>
           <Button
             size="sm"
@@ -174,7 +176,7 @@ export default function PortfolioDashboard({
             className="bg-blue-600 hover:bg-blue-500 text-white"
           >
             <PlusIcon className="w-4 h-4 mr-1.5" />
-            Add Holdings
+            {ko ? "자산 추가" : "Add Holdings"}
           </Button>
         </div>
       </div>
@@ -184,7 +186,7 @@ export default function PortfolioDashboard({
         {/* Total Value */}
         <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
-            Total Value
+            {ko ? "총 자산 가치" : "Total Value"}
           </p>
           <p className="text-2xl font-mono font-bold text-white">
             {formatUSD(totalValue)}
@@ -194,7 +196,7 @@ export default function PortfolioDashboard({
         {/* Total P&L */}
         <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
-            Total P&L
+            {ko ? "총 손익" : "Total P&L"}
           </p>
           <div className="flex items-end gap-2">
             <p
@@ -215,7 +217,7 @@ export default function PortfolioDashboard({
         {/* 24h Change */}
         <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
-            24h Change
+            {ko ? "24시간 변동" : "24h Change"}
           </p>
           <div className="flex items-center gap-2">
             {change24h >= 0 ? (
@@ -241,7 +243,7 @@ export default function PortfolioDashboard({
         {/* Best Performer */}
         <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
-            Best Performer
+            {ko ? "최고 수익률" : "Best Performer"}
           </p>
           {bestPerformer ? (
             <div>
@@ -256,7 +258,7 @@ export default function PortfolioDashboard({
               </p>
             </div>
           ) : (
-            <p className="text-zinc-600 text-sm">No holdings yet</p>
+            <p className="text-zinc-600 text-sm">{ko ? "보유 자산 없음" : "No holdings yet"}</p>
           )}
         </Card>
       </div>
@@ -268,18 +270,19 @@ export default function PortfolioDashboard({
             <PlusIcon className="w-8 h-8 text-zinc-500" />
           </div>
           <h3 className="text-lg font-semibold text-zinc-300 mb-2">
-            No holdings yet
+            {ko ? "보유 자산 없음" : "No holdings yet"}
           </h3>
           <p className="text-zinc-500 text-sm mb-6 max-w-md mx-auto">
-            Add your crypto holdings manually, upload a CSV, or take a
-            screenshot of your exchange portfolio to get started.
+            {ko
+              ? "수동 입력, CSV 업로드, 또는 거래소 스크린샷으로 자산을 추가하세요."
+              : "Add your crypto holdings manually, upload a CSV, or take a screenshot of your exchange portfolio to get started."}
           </p>
           <Button
             onClick={() => setAddDialogOpen(true)}
             className="bg-blue-600 hover:bg-blue-500 text-white"
           >
             <PlusIcon className="w-4 h-4 mr-1.5" />
-            Add Your First Holding
+            {ko ? "첫 자산 추가하기" : "Add Your First Holding"}
           </Button>
         </Card>
       ) : (
@@ -287,7 +290,7 @@ export default function PortfolioDashboard({
           {/* Allocation Donut */}
           <Card className="p-6 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl">
             <h3 className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-4">
-              Allocation
+              {ko ? "배분" : "Allocation"}
             </h3>
             <div className="space-y-3">
               {portfolio.holdings
@@ -330,6 +333,7 @@ export default function PortfolioDashboard({
               prices={prices}
               onDelete={reloadPortfolio}
               onEdit={reloadPortfolio}
+              lang={lang}
             />
           </div>
 
