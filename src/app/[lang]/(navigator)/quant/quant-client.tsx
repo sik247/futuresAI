@@ -389,217 +389,213 @@ export default function QuantClient({
       <div className="max-w-7xl mx-auto px-6 pt-10 pb-24 sm:pb-32">
         {activeTab === "signals" && (
           <div>
-            {/* -- Market Overview ---------------------------------------- */}
+            {/* -- Market Regime Bar (Bloomberg-style) ---------------------- */}
             <div
               ref={overviewRef}
-              className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10"
+              className="rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl mb-8 overflow-hidden"
             >
-              {/* Fear & Greed */}
-              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.05]">
-                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-3">
-                  {t.quant_fearGreed} Index
-                </p>
-                <div className="flex items-end gap-3 mb-4">
-                  <AnimatedCounter
-                    value={fearGreed.value}
-                    decimals={0}
-                    className="text-4xl font-mono font-bold"
-                  />
-                  <span className="text-sm text-zinc-400 mb-1 font-mono">
-                    / 100 &middot; {fearGreed.classification}
-                  </span>
+              <div className="grid grid-cols-2 md:grid-cols-5 divide-x divide-white/[0.04]">
+                {/* Fear & Greed */}
+                <div className="p-5">
+                  <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-[0.2em] mb-2">{t.quant_fearGreed}</p>
+                  <div className="flex items-baseline gap-2">
+                    <AnimatedCounter value={fearGreed.value} decimals={0} className="text-2xl font-mono font-bold" />
+                    <span className={`text-[11px] font-mono font-semibold ${fearGreed.value <= 25 ? "text-red-400" : fearGreed.value <= 45 ? "text-orange-400" : fearGreed.value <= 55 ? "text-yellow-400" : fearGreed.value <= 75 ? "text-lime-400" : "text-emerald-400"}`}>
+                      {fearGreed.classification}
+                    </span>
+                  </div>
+                  <div className="h-1 rounded-full bg-white/[0.06] mt-2 overflow-hidden">
+                    <div className={`h-full rounded-full bg-gradient-to-r ${fearGreedColor(fearGreed.value)} transition-all duration-700`} style={{ width: `${fearGreed.value}%` }} />
+                  </div>
                 </div>
-                {/* Gauge bar */}
-                <div className="h-2.5 rounded-full bg-white/[0.06] overflow-hidden">
-                  <div
-                    className={`h-full rounded-full bg-gradient-to-r ${fearGreedColor(
-                      fearGreed.value
-                    )} transition-all duration-700`}
-                    style={{ width: `${fearGreed.value}%` }}
-                  />
-                </div>
-                <div className="flex justify-between mt-1.5">
-                  <span className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">
-                    Extreme Fear
-                  </span>
-                  <span className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">
-                    Extreme Greed
-                  </span>
-                </div>
-              </div>
 
-              {/* BTC Trend */}
-              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.05]">
-                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-3">
-                  {t.quant_btcTrend} &middot; 7-Day SMA
-                </p>
-                <p className="text-2xl font-mono font-bold mb-2">
-                  {btcTrend === "above_sma" ? (
-                    <span className="text-emerald-400">{t.quant_aboveSma}</span>
-                  ) : (
-                    <span className="text-red-400">{t.quant_belowSma}</span>
-                  )}
-                </p>
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`h-1.5 w-1.5 rounded-full ${
-                      btcTrend === "above_sma"
-                        ? "bg-emerald-500"
-                        : "bg-red-500"
-                    }`}
-                  />
-                  <span className="text-xs text-zinc-500 font-mono">
-                    {btcTrend === "above_sma" ? "Bullish" : "Bearish"} bias
+                {/* BTC Trend */}
+                <div className="p-5">
+                  <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-[0.2em] mb-2">{t.quant_btcTrend}</p>
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${btcTrend === "above_sma" ? "bg-emerald-500" : "bg-red-500"}`} />
+                    <span className={`text-lg font-mono font-bold ${btcTrend === "above_sma" ? "text-emerald-400" : "text-red-400"}`}>
+                      {btcTrend === "above_sma" ? t.quant_aboveSma : t.quant_belowSma}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-zinc-600 font-mono mt-1">7-Day SMA</p>
+                </div>
+
+                {/* Bull/Bear Ratio */}
+                <div className="p-5">
+                  <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-[0.2em] mb-2">Signal Ratio</p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-emerald-400 text-lg font-mono font-bold">{signals.filter(s => s.signal === "Strong Buy" || s.signal === "Buy").length}</span>
+                    <span className="text-zinc-600 text-sm font-mono">/</span>
+                    <span className="text-zinc-400 text-lg font-mono font-bold">{signals.filter(s => s.signal === "Neutral").length}</span>
+                    <span className="text-zinc-600 text-sm font-mono">/</span>
+                    <span className="text-red-400 text-lg font-mono font-bold">{signals.filter(s => s.signal === "Strong Sell" || s.signal === "Sell").length}</span>
+                  </div>
+                  <p className="text-[10px] text-zinc-600 font-mono mt-1">Buy / Neutral / Sell</p>
+                </div>
+
+                {/* BTC Price */}
+                <div className="p-5">
+                  <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-[0.2em] mb-2">BTC/USDT</p>
+                  <AnimatedCounter value={signals[0]?.price || 0} prefix="$" decimals={0} className="text-lg font-mono font-bold text-white" />
+                  <span className={`text-[11px] font-mono font-semibold ml-2 ${(signals[0]?.change24h || 0) >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                    {(signals[0]?.change24h || 0) >= 0 ? "+" : ""}{(signals[0]?.change24h || 0).toFixed(2)}%
                   </span>
                 </div>
-              </div>
 
-              {/* Market Summary */}
-              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.05]">
-                <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-3">
-                  {t.quant_marketSummary}
-                </p>
-                <p className="text-sm text-zinc-300 leading-relaxed">
-                  {marketSummary}
-                </p>
+                {/* Refresh */}
+                <div className="p-5 flex flex-col justify-between">
+                  <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-[0.2em] mb-2">{t.quant_autoRefresh}</p>
+                  <span className="text-lg font-mono font-bold text-zinc-400 tabular-nums">{countdownDisplay}</span>
+                  <button onClick={handleRefresh} disabled={loading}
+                    className="mt-1 text-[10px] font-mono text-blue-400 hover:text-blue-300 transition-colors disabled:opacity-40">
+                    {loading ? "..." : t.quant_refreshNow}
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* -- Refresh bar ------------------------------------------- */}
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold tracking-tight">
-                {t.quant_assetSignals}
-              </h2>
-              <div className="flex items-center gap-3">
-                <span className="text-[10px] font-mono text-zinc-600 hidden sm:inline">
-                  Last updated: {new Date(data.updatedAt).toLocaleTimeString()}
-                </span>
-                <span className="text-[10px] font-mono text-zinc-600">
-                  {t.quant_autoRefresh} {countdownDisplay}
-                </span>
-                <button
-                  onClick={handleRefresh}
-                  disabled={loading}
-                  className="px-4 py-2 text-xs font-mono font-medium rounded-xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-200 disabled:opacity-40"
-                >
-                  {loading ? "..." : t.quant_refreshNow}
-                </button>
-              </div>
+            {/* -- Market Summary ----------------------------------------- */}
+            <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] px-6 py-4 mb-8">
+              <p className="text-sm text-zinc-400 leading-relaxed">
+                <span className="text-zinc-200 font-semibold">{t.quant_marketSummary}:</span>{" "}
+                {marketSummary}
+              </p>
             </div>
 
-            {/* -- Signal Cards Grid -------------------------------------- */}
+            {/* -- Asset Signals Header ----------------------------------- */}
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-1 h-5 rounded-full bg-blue-500/70" />
+              <h2 className="text-base font-semibold tracking-tight text-zinc-200">{t.quant_assetSignals}</h2>
+              <span className="text-[10px] font-mono text-zinc-600">{signals.length} assets</span>
+              <span className="text-[10px] font-mono text-zinc-700 hidden sm:inline">
+                Updated: {new Date(data.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              </span>
+            </div>
+
+            {/* -- Signal Table (Bloomberg-style) -------------------------- */}
             <div
               ref={cardsRef}
-              className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-12"
+              className="rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl overflow-hidden mb-8"
             >
+              {/* Table Header */}
+              <div className="grid grid-cols-12 gap-0 px-6 py-3 border-b border-white/[0.06] text-[9px] font-mono text-zinc-600 uppercase tracking-[0.15em]">
+                <div className="col-span-3">Asset</div>
+                <div className="col-span-2 text-right">Price</div>
+                <div className="col-span-1 text-right">24h</div>
+                <div className="col-span-2 text-right">Volume</div>
+                <div className="col-span-2 text-center">Signal</div>
+                <div className="col-span-2 text-right">{t.quant_confidence}</div>
+              </div>
+
+              {/* Signal Rows */}
               {signals.map((s) => {
                 const icon = COIN_ICONS[s.symbol];
                 const gradient = icon?.gradient ?? "from-zinc-500 to-zinc-700";
                 const label = icon?.emoji ?? s.symbol.charAt(0);
-                const signalStyle = SIGNAL_COLORS[s.signal] ?? {
-                  bg: "",
-                  glow: "",
-                };
+                const signalStyle = SIGNAL_COLORS[s.signal] ?? { bg: "", glow: "" };
 
                 return (
                   <div
                     key={s.symbol}
-                    className="group rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 flex flex-col gap-5 transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+                    className="group grid grid-cols-12 gap-0 items-center px-6 py-4 border-b border-white/[0.03] hover:bg-white/[0.03] transition-all duration-200"
                   >
-                    {/* Header row */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`h-11 w-11 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-lg`}
-                        >
-                          {label}
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold leading-tight">
-                            {s.coin}
-                          </h3>
-                          <p className="text-[11px] text-zinc-500 font-mono">
-                            {s.symbol}
-                          </p>
-                        </div>
+                    {/* Asset */}
+                    <div className="col-span-3 flex items-center gap-3">
+                      <div className={`h-9 w-9 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-xs flex-shrink-0`}>
+                        {label}
                       </div>
-                      <span
-                        className={`px-3.5 py-1.5 text-[11px] font-mono font-bold rounded-full border ${signalStyle.bg} ${signalStyle.glow}`}
-                      >
+                      <div>
+                        <h3 className="text-sm font-semibold text-white leading-tight">{s.coin}</h3>
+                        <p className="text-[10px] text-zinc-500 font-mono">{s.symbol}/USDT</p>
+                      </div>
+                    </div>
+
+                    {/* Price */}
+                    <div className="col-span-2 text-right">
+                      <AnimatedCounter value={s.price} prefix="$" decimals={s.price > 100 ? 0 : 2} className="text-sm font-mono font-bold text-white tabular-nums" />
+                    </div>
+
+                    {/* 24h Change */}
+                    <div className="col-span-1 text-right">
+                      <span className={`text-xs font-mono font-bold tabular-nums ${s.change24h >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                        {s.change24h >= 0 ? "+" : ""}{s.change24h.toFixed(2)}%
+                      </span>
+                    </div>
+
+                    {/* Volume */}
+                    <div className="col-span-2 text-right">
+                      <span className="text-xs font-mono text-zinc-400 tabular-nums">{formatVolume(s.volume24h)}</span>
+                    </div>
+
+                    {/* Signal */}
+                    <div className="col-span-2 flex justify-center">
+                      <span className={`px-3 py-1 text-[10px] font-mono font-bold rounded-full border ${signalStyle.bg} ${signalStyle.glow}`}>
                         {s.signal}
                       </span>
                     </div>
 
-                    {/* Price + change + volume */}
-                    <div className="flex items-end justify-between">
-                      <div className="flex items-end gap-3">
-                        <AnimatedCounter
-                          value={s.price}
-                          prefix="$"
-                          decimals={s.price > 100 ? 2 : 4}
-                          className="text-3xl font-mono font-bold tracking-tight"
-                        />
-                        <span
-                          className={`text-sm font-mono font-semibold mb-0.5 px-2 py-0.5 rounded-md ${
-                            s.change24h >= 0
-                              ? "text-emerald-400 bg-emerald-500/10"
-                              : "text-red-400 bg-red-500/10"
-                          }`}
-                        >
-                          {s.change24h >= 0 ? "+" : ""}
-                          {s.change24h.toFixed(2)}%
-                        </span>
-                      </div>
-                      {s.volume24h > 0 && (
-                        <div className="text-right">
-                          <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">
-                            24h Vol
-                          </p>
-                          <p className="text-xs text-zinc-400 font-mono">
-                            {formatVolume(s.volume24h)}
-                          </p>
+                    {/* Confidence */}
+                    <div className="col-span-2">
+                      <div className="flex items-center gap-2 justify-end">
+                        <div className="w-16 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                          <div className={`h-full rounded-full bg-gradient-to-r ${confidenceBarColor(s.confidence)} transition-all duration-700`} style={{ width: `${s.confidence}%` }} />
                         </div>
-                      )}
-                    </div>
-
-                    {/* Confidence bar */}
-                    <div>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">
-                          {t.quant_confidence}
-                        </span>
-                        <AnimatedCounter
-                          value={s.confidence}
-                          suffix="%"
-                          decimals={0}
-                          className="text-[11px] font-mono font-semibold text-zinc-400"
-                        />
+                        <AnimatedCounter value={s.confidence} suffix="%" decimals={0} className="text-[11px] font-mono font-semibold text-zinc-400 tabular-nums w-8 text-right" />
                       </div>
-                      <div className="h-2 rounded-full bg-white/[0.06] overflow-hidden">
-                        <div
-                          className={`h-full rounded-full bg-gradient-to-r ${confidenceBarColor(
-                            s.confidence
-                          )} transition-all duration-700`}
-                          style={{ width: `${s.confidence}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Reasons as tags */}
-                    <div className="flex flex-wrap gap-1.5">
-                      {s.reasons.slice(0, 3).map((r, i) => (
-                        <span
-                          key={i}
-                          className="inline-flex items-center gap-1.5 text-[11px] text-zinc-400 px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/[0.06]"
-                        >
-                          <span className="h-1 w-1 rounded-full bg-zinc-600 flex-shrink-0" />
-                          {r}
-                        </span>
-                      ))}
                     </div>
                   </div>
                 );
               })}
+
+              {/* Expanded Detail Cards (below table on mobile) */}
+              <div className="md:hidden divide-y divide-white/[0.04]">
+                {signals.map((s) => {
+                  const signalStyle = SIGNAL_COLORS[s.signal] ?? { bg: "", glow: "" };
+                  return (
+                    <div key={`mobile-${s.symbol}`} className="p-5 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold text-white">{s.symbol}</span>
+                        <span className={`px-2.5 py-1 text-[10px] font-mono font-bold rounded-full border ${signalStyle.bg}`}>{s.signal}</span>
+                      </div>
+                      <div className="flex justify-between text-xs font-mono">
+                        <span className="text-zinc-400">Price</span>
+                        <span className="text-white">${s.price.toLocaleString(undefined, { maximumFractionDigits: s.price > 100 ? 0 : 2 })}</span>
+                      </div>
+                      <div className="flex justify-between text-xs font-mono">
+                        <span className="text-zinc-400">24h</span>
+                        <span className={s.change24h >= 0 ? "text-emerald-400" : "text-red-400"}>{s.change24h >= 0 ? "+" : ""}{s.change24h.toFixed(2)}%</span>
+                      </div>
+                      <div className="flex justify-between text-xs font-mono">
+                        <span className="text-zinc-400">{t.quant_confidence}</span>
+                        <span className="text-zinc-300">{s.confidence}%</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* -- Reasons/Analysis Panel --------------------------------- */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+              {signals.map((s) => (
+                <div key={`reasons-${s.symbol}`} className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xs font-mono font-bold text-zinc-300">{s.symbol}</span>
+                    <span className={`text-[10px] font-mono ${s.change24h >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                      {s.change24h >= 0 ? "+" : ""}{s.change24h.toFixed(2)}%
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {s.reasons.map((r, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <span className="mt-1.5 w-1 h-1 rounded-full bg-zinc-600 flex-shrink-0" />
+                        <span className="text-[12px] text-zinc-400 leading-relaxed">{r}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* -- Disclaimer -------------------------------------------- */}
