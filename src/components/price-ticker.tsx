@@ -9,7 +9,13 @@ interface CoinPrice {
   price_change_percentage_24h: number;
 }
 
-const COINS = "bitcoin,ethereum,solana,ripple,binancecoin";
+const SYMBOLS = [
+  { id: "bitcoin", symbol: "BTC", binance: "BTCUSDT" },
+  { id: "ethereum", symbol: "ETH", binance: "ETHUSDT" },
+  { id: "solana", symbol: "SOL", binance: "SOLUSDT" },
+  { id: "ripple", symbol: "XRP", binance: "XRPUSDT" },
+  { id: "binancecoin", symbol: "BNB", binance: "BNBUSDT" },
+];
 
 export function PriceTicker() {
   const [prices, setPrices] = useState<CoinPrice[]>([]);
@@ -17,10 +23,21 @@ export function PriceTicker() {
   useEffect(() => {
     const fetchPrices = async () => {
       try {
-        const res = await fetch(
-          `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${COINS}&order=market_cap_desc&sparkline=false`
+        const results = await Promise.all(
+          SYMBOLS.map(async (s) => {
+            const res = await fetch(
+              `https://api.binance.com/api/v3/ticker/24hr?symbol=${s.binance}`
+            );
+            const data = await res.json();
+            return {
+              id: s.id,
+              symbol: s.symbol,
+              current_price: parseFloat(data.lastPrice),
+              price_change_percentage_24h: parseFloat(data.priceChangePercent),
+            };
+          })
         );
-        if (res.ok) setPrices(await res.json());
+        setPrices(results);
       } catch {
         // silently fail — ticker will remain hidden
       }

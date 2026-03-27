@@ -24,7 +24,8 @@ export function TradingViewChart({
     script.type = "text/javascript";
     script.async = true;
     script.innerHTML = JSON.stringify({
-      autosize: true,
+      width: "100%",
+      height: containerRef.current?.clientHeight || 800,
       symbol,
       interval: "D",
       timezone: "Etc/UTC",

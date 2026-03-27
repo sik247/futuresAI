@@ -70,7 +70,7 @@ export async function parseOrderScreenshot(
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-pro-preview-05-06",
+    model: "gemini-2.5-pro",
   });
 
   const { data, mimeType } = await fetchImageAsBase64(imageUrl);

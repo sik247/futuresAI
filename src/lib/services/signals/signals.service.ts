@@ -86,24 +86,59 @@ function buildReasons(
   return reasons;
 }
 
+async function fetchBinancePrices() {
+  const symbols = [
+    { id: "bitcoin", symbol: "BTCUSDT" },
+    { id: "ethereum", symbol: "ETHUSDT" },
+    { id: "solana", symbol: "SOLUSDT" },
+    { id: "ripple", symbol: "XRPUSDT" },
+  ];
+
+  const tickers = await Promise.all(
+    symbols.map(async (s) => {
+      const res = await fetch(
+        `https://api.binance.com/api/v3/ticker/24hr?symbol=${s.symbol}`,
+        { next: { revalidate: 300 } }
+      );
+      const data = await res.json();
+      return {
+        id: s.id,
+        usd: parseFloat(data.lastPrice),
+        usd_24h_change: parseFloat(data.priceChangePercent),
+        usd_24h_vol: parseFloat(data.quoteVolume),
+      };
+    })
+  );
+
+  const result: Record<string, { usd: number; usd_24h_change: number; usd_24h_vol: number }> = {};
+  for (const t of tickers) {
+    result[t.id] = { usd: t.usd, usd_24h_change: t.usd_24h_change, usd_24h_vol: t.usd_24h_vol };
+  }
+  return result;
+}
+
+async function fetchBtcKlines(): Promise<number[][]> {
+  const res = await fetch(
+    "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=42",
+    { next: { revalidate: 300 } }
+  );
+  return res.json();
+}
+
 export async function fetchMarketSignals(): Promise<MarketSignals> {
-  const [priceRes, fngRes, ohlcRes] = await Promise.all([
-    fetch(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,ripple&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true",
-      { next: { revalidate: 300 } }
-    ),
+  const [priceData, fngRes, klineData] = await Promise.all([
+    fetchBinancePrices(),
     fetch("https://api.alternative.me/fng/?limit=1", {
       next: { revalidate: 300 },
     }),
-    fetch(
-      "https://api.coingecko.com/api/v3/coins/bitcoin/ohlc?vs_currency=usd&days=7",
-      { next: { revalidate: 300 } }
-    ),
+    fetchBtcKlines(),
   ]);
 
-  const priceData = await priceRes.json();
   const fngData = await fngRes.json();
-  const ohlcData: number[][] = await ohlcRes.json();
+  // Binance klines: [openTime, open, high, low, close, ...]
+  const ohlcData: number[][] = Array.isArray(klineData)
+    ? klineData.map((k: any) => [k[0], parseFloat(k[1]), parseFloat(k[2]), parseFloat(k[3]), parseFloat(k[4])])
+    : [];
 
   // Fear & Greed
   const fngEntry = fngData?.data?.[0] ?? { value: "50", value_classification: "Neutral" };
