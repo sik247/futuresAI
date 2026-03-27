@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { fetchMarketSignals } from "@/lib/services/signals/signals.service";
 
-export const revalidate = 300;
+export const revalidate = 60;
 
 export async function GET() {
   try {

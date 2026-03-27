@@ -98,14 +98,14 @@ async function fetchBinancePrices() {
     symbols.map(async (s) => {
       const res = await fetch(
         `https://api.binance.com/api/v3/ticker/24hr?symbol=${s.symbol}`,
-        { next: { revalidate: 300 } }
+        { next: { revalidate: 60 } }
       );
       const data = await res.json();
       return {
         id: s.id,
-        usd: parseFloat(data.lastPrice),
-        usd_24h_change: parseFloat(data.priceChangePercent),
-        usd_24h_vol: parseFloat(data.quoteVolume),
+        usd: parseFloat(data.lastPrice) || 0,
+        usd_24h_change: parseFloat(data.priceChangePercent) || 0,
+        usd_24h_vol: parseFloat(data.quoteVolume) || 0,
       };
     })
   );
@@ -120,7 +120,7 @@ async function fetchBinancePrices() {
 async function fetchBtcKlines(): Promise<number[][]> {
   const res = await fetch(
     "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=42",
-    { next: { revalidate: 300 } }
+    { next: { revalidate: 60 } }
   );
   return res.json();
 }
