@@ -25,7 +25,7 @@ const notoSansKR = Noto_Sans_KR({
   display: "swap",
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://futuresai.com";
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://futuresai.io";
 
 export const viewport: Viewport = {
   width: "device-width",

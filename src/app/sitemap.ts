@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://futuresai.com'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://futuresai.io'
   const pages = [
     'dashboard', 'charts', 'signals', 'markets', 'whales',
     'sns', 'news', 'calculator', 'chart-ideas', 'payback',

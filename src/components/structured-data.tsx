@@ -4,8 +4,8 @@ export function OrganizationJsonLd() {
     '@type': 'Organization',
     name: 'Futures AI',
     description: 'AI-Powered Crypto Trading Intelligence Platform',
-    url: 'https://futuresai.com',
-    logo: 'https://futuresai.com/images/futures-ai-logo.png',
+    url: 'https://futuresai.io',
+    logo: 'https://futuresai.io/images/futures-ai-logo.png',
     sameAs: [
       'https://www.youtube.com/@TetherBase',
     ],
@@ -30,10 +30,10 @@ export function WebsiteJsonLd() {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'Futures AI',
-    url: 'https://futuresai.com',
+    url: 'https://futuresai.io',
     potentialAction: {
       '@type': 'SearchAction',
-      target: 'https://futuresai.com/en/news?q={search_term_string}',
+      target: 'https://futuresai.io/en/news?q={search_term_string}',
       'query-input': 'required name=search_term_string',
     },
   }

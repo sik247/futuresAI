@@ -64,7 +64,7 @@ const Footer: React.FC<TFooter> = ({ lang = "en", translations }) => {
               AI-powered crypto trading signals, whale tracking, market analytics, and trading rebates.
             </p>
             <div className="text-zinc-600 text-sm space-y-1.5 mt-1">
-              <a href="mailto:support@futuresai.com" className="hover:text-zinc-400 transition-colors duration-300">support@futuresai.com</a>
+              <a href="mailto:support@futuresai.io" className="hover:text-zinc-400 transition-colors duration-300">support@futuresai.io</a>
               <p>Live Chat Support (24/7)</p>
             </div>
           </div>
