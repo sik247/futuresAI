@@ -62,7 +62,7 @@ const LoginPage: React.FC<TLoginPage> = async ({ params: { lang } }) => {
           <div className="absolute -top-px inset-x-6 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />
 
           {/* Social login buttons */}
-          <SocialLoginButtons />
+          <SocialLoginButtons lang={lang} />
 
           {/* Divider */}
           <div className="relative flex items-center mb-6">
@@ -74,7 +74,7 @@ const LoginPage: React.FC<TLoginPage> = async ({ params: { lang } }) => {
           </div>
 
           {/* Login form */}
-          <LoginForm translations={t} />
+          <LoginForm translations={t} lang={lang} />
 
           {/* Forgot password */}
           <div className="mt-4 text-center">

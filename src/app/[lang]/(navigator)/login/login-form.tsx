@@ -21,12 +21,14 @@ import { Dictionary } from "@/i18n";
 
 type TLoginForm = {
   translations: Dictionary;
+  lang?: string;
 };
 
 const LoginForm = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & TLoginForm
->(({ translations: t, ...props }, ref) => {
+>(({ translations: t, lang, ...props }, ref) => {
+  const ko = lang === "ko";
   const router = useRouter();
   const formSchema = z.object({
     email: z
@@ -89,7 +91,7 @@ const LoginForm = React.forwardRef<
             render={({ field }) => (
               <FormItem>
                 <label className="block text-xs font-mono text-zinc-400 mb-1.5 uppercase tracking-wider">
-                  Email
+                  {ko ? "이메일" : "Email"}
                 </label>
                 <FormControl>
                   <Input
@@ -108,7 +110,7 @@ const LoginForm = React.forwardRef<
             render={({ field }) => (
               <FormItem>
                 <label className="block text-xs font-mono text-zinc-400 mb-1.5 uppercase tracking-wider">
-                  Password
+                  {ko ? "비밀번호" : "Password"}
                 </label>
                 <FormControl>
                   <Input
