@@ -6,12 +6,6 @@ function getBotToken(): string {
   return token;
 }
 
-function getAdminChatId(): string {
-  const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
-  if (!chatId) throw new Error("TELEGRAM_ADMIN_CHAT_ID not configured");
-  return chatId;
-}
-
 export async function sendTelegramMessage(
   chatId: string,
   text: string,
@@ -42,108 +36,23 @@ export async function sendTelegramMessage(
   }
 }
 
-export async function notifyAdmin(text: string): Promise<boolean> {
-  return sendTelegramMessage(getAdminChatId(), text);
+/**
+ * Admin notifications DISABLED — bot is now channel-only.
+ * Admin duties moved to web dashboard at /dashboard/admin.
+ * Keeping the function signature so callers don't break.
+ */
+export async function notifyAdmin(_text: string): Promise<boolean> {
+  // Admin notifications disabled — check admin dashboard instead
+  return true;
 }
 
-// -- Notification templates --
+// Admin template functions kept for compatibility but not used
+export function formatTradeNotification(_trades: any[]): string { return ""; }
+export function formatDailySummary(_data: any): string { return ""; }
+export function formatWithdrawalRequest(_data: any): string { return ""; }
+export function formatChartAnalysisNotification(_data: any): string { return ""; }
 
-export function formatTradeNotification(trades: {
-  exchange: string;
-  uid: string;
-  amount: number;
-  count: number;
-}[]): string {
-  if (trades.length === 0) return "";
-
-  const totalAmount = trades.reduce((sum, t) => sum + t.amount, 0);
-  const totalCount = trades.reduce((sum, t) => sum + t.count, 0);
-
-  let msg = `<b>New Trades Synced</b>\n\n`;
-  for (const t of trades) {
-    msg += `  <b>${t.exchange}</b> (${t.uid})\n`;
-    msg += `  ${t.count} trade(s) — $${t.amount.toFixed(2)}\n\n`;
-  }
-  msg += `<b>Total:</b> ${totalCount} trades — <b>$${totalAmount.toFixed(2)}</b>`;
-  return msg;
-}
-
-export function formatDailySummary(data: {
-  exchanges: { name: string; payback: number; status: string }[];
-  grandTotal: number;
-  pendingWithdrawals: number;
-  pendingWithdrawalAmount: number;
-  pendingAnalyses: number;
-  pendingAnalysisRevenue: number;
-}): string {
-  const now = new Date().toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-
-  let msg = `<b>Daily Admin Summary</b>\n<i>${now}</i>\n\n`;
-
-  // Exchange breakdown
-  msg += `<b>Exchange Paybacks</b>\n`;
-  for (const ex of data.exchanges) {
-    const icon = ex.status === "ok" ? "✅" : "❌";
-    msg += `${icon} ${ex.name}: <b>$${ex.payback.toFixed(2)}</b>\n`;
-  }
-  msg += `\n<b>Total Payback:</b> $${data.grandTotal.toFixed(2)}\n\n`;
-
-  // Pending withdrawals
-  if (data.pendingWithdrawals > 0) {
-    msg += `<b>Pending Withdrawals:</b> ${data.pendingWithdrawals} ($${data.pendingWithdrawalAmount.toFixed(2)})\n`;
-  } else {
-    msg += `<b>Pending Withdrawals:</b> None\n`;
-  }
-
-  // Chart analysis revenue
-  if (data.pendingAnalyses > 0) {
-    msg += `<b>Pending Chart Analyses:</b> ${data.pendingAnalyses} ($${data.pendingAnalysisRevenue.toFixed(2)})\n`;
-  }
-
-  msg += `\n<i>— FuturesAI</i>`;
-  return msg;
-}
-
-export function formatWithdrawalRequest(data: {
-  userName: string;
-  email: string;
-  amount: number;
-  network: string;
-  address: string;
-  exchanges: string[];
-}): string {
-  return (
-    `<b>New Withdrawal Request</b>\n\n` +
-    `<b>User:</b> ${data.userName} (${data.email})\n` +
-    `<b>Amount:</b> $${data.amount.toFixed(2)}\n` +
-    `<b>Network:</b> ${data.network}\n` +
-    `<b>Address:</b> <code>${data.address}</code>\n` +
-    `<b>Exchanges:</b> ${data.exchanges.join(", ")}\n\n` +
-    `<i>Please review in the admin dashboard.</i>`
-  );
-}
-
-export function formatChartAnalysisNotification(data: {
-  userName: string;
-  trend: string;
-  confidence: number;
-  cost: number;
-}): string {
-  return (
-    `<b>New Chart Analysis</b>\n\n` +
-    `<b>User:</b> ${data.userName}\n` +
-    `<b>Trend:</b> ${data.trend}\n` +
-    `<b>Confidence:</b> ${data.confidence}%\n` +
-    `<b>Charge:</b> ${data.cost.toFixed(0)} USDT (pending approval)\n`
-  );
-}
-
-// -- Group chat helpers --
+// -- Channel (Korean content bot) --
 
 function getGroupChatId(): string {
   const chatId = process.env.TELEGRAM_GROUP_CHAT_ID;
