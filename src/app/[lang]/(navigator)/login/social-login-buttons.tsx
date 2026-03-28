@@ -30,7 +30,8 @@ export function SocialLoginButtons({ lang }: { lang?: string }) {
         username: user.username || "",
         hash: user.hash || "",
         auth_date: String(user.auth_date || ""),
-        callbackUrl: "/",
+        callbackUrl: `/${lang || "ko"}/dashboard`,
+        redirect: true,
       });
     };
 
