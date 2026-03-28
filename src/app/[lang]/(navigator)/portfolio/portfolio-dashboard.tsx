@@ -184,7 +184,7 @@ export default function PortfolioDashboard({
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {/* Total Value */}
-        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl">
+        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl shadow-lg shadow-black/30">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
             {ko ? "총 자산 가치" : "Total Value"}
           </p>
@@ -194,7 +194,7 @@ export default function PortfolioDashboard({
         </Card>
 
         {/* Total P&L */}
-        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl">
+        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl shadow-lg shadow-black/30">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
             {ko ? "총 손익" : "Total P&L"}
           </p>
@@ -215,7 +215,7 @@ export default function PortfolioDashboard({
         </Card>
 
         {/* 24h Change */}
-        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl">
+        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl shadow-lg shadow-black/30">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
             {ko ? "24시간 변동" : "24h Change"}
           </p>
@@ -241,7 +241,7 @@ export default function PortfolioDashboard({
         </Card>
 
         {/* Best Performer */}
-        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl">
+        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl shadow-lg shadow-black/30">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
             {ko ? "최고 수익률" : "Best Performer"}
           </p>
@@ -288,7 +288,7 @@ export default function PortfolioDashboard({
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Allocation Donut */}
-          <Card className="p-6 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl">
+          <Card className="p-6 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl shadow-lg shadow-black/30">
             <h3 className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-4">
               {ko ? "배분" : "Allocation"}
             </h3>

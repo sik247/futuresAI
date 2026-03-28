@@ -123,7 +123,7 @@ export default function UserDashboard({
 
       {/* Portfolio Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl hover:border-white/[0.12] transition-all">
+        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl shadow-lg shadow-black/30 hover:border-white/[0.12] hover:scale-[1.01] transition-all">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
             {ko ? "포트폴리오 가치" : "Portfolio Value"}
           </p>
@@ -135,7 +135,7 @@ export default function UserDashboard({
           </p>
         </Card>
 
-        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl hover:border-white/[0.12] transition-all">
+        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl shadow-lg shadow-black/30 hover:border-white/[0.12] hover:scale-[1.01] transition-all">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
             {ko ? "총 손익" : "Total P&L"}
           </p>
@@ -149,7 +149,7 @@ export default function UserDashboard({
           </div>
         </Card>
 
-        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl hover:border-white/[0.12] transition-all">
+        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl shadow-lg shadow-black/30 hover:border-white/[0.12] hover:scale-[1.01] transition-all">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
             {ko ? "24시간 변동" : "24h Change"}
           </p>
@@ -165,7 +165,7 @@ export default function UserDashboard({
           </div>
         </Card>
 
-        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl hover:border-white/[0.12] transition-all">
+        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl shadow-lg shadow-black/30 hover:border-white/[0.12] hover:scale-[1.01] transition-all">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
             {ko ? "크레딧" : "Credits"}
           </p>

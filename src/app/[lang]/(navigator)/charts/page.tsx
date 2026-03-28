@@ -123,14 +123,14 @@ export default async function ChartsPage({
             Charts &<br />
             Market Data
           </h1>
-          <p className="text-base text-zinc-500 max-w-lg mt-6 leading-relaxed">
+          <p className="text-base md:text-lg text-zinc-400 max-w-lg mt-6 leading-relaxed">
             Professional-grade charting, real-time sentiment analysis, and
             comprehensive market intelligence.
           </p>
 
           {/* Stats Bar */}
           <div className="mt-8 flex flex-wrap gap-2 sm:gap-3">
-            <div className="flex-1 min-w-[140px] rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 sm:px-5 py-3 flex flex-col gap-1 hover:border-white/[0.12] hover:bg-white/[0.04] hover:scale-[1.02] transition-all duration-200">
+            <div className="flex-1 min-w-[140px] rounded-xl border border-white/[0.06] bg-white/[0.03] shadow-lg shadow-black/30 px-4 sm:px-5 py-3 flex flex-col gap-1 hover:border-white/[0.12] hover:bg-white/[0.05] hover:scale-[1.01] transition-all duration-200">
               <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-600">
                 BTC PRICE
               </span>
@@ -143,7 +143,7 @@ export default async function ChartsPage({
               </span>
             </div>
 
-            <div className="flex-1 min-w-[140px] rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 sm:px-5 py-3 flex flex-col gap-1 hover:border-white/[0.12] hover:bg-white/[0.04] hover:scale-[1.02] transition-all duration-200">
+            <div className="flex-1 min-w-[140px] rounded-xl border border-white/[0.06] bg-white/[0.03] shadow-lg shadow-black/30 px-4 sm:px-5 py-3 flex flex-col gap-1 hover:border-white/[0.12] hover:bg-white/[0.05] hover:scale-[1.01] transition-all duration-200">
               <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-600">
                 24H CHANGE
               </span>
@@ -157,7 +157,7 @@ export default async function ChartsPage({
               </span>
             </div>
 
-            <div className="flex-1 min-w-[140px] rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 sm:px-5 py-3 flex flex-col gap-1 hover:border-white/[0.12] hover:bg-white/[0.04] hover:scale-[1.02] transition-all duration-200">
+            <div className="flex-1 min-w-[140px] rounded-xl border border-white/[0.06] bg-white/[0.03] shadow-lg shadow-black/30 px-4 sm:px-5 py-3 flex flex-col gap-1 hover:border-white/[0.12] hover:bg-white/[0.05] hover:scale-[1.01] transition-all duration-200">
               <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-600">
                 FEAR & GREED
               </span>
@@ -166,7 +166,7 @@ export default async function ChartsPage({
               </span>
             </div>
 
-            <div className="flex-1 min-w-[140px] rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 sm:px-5 py-3 flex flex-col gap-1 hover:border-white/[0.12] hover:bg-white/[0.04] hover:scale-[1.02] transition-all duration-200">
+            <div className="flex-1 min-w-[140px] rounded-xl border border-white/[0.06] bg-white/[0.03] shadow-lg shadow-black/30 px-4 sm:px-5 py-3 flex flex-col gap-1 hover:border-white/[0.12] hover:bg-white/[0.05] hover:scale-[1.01] transition-all duration-200">
               <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-600">
                 MARKET TREND
               </span>
@@ -182,10 +182,10 @@ export default async function ChartsPage({
         </section>
 
         {/* Divider */}
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.10] to-transparent" />
 
         {/* ──────── Section 1: Multi-Chart Terminal ──────── */}
-        <section className="py-16 sm:py-20">
+        <section className="py-20 sm:py-24">
           <div className="mb-8">
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-600 mb-2">
               01
@@ -200,10 +200,10 @@ export default async function ChartsPage({
           <MultiChartTerminal />
         </section>
 
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.10] to-transparent" />
 
         {/* ──────── Section 2: Fear & Greed Index ──────── */}
-        <section className="py-16 sm:py-20">
+        <section className="py-20 sm:py-24">
           <div className="mb-8">
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-600 mb-2">
               02
@@ -219,10 +219,10 @@ export default async function ChartsPage({
           <FearGreedSection data={fearGreedData} />
         </section>
 
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.10] to-transparent" />
 
         {/* ──────── Section 3: Market Correlations ──────── */}
-        <section className="py-16 sm:py-20">
+        <section className="py-20 sm:py-24">
           <div className="mb-8">
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-600 mb-2">
               03
@@ -237,10 +237,10 @@ export default async function ChartsPage({
           <MarketCorrelations data={globalData} />
         </section>
 
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.10] to-transparent" />
 
         {/* ──────── Section 4: Market Screener ──────── */}
-        <section className="py-16 sm:py-20">
+        <section className="py-20 sm:py-24">
           <div className="mb-8">
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-600 mb-2">
               04
@@ -264,10 +264,10 @@ export default async function ChartsPage({
           </div>
         </section>
 
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.10] to-transparent" />
 
         {/* ──────── Section 5: Key Metrics Dashboard ──────── */}
-        <section className="py-16 sm:py-20">
+        <section className="py-20 sm:py-24">
           <div className="mb-8">
             <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-zinc-600 mb-2">
               05

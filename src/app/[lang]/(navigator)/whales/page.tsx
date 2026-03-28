@@ -406,7 +406,7 @@ export default async function WhalesPage() {
                 <div
                   key={wallet.address}
                   data-whale-card
-                  className={`rounded-xl backdrop-blur-md bg-white/[0.025] border ${colors.border} border-l-2 ${colors.leftBorder} p-5 transition-all duration-300 hover:bg-white/[0.04] hover:border-white/[0.1] group`}
+                  className={`rounded-xl backdrop-blur-md bg-white/[0.03] border ${colors.border} border-l-2 ${colors.leftBorder} p-5 transition-all duration-300 hover:bg-white/[0.04] hover:border-white/[0.1] group`}
                 >
                   {/* Top row: badge + name + type */}
                   <div className="flex items-start justify-between mb-3">
@@ -579,7 +579,7 @@ export default async function WhalesPage() {
               <div
                 key={fund.name}
                 data-whale-card
-                className="rounded-xl backdrop-blur-md bg-white/[0.025] border border-white/[0.06] p-5 transition-all duration-300 hover:bg-white/[0.04] hover:border-white/[0.1] flex flex-col"
+                className="rounded-xl backdrop-blur-md bg-white/[0.03] border border-white/[0.06] p-5 transition-all duration-300 hover:bg-white/[0.04] hover:border-white/[0.1] flex flex-col"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-lg bg-white/[0.05] border border-white/[0.08] flex items-center justify-center text-lg font-bold text-white flex-shrink-0">

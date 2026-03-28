@@ -273,12 +273,12 @@ export default function QuantClient({
       {/* ============================================================ */}
       {/*  HERO                                                        */}
       {/* ============================================================ */}
-      <section ref={heroRef} className="relative pt-16 pb-20 overflow-hidden">
+      <section ref={heroRef} className="relative pt-24 sm:pt-28 pb-20 overflow-hidden">
         {/* Background gradient orbs */}
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-950/20 via-zinc-950 to-zinc-950" />
-        <div className="absolute top-[-80px] left-1/4 w-[500px] h-[500px] bg-blue-600/[0.07] rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute top-[-40px] right-1/4 w-[400px] h-[400px] bg-cyan-600/[0.05] rounded-full blur-[100px] animate-pulse [animation-delay:2s]" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-indigo-600/[0.04] rounded-full blur-[80px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-950/25 via-zinc-950 to-zinc-950" />
+        <div className="absolute top-[-80px] left-1/4 w-[500px] h-[500px] bg-blue-500/[0.12] rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute top-[-40px] right-1/4 w-[400px] h-[400px] bg-cyan-500/[0.10] rounded-full blur-[100px] animate-pulse [animation-delay:2s]" />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-indigo-500/[0.06] rounded-full blur-[80px]" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6">
           <p className="font-mono text-[11px] tracking-[0.3em] text-zinc-500 uppercase mb-3 flex items-center gap-2">
@@ -288,7 +288,7 @@ export default function QuantClient({
             </span>
             {t.quant_subtitle}
           </p>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[0.9] mb-5">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[0.95] mb-6">
             <span className="text-white">AI </span>
             <span className="bg-gradient-to-r from-white via-blue-400 to-cyan-400 bg-clip-text text-transparent">
               Quant Terminal
@@ -392,7 +392,7 @@ export default function QuantClient({
             {/* -- Market Regime Bar (Bloomberg-style) ---------------------- */}
             <div
               ref={overviewRef}
-              className="rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl mb-8 overflow-hidden"
+              className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl shadow-lg shadow-black/40 mb-8 overflow-hidden"
             >
               <div className="grid grid-cols-2 md:grid-cols-5 divide-x divide-white/[0.04]">
                 {/* Fear & Greed */}
@@ -476,7 +476,7 @@ export default function QuantClient({
             {/* -- Signal Table (Bloomberg-style) -------------------------- */}
             <div
               ref={cardsRef}
-              className="rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl overflow-hidden mb-8"
+              className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl shadow-lg shadow-black/40 overflow-hidden mb-8"
             >
               {/* Table Header */}
               <div className="grid grid-cols-12 gap-0 px-6 py-3 border-b border-white/[0.06] text-[9px] font-mono text-zinc-600 uppercase tracking-[0.15em]">
