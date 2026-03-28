@@ -600,6 +600,27 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
         </div>
       </div>
 
+      {/* Quick TradingView Link */}
+      {!imageUrl && !analysis && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/[0.05] border border-blue-500/15">
+          <svg className="w-4 h-4 text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+          </svg>
+          <p className="text-xs text-zinc-400">
+            {lang === "ko" ? "차트가 없으신가요? " : "Need a chart? "}
+            <a
+              href={`https://www.tradingview.com/chart/?symbol=BINANCE:${selectedPair}&interval=240`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 font-medium underline underline-offset-2"
+            >
+              {lang === "ko" ? `TradingView에서 ${selectedPair.replace("USDT", "/USDT")} 차트 열기` : `Open ${selectedPair.replace("USDT", "/USDT")} on TradingView`}
+            </a>
+            {lang === "ko" ? " → 스크린샷 → 여기에 업로드" : " → Screenshot → Upload here"}
+          </p>
+        </div>
+      )}
+
       {/* Upload Area / Chart Canvas */}
       <Card className="p-0 bg-zinc-950/50 backdrop-blur-sm border-white/10 overflow-hidden">
         {!imageUrl ? (

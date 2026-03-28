@@ -8,6 +8,23 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+/** Decode HTML entities like &#8217; → ' and &amp; → & */
+function decodeHtml(html: string): string {
+  if (typeof document === "undefined") {
+    return html
+      .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&apos;/g, "'");
+  }
+  const el = document.createElement("textarea");
+  el.innerHTML = html;
+  return el.value;
+}
+
 interface INewsListSection {
   news: CryptoNewsItem[];
 }
@@ -186,9 +203,9 @@ const NewsListSection = React.forwardRef<
                 rel="noopener noreferrer"
                 className="block animate-marquee-breaking whitespace-nowrap font-mono text-xs text-zinc-300 hover:text-white transition-colors"
               >
-                {breakingArticle.title}
+                {decodeHtml(breakingArticle.title)}
                 <span className="mx-8 text-red-500/40">---</span>
-                {breakingArticle.title}
+                {decodeHtml(breakingArticle.title)}
               </a>
             </div>
           </div>
@@ -336,7 +353,7 @@ const FeaturedCard = React.forwardRef<
 
         {/* Title */}
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-tight tracking-tight group-hover:text-zinc-100 transition-colors">
-          {news.title}
+          {decodeHtml(news.title)}
         </h2>
 
         {/* Body excerpt */}
@@ -452,7 +469,7 @@ const NewsCard: React.FC<{ news: CryptoNewsItem }> = ({ news }) => {
 
         {/* Title */}
         <h3 className="text-base md:text-lg font-semibold text-white leading-snug tracking-tight line-clamp-2 group-hover:text-zinc-100 transition-colors">
-          {news.title}
+          {decodeHtml(news.title)}
         </h3>
 
         {/* Body */}
