@@ -190,55 +190,7 @@ export default async function SnsPage({ params: { lang } }: { params: { lang: st
         </Container>
       </section>
 
-      {/* ── Breaking News Ticker ────────────────────────────────── */}
-      {tickerHeadlines.length > 0 && (
-        <div className="relative border-y border-white/[0.06] bg-white/[0.02] backdrop-blur-xl overflow-hidden">
-          {/* Fade edges */}
-          <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-transparent to-zinc-950 z-10 pointer-events-none" />
-
-          <div className="flex items-center py-3">
-            {/* BREAKING pill */}
-            <div className="relative z-20 shrink-0 flex items-center gap-2 bg-red-600/90 text-white text-[10px] font-bold uppercase tracking-[0.15em] px-4 py-1.5 mr-4">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
-              </span>
-              Breaking
-            </div>
-
-            {/* Scrolling headlines */}
-            <div className="sns-ticker-track flex items-center gap-8 whitespace-nowrap">
-              {[...tickerHeadlines, ...tickerHeadlines].map((h, i) => (
-                <span
-                  key={`ticker-${i}`}
-                  className="inline-flex items-center gap-3 text-xs text-zinc-300"
-                >
-                  <span className="px-2 py-0.5 rounded bg-white/[0.06] text-[10px] font-mono font-semibold uppercase tracking-wider text-zinc-500 border border-white/[0.06]">
-                    {h.source}
-                  </span>
-                  <span className="hover:text-white transition-colors cursor-default">
-                    {h.title}
-                  </span>
-                  <span className="text-zinc-700">|</span>
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <style>{`
-            @keyframes sns-ticker {
-              from { transform: translateX(0); }
-              to { transform: translateX(-50%); }
-            }
-            .sns-ticker-track {
-              animation: sns-ticker 60s linear infinite;
-            }
-            .sns-ticker-track:hover {
-              animation-play-state: paused;
-            }
-          `}</style>
-        </div>
-      )}
+      {/* Breaking news ticker removed */}
 
       {/* ── Main Content Tabs ────────────────────────────────────── */}
       <CommunityTabs

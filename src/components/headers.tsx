@@ -133,15 +133,7 @@ const Headers: React.FC<THeaders> = ({ lang, translations }) => {
 
         {/* Auth, theme toggle & mobile menu */}
         <div className="flex items-center gap-1.5">
-          {/* Theme toggle */}
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="relative p-2 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06] transition-all duration-200"
-            aria-label="Toggle theme"
-          >
-            <SunIcon className="w-[18px] h-[18px] hidden dark:block" />
-            <MoonIcon className="w-[18px] h-[18px] block dark:hidden" />
-          </button>
+          {/* Theme toggle removed — dark mode only */}
 
           {session?.user ? (
             <>
