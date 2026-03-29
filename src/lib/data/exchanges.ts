@@ -43,7 +43,7 @@ export const EXCHANGES: ExchangeInfo[] = [
   {
     id: "gate",
     name: "Gate.io",
-    logo: "/icons/footer-icons/gate.svg",
+    logo: "/icons/footer-icons/gate.png",
     makerFee: 0.02,
     takerFee: 0.05,
     paybackRate: 0.75,
@@ -53,7 +53,7 @@ export const EXCHANGES: ExchangeInfo[] = [
   {
     id: "htx",
     name: "HTX",
-    logo: "/icons/footer-icons/htx.svg",
+    logo: "/icons/footer-icons/htx.png",
     makerFee: 0.02,
     takerFee: 0.05,
     paybackRate: 0.54,

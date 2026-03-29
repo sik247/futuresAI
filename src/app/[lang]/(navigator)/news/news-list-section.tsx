@@ -182,44 +182,7 @@ const NewsListSection = React.forwardRef<
 
   return (
     <section ref={ref} {...props} className="flex flex-col gap-8 w-full">
-      {/* Breaking news ticker */}
-      {breakingArticle && (
-        <div className="relative overflow-hidden rounded-lg border border-red-500/20 bg-red-500/[0.05] backdrop-blur-sm">
-          <div className="flex items-center gap-3 px-4 py-2.5">
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
-              </span>
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-red-400">
-                Breaking
-              </span>
-            </div>
-            <div className="w-px h-4 bg-red-500/20 shrink-0" />
-            <div className="overflow-hidden flex-1">
-              <a
-                href={breakingArticle.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block animate-marquee-breaking whitespace-nowrap font-mono text-xs text-zinc-300 hover:text-white transition-colors"
-              >
-                {decodeHtml(breakingArticle.title)}
-                <span className="mx-8 text-red-500/40">---</span>
-                {decodeHtml(breakingArticle.title)}
-              </a>
-            </div>
-          </div>
-          <style>{`
-            @keyframes marquee-breaking {
-              from { transform: translateX(0); }
-              to { transform: translateX(-50%); }
-            }
-            .animate-marquee-breaking {
-              animation: marquee-breaking 20s linear infinite;
-            }
-          `}</style>
-        </div>
-      )}
+      {/* Breaking news ticker — removed */}
 
       {/* Category filter with GSAP sliding indicator */}
       <div className="relative rounded-xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] p-1.5 overflow-x-auto scrollbar-none">
