@@ -59,9 +59,14 @@ export default async function DashboardPage({
     select: { id: true, pair: true, trend: true, confidence: true, createdAt: true },
   });
 
+  // Fetch available exchanges for the link form
+  const exchanges = await prisma.exchange.findMany({
+    select: { id: true, name: true, imageUrl: true },
+  });
+
   // Fetch exchange accounts with payback data
   const exchangeAccounts = await prisma.exchangeAccount.findMany({
-    where: { userId: user.id, status: "ACTIVE" },
+    where: { userId: user.id },
     include: {
       exchange: true,
       trades: {
@@ -78,6 +83,7 @@ export default async function DashboardPage({
     return {
       id: acc.id,
       uid: acc.uid,
+      status: acc.status,
       exchangeName: acc.exchange.name,
       exchangeImage: acc.exchange.imageUrl,
       paybackRate: acc.exchange.paybackRatio,
@@ -102,6 +108,7 @@ export default async function DashboardPage({
         prices={prices}
         recentAnalyses={JSON.parse(JSON.stringify(recentAnalyses))}
         paybackAccounts={JSON.parse(JSON.stringify(paybackAccounts))}
+        exchanges={JSON.parse(JSON.stringify(exchanges))}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getPendingRequests, getAllRequests, approveRequest, rejectRequest } from "./actions";
+import { getPendingRequests, getAllRequests, approveRequest, rejectRequest, getPendingAccountLinks, approveAccountLink, rejectAccountLink } from "./actions";
 
 interface ExchangeData {
   exchange: string;
@@ -122,6 +122,14 @@ export default function AdminDashboard() {
   const [chartAnalyses, setChartAnalyses] = useState<ChartAnalysisRequest[]>([]);
   const [chartFilter, setChartFilter] = useState<"ALL" | "PENDING" | "CHARGED" | "REFUNDED">("ALL");
   const [testLoading, setTestLoading] = useState(false);
+  const [pendingAccounts, setPendingAccounts] = useState<any[]>([]);
+
+  const fetchPendingAccounts = useCallback(async () => {
+    try {
+      const data = await getPendingAccountLinks();
+      setPendingAccounts(data as any[]);
+    } catch { /* keep previous */ }
+  }, []);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -155,7 +163,8 @@ export default function AdminDashboard() {
     fetchData();
     fetchRequests();
     fetchChartAnalyses();
-  }, [fetchData, fetchRequests, fetchChartAnalyses]);
+    fetchPendingAccounts();
+  }, [fetchData, fetchRequests, fetchChartAnalyses, fetchPendingAccounts]);
 
   async function handleApprove(id: string) {
     setActionLoading(id);
@@ -244,7 +253,7 @@ export default function AdminDashboard() {
               {testLoading ? "Creating..." : "Test Payback"}
             </button>
             <button
-              onClick={() => { fetchData(); fetchRequests(); fetchChartAnalyses(); }}
+              onClick={() => { fetchData(); fetchRequests(); fetchChartAnalyses(); fetchPendingAccounts(); }}
               disabled={loading}
               className="px-4 py-2 rounded-xl border border-white/[0.06] bg-white/[0.03] text-sm font-medium text-zinc-300 hover:border-white/[0.12] hover:bg-white/[0.05] transition-all disabled:opacity-50"
             >
@@ -327,6 +336,81 @@ export default function AdminDashboard() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ============================================================ */}
+        {/*  ACCOUNT VERIFICATION                                        */}
+        {/* ============================================================ */}
+        <div className="mb-10">
+          <SectionHeader
+            title="Account Verification"
+            subtitle="Users requesting to link exchange accounts"
+            color="bg-orange-500/70"
+            badge={`${pendingAccounts.length} pending`}
+          />
+
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] overflow-hidden">
+            {pendingAccounts.length === 0 ? (
+              <div className="p-8 text-center text-zinc-500 text-sm">No pending account verifications</div>
+            ) : (
+              <div className="divide-y divide-white/[0.04]">
+                {pendingAccounts.map((acc: any) => (
+                  <div key={acc.id} className="p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-semibold text-white">{acc.user?.name || "Unknown"}</span>
+                        <span className="text-[11px] text-zinc-500 font-mono">{acc.user?.email}</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-zinc-400">
+                        <span className="font-medium text-blue-400">{acc.exchange?.name}</span>
+                        <span className="font-mono">UID: {acc.uid}</span>
+                        <span className="text-zinc-600">{new Date(acc.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      {acc.screenshotUrl && (
+                        <a
+                          href={acc.screenshotUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 mt-2 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v13.5A1.5 1.5 0 003.75 21z" />
+                          </svg>
+                          View Screenshot
+                        </a>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={async () => {
+                          setActionLoading(acc.id);
+                          await approveAccountLink(acc.id);
+                          await fetchPendingAccounts();
+                          setActionLoading(null);
+                        }}
+                        disabled={actionLoading === acc.id}
+                        className="px-3 py-1.5 rounded-lg bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 text-xs font-medium hover:bg-emerald-600/30 transition-colors disabled:opacity-50"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={async () => {
+                          setActionLoading(acc.id);
+                          await rejectAccountLink(acc.id);
+                          await fetchPendingAccounts();
+                          setActionLoading(null);
+                        }}
+                        disabled={actionLoading === acc.id}
+                        className="px-3 py-1.5 rounded-lg bg-red-600/20 border border-red-500/30 text-red-400 text-xs font-medium hover:bg-red-600/30 transition-colors disabled:opacity-50"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

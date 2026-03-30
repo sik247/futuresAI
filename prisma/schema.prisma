@@ -179,6 +179,7 @@ model ExchangeAccount {
   createdAt       DateTime              @default(now()) @db.Timestamptz()
   updatedAt       DateTime              @updatedAt @db.Timestamptz()
   totalCommission Float                 @default(0)
+  screenshotUrl   String?
   trades          Trade[]
   withdrawal      Withdrawal[]
 }

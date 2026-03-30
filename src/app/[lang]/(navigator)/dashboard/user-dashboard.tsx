@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import type { Dictionary } from "@/i18n";
 import type { CoinPrice } from "@/lib/services/portfolio/portfolio-prices";
+import LinkExchangeForm from "./link-exchange-form";
 import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
@@ -36,6 +37,7 @@ type RecentAnalysis = {
 type PaybackAccount = {
   id: string;
   uid: string;
+  status: string;
   exchangeName: string;
   exchangeImage: string;
   paybackRate: number;
@@ -52,6 +54,7 @@ type Props = {
   prices: Record<string, CoinPrice>;
   recentAnalyses: RecentAnalysis[];
   paybackAccounts?: PaybackAccount[];
+  exchanges?: { id: string; name: string; imageUrl: string }[];
 };
 
 const QUICK_LINKS = [
@@ -76,6 +79,7 @@ export default function UserDashboard({
   prices,
   recentAnalyses,
   paybackAccounts = [],
+  exchanges = [],
 }: Props) {
   const totalValue = portfolio.holdings.reduce((sum, h) => {
     return sum + h.quantity * (prices[h.coinId]?.usd ?? 0);
@@ -303,70 +307,105 @@ export default function UserDashboard({
       </div>
 
       {/* Payback Accounts */}
-      {paybackAccounts.length > 0 && (
-        <Card className="p-0 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl overflow-hidden mb-8">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
-            <div className="flex items-center gap-3">
-              <h3 className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em]">
-                {ko ? "거래소 페이백" : "Exchange Payback"}
-              </h3>
+      <Card className="p-0 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl overflow-hidden mb-8">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+          <div className="flex items-center gap-3">
+            <h3 className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em]">
+              {ko ? "거래소 페이백" : "Exchange Payback"}
+            </h3>
+            {paybackAccounts.length > 0 && (
               <span className="text-xs font-mono font-bold text-emerald-400">
                 ${paybackAccounts.reduce((s, a) => s + a.totalEarned, 0).toFixed(2)} {ko ? "적립" : "earned"}
               </span>
-            </div>
-            <Link
-              href={`/${lang}/payback`}
-              className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
-            >
-              {ko ? "페이백 요청" : "Request Payback"}
-            </Link>
+            )}
           </div>
+          <Link
+            href={`/${lang}/payback`}
+            className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
+          >
+            {ko ? "페이백 상세 보기" : "View Payback Details"}
+          </Link>
+        </div>
 
-          {/* Summary row */}
-          <div className="grid grid-cols-3 gap-0 px-6 py-3 border-b border-white/[0.04] bg-white/[0.01]">
-            <div>
-              <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">{ko ? "총 적립" : "Total Earned"}</p>
-              <p className="text-sm font-mono font-bold text-white">${paybackAccounts.reduce((s, a) => s + a.totalEarned, 0).toFixed(2)}</p>
-            </div>
-            <div>
-              <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">{ko ? "미지급" : "Unpaid"}</p>
-              <p className="text-sm font-mono font-bold text-emerald-400">${paybackAccounts.reduce((s, a) => s + a.unpaid, 0).toFixed(2)}</p>
-            </div>
-            <div>
-              <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">{ko ? "연결 거래소" : "Exchanges"}</p>
-              <p className="text-sm font-mono font-bold text-white">{paybackAccounts.length}</p>
-            </div>
+        {paybackAccounts.length === 0 ? (
+          <div className="px-6 py-10 text-center">
+            <p className="text-sm text-zinc-500 mb-1">
+              {ko ? "연결된 거래소 계정이 없습니다." : "No exchange accounts linked yet."}
+            </p>
+            <p className="text-[11px] text-zinc-600 font-mono mb-4">
+              {ko
+                ? "거래소 계정을 연결하면 페이백 수익을 추적할 수 있습니다."
+                : "Link your exchange account to start tracking payback rewards."}
+            </p>
           </div>
-
-          {/* Exchange rows */}
-          {paybackAccounts.map((acc, i) => (
-            <div
-              key={acc.id}
-              className={`flex items-center justify-between px-6 py-3.5 hover:bg-white/[0.02] transition-colors ${
-                i < paybackAccounts.length - 1 ? "border-b border-white/[0.03]" : ""
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-xs font-bold text-blue-400">
-                  {acc.exchangeName[0]}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-white">{acc.exchangeName}</p>
-                  <p className="text-[10px] text-zinc-500 font-mono">
-                    UID: {acc.uid} · {acc.tradeCount} {ko ? "건" : "trades"} · {(acc.paybackRate * 100).toFixed(0)}% rate
-                  </p>
-                </div>
+        ) : (
+          <>
+            {/* Summary row */}
+            <div className="grid grid-cols-3 gap-0 px-6 py-3 border-b border-white/[0.04] bg-white/[0.01]">
+              <div>
+                <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">{ko ? "총 적립" : "Total Earned"}</p>
+                <p className="text-sm font-mono font-bold text-white">${paybackAccounts.reduce((s, a) => s + a.totalEarned, 0).toFixed(2)}</p>
               </div>
-              <div className="text-right">
-                <p className="text-sm font-mono font-bold text-white">${acc.totalEarned.toFixed(2)}</p>
-                {acc.unpaid > 0 && (
-                  <p className="text-[10px] font-mono text-emerald-400">${acc.unpaid.toFixed(2)} {ko ? "미지급" : "unpaid"}</p>
-                )}
+              <div>
+                <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">{ko ? "미지급" : "Unpaid"}</p>
+                <p className="text-sm font-mono font-bold text-emerald-400">${paybackAccounts.reduce((s, a) => s + a.unpaid, 0).toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">{ko ? "연결 거래소" : "Exchanges"}</p>
+                <p className="text-sm font-mono font-bold text-white">{paybackAccounts.length}</p>
               </div>
             </div>
-          ))}
-        </Card>
-      )}
+
+            {/* Exchange rows */}
+            {paybackAccounts.map((acc, i) => (
+              <div
+                key={acc.id}
+                className={`flex items-center justify-between px-6 py-3.5 hover:bg-white/[0.02] transition-colors ${
+                  i < paybackAccounts.length - 1 ? "border-b border-white/[0.03]" : ""
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-xs font-bold text-blue-400">
+                    {acc.exchangeName[0]}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold text-white">{acc.exchangeName}</p>
+                      {acc.status === "PENDING" && (
+                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                          {ko ? "검증 대기중" : "Pending Verification"}
+                        </span>
+                      )}
+                      {acc.status === "ACTIVE" && (
+                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                          {ko ? "활성" : "Active"}
+                        </span>
+                      )}
+                      {acc.status === "INACTIVE" && (
+                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-red-500/10 border border-red-500/20 text-red-400">
+                          {ko ? "비활성" : "Rejected"}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-zinc-500 font-mono">
+                      UID: {acc.uid} · {acc.tradeCount} {ko ? "건" : "trades"} · {(acc.paybackRate * 100).toFixed(0)}% rate
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-mono font-bold text-white">${acc.totalEarned.toFixed(2)}</p>
+                  {acc.unpaid > 0 && (
+                    <p className="text-[10px] font-mono text-emerald-400">${acc.unpaid.toFixed(2)} {ko ? "미지급" : "unpaid"}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* Link Exchange Form */}
+        <LinkExchangeForm exchanges={exchanges} lang={lang} />
+      </Card>
 
       {/* Quick Links */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
