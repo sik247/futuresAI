@@ -259,136 +259,158 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     const isEntry = line.type === "entry";
     const isSL = line.type === "stopLoss";
     const isTP = line.type === "takeProfit";
+    const isTrend = line.type === "trend";
 
-    // Draw zone fill (subtle shaded area above/below line)
-    if (isSupport || isResistance || isEntry || isSL || isTP) {
-      const zoneHeight = 12;
-      const grad = ctx.createLinearGradient(0, y - zoneHeight, 0, y + zoneHeight);
-      const baseColor = line.color;
-      grad.addColorStop(0, "transparent");
-      grad.addColorStop(0.5, baseColor + "18"); // very subtle fill
-      grad.addColorStop(1, "transparent");
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, y - zoneHeight, width, zoneHeight * 2);
-    }
+    // --- Zone fill (wider, more visible gradient band) ---
+    const zoneHeight = isEntry ? 20 : isSL || isTP ? 16 : 14;
+    const grad = ctx.createLinearGradient(0, y - zoneHeight, 0, y + zoneHeight);
+    const zoneAlpha = isEntry ? "28" : isSL || isTP ? "20" : "14";
+    grad.addColorStop(0, "transparent");
+    grad.addColorStop(0.3, line.color + zoneAlpha);
+    grad.addColorStop(0.5, line.color + zoneAlpha);
+    grad.addColorStop(0.7, line.color + zoneAlpha);
+    grad.addColorStop(1, "transparent");
+    ctx.fillStyle = grad;
+    ctx.globalAlpha = 1;
+    ctx.fillRect(0, y - zoneHeight, width, zoneHeight * 2);
 
-    // Draw glow effect behind the line
+    // --- Glow effect (stronger for key levels) ---
     ctx.save();
     ctx.shadowColor = line.color;
-    ctx.shadowBlur = 8;
+    ctx.shadowBlur = isEntry ? 14 : 10;
     ctx.strokeStyle = line.color;
-    ctx.lineWidth = 1;
-    ctx.globalAlpha = 0.3;
+    ctx.lineWidth = isEntry ? 2.5 : 1.5;
+    ctx.globalAlpha = 0.35;
     ctx.beginPath();
     ctx.moveTo(0, y);
     ctx.lineTo(width, y);
     ctx.stroke();
     ctx.restore();
 
-    // Draw main line
+    // --- Main line (thicker, cleaner) ---
     ctx.strokeStyle = line.color;
-    ctx.lineWidth = line.dashed ? 1.5 : 2;
-    ctx.setLineDash(line.dashed ? [6, 4] : []);
-    ctx.globalAlpha = 0.9;
+    ctx.lineWidth = isEntry ? 2.5 : isSL || isTP ? 2 : line.dashed ? 1.5 : 2;
+    ctx.setLineDash(line.dashed ? [8, 5] : isSL ? [4, 3] : []);
+    ctx.globalAlpha = 0.95;
     ctx.beginPath();
     ctx.moveTo(0, y);
     ctx.lineTo(width, y);
     ctx.stroke();
     ctx.setLineDash([]);
-
-    // Draw small tick marks along the line
-    ctx.globalAlpha = 0.4;
-    ctx.lineWidth = 1;
-    for (let x = 0; x < width; x += 80) {
-      ctx.beginPath();
-      ctx.moveTo(x, y - 3);
-      ctx.lineTo(x, y + 3);
-      ctx.stroke();
-    }
-
-    // --- Left label badge ---
-    const padding = 8;
-    const labelHeight = 22;
-    const labelX = 6;
-    const labelY = y - labelHeight - 4;
-
-    // Type icon prefix
-    const typeIcon = isEntry ? "\u25B6" : isSL ? "\u25BC" : isTP ? "\u2605" : isSupport ? "\u25B2" : isResistance ? "\u25BC" : "\u2500";
-    const labelText = `${typeIcon} ${line.label}`;
-
-    ctx.font = "bold 12px Inter, system-ui, sans-serif";
-    const textWidth = ctx.measureText(labelText).width;
-
-    // Badge background with slight gradient
-    const badgeGrad = ctx.createLinearGradient(labelX, labelY, labelX, labelY + labelHeight);
-    badgeGrad.addColorStop(0, line.color + "E6");
-    badgeGrad.addColorStop(1, line.color + "CC");
-    ctx.fillStyle = badgeGrad;
     ctx.globalAlpha = 1;
+
+    // --- Left label badge (refined with strategy context) ---
+    const padding = 10;
+    const labelHeight = 24;
+    const labelX = 8;
+    const labelY = y - labelHeight - 5;
+
+    // Strategy-focused icons and labels
+    const typePrefix = isEntry ? "ENTRY" : isSL ? "STOP" : isTP ? "TARGET" : isSupport ? "S" : isResistance ? "R" : "TREND";
+    const typeIcon = isEntry ? "\u25B6" : isSL ? "\u2716" : isTP ? "\u2605" : isSupport ? "\u25B2" : isResistance ? "\u25BC" : "\u2500";
+    const priceMatch = line.label.match(/\$[\d,.]+/)?.[0] || "";
+    const labelNum = line.label.match(/S(\d)|R(\d)/)?.[0] || "";
+    const displayLabel = `${typeIcon} ${typePrefix}${labelNum ? "" : ""} ${priceMatch}`;
+
+    ctx.font = "bold 13px Inter, system-ui, sans-serif";
+    const textWidth = ctx.measureText(displayLabel).width;
+    const badgeWidth = textWidth + padding * 2;
+
+    // Badge background — dark semi-transparent with colored border
+    ctx.fillStyle = "#0a0a0f" + "E8";
     ctx.beginPath();
-    ctx.roundRect(labelX, labelY, textWidth + padding * 2, labelHeight, 4);
+    ctx.roundRect(labelX, labelY, badgeWidth, labelHeight, 5);
     ctx.fill();
 
-    // Badge shadow
-    ctx.save();
-    ctx.shadowColor = line.color;
-    ctx.shadowBlur = 12;
-    ctx.shadowOffsetY = 2;
-    ctx.fillStyle = "transparent";
+    // Colored left accent bar on badge
+    ctx.fillStyle = line.color;
     ctx.beginPath();
-    ctx.roundRect(labelX, labelY, textWidth + padding * 2, labelHeight, 4);
+    ctx.roundRect(labelX, labelY, 4, labelHeight, [5, 0, 0, 5]);
     ctx.fill();
-    ctx.restore();
+
+    // Badge border
+    ctx.strokeStyle = line.color + "80";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(labelX, labelY, badgeWidth, labelHeight, 5);
+    ctx.stroke();
 
     // Badge text
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 12px Inter, system-ui, sans-serif";
-    ctx.fillText(labelText, labelX + padding, labelY + 15);
+    ctx.fillStyle = line.color;
+    ctx.font = "bold 13px Inter, system-ui, sans-serif";
+    ctx.fillText(displayLabel, labelX + padding + 2, labelY + 16);
 
-    // --- Probability badge (right of label) ---
+    // --- Probability badge (pill shape, right of label) ---
     if (line.hitProbability != null && line.hitProbability > 0) {
       const probText = `${line.hitProbability}%`;
       ctx.font = "bold 11px Inter, system-ui, sans-serif";
       const probWidth = ctx.measureText(probText).width;
-      const probX = labelX + textWidth + padding * 2 + 5;
+      const probX = labelX + badgeWidth + 6;
       const probColor = line.hitProbability >= 70 ? "#22c55e" : line.hitProbability >= 40 ? "#eab308" : "#ef4444";
 
-      ctx.fillStyle = probColor + "DD";
-      ctx.globalAlpha = 1;
+      // Probability pill background
+      ctx.fillStyle = "#0a0a0f" + "E8";
       ctx.beginPath();
-      ctx.roundRect(probX, labelY, probWidth + padding * 2, labelHeight, 4);
+      ctx.roundRect(probX, labelY, probWidth + padding * 2, labelHeight, 5);
       ctx.fill();
 
-      ctx.fillStyle = "#ffffff";
-      ctx.fillText(probText, probX + padding, labelY + 15);
+      // Probability fill bar (shows percentage visually)
+      const barWidth = (probWidth + padding * 2) * (line.hitProbability / 100);
+      ctx.fillStyle = probColor + "30";
+      ctx.beginPath();
+      ctx.roundRect(probX, labelY, barWidth, labelHeight, 5);
+      ctx.fill();
+
+      // Probability border
+      ctx.strokeStyle = probColor + "60";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(probX, labelY, probWidth + padding * 2, labelHeight, 5);
+      ctx.stroke();
+
+      // Probability text
+      ctx.fillStyle = probColor;
+      ctx.fillText(probText, probX + padding, labelY + 16);
     }
 
-    // --- Right-side price tag (TradingView style) ---
-    const rightPadding = 6;
-    const priceTag = line.label.match(/\$[\d,.]+/)?.[0] || "";
-    if (priceTag) {
-      ctx.font = "bold 11px monospace";
-      const priceWidth = ctx.measureText(priceTag).width;
-      const tagX = width - priceWidth - rightPadding * 2 - 4;
-      const tagY = y - 10;
+    // --- Right-side price tag (TradingView-style) ---
+    const rightPadding = 8;
+    if (priceMatch) {
+      ctx.font = "bold 12px monospace";
+      const priceWidth = ctx.measureText(priceMatch).width;
+      const tagWidth = priceWidth + rightPadding * 2;
+      const tagX = width - tagWidth - 6;
+      const tagH = 22;
+      const tagY = y - tagH / 2;
 
-      ctx.fillStyle = line.color + "E6";
-      ctx.globalAlpha = 1;
+      // Tag background
+      ctx.fillStyle = line.color + "E8";
       ctx.beginPath();
-      ctx.roundRect(tagX, tagY, priceWidth + rightPadding * 2, 20, 3);
+      ctx.roundRect(tagX, tagY, tagWidth, tagH, 3);
       ctx.fill();
 
-      // Small arrow pointing to line
+      // Arrow pointing to line
       ctx.beginPath();
-      ctx.moveTo(tagX - 4, y);
-      ctx.lineTo(tagX, y - 4);
-      ctx.lineTo(tagX, y + 4);
+      ctx.moveTo(tagX - 5, y);
+      ctx.lineTo(tagX, y - 5);
+      ctx.lineTo(tagX, y + 5);
       ctx.closePath();
       ctx.fill();
 
+      // Price text
       ctx.fillStyle = "#ffffff";
-      ctx.fillText(priceTag, tagX + rightPadding, tagY + 14);
+      ctx.fillText(priceMatch, tagX + rightPadding, tagY + 15);
+    }
+
+    // --- Strategy annotation for entry/SL/TP ---
+    if (isEntry || isSL || isTP) {
+      const strategyText = isEntry
+        ? (isTrend ? "" : "ENTRY ZONE")
+        : isSL ? "INVALIDATION"
+        : "TAKE PROFIT";
+      ctx.font = "bold 9px Inter, system-ui, sans-serif";
+      ctx.fillStyle = line.color + "60";
+      ctx.fillText(strategyText, labelX + 8, y + zoneHeight + 12);
     }
   };
 
