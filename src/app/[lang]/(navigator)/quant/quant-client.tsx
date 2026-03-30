@@ -489,6 +489,17 @@ export default function QuantClient({
               </div>
 
               {/* Signal Rows */}
+              {signals.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-16 gap-3">
+                  <div className="h-8 w-8 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
+                  <p className="text-sm text-zinc-400 font-medium">
+                    {lang === "ko" ? "시그널 데이터를 불러오고 있습니다..." : "Loading signal data..."}
+                  </p>
+                  <p className="text-xs text-zinc-600">
+                    {lang === "ko" ? "실시간 시장 분석에 시간이 걸릴 수 있습니다" : "Real-time market analysis may take a moment"}
+                  </p>
+                </div>
+              )}
               {signals.map((s) => {
                 const icon = COIN_ICONS[s.symbol];
                 const gradient = icon?.gradient ?? "from-zinc-500 to-zinc-700";
