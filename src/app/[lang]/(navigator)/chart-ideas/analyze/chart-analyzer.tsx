@@ -238,12 +238,99 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     canvas.width = dimensions.width;
     canvas.height = dimensions.height;
     ctx.drawImage(img, 0, 0, dimensions.width, dimensions.height);
-    if (analysis?.lines) {
+
+    if (!analysis) return;
+
+    // --- Draw strategy header overlay on top of chart ---
+    if (analysis.tradeSetup) {
+      const headerH = 52;
+      // Dark gradient overlay at top
+      const hGrad = ctx.createLinearGradient(0, 0, 0, headerH + 20);
+      hGrad.addColorStop(0, "rgba(0,0,0,0.85)");
+      hGrad.addColorStop(0.7, "rgba(0,0,0,0.5)");
+      hGrad.addColorStop(1, "transparent");
+      ctx.fillStyle = hGrad;
+      ctx.fillRect(0, 0, dimensions.width, headerH + 20);
+
+      const dir = analysis.tradeSetup.direction;
+      const isLong = dir === "LONG";
+      const isShort = dir === "SHORT";
+      const dirColor = isLong ? "#22c55e" : isShort ? "#ef4444" : "#eab308";
+      const dirText = isLong ? "LONG" : isShort ? "SHORT" : "NEUTRAL";
+      const dirArrow = isLong ? "\u25B2" : isShort ? "\u25BC" : "\u25C6";
+
+      // Direction badge (large, prominent)
+      ctx.font = "bold 20px Inter, system-ui, sans-serif";
+      const dirLabel = `${dirArrow} ${dirText}`;
+      const dirW = ctx.measureText(dirLabel).width;
+      const dirPad = 14;
+      const dirBadgeW = dirW + dirPad * 2;
+
+      ctx.fillStyle = dirColor + "20";
+      ctx.beginPath();
+      ctx.roundRect(12, 10, dirBadgeW, 34, 6);
+      ctx.fill();
+      ctx.strokeStyle = dirColor + "80";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(12, 10, dirBadgeW, 34, 6);
+      ctx.stroke();
+      ctx.fillStyle = dirColor;
+      ctx.fillText(dirLabel, 12 + dirPad, 34);
+
+      // Key levels text next to direction
+      const infoX = 12 + dirBadgeW + 16;
+      ctx.font = "bold 12px Inter, system-ui, sans-serif";
+      const entry = analysis.tradeSetup.entry;
+      const sl = analysis.tradeSetup.stopLoss;
+      const tp = analysis.tradeSetup.takeProfit;
+      const rr = analysis.tradeSetup.riskReward;
+
+      if (entry) {
+        ctx.fillStyle = "#3b82f6";
+        ctx.fillText(`Entry: $${entry.toLocaleString()}`, infoX, 22);
+      }
+      if (sl) {
+        ctx.fillStyle = "#ef4444";
+        ctx.fillText(`SL: $${sl.toLocaleString()}`, infoX + 140, 22);
+      }
+      if (tp) {
+        ctx.fillStyle = "#22c55e";
+        ctx.fillText(`TP: $${tp.toLocaleString()}`, infoX + 260, 22);
+      }
+      if (rr) {
+        ctx.fillStyle = "#a78bfa";
+        ctx.fillText(`R:R ${rr}`, infoX + 380, 22);
+      }
+
+      // Confidence + trend on second line
+      ctx.font = "11px Inter, system-ui, sans-serif";
+      ctx.fillStyle = "#94a3b8";
+      const conf = analysis.confidence || 0;
+      const trend = analysis.trend || "";
+      const patterns = analysis.patterns?.slice(0, 2).join(", ") || "";
+      const summaryLine = `${trend} | Confidence: ${conf}% ${patterns ? `| ${patterns}` : ""}`;
+      ctx.fillText(summaryLine, infoX, 38);
+    }
+
+    // --- Draw analysis lines ---
+    if (analysis.lines) {
       analysis.lines.forEach((line) => {
         const y = (line.yPercent / 100) * dimensions.height;
         drawAnalysisLine(ctx, y, line, dimensions.width);
       });
     }
+
+    // --- Draw bottom watermark ---
+    const wmH = 24;
+    const wmGrad = ctx.createLinearGradient(0, dimensions.height - wmH - 10, 0, dimensions.height);
+    wmGrad.addColorStop(0, "transparent");
+    wmGrad.addColorStop(1, "rgba(0,0,0,0.6)");
+    ctx.fillStyle = wmGrad;
+    ctx.fillRect(0, dimensions.height - wmH - 10, dimensions.width, wmH + 10);
+    ctx.font = "bold 10px Inter, system-ui, sans-serif";
+    ctx.fillStyle = "#64748b";
+    ctx.fillText("Analyzed by Futures AI", 10, dimensions.height - 8);
   }, [dimensions, analysis]);
 
   useEffect(() => { drawCanvas(); }, [drawCanvas]);
@@ -261,37 +348,37 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     const isTP = line.type === "takeProfit";
     const isTrend = line.type === "trend";
 
-    // --- Zone fill (wider, more visible gradient band) ---
-    const zoneHeight = isEntry ? 20 : isSL || isTP ? 16 : 14;
+    // --- Zone fill (wide, prominent gradient band) ---
+    const zoneHeight = isEntry ? 26 : isSL || isTP ? 22 : 18;
     const grad = ctx.createLinearGradient(0, y - zoneHeight, 0, y + zoneHeight);
-    const zoneAlpha = isEntry ? "28" : isSL || isTP ? "20" : "14";
+    const zoneAlpha = isEntry ? "35" : isSL || isTP ? "28" : "20";
     grad.addColorStop(0, "transparent");
-    grad.addColorStop(0.3, line.color + zoneAlpha);
+    grad.addColorStop(0.2, line.color + zoneAlpha);
     grad.addColorStop(0.5, line.color + zoneAlpha);
-    grad.addColorStop(0.7, line.color + zoneAlpha);
+    grad.addColorStop(0.8, line.color + zoneAlpha);
     grad.addColorStop(1, "transparent");
     ctx.fillStyle = grad;
     ctx.globalAlpha = 1;
     ctx.fillRect(0, y - zoneHeight, width, zoneHeight * 2);
 
-    // --- Glow effect (stronger for key levels) ---
+    // --- Double glow effect (much more visible) ---
     ctx.save();
     ctx.shadowColor = line.color;
-    ctx.shadowBlur = isEntry ? 14 : 10;
+    ctx.shadowBlur = isEntry ? 20 : 14;
     ctx.strokeStyle = line.color;
-    ctx.lineWidth = isEntry ? 2.5 : 1.5;
-    ctx.globalAlpha = 0.35;
+    ctx.lineWidth = isEntry ? 3 : 2;
+    ctx.globalAlpha = 0.4;
     ctx.beginPath();
     ctx.moveTo(0, y);
     ctx.lineTo(width, y);
     ctx.stroke();
     ctx.restore();
 
-    // --- Main line (thicker, cleaner) ---
+    // --- Main line (thick, bold, high contrast) ---
     ctx.strokeStyle = line.color;
-    ctx.lineWidth = isEntry ? 2.5 : isSL || isTP ? 2 : line.dashed ? 1.5 : 2;
-    ctx.setLineDash(line.dashed ? [8, 5] : isSL ? [4, 3] : []);
-    ctx.globalAlpha = 0.95;
+    ctx.lineWidth = isEntry ? 3 : isSL || isTP ? 2.5 : line.dashed ? 2 : 2.5;
+    ctx.setLineDash(line.dashed ? [10, 6] : isSL ? [5, 4] : []);
+    ctx.globalAlpha = 1;
     ctx.beginPath();
     ctx.moveTo(0, y);
     ctx.lineTo(width, y);
@@ -402,15 +489,26 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
       ctx.fillText(priceMatch, tagX + rightPadding, tagY + 15);
     }
 
-    // --- Strategy annotation for entry/SL/TP ---
-    if (isEntry || isSL || isTP) {
-      const strategyText = isEntry
-        ? (isTrend ? "" : "ENTRY ZONE")
-        : isSL ? "INVALIDATION"
-        : "TAKE PROFIT";
-      ctx.font = "bold 9px Inter, system-ui, sans-serif";
-      ctx.fillStyle = line.color + "60";
-      ctx.fillText(strategyText, labelX + 8, y + zoneHeight + 12);
+    // --- Strategy annotation text ON the chart (centered, large, semi-transparent) ---
+    if (isEntry || isSL || isTP || isSupport || isResistance) {
+      const strategyText = isEntry ? "ENTRY ZONE"
+        : isSL ? "STOP LOSS — INVALIDATION"
+        : isTP ? "TAKE PROFIT TARGET"
+        : isSupport ? "SUPPORT LEVEL"
+        : "RESISTANCE LEVEL";
+
+      ctx.font = `bold ${isEntry ? 14 : 11}px Inter, system-ui, sans-serif`;
+      const stW = ctx.measureText(strategyText).width;
+      const stX = width / 2 - stW / 2;
+      const stY = y + (isEntry ? 5 : 4);
+
+      // Text shadow for readability
+      ctx.save();
+      ctx.shadowColor = "#000000";
+      ctx.shadowBlur = 6;
+      ctx.fillStyle = line.color + (isEntry ? "70" : "50");
+      ctx.fillText(strategyText, stX, stY);
+      ctx.restore();
     }
   };
 
