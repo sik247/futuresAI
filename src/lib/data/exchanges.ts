@@ -13,7 +13,7 @@ export const EXCHANGES: ExchangeInfo[] = [
   {
     id: "bybit",
     name: "Bybit",
-    logo: "/icons/footer-icons/bybit-logo.png",
+    logo: "/icons/exchange/bybit.svg",
     makerFee: 0.02,
     takerFee: 0.055,
     paybackRate: 0.20,
@@ -23,7 +23,7 @@ export const EXCHANGES: ExchangeInfo[] = [
   {
     id: "bitget",
     name: "Bitget",
-    logo: "/icons/footer-icons/bitget.svg",
+    logo: "/icons/exchange/bitget.svg",
     makerFee: 0.02,
     takerFee: 0.06,
     paybackRate: 0.55,
@@ -33,7 +33,7 @@ export const EXCHANGES: ExchangeInfo[] = [
   {
     id: "okx",
     name: "OKX",
-    logo: "/icons/footer-icons/okx.svg",
+    logo: "/icons/exchange/okx.svg",
     makerFee: 0.02,
     takerFee: 0.05,
     paybackRate: 0.20,
@@ -43,7 +43,7 @@ export const EXCHANGES: ExchangeInfo[] = [
   {
     id: "gate",
     name: "Gate.io",
-    logo: "/icons/footer-icons/gate.png",
+    logo: "/icons/exchange/gate.svg",
     makerFee: 0.02,
     takerFee: 0.05,
     paybackRate: 0.75,
@@ -53,7 +53,7 @@ export const EXCHANGES: ExchangeInfo[] = [
   {
     id: "htx",
     name: "HTX",
-    logo: "/icons/footer-icons/htx.png",
+    logo: "/icons/exchange/htx.svg",
     makerFee: 0.02,
     takerFee: 0.05,
     paybackRate: 0.54,

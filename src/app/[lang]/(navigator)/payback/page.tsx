@@ -14,11 +14,11 @@ export const metadata: Metadata = {
 };
 
 const EXCHANGES = [
-  { name: "Bitget", account: "base03", paybackRate: 55, makerFee: 0.02, takerFee: 0.06, link: "https://www.bitget.com", logo: "/icons/footer-icons/bitget.svg" },
-  { name: "Bybit", account: "BBLL", paybackRate: 20, makerFee: 0.02, takerFee: 0.055, link: "https://www.bybit.com", logo: "/icons/footer-icons/bybit-logo.png" },
-  { name: "BingX", account: "FCC9QDJK", paybackRate: 50, makerFee: 0.02, takerFee: 0.05, link: "https://www.bingx.com", logo: "/icons/footer-icons/bingX.webp" },
-  { name: "Gate.io", account: "COINBASE", paybackRate: 75, makerFee: 0.02, takerFee: 0.05, link: "https://www.gate.io", logo: "/icons/footer-icons/gate.png" },
-  { name: "HTX", account: "miqkc223", paybackRate: 54, makerFee: 0.02, takerFee: 0.05, link: "https://www.htx.com", logo: "/icons/footer-icons/htx.png" },
+  { name: "Bitget", account: "base03", paybackRate: 55, makerFee: 0.02, takerFee: 0.06, link: "https://www.bitget.com", logo: "/icons/exchange/bitget.svg" },
+  { name: "Bybit", account: "BBLL", paybackRate: 20, makerFee: 0.02, takerFee: 0.055, link: "https://www.bybit.com", logo: "/icons/exchange/bybit.svg" },
+  { name: "BingX", account: "FCC9QDJK", paybackRate: 50, makerFee: 0.02, takerFee: 0.05, link: "https://www.bingx.com", logo: "/icons/exchange/bingx.svg" },
+  { name: "Gate.io", account: "COINBASE", paybackRate: 75, makerFee: 0.02, takerFee: 0.05, link: "https://www.gate.io", logo: "/icons/exchange/gate.svg" },
+  { name: "HTX", account: "miqkc223", paybackRate: 54, makerFee: 0.02, takerFee: 0.05, link: "https://www.htx.com", logo: "/icons/exchange/htx.svg" },
 ];
 
 export default async function PaybackPage({

@@ -29,6 +29,11 @@ export default async function DashboardPage({
 
   if (!user) redirect(`/${lang}/login`);
 
+  // Redirect admins to admin dashboard
+  if (user.role === "ADMIN") {
+    redirect(`/${lang}/dashboard/admin`);
+  }
+
   // Fetch portfolio data
   let portfolio = await prisma.portfolio.findFirst({
     where: { userId: user.id },
