@@ -13,8 +13,7 @@ class BingXService extends AffiliateService {
       startTime: "1702731524208",
       endTime: "1702731524208",
       uid: "1234567890",
-      timestamp: "1702731524208",
-    },
+    } as Record<string, string>,
     protocol: "https",
   };
   async getAffiliateData(uid: string, date: Date) {

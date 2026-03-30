@@ -12,7 +12,8 @@ class RestClient extends RestClientV2 {
     const startTime = yesterday.getTime();
     const endTime = today.getTime();
 
-    const requestUrl = `/api/broker/v1/agent/customer-commissions?uid=${uid}&startTime=${startTime}&endTime=${endTime}`;
+    // Use v2 endpoint (v1 was deprecated Nov 2025)
+    const requestUrl = `/api/v2/broker/customer-commissions?uid=${uid}&startTime=${startTime}&endTime=${endTime}&limit=100`;
 
     return new Promise((resolve, reject) => {
       setTimeout(() => {

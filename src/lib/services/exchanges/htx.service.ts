@@ -52,18 +52,19 @@ class HtxService extends AffiliateService {
 
       const accountId = accountData.data[0].id;
 
-      // Fetch transaction history for rebate type
-      const ledgerUrl = this.sign("GET", `/v1/account/accounts/${accountId}/ledger`, {
-        transactTypes: "rebate",
+      // Fetch account history filtering for rebate transactions
+      const historyUrl = this.sign("GET", "/v1/account/history", {
+        "account-id": String(accountId),
+        "transact-types": "rebate",
         size: "100",
       });
-      const ledgerRes = await fetch(ledgerUrl);
-      const ledgerData = await ledgerRes.json();
+      const historyRes = await fetch(historyUrl);
+      const historyData = await historyRes.json();
 
       let totalPayback = 0;
-      if (ledgerData.status === "ok" && Array.isArray(ledgerData.data)) {
-        totalPayback = ledgerData.data.reduce(
-          (sum: number, item: any) => sum + parseFloat(item.transactAmt || "0"),
+      if (historyData.status === "ok" && Array.isArray(historyData.data)) {
+        totalPayback = historyData.data.reduce(
+          (sum: number, item: any) => sum + Math.abs(parseFloat(item["transact-amt"] || "0")),
           0
         );
       }
@@ -73,7 +74,7 @@ class HtxService extends AffiliateService {
         payback: totalPayback,
         uid,
         accountId,
-        entries: ledgerData.data?.length || 0,
+        entries: historyData.data?.length || 0,
       };
     } catch (error: any) {
       return { ok: false, error: error.message };

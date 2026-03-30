@@ -22,8 +22,12 @@ class GateService extends AffiliateService {
 
   async getAffiliateData(uid: string) {
     try {
+      // Fetch last 30 days of commission history
+      const now = Math.floor(Date.now() / 1000);
+      const thirtyDaysAgo = now - 30 * 24 * 60 * 60;
+
       const path = "/api/v4/rebate/agency/commission_history";
-      const query = `currency_pair=BTC_USDT&limit=100`;
+      const query = `from=${thirtyDaysAgo}&to=${now}&limit=100`;
       const headers = this.sign("GET", path, query, "");
 
       const res = await fetch(`${this.baseUrl}${path}?${query}`, {
@@ -45,9 +49,9 @@ class GateService extends AffiliateService {
         return { ok: true, payback: total, entries: data.length, uid };
       }
 
-      // If the commission history endpoint doesn't work, try the transaction history
+      // If commission_history returns an error object, try transaction_history
       const altPath = "/api/v4/rebate/agency/transaction_history";
-      const altQuery = `limit=100`;
+      const altQuery = `from=${thirtyDaysAgo}&to=${now}&limit=100`;
       const altHeaders = this.sign("GET", altPath, altQuery, "");
 
       const altRes = await fetch(`${this.baseUrl}${altPath}?${altQuery}`, {
@@ -75,7 +79,6 @@ class GateService extends AffiliateService {
         entries: 0,
         uid,
         note: "No commission data available yet",
-        rawData: data,
       };
     } catch (error: any) {
       return { ok: false, error: error.message };
