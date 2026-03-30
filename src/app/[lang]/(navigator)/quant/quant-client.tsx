@@ -22,6 +22,19 @@ const ChartAnalyzer = dynamic(
   }
 );
 
+const QuantTools = dynamic(
+  () => import("./quant-tools"),
+  {
+    loading: () => (
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <div className="h-12 w-12 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
+        <p className="text-sm text-zinc-500 font-mono">Loading Tools...</p>
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
 /* ------------------------------------------------------------------ */
@@ -30,7 +43,31 @@ const COIN_ICONS: Record<string, { emoji: string; gradient: string }> = {
   ETH: { emoji: "\u039E", gradient: "from-blue-400 to-indigo-500" },
   SOL: { emoji: "\u25CE", gradient: "from-purple-500 to-fuchsia-500" },
   XRP: { emoji: "\u2715", gradient: "from-zinc-300 to-zinc-500" },
+  BNB: { emoji: "B", gradient: "from-yellow-500 to-amber-500" },
+  DOGE: { emoji: "D", gradient: "from-amber-400 to-yellow-500" },
+  ADA: { emoji: "A", gradient: "from-blue-500 to-cyan-500" },
+  AVAX: { emoji: "A", gradient: "from-red-500 to-rose-500" },
+  DOT: { emoji: "D", gradient: "from-pink-500 to-rose-500" },
+  LINK: { emoji: "L", gradient: "from-blue-400 to-blue-600" },
 };
+
+/* -- Sparkline SVG component -- */
+function Sparkline({ data, className }: { data?: number[]; className?: string }) {
+  if (!data || data.length < 2) return null;
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min || 1;
+  const w = 56, h = 18;
+  const points = data.map((v, i) =>
+    `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * h}`
+  ).join(" ");
+  const color = data[data.length - 1] >= data[0] ? "#22c55e" : "#ef4444";
+  return (
+    <svg width={w} height={h} className={className}>
+      <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 const SIGNAL_COLORS: Record<string, { bg: string; glow: string }> = {
   "Strong Buy": {
@@ -60,6 +97,7 @@ const AUTO_REFRESH_INTERVAL = 300;
 const TABS = [
   { key: "signals", labelKey: "quant_signals" as const },
   { key: "chart", labelKey: "quant_chartAnalysis" as const },
+  { key: "tools", labelKey: "quant_tools" as const },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -170,6 +208,7 @@ export default function QuantClient({
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>("signals");
   const [chartLoaded, setChartLoaded] = useState(false);
+  const [toolsLoaded, setToolsLoaded] = useState(false);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const overviewRef = useRef<HTMLDivElement>(null);
@@ -263,6 +302,9 @@ export default function QuantClient({
     setActiveTab(tab);
     if (tab === "chart" && !chartLoaded) {
       setChartLoaded(true);
+    }
+    if (tab === "tools" && !toolsLoaded) {
+      setToolsLoaded(true);
     }
   };
 
@@ -479,13 +521,15 @@ export default function QuantClient({
               className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl shadow-lg shadow-black/40 overflow-hidden mb-8"
             >
               {/* Table Header */}
-              <div className="grid grid-cols-12 gap-0 px-6 py-3 border-b border-white/[0.06] text-[9px] font-mono text-zinc-600 uppercase tracking-[0.15em]">
-                <div className="col-span-3">Asset</div>
-                <div className="col-span-2 text-right">Price</div>
-                <div className="col-span-1 text-right">24h</div>
-                <div className="col-span-2 text-right">Volume</div>
-                <div className="col-span-2 text-center">Signal</div>
-                <div className="col-span-2 text-right">{t.quant_confidence}</div>
+              <div className="hidden md:grid grid-cols-16 gap-0 px-6 py-3 border-b border-white/[0.06] text-[9px] font-mono text-zinc-600 uppercase tracking-[0.15em]" style={{ gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1fr 1fr 1.5fr 1.5fr" }}>
+                <div>Asset</div>
+                <div className="text-right">Price</div>
+                <div className="text-right">24h</div>
+                <div className="text-center">24h</div>
+                <div className="text-right">RSI</div>
+                <div className="text-right">MACD</div>
+                <div className="text-center">Signal</div>
+                <div className="text-right">{t.quant_confidence}</div>
               </div>
 
               {/* Signal Rows */}
@@ -505,15 +549,18 @@ export default function QuantClient({
                 const gradient = icon?.gradient ?? "from-zinc-500 to-zinc-700";
                 const label = icon?.emoji ?? s.symbol.charAt(0);
                 const signalStyle = SIGNAL_COLORS[s.signal] ?? { bg: "", glow: "" };
+                const rsiColor = s.rsi > 70 ? "text-red-400" : s.rsi < 30 ? "text-emerald-400" : "text-zinc-400";
+                const macdColor = s.macd?.histogram >= 0 ? "text-emerald-400" : "text-red-400";
 
                 return (
                   <div
                     key={s.symbol}
-                    className="group grid grid-cols-12 gap-0 items-center px-6 py-4 border-b border-white/[0.03] hover:bg-white/[0.03] transition-all duration-200"
+                    className="group hidden md:grid items-center px-6 py-4 border-b border-white/[0.03] hover:bg-white/[0.03] transition-all duration-200"
+                    style={{ gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1fr 1fr 1.5fr 1.5fr" }}
                   >
                     {/* Asset */}
-                    <div className="col-span-3 flex items-center gap-3">
-                      <div className={`h-9 w-9 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-xs flex-shrink-0`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`h-8 w-8 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-xs flex-shrink-0`}>
                         {label}
                       </div>
                       <div>
@@ -523,31 +570,45 @@ export default function QuantClient({
                     </div>
 
                     {/* Price */}
-                    <div className="col-span-2 text-right">
+                    <div className="text-right">
                       <AnimatedCounter value={s.price} prefix="$" decimals={s.price > 100 ? 0 : 2} className="text-sm font-mono font-bold text-white tabular-nums" />
                     </div>
 
                     {/* 24h Change */}
-                    <div className="col-span-1 text-right">
+                    <div className="text-right">
                       <span className={`text-xs font-mono font-bold tabular-nums ${s.change24h >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                         {s.change24h >= 0 ? "+" : ""}{s.change24h.toFixed(2)}%
                       </span>
                     </div>
 
-                    {/* Volume */}
-                    <div className="col-span-2 text-right">
-                      <span className="text-xs font-mono text-zinc-400 tabular-nums">{formatVolume(s.volume24h)}</span>
+                    {/* Sparkline */}
+                    <div className="flex justify-center">
+                      <Sparkline data={s.sparkline} />
+                    </div>
+
+                    {/* RSI */}
+                    <div className="text-right">
+                      <span className={`text-xs font-mono font-bold tabular-nums ${rsiColor}`}>
+                        {s.rsi?.toFixed(1) || "—"}
+                      </span>
+                    </div>
+
+                    {/* MACD */}
+                    <div className="text-right">
+                      <span className={`text-xs font-mono font-bold tabular-nums ${macdColor}`}>
+                        {s.macd?.histogram ? (s.macd.histogram >= 0 ? "+" : "") + s.macd.histogram.toFixed(1) : "—"}
+                      </span>
                     </div>
 
                     {/* Signal */}
-                    <div className="col-span-2 flex justify-center">
+                    <div className="flex justify-center">
                       <span className={`px-3 py-1 text-[10px] font-mono font-bold rounded-full border ${signalStyle.bg} ${signalStyle.glow}`}>
                         {s.signal}
                       </span>
                     </div>
 
                     {/* Confidence */}
-                    <div className="col-span-2">
+                    <div>
                       <div className="flex items-center gap-2 justify-end">
                         <div className="w-16 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
                           <div className={`h-full rounded-full bg-gradient-to-r ${confidenceBarColor(s.confidence)} transition-all duration-700`} style={{ width: `${s.confidence}%` }} />
@@ -566,7 +627,10 @@ export default function QuantClient({
                   return (
                     <div key={`mobile-${s.symbol}`} className="p-5 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-white">{s.symbol}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-white">{s.symbol}</span>
+                          <Sparkline data={s.sparkline} />
+                        </div>
                         <span className={`px-2.5 py-1 text-[10px] font-mono font-bold rounded-full border ${signalStyle.bg}`}>{s.signal}</span>
                       </div>
                       <div className="flex justify-between text-xs font-mono">
@@ -576,6 +640,14 @@ export default function QuantClient({
                       <div className="flex justify-between text-xs font-mono">
                         <span className="text-zinc-400">24h</span>
                         <span className={s.change24h >= 0 ? "text-emerald-400" : "text-red-400"}>{s.change24h >= 0 ? "+" : ""}{s.change24h.toFixed(2)}%</span>
+                      </div>
+                      <div className="flex justify-between text-xs font-mono">
+                        <span className="text-zinc-400">RSI</span>
+                        <span className={s.rsi > 70 ? "text-red-400" : s.rsi < 30 ? "text-emerald-400" : "text-zinc-300"}>{s.rsi?.toFixed(1) || "—"}</span>
+                      </div>
+                      <div className="flex justify-between text-xs font-mono">
+                        <span className="text-zinc-400">MACD</span>
+                        <span className={s.macd?.histogram >= 0 ? "text-emerald-400" : "text-red-400"}>{s.macd?.histogram ? (s.macd.histogram >= 0 ? "+" : "") + s.macd.histogram.toFixed(1) : "—"}</span>
                       </div>
                       <div className="flex justify-between text-xs font-mono">
                         <span className="text-zinc-400">{t.quant_confidence}</span>
@@ -621,6 +693,12 @@ export default function QuantClient({
         {activeTab === "chart" && (
           <div>
             <ChartAnalyzer lang={lang} translations={t} />
+          </div>
+        )}
+
+        {activeTab === "tools" && (
+          <div>
+            {toolsLoaded && <QuantTools lang={lang} />}
           </div>
         )}
       </div>

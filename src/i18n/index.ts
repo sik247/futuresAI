@@ -116,6 +116,7 @@ export type Dictionary = {
   quant_description: string;
   quant_signals: string;
   quant_chartAnalysis: string;
+  quant_tools: string;
   quant_marketOverview: string;
   quant_fearGreed: string;
   quant_btcTrend: string;

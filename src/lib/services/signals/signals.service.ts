@@ -7,6 +7,9 @@ export type SignalItem = {
   signal: "Strong Buy" | "Buy" | "Neutral" | "Sell" | "Strong Sell";
   confidence: number;
   reasons: string[];
+  rsi: number;
+  macd: { value: number; signal: number; histogram: number };
+  sparkline: number[];
   timestamp: string;
 };
 
@@ -23,6 +26,12 @@ const COINS = [
   { id: "ethereum", symbol: "ETH", name: "Ethereum" },
   { id: "solana", symbol: "SOL", name: "Solana" },
   { id: "ripple", symbol: "XRP", name: "Ripple" },
+  { id: "binancecoin", symbol: "BNB", name: "BNB" },
+  { id: "dogecoin", symbol: "DOGE", name: "Dogecoin" },
+  { id: "cardano", symbol: "ADA", name: "Cardano" },
+  { id: "avalanche-2", symbol: "AVAX", name: "Avalanche" },
+  { id: "polkadot", symbol: "DOT", name: "Polkadot" },
+  { id: "chainlink", symbol: "LINK", name: "Chainlink" },
 ];
 
 function getSignalFromChange(change: number): SignalItem["signal"] {
@@ -33,11 +42,31 @@ function getSignalFromChange(change: number): SignalItem["signal"] {
   return "Strong Sell";
 }
 
+function applyRsiFilter(
+  signal: SignalItem["signal"],
+  rsi: number
+): SignalItem["signal"] {
+  if (
+    rsi > 70 &&
+    (signal === "Buy" || signal === "Strong Buy")
+  ) {
+    return "Neutral";
+  }
+  if (
+    rsi < 30 &&
+    (signal === "Sell" || signal === "Strong Sell")
+  ) {
+    return "Neutral";
+  }
+  return signal;
+}
+
 function getConfidence(
   change: number,
   fearGreedValue: number,
   isBtc: boolean,
-  btcAboveSma: boolean
+  btcAboveSma: boolean,
+  rsi: number
 ): number {
   let confidence = 50;
   const absChange = Math.abs(change);
@@ -51,6 +80,9 @@ function getConfidence(
   if (isBtc && btcAboveSma) confidence += 10;
   else if (isBtc) confidence -= 5;
 
+  // RSI extremes indicate clearer signals
+  if (rsi > 70 || rsi < 30) confidence += 10;
+
   return Math.min(Math.max(confidence, 10), 95);
 }
 
@@ -59,7 +91,8 @@ function buildReasons(
   fearGreedValue: number,
   fearGreedClass: string,
   isBtc: boolean,
-  btcAboveSma: boolean
+  btcAboveSma: boolean,
+  rsi: number
 ): string[] {
   const reasons: string[] = [];
 
@@ -83,16 +116,14 @@ function buildReasons(
     );
   }
 
+  if (rsi > 70) reasons.push(`RSI at ${rsi.toFixed(1)} - overbought territory`);
+  else if (rsi < 30) reasons.push(`RSI at ${rsi.toFixed(1)} - oversold territory`);
+
   return reasons;
 }
 
 async function fetchBinancePrices() {
-  const symbols = [
-    { id: "bitcoin", symbol: "BTCUSDT" },
-    { id: "ethereum", symbol: "ETHUSDT" },
-    { id: "solana", symbol: "SOLUSDT" },
-    { id: "ripple", symbol: "XRPUSDT" },
-  ];
+  const symbols = COINS.map((c) => ({ id: c.id, symbol: `${c.symbol}USDT` }));
 
   try {
     const tickers = await Promise.all(
@@ -128,7 +159,7 @@ async function fetchBinancePrices() {
 }
 
 async function fetchCoinGeckoPrices() {
-  const ids = "bitcoin,ethereum,solana,ripple";
+  const ids = COINS.map((c) => c.id).join(",");
   const res = await fetch(
     `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true`,
     { next: { revalidate: 60 } }
@@ -149,34 +180,90 @@ async function fetchCoinGeckoPrices() {
   return result;
 }
 
-async function fetchBtcKlines(): Promise<number[][]> {
-  try {
-    const res = await fetch(
-      "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=42",
-      { next: { revalidate: 60 } }
-    );
-    if (!res.ok) throw new Error(`Binance klines: ${res.status}`);
-    return res.json();
-  } catch {
-    // Fallback: return empty array, SMA will default to 0
-    return [];
+function calculateRSI(closes: number[], period = 14): number {
+  if (closes.length < period + 1) return 50;
+  let gains = 0, losses = 0;
+  for (let i = 1; i <= period; i++) {
+    const change = closes[i] - closes[i - 1];
+    if (change > 0) gains += change;
+    else losses -= change;
   }
+  let avgGain = gains / period;
+  let avgLoss = losses / period;
+  for (let i = period + 1; i < closes.length; i++) {
+    const change = closes[i] - closes[i - 1];
+    avgGain = (avgGain * (period - 1) + (change > 0 ? change : 0)) / period;
+    avgLoss = (avgLoss * (period - 1) + (change < 0 ? -change : 0)) / period;
+  }
+  if (avgLoss === 0) return 100;
+  const rs = avgGain / avgLoss;
+  return 100 - 100 / (1 + rs);
+}
+
+function calculateEMA(data: number[], period: number): number[] {
+  const k = 2 / (period + 1);
+  const ema = [data[0]];
+  for (let i = 1; i < data.length; i++) {
+    ema.push(data[i] * k + ema[i - 1] * (1 - k));
+  }
+  return ema;
+}
+
+function calculateMACD(closes: number[]): { value: number; signal: number; histogram: number } {
+  if (closes.length < 26) return { value: 0, signal: 0, histogram: 0 };
+  const ema12 = calculateEMA(closes, 12);
+  const ema26 = calculateEMA(closes, 26);
+  const macdLine = ema12.map((v, i) => v - ema26[i]);
+  const signalLine = calculateEMA(macdLine.slice(26), 9);
+  const macdValue = macdLine[macdLine.length - 1];
+  const signalValue = signalLine[signalLine.length - 1];
+  return { value: macdValue, signal: signalValue, histogram: macdValue - signalValue };
+}
+
+async function fetchAllKlines(): Promise<Record<string, string[][]>> {
+  const results: Record<string, string[][]> = {};
+  const fetches = COINS.map(async (coin) => {
+    try {
+      const res = await fetch(
+        `https://api.binance.com/api/v3/klines?symbol=${coin.symbol}USDT&interval=4h&limit=50`,
+        { next: { revalidate: 60 } }
+      );
+      if (!res.ok) return;
+      results[coin.id] = await res.json();
+    } catch { /* skip */ }
+  });
+  await Promise.allSettled(fetches);
+  return results;
+}
+
+async function fetchSparklineData(): Promise<Record<string, number[]>> {
+  const results: Record<string, number[]> = {};
+  const fetches = COINS.map(async (coin) => {
+    try {
+      const res = await fetch(
+        `https://api.binance.com/api/v3/klines?symbol=${coin.symbol}USDT&interval=1h&limit=24`,
+        { next: { revalidate: 60 } }
+      );
+      if (!res.ok) return;
+      const klines = await res.json();
+      results[coin.id] = klines.map((k: (string | number)[]) => parseFloat(k[4] as string)); // close prices
+    } catch { /* skip */ }
+  });
+  await Promise.allSettled(fetches);
+  return results;
 }
 
 export async function fetchMarketSignals(): Promise<MarketSignals> {
-  const [priceData, fngRes, klineData] = await Promise.all([
+  const [priceData, fngRes, allKlines, sparklineData] = await Promise.all([
     fetchBinancePrices(),
     fetch("https://api.alternative.me/fng/?limit=1", {
       next: { revalidate: 300 },
     }),
-    fetchBtcKlines(),
+    fetchAllKlines(),
+    fetchSparklineData(),
   ]);
 
   const fngData = await fngRes.json();
-  // Binance klines: [openTime, open, high, low, close, ...]
-  const ohlcData: number[][] = Array.isArray(klineData)
-    ? klineData.map((k: any) => [k[0], parseFloat(k[1]), parseFloat(k[2]), parseFloat(k[3]), parseFloat(k[4])])
-    : [];
 
   // Fear & Greed
   const fngEntry = fngData?.data?.[0] ?? { value: "50", value_classification: "Neutral" };
@@ -184,6 +271,17 @@ export async function fetchMarketSignals(): Promise<MarketSignals> {
   const fearGreedClass: string = fngEntry.value_classification;
 
   // BTC SMA calculation from OHLC (close prices are index 4)
+  const btcRawKlines = allKlines["bitcoin"] ?? [];
+  const ohlcData: number[][] = Array.isArray(btcRawKlines)
+    ? btcRawKlines.map((k) => [
+        parseFloat(k[0]),
+        parseFloat(k[1]),
+        parseFloat(k[2]),
+        parseFloat(k[3]),
+        parseFloat(k[4]),
+      ])
+    : [];
+
   const closes = Array.isArray(ohlcData) ? ohlcData.map((c) => c[4]) : [];
   const sma = closes.length > 0 ? closes.reduce((a, b) => a + b, 0) / closes.length : 0;
   const latestClose = closes.length > 0 ? closes[closes.length - 1] : 0;
@@ -198,15 +296,30 @@ export async function fetchMarketSignals(): Promise<MarketSignals> {
     const volume24h: number = data?.usd_24h_vol ?? 0;
     const isBtc = coin.id === "bitcoin";
 
+    // RSI & MACD from 4h klines
+    const rawKlines = allKlines[coin.id] ?? [];
+    const coinCloses = rawKlines.map((k) => parseFloat(k[4]));
+    const rsi = calculateRSI(coinCloses);
+    const macd = calculateMACD(coinCloses);
+
+    // Sparkline from 1h klines
+    const sparkline = sparklineData[coin.id] ?? [];
+
+    const baseSignal = getSignalFromChange(change24h);
+    const signal = applyRsiFilter(baseSignal, rsi);
+
     return {
       coin: coin.name,
       symbol: coin.symbol,
       price,
       change24h,
       volume24h,
-      signal: getSignalFromChange(change24h),
-      confidence: getConfidence(change24h, fearGreedValue, isBtc, btcAboveSma),
-      reasons: buildReasons(change24h, fearGreedValue, fearGreedClass, isBtc, btcAboveSma),
+      signal,
+      confidence: getConfidence(change24h, fearGreedValue, isBtc, btcAboveSma, rsi),
+      reasons: buildReasons(change24h, fearGreedValue, fearGreedClass, isBtc, btcAboveSma, rsi),
+      rsi,
+      macd,
+      sparkline,
       timestamp: new Date().toISOString(),
     };
   });
