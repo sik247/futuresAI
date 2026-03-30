@@ -19,12 +19,15 @@ export function SocialLoginButtons({ lang }: { lang?: string }) {
       setError(null);
 
       try {
+        // Forward ALL fields from Telegram (id, first_name, last_name, username, photo_url, auth_date, hash)
+        const authData: Record<string, string> = {};
+        for (const [key, value] of Object.entries(user)) {
+          authData[key] = String(value ?? "");
+        }
+        authData.redirect = "false";
+
         const result = await signIn("telegram", {
-          id: String(user.id),
-          first_name: user.first_name || "",
-          username: user.username || "",
-          hash: user.hash || "",
-          auth_date: String(user.auth_date || ""),
+          ...authData,
           redirect: false,
         });
 

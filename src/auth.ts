@@ -17,7 +17,9 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         id: { label: "Telegram ID", type: "text" },
         first_name: { label: "First Name", type: "text" },
+        last_name: { label: "Last Name", type: "text" },
         username: { label: "Username", type: "text" },
+        photo_url: { label: "Photo URL", type: "text" },
         hash: { label: "Hash", type: "text" },
         auth_date: { label: "Auth Date", type: "text" },
       },
@@ -27,11 +29,16 @@ export const authOptions: NextAuthOptions = {
         // Verify Telegram auth data
         const crypto = require("crypto");
         const botToken = process.env.TELEGRAM_BOT_TOKEN;
-        if (!botToken) return null;
+        if (!botToken) {
+          console.error("[Telegram Auth] TELEGRAM_BOT_TOKEN not set");
+          return null;
+        }
 
+        // Only include known Telegram fields in HMAC check (not NextAuth internal fields)
+        const telegramFields = ["id", "first_name", "last_name", "username", "photo_url", "auth_date"];
         const secretKey = crypto.createHash("sha256").update(botToken).digest();
         const checkData = Object.entries(credentials)
-          .filter(([k]) => k !== "hash" && k !== "callbackUrl" && k !== "csrfToken" && k !== "redirect" && k !== "json")
+          .filter(([k, v]) => telegramFields.includes(k) && v !== undefined && v !== "")
           .sort(([a], [b]) => a.localeCompare(b))
           .map(([k, v]) => `${k}=${v}`)
           .join("\n");
@@ -39,6 +46,8 @@ export const authOptions: NextAuthOptions = {
         const hmac = crypto.createHmac("sha256", secretKey).update(checkData).digest("hex");
 
         if (hmac !== credentials.hash) {
+          console.error("[Telegram Auth] HMAC mismatch. Expected:", hmac, "Got:", credentials.hash);
+          console.error("[Telegram Auth] Check data:", checkData);
           // In dev, allow without hash verification
           if (process.env.NODE_ENV === "production") return null;
         }
