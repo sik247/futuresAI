@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import Container from "@/components/ui/container";
 import PaybackAnimations from "./payback-animations";
 import { auth } from "@/auth";
@@ -13,11 +14,11 @@ export const metadata: Metadata = {
 };
 
 const EXCHANGES = [
-  { name: "Bitget", account: "base03", paybackRate: 55, makerFee: 0.02, takerFee: 0.06, link: "https://www.bitget.com" },
-  { name: "Bybit", account: "BBLL", paybackRate: 20, makerFee: 0.02, takerFee: 0.055, link: "https://www.bybit.com" },
-  { name: "BingX", account: "FCC9QDJK", paybackRate: 50, makerFee: 0.02, takerFee: 0.05, link: "https://www.bingx.com" },
-  { name: "Gate.io", account: "COINBASE", paybackRate: 75, makerFee: 0.02, takerFee: 0.05, link: "https://www.gate.io" },
-  { name: "HTX", account: "miqkc223", paybackRate: 54, makerFee: 0.02, takerFee: 0.05, link: "https://www.htx.com" },
+  { name: "Bitget", account: "base03", paybackRate: 55, makerFee: 0.02, takerFee: 0.06, link: "https://www.bitget.com", logo: "/icons/footer-icons/bitget.svg" },
+  { name: "Bybit", account: "BBLL", paybackRate: 20, makerFee: 0.02, takerFee: 0.055, link: "https://www.bybit.com", logo: "/icons/footer-icons/bybit-logo.png" },
+  { name: "BingX", account: "FCC9QDJK", paybackRate: 50, makerFee: 0.02, takerFee: 0.05, link: "https://www.bingx.com", logo: "/icons/footer-icons/bingX.webp" },
+  { name: "Gate.io", account: "COINBASE", paybackRate: 75, makerFee: 0.02, takerFee: 0.05, link: "https://www.gate.io", logo: "/icons/footer-icons/gate.png" },
+  { name: "HTX", account: "miqkc223", paybackRate: 54, makerFee: 0.02, takerFee: 0.05, link: "https://www.htx.com", logo: "/icons/footer-icons/htx.png" },
 ];
 
 export default async function PaybackPage({
@@ -114,8 +115,8 @@ export default async function PaybackPage({
                 className="group relative rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 transition-all duration-300 hover:border-blue-500/30 hover:bg-white/[0.06] hover:-translate-y-1"
               >
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-14 h-14 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-xl font-bold text-blue-400">
-                    {exchange.name[0]}
+                  <div className="w-14 h-14 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center overflow-hidden">
+                    <Image src={exchange.logo} alt={exchange.name} width={32} height={32} className="object-contain" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-white">{exchange.name}</h3>
@@ -221,10 +222,10 @@ export default async function PaybackPage({
                     href={ex.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-lg font-bold text-blue-400 transition-all hover:bg-white/[0.12] hover:border-blue-500/30 hover:scale-110"
+                    className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center overflow-hidden transition-all hover:bg-white/[0.12] hover:border-blue-500/30 hover:scale-110"
                     title={`${ex.name} — ${ex.paybackRate}% payback`}
                   >
-                    {ex.name[0]}
+                    <Image src={ex.logo} alt={ex.name} width={24} height={24} className="object-contain" />
                   </a>
                 ))}
               </div>

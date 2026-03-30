@@ -17,6 +17,16 @@ const PoweredByIconsPathList = [
 
 const CommunityIconsPathList = [
   {
+    item: "/icons/footer-icons/telegram.svg",
+    alt: "Telegram",
+    href: "https://t.me/moneyboutique_ms",
+  },
+  {
+    item: "/icons/footer-icons/telegram.svg",
+    alt: "Futures AI Official",
+    href: "https://t.me/FuturesAIOfficial",
+  },
+  {
     item: "/icons/footer-icons/youtube.png",
     alt: "YouTube",
     href: "https://www.youtube.com/@TetherBase",
