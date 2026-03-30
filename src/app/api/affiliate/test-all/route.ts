@@ -2,6 +2,8 @@ import { bitgetService } from "@/lib/services/exchanges/bitget.service";
 import { byBitService } from "@/lib/services/exchanges/bybit.service";
 import { bingXService } from "@/lib/services/exchanges/bingx.service";
 import { okxService } from "@/lib/services/exchanges/okx.service";
+import { gateService } from "@/lib/services/exchanges/gate.service";
+import { htxService } from "@/lib/services/exchanges/htx.service";
 
 async function testExchange(name: string, fn: () => Promise<any>) {
   try {
@@ -28,6 +30,12 @@ export async function GET() {
     }),
     testExchange("okx", () =>
       okxService.getAffiliateData("594436422380389965")
+    ),
+    testExchange("gate", () =>
+      gateService.getAffiliateData("COINBASE")
+    ),
+    testExchange("htx", () =>
+      htxService.getAffiliateData("miqkc223")
     ),
   ]);
 

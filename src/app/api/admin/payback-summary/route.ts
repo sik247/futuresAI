@@ -3,6 +3,7 @@ import { bitgetService } from "@/lib/services/exchanges/bitget.service";
 import { byBitService } from "@/lib/services/exchanges/bybit.service";
 import { bingXService } from "@/lib/services/exchanges/bingx.service";
 import { htxService } from "@/lib/services/exchanges/htx.service";
+import { gateService } from "@/lib/services/exchanges/gate.service";
 
 interface ExchangeResult {
   exchange: string;
@@ -111,6 +112,25 @@ async function fetchHtx(): Promise<ExchangeResult> {
   }
 }
 
+async function fetchGate(): Promise<ExchangeResult> {
+  try {
+    if (!process.env.GATE_API_KEY || !process.env.GATE_API_SECRET) {
+      return { exchange: "Gate.io", account: "COINBASE", status: "error", totalPayback: 0, entries: 0, error: "GATE_API_KEY or GATE_API_SECRET not set" };
+    }
+    const data = await gateService.getAffiliateData("COINBASE");
+    return {
+      exchange: "Gate.io",
+      account: "COINBASE",
+      status: data.ok ? "ok" : "error",
+      totalPayback: data.payback || 0,
+      entries: data.entries || 0,
+      error: data.ok ? undefined : (data as any).error || "Gate.io API error",
+    };
+  } catch (error: any) {
+    return { exchange: "Gate.io", account: "COINBASE", status: "error", totalPayback: 0, entries: 0, error: error.message };
+  }
+}
+
 export async function GET() {
   const session = await auth();
   if (!session || (session.user as { role?: string }).role !== "ADMIN") {
@@ -122,6 +142,7 @@ export async function GET() {
     fetchBybit(),
     fetchBingX(),
     fetchHtx(),
+    fetchGate(),
   ]);
 
   const exchanges = results.map((r) =>

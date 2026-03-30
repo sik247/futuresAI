@@ -94,35 +94,73 @@ async function fetchBinancePrices() {
     { id: "ripple", symbol: "XRPUSDT" },
   ];
 
-  const tickers = await Promise.all(
-    symbols.map(async (s) => {
-      const res = await fetch(
-        `https://api.binance.com/api/v3/ticker/24hr?symbol=${s.symbol}`,
-        { next: { revalidate: 60 } }
-      );
-      const data = await res.json();
-      return {
-        id: s.id,
-        usd: parseFloat(data.lastPrice) || 0,
-        usd_24h_change: parseFloat(data.priceChangePercent) || 0,
-        usd_24h_vol: parseFloat(data.quoteVolume) || 0,
-      };
-    })
+  try {
+    const tickers = await Promise.all(
+      symbols.map(async (s) => {
+        const res = await fetch(
+          `https://api.binance.com/api/v3/ticker/24hr?symbol=${s.symbol}`,
+          { next: { revalidate: 60 } }
+        );
+        if (!res.ok) throw new Error(`Binance ${s.symbol}: ${res.status}`);
+        const data = await res.json();
+        return {
+          id: s.id,
+          usd: parseFloat(data.lastPrice) || 0,
+          usd_24h_change: parseFloat(data.priceChangePercent) || 0,
+          usd_24h_vol: parseFloat(data.quoteVolume) || 0,
+        };
+      })
+    );
+
+    // Verify we got actual prices (not all zeros)
+    const hasValidPrices = tickers.some((t) => t.usd > 0);
+    if (!hasValidPrices) throw new Error("Binance returned zero prices");
+
+    const result: Record<string, { usd: number; usd_24h_change: number; usd_24h_vol: number }> = {};
+    for (const t of tickers) {
+      result[t.id] = { usd: t.usd, usd_24h_change: t.usd_24h_change, usd_24h_vol: t.usd_24h_vol };
+    }
+    return result;
+  } catch {
+    // Fallback to CoinGecko if Binance fails
+    return fetchCoinGeckoPrices();
+  }
+}
+
+async function fetchCoinGeckoPrices() {
+  const ids = "bitcoin,ethereum,solana,ripple";
+  const res = await fetch(
+    `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true`,
+    { next: { revalidate: 60 } }
   );
+  const data = await res.json();
 
   const result: Record<string, { usd: number; usd_24h_change: number; usd_24h_vol: number }> = {};
-  for (const t of tickers) {
-    result[t.id] = { usd: t.usd, usd_24h_change: t.usd_24h_change, usd_24h_vol: t.usd_24h_vol };
+  for (const id of ids.split(",")) {
+    const coin = data[id];
+    if (coin) {
+      result[id] = {
+        usd: coin.usd || 0,
+        usd_24h_change: coin.usd_24h_change || 0,
+        usd_24h_vol: coin.usd_24h_vol || 0,
+      };
+    }
   }
   return result;
 }
 
 async function fetchBtcKlines(): Promise<number[][]> {
-  const res = await fetch(
-    "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=42",
-    { next: { revalidate: 60 } }
-  );
-  return res.json();
+  try {
+    const res = await fetch(
+      "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=42",
+      { next: { revalidate: 60 } }
+    );
+    if (!res.ok) throw new Error(`Binance klines: ${res.status}`);
+    return res.json();
+  } catch {
+    // Fallback: return empty array, SMA will default to 0
+    return [];
+  }
 }
 
 export async function fetchMarketSignals(): Promise<MarketSignals> {

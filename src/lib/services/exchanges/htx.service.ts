@@ -32,24 +32,48 @@ class HtxService extends AffiliateService {
 
   async getAffiliateData(uid: string) {
     try {
-      const url = this.sign("GET", "/v2/user/uid", {});
-      const res = await fetch(url);
-      const data = await res.json();
+      // Get user UID to verify API access
+      const uidUrl = this.sign("GET", "/v2/user/uid", {});
+      const uidRes = await fetch(uidUrl);
+      const uidData = await uidRes.json();
 
-      if (data.code !== 200 && data.status !== "ok") {
-        return { ok: false, error: data.message || data["err-msg"] || "API error" };
+      if (uidData.code !== 200 && uidData.status !== "ok") {
+        return { ok: false, error: uidData.message || uidData["err-msg"] || "API error" };
       }
 
-      // Try to get rebate data
-      const rebateUrl = this.sign("GET", "/v2/account/accounts", {});
-      const rebateRes = await fetch(rebateUrl);
-      const rebateData = await rebateRes.json();
+      // Fetch account ledger for rebate entries
+      const accountUrl = this.sign("GET", "/v1/account/accounts", {});
+      const accountRes = await fetch(accountUrl);
+      const accountData = await accountRes.json();
+
+      if (accountData.status !== "ok" || !accountData.data?.length) {
+        return { ok: true, payback: 0, uid, accounts: [], note: "No accounts found" };
+      }
+
+      const accountId = accountData.data[0].id;
+
+      // Fetch transaction history for rebate type
+      const ledgerUrl = this.sign("GET", `/v1/account/accounts/${accountId}/ledger`, {
+        transactTypes: "rebate",
+        size: "100",
+      });
+      const ledgerRes = await fetch(ledgerUrl);
+      const ledgerData = await ledgerRes.json();
+
+      let totalPayback = 0;
+      if (ledgerData.status === "ok" && Array.isArray(ledgerData.data)) {
+        totalPayback = ledgerData.data.reduce(
+          (sum: number, item: any) => sum + parseFloat(item.transactAmt || "0"),
+          0
+        );
+      }
 
       return {
         ok: true,
-        payback: 0, // HTX rebate API needs specific broker endpoint
+        payback: totalPayback,
         uid,
-        accounts: rebateData.data || [],
+        accountId,
+        entries: ledgerData.data?.length || 0,
       };
     } catch (error: any) {
       return { ok: false, error: error.message };
