@@ -51,6 +51,16 @@ export const EXCHANGES: ExchangeInfo[] = [
     features: ["Wide Token Selection", "Margin Trading"],
   },
   {
+    id: "bingx",
+    name: "BingX",
+    logo: "/icons/exchange/bingx.svg",
+    makerFee: 0.02,
+    takerFee: 0.05,
+    paybackRate: 0.50,
+    color: "#2c6ecf",
+    features: ["Copy Trading", "Grid Trading"],
+  },
+  {
     id: "htx",
     name: "HTX",
     logo: "/icons/exchange/htx.svg",
