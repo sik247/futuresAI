@@ -54,6 +54,34 @@ export default async function DashboardPage({
     select: { id: true, pair: true, trend: true, confidence: true, createdAt: true },
   });
 
+  // Fetch exchange accounts with payback data
+  const exchangeAccounts = await prisma.exchangeAccount.findMany({
+    where: { userId: user.id, status: "ACTIVE" },
+    include: {
+      exchange: true,
+      trades: {
+        where: { status: "SUCCESS" },
+        select: { payback: true, withdrawId: true, createdAt: true },
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
+
+  const paybackAccounts = exchangeAccounts.map((acc) => {
+    const totalEarned = acc.trades.reduce((sum, t) => sum + t.payback, 0);
+    const unpaid = acc.trades.filter((t) => !t.withdrawId).reduce((sum, t) => sum + t.payback, 0);
+    return {
+      id: acc.id,
+      uid: acc.uid,
+      exchangeName: acc.exchange.name,
+      exchangeImage: acc.exchange.imageUrl,
+      paybackRate: acc.exchange.paybackRatio,
+      totalEarned,
+      unpaid,
+      tradeCount: acc.trades.length,
+    };
+  });
+
   return (
     <div className="bg-zinc-950 min-h-screen">
       <UserDashboard
@@ -68,6 +96,7 @@ export default async function DashboardPage({
         portfolio={JSON.parse(JSON.stringify(portfolio))}
         prices={prices}
         recentAnalyses={JSON.parse(JSON.stringify(recentAnalyses))}
+        paybackAccounts={JSON.parse(JSON.stringify(paybackAccounts))}
       />
     </div>
   );

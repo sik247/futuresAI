@@ -3,7 +3,10 @@ export const dynamic = "force-dynamic";
 import { exchangeAccountsService } from "@/lib/services/exchange-accounts/exchange-accounts.service";
 import { bingXService } from "@/lib/services/exchanges/bingx.service";
 import { bitgetService } from "@/lib/services/exchanges/bitget.service";
-// OKX removed — HTX added
+import { byBitService } from "@/lib/services/exchanges/bybit.service";
+import { okxService } from "@/lib/services/exchanges/okx.service";
+import { gateService } from "@/lib/services/exchanges/gate.service";
+import { htxService } from "@/lib/services/exchanges/htx.service";
 import { Prisma, Trade } from "@prisma/client";
 import {
   notifyAdmin,
@@ -61,7 +64,7 @@ export async function GET(request: Request) {
         });
       }
     } catch (error) {
-      console.error(error);
+      console.error(`Cron sync error for ${exchangeAccount.exchange.name}:`, error);
       continue;
     }
   }
@@ -83,63 +86,134 @@ export async function GET(request: Request) {
 }
 
 function getHandler(exchangeAccount: TExchangeAccount): IHandler | null {
-  const exchange = exchangeAccount.exchange;
-  switch (exchange.id) {
-    case "3":
-      return handleBitget;
-    // case "5": OKX removed
-    case "2":
-      return handleBingx;
-    // case "4":
-    //   return handleBybit;
-    default:
-      return null;
-  }
+  const exchangeName = exchangeAccount.exchange.name.toLowerCase();
+  if (exchangeName.includes("bitget")) return handleBitget;
+  if (exchangeName.includes("bingx")) return handleBingx;
+  if (exchangeName.includes("bybit")) return handleBybit;
+  if (exchangeName.includes("okx")) return handleOkx;
+  if (exchangeName.includes("gate")) return handleGate;
+  if (exchangeName.includes("htx") || exchangeName.includes("huobi")) return handleHtx;
+  return null;
 }
 
-// OKX handler removed
-
-const handleBitget: IHandler = async (exchangeAccount: TExchangeAccount) => {
-  let result: IHandlerReturn = { newTrades: [] };
-  const data = await bitgetService.getAffiliateData(exchangeAccount.uid);
-  if (data.length === 0) return result;
-  if (exchangeAccount.status !== "ACTIVE") {
-    exchangeAccountsService.activate(exchangeAccount.id);
-  }
-
-  for (const item of data) {
+/* -- Helper to save trades without duplicates -- */
+async function saveTrades(
+  exchangeAccountId: string,
+  items: { amount: number; payback: number; date: Date }[]
+): Promise<Trade[]> {
+  const newTrades: Trade[] = [];
+  for (const item of items) {
     const hasSame = await exchangeAccountsService.findSameTrade({
-      exchangeAccountId: exchangeAccount.id,
-      amount: item.payback,
+      exchangeAccountId,
+      amount: item.amount,
       apiCreatedAt: item.date,
     });
     if (hasSame) continue;
-    const newTrades = await exchangeAccountsService.addTrades([
+    const created = await exchangeAccountsService.addTrades([
       {
-        amount: item.payback,
-        exchangeAccount: {
-          connect: {
-            id: exchangeAccount.id,
-          },
-        },
+        amount: item.amount,
+        exchangeAccount: { connect: { id: exchangeAccountId } },
         apiCreatedAt: item.date,
         payback: item.payback,
       },
     ]);
-    result.newTrades.push(...newTrades);
+    newTrades.push(...created);
   }
-  return result;
+  return newTrades;
+}
+
+const handleBitget: IHandler = async (exchangeAccount) => {
+  const data = await bitgetService.getAffiliateData(exchangeAccount.uid);
+  if (data.length === 0) return { newTrades: [] };
+  if (exchangeAccount.status !== "ACTIVE") {
+    exchangeAccountsService.activate(exchangeAccount.id);
+  }
+  const newTrades = await saveTrades(
+    exchangeAccount.id,
+    data.map((item: any) => ({ amount: item.payback, payback: item.payback, date: item.date }))
+  );
+  return { newTrades };
 };
 
-// const handleBybit: IHandler = async (exchangeAccount: TExchangeAccount) => {
-//   const data = await byBitService.getAffiliateData(exchangeAccount.uid);
-// };
-
-const handleBingx: IHandler = async (exchangeAccount: TExchangeAccount) => {
+const handleBingx: IHandler = async (exchangeAccount) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const data = await bingXService.getAffiliateData(exchangeAccount.uid, today);
-  console.log("BINGX");
-  console.log(data);
-  return { newTrades: [] };
+  const { data: rawData } = await bingXService.getAffiliateData(exchangeAccount.uid, today);
+  const parsed = JSON.parse(rawData);
+  if (parsed.code !== 0 || !parsed.data?.list?.length) return { newTrades: [] };
+
+  if (exchangeAccount.status !== "ACTIVE") {
+    exchangeAccountsService.activate(exchangeAccount.id);
+  }
+
+  const newTrades = await saveTrades(
+    exchangeAccount.id,
+    parsed.data.list.map((item: any) => ({
+      amount: parseFloat(item.commission || "0"),
+      payback: parseFloat(item.commission || "0"),
+      date: new Date(parseInt(item.time || Date.now())),
+    }))
+  );
+  return { newTrades };
+};
+
+const handleBybit: IHandler = async (exchangeAccount) => {
+  const response = await byBitService.getAffiliateData(exchangeAccount.uid);
+  if (response.retCode !== 0) return { newTrades: [] };
+
+  const result = response.result as any;
+  const commission = parseFloat(result?.totalCommission || result?.commission || "0");
+  if (commission <= 0) return { newTrades: [] };
+
+  if (exchangeAccount.status !== "ACTIVE") {
+    exchangeAccountsService.activate(exchangeAccount.id);
+  }
+
+  const newTrades = await saveTrades(exchangeAccount.id, [
+    { amount: commission, payback: commission, date: new Date() },
+  ]);
+  return { newTrades };
+};
+
+const handleOkx: IHandler = async (exchangeAccount) => {
+  const data: any = await okxService.getAffiliateData(exchangeAccount.uid);
+  if (!data.ok || !data.payback) return { newTrades: [] };
+
+  if (exchangeAccount.status !== "ACTIVE") {
+    exchangeAccountsService.activate(exchangeAccount.id);
+  }
+
+  const payback = typeof data.payback === "number" ? data.payback : parseFloat(data.payback);
+  const newTrades = await saveTrades(exchangeAccount.id, [
+    { amount: payback, payback, date: new Date() },
+  ]);
+  return { newTrades };
+};
+
+const handleGate: IHandler = async (exchangeAccount) => {
+  const data = await gateService.getAffiliateData(exchangeAccount.uid);
+  if (!data.ok || !data.payback) return { newTrades: [] };
+
+  if (exchangeAccount.status !== "ACTIVE") {
+    exchangeAccountsService.activate(exchangeAccount.id);
+  }
+
+  const newTrades = await saveTrades(exchangeAccount.id, [
+    { amount: data.payback, payback: data.payback, date: new Date() },
+  ]);
+  return { newTrades };
+};
+
+const handleHtx: IHandler = async (exchangeAccount) => {
+  const data = await htxService.getAffiliateData(exchangeAccount.uid);
+  if (!data.ok || !data.payback) return { newTrades: [] };
+
+  if (exchangeAccount.status !== "ACTIVE") {
+    exchangeAccountsService.activate(exchangeAccount.id);
+  }
+
+  const newTrades = await saveTrades(exchangeAccount.id, [
+    { amount: data.payback, payback: data.payback, date: new Date() },
+  ]);
+  return { newTrades };
 };
