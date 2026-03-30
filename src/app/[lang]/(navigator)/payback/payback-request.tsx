@@ -24,23 +24,28 @@ interface WithdrawalRecord {
   exchangeAccounts: { exchange: { name: string } }[];
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const config: Record<string, { label: string; bg: string; text: string; dot: string }> = {
-    PENDING: { label: "Pending", bg: "bg-amber-500/10", text: "text-amber-400", dot: "bg-amber-400" },
-    SUCCESS: { label: "Paid", bg: "bg-emerald-500/10", text: "text-emerald-400", dot: "bg-emerald-400" },
-    FAILED: { label: "Rejected", bg: "bg-red-500/10", text: "text-red-400", dot: "bg-red-400" },
+function StatusBadge({ status, ko }: { status: string; ko: boolean }) {
+  const config: Record<string, { label: string; labelKo: string; bg: string; text: string; dot: string }> = {
+    PENDING: { label: "Pending", labelKo: "대기 중", bg: "bg-amber-500/10", text: "text-amber-400", dot: "bg-amber-400" },
+    SUCCESS: { label: "Paid", labelKo: "지급 완료", bg: "bg-emerald-500/10", text: "text-emerald-400", dot: "bg-emerald-400" },
+    FAILED: { label: "Rejected", labelKo: "거절됨", bg: "bg-red-500/10", text: "text-red-400", dot: "bg-red-400" },
   };
   const c = config[status] || config.PENDING;
 
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${c.bg} ${c.text}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${c.dot}`} />
-      {c.label}
+      {ko ? c.labelKo : c.label}
     </span>
   );
 }
 
-export default function PaybackRequest() {
+type Props = {
+  lang: string;
+};
+
+export default function PaybackRequest({ lang }: Props) {
+  const ko = lang === "ko";
   const [accounts, setAccounts] = useState<AccountSummary[]>([]);
   const [totalUnpaid, setTotalUnpaid] = useState(0);
   const [history, setHistory] = useState<WithdrawalRecord[]>([]);
@@ -87,13 +92,21 @@ export default function PaybackRequest() {
     });
 
     if (result.success) {
-      setMessage({ type: "success", text: "Payback request submitted successfully!" });
+      setMessage({
+        type: "success",
+        text: ko
+          ? "페이백 요청이 성공적으로 제출되었습니다!"
+          : "Payback request submitted successfully!",
+      });
       setShowForm(false);
       setSelectedAccounts([]);
       setAddress("");
       await loadData();
     } else {
-      setMessage({ type: "error", text: result.error || "Failed to submit request" });
+      setMessage({
+        type: "error",
+        text: result.error || (ko ? "요청 제출에 실패했습니다" : "Failed to submit request"),
+      });
     }
     setSubmitting(false);
   }
@@ -121,21 +134,31 @@ export default function PaybackRequest() {
       <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-xl font-bold text-white">Your Payback</h3>
-            <p className="text-sm text-zinc-500 mt-1">Unpaid payback across your exchange accounts</p>
+            <h3 className="text-xl font-bold text-white">
+              {ko ? "내 페이백" : "Your Payback"}
+            </h3>
+            <p className="text-sm text-zinc-500 mt-1">
+              {ko
+                ? "거래소 계정의 미지급 페이백"
+                : "Unpaid payback across your exchange accounts"}
+            </p>
           </div>
           <div className="text-right">
             <p className="text-3xl font-bold font-mono tabular-nums text-emerald-400">
               ${totalUnpaid.toFixed(2)}
             </p>
-            <p className="text-xs text-zinc-500 mt-1">Available to withdraw</p>
+            <p className="text-xs text-zinc-500 mt-1">
+              {ko ? "출금 가능" : "Available to withdraw"}
+            </p>
           </div>
         </div>
 
         {/* Account cards */}
         {accounts.length === 0 ? (
           <p className="text-zinc-500 text-sm py-4">
-            No exchange accounts linked. Link your exchange account to start earning payback.
+            {ko
+              ? "연결된 거래소 계정이 없습니다. 거래소 계정을 연결하면 페이백을 받을 수 있습니다."
+              : "No exchange accounts linked. Link your exchange account to start earning payback."}
           </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -167,7 +190,9 @@ export default function PaybackRequest() {
             onClick={() => setShowForm(!showForm)}
             className="mt-6 w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-blue-500 hover:shadow-[0_0_30px_-8px_rgba(37,99,235,0.4)]"
           >
-            {showForm ? "Cancel" : "Request Payback"}
+            {showForm
+              ? ko ? "취소" : "Cancel"
+              : ko ? "페이백 요청" : "Request Payback"}
           </button>
         )}
       </div>
@@ -186,11 +211,15 @@ export default function PaybackRequest() {
       {/* Request Form */}
       {showForm && (
         <form onSubmit={handleSubmit} className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-6 space-y-5">
-          <h4 className="text-lg font-semibold text-white">Request Payback</h4>
+          <h4 className="text-lg font-semibold text-white">
+            {ko ? "페이백 요청" : "Request Payback"}
+          </h4>
 
           {/* Select accounts */}
           <div>
-            <label className="block text-sm text-zinc-400 mb-2">Select Exchange Accounts</label>
+            <label className="block text-sm text-zinc-400 mb-2">
+              {ko ? "거래소 계정 선택" : "Select Exchange Accounts"}
+            </label>
             <div className="space-y-2">
               {accounts.filter((a) => a.unpaidPayback > 0).map((acc) => (
                 <label
@@ -221,7 +250,9 @@ export default function PaybackRequest() {
 
           {/* Network */}
           <div>
-            <label className="block text-sm text-zinc-400 mb-2">Network</label>
+            <label className="block text-sm text-zinc-400 mb-2">
+              {ko ? "네트워크" : "Network"}
+            </label>
             <select
               value={network}
               onChange={(e) => setNetwork(e.target.value)}
@@ -235,12 +266,14 @@ export default function PaybackRequest() {
 
           {/* Wallet Address */}
           <div>
-            <label className="block text-sm text-zinc-400 mb-2">Wallet Address</label>
+            <label className="block text-sm text-zinc-400 mb-2">
+              {ko ? "지갑 주소" : "Wallet Address"}
+            </label>
             <input
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              placeholder="Enter your wallet address..."
+              placeholder={ko ? "지갑 주소를 입력하세요..." : "Enter your wallet address..."}
               className="w-full rounded-lg border border-white/[0.08] bg-zinc-900 px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:border-blue-500/50 focus:outline-none focus:ring-1 focus:ring-blue-500/50"
               required
               minLength={10}
@@ -251,7 +284,9 @@ export default function PaybackRequest() {
           {selectedAccounts.length > 0 && (
             <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-zinc-400">Total Request Amount</span>
+                <span className="text-sm text-zinc-400">
+                  {ko ? "총 요청 금액" : "Total Request Amount"}
+                </span>
                 <span className="text-xl font-bold font-mono tabular-nums text-emerald-400">
                   ${accounts
                     .filter((a) => selectedAccounts.includes(a.id))
@@ -273,10 +308,10 @@ export default function PaybackRequest() {
                   <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" className="opacity-25" />
                   <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 </svg>
-                Submitting...
+                {ko ? "제출 중..." : "Submitting..."}
               </>
             ) : (
-              "Submit Request"
+              ko ? "요청 제출" : "Submit Request"
             )}
           </button>
         </form>
@@ -285,7 +320,9 @@ export default function PaybackRequest() {
       {/* Request History — Timeline Style */}
       {history.length > 0 && (
         <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-6">
-          <h3 className="text-sm font-semibold text-zinc-300 mb-6">Withdrawal History</h3>
+          <h3 className="text-sm font-semibold text-zinc-300 mb-6">
+            {ko ? "출금 내역" : "Withdrawal History"}
+          </h3>
           <div className="space-y-4">
             {history.map((req) => {
               const isPending = req.status === "PENDING";
@@ -306,7 +343,7 @@ export default function PaybackRequest() {
                   {/* Header */}
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <StatusBadge status={req.status} />
+                      <StatusBadge status={req.status} ko={ko} />
                       <span className="text-sm font-semibold text-white font-mono">${req.amount.toFixed(2)}</span>
                     </div>
                     <span className="text-xs text-zinc-500">

@@ -166,7 +166,7 @@ export default function LinkExchangeForm({ exchanges, lang }: Props) {
             {/* Screenshot upload */}
             <div>
               <label className="block text-[10px] font-mono text-zinc-500 uppercase tracking-[0.15em] mb-2">
-                {ko ? "스크린샷 (선택)" : "Screenshot (optional)"}
+                {ko ? "스크린샷 (선택사항)" : "Screenshot (optional)"}
               </label>
               <div
                 onDrop={handleDrop}
@@ -200,7 +200,7 @@ export default function LinkExchangeForm({ exchanges, lang }: Props) {
                 ) : (
                   <div className="py-8 flex flex-col items-center gap-2">
                     <p className="text-sm text-zinc-500">
-                      {ko ? "파일을 드래그하거나 클릭하여 업로드" : "Drag & drop or click to upload"}
+                      {ko ? "드래그 앤 드롭 또는 클릭하여 업로드" : "Drag & drop or click to upload"}
                     </p>
                     <p className="text-xs text-zinc-700">PNG, JPG, WEBP</p>
                   </div>
@@ -226,7 +226,7 @@ export default function LinkExchangeForm({ exchanges, lang }: Props) {
               >
                 {result.success
                   ? ko
-                    ? "계정이 성공적으로 연결되었습니다. 검토 후 승인됩니다."
+                    ? "계정이 성공적으로 연결되었습니다. 관리자 확인 후 승인됩니다."
                     : "Account linked successfully. It will be reviewed and approved shortly."
                   : result.error}
               </div>
@@ -240,7 +240,7 @@ export default function LinkExchangeForm({ exchanges, lang }: Props) {
             >
               {loading
                 ? ko ? "처리 중..." : "Processing..."
-                : ko ? "계정 연결 신청" : "Submit Account Link"}
+                : ko ? "계정 연결 제출" : "Submit Account Link"}
             </button>
           </form>
         </Card>
