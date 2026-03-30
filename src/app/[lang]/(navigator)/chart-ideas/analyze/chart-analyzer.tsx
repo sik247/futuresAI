@@ -239,98 +239,13 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     canvas.height = dimensions.height;
     ctx.drawImage(img, 0, 0, dimensions.width, dimensions.height);
 
-    if (!analysis) return;
+    if (!analysis?.lines) return;
 
-    // --- Draw strategy header overlay on top of chart ---
-    if (analysis.tradeSetup) {
-      const headerH = 52;
-      // Dark gradient overlay at top
-      const hGrad = ctx.createLinearGradient(0, 0, 0, headerH + 20);
-      hGrad.addColorStop(0, "rgba(0,0,0,0.85)");
-      hGrad.addColorStop(0.7, "rgba(0,0,0,0.5)");
-      hGrad.addColorStop(1, "transparent");
-      ctx.fillStyle = hGrad;
-      ctx.fillRect(0, 0, dimensions.width, headerH + 20);
-
-      const dir = analysis.tradeSetup.direction;
-      const isLong = dir === "LONG";
-      const isShort = dir === "SHORT";
-      const dirColor = isLong ? "#22c55e" : isShort ? "#ef4444" : "#eab308";
-      const dirText = isLong ? "LONG" : isShort ? "SHORT" : "NEUTRAL";
-      const dirArrow = isLong ? "\u25B2" : isShort ? "\u25BC" : "\u25C6";
-
-      // Direction badge (large, prominent)
-      ctx.font = "bold 20px Inter, system-ui, sans-serif";
-      const dirLabel = `${dirArrow} ${dirText}`;
-      const dirW = ctx.measureText(dirLabel).width;
-      const dirPad = 14;
-      const dirBadgeW = dirW + dirPad * 2;
-
-      ctx.fillStyle = dirColor + "20";
-      ctx.beginPath();
-      ctx.roundRect(12, 10, dirBadgeW, 34, 6);
-      ctx.fill();
-      ctx.strokeStyle = dirColor + "80";
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.roundRect(12, 10, dirBadgeW, 34, 6);
-      ctx.stroke();
-      ctx.fillStyle = dirColor;
-      ctx.fillText(dirLabel, 12 + dirPad, 34);
-
-      // Key levels text next to direction
-      const infoX = 12 + dirBadgeW + 16;
-      ctx.font = "bold 12px Inter, system-ui, sans-serif";
-      const entry = analysis.tradeSetup.entry;
-      const sl = analysis.tradeSetup.stopLoss;
-      const tp = analysis.tradeSetup.takeProfit;
-      const rr = analysis.tradeSetup.riskReward;
-
-      if (entry) {
-        ctx.fillStyle = "#3b82f6";
-        ctx.fillText(`Entry: $${entry.toLocaleString()}`, infoX, 22);
-      }
-      if (sl) {
-        ctx.fillStyle = "#ef4444";
-        ctx.fillText(`SL: $${sl.toLocaleString()}`, infoX + 140, 22);
-      }
-      if (tp) {
-        ctx.fillStyle = "#22c55e";
-        ctx.fillText(`TP: $${tp.toLocaleString()}`, infoX + 260, 22);
-      }
-      if (rr) {
-        ctx.fillStyle = "#a78bfa";
-        ctx.fillText(`R:R ${rr}`, infoX + 380, 22);
-      }
-
-      // Confidence + trend on second line
-      ctx.font = "11px Inter, system-ui, sans-serif";
-      ctx.fillStyle = "#94a3b8";
-      const conf = analysis.confidence || 0;
-      const trend = analysis.trend || "";
-      const patterns = analysis.patterns?.slice(0, 2).join(", ") || "";
-      const summaryLine = `${trend} | Confidence: ${conf}% ${patterns ? `| ${patterns}` : ""}`;
-      ctx.fillText(summaryLine, infoX, 38);
-    }
-
-    // --- Draw analysis lines ---
-    if (analysis.lines) {
-      analysis.lines.forEach((line) => {
-        const y = (line.yPercent / 100) * dimensions.height;
-        drawAnalysisLine(ctx, y, line, dimensions.width);
-      });
-    }
-
-    // --- Draw bottom watermark ---
-    const wmH = 24;
-    const wmGrad = ctx.createLinearGradient(0, dimensions.height - wmH - 10, 0, dimensions.height);
-    wmGrad.addColorStop(0, "transparent");
-    wmGrad.addColorStop(1, "rgba(0,0,0,0.6)");
-    ctx.fillStyle = wmGrad;
-    ctx.fillRect(0, dimensions.height - wmH - 10, dimensions.width, wmH + 10);
-    ctx.font = "bold 10px Inter, system-ui, sans-serif";
-    ctx.fillStyle = "#64748b";
-    ctx.fillText("Analyzed by Futures AI", 10, dimensions.height - 8);
+    // Draw clean lines only — no header overlay, no centered text
+    analysis.lines.forEach((line) => {
+      const y = (line.yPercent / 100) * dimensions.height;
+      drawAnalysisLine(ctx, y, line, dimensions.width);
+    });
   }, [dimensions, analysis]);
 
   useEffect(() => { drawCanvas(); }, [drawCanvas]);
@@ -341,174 +256,51 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     line: ChartLine,
     width: number
   ) => {
-    const isSupport = line.type === "support";
-    const isResistance = line.type === "resistance";
     const isEntry = line.type === "entry";
     const isSL = line.type === "stopLoss";
     const isTP = line.type === "takeProfit";
-    const isTrend = line.type === "trend";
 
-    // --- Zone fill (wide, prominent gradient band) ---
-    const zoneHeight = isEntry ? 26 : isSL || isTP ? 22 : 18;
-    const grad = ctx.createLinearGradient(0, y - zoneHeight, 0, y + zoneHeight);
-    const zoneAlpha = isEntry ? "35" : isSL || isTP ? "28" : "20";
-    grad.addColorStop(0, "transparent");
-    grad.addColorStop(0.2, line.color + zoneAlpha);
-    grad.addColorStop(0.5, line.color + zoneAlpha);
-    grad.addColorStop(0.8, line.color + zoneAlpha);
-    grad.addColorStop(1, "transparent");
-    ctx.fillStyle = grad;
-    ctx.globalAlpha = 1;
-    ctx.fillRect(0, y - zoneHeight, width, zoneHeight * 2);
-
-    // --- Double glow effect (much more visible) ---
-    ctx.save();
-    ctx.shadowColor = line.color;
-    ctx.shadowBlur = isEntry ? 20 : 14;
+    // --- Clean single line (no zone fill, no glow) ---
     ctx.strokeStyle = line.color;
-    ctx.lineWidth = isEntry ? 3 : 2;
-    ctx.globalAlpha = 0.4;
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(width, y);
-    ctx.stroke();
-    ctx.restore();
-
-    // --- Main line (thick, bold, high contrast) ---
-    ctx.strokeStyle = line.color;
-    ctx.lineWidth = isEntry ? 3 : isSL || isTP ? 2.5 : line.dashed ? 2 : 2.5;
-    ctx.setLineDash(line.dashed ? [10, 6] : isSL ? [5, 4] : []);
+    ctx.lineWidth = isEntry ? 2.5 : 2;
+    ctx.setLineDash(line.dashed ? [8, 4] : isSL ? [5, 3] : isTP ? [5, 3] : []);
     ctx.globalAlpha = 1;
     ctx.beginPath();
     ctx.moveTo(0, y);
     ctx.lineTo(width, y);
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.globalAlpha = 1;
 
-    // --- Left label badge (refined with strategy context) ---
-    const padding = 10;
-    const labelHeight = 24;
-    const labelX = 8;
-    const labelY = y - labelHeight - 5;
-
-    // Strategy-focused icons and labels
-    const typePrefix = isEntry ? "ENTRY" : isSL ? "STOP" : isTP ? "TARGET" : isSupport ? "S" : isResistance ? "R" : "TREND";
-    const typeIcon = isEntry ? "\u25B6" : isSL ? "\u2716" : isTP ? "\u2605" : isSupport ? "\u25B2" : isResistance ? "\u25BC" : "\u2500";
+    // --- Right-side price tag only (TradingView-style, clean) ---
     const priceMatch = line.label.match(/\$[\d,.]+/)?.[0] || "";
-    const labelNum = line.label.match(/S(\d)|R(\d)/)?.[0] || "";
-    const displayLabel = `${typeIcon} ${typePrefix}${labelNum ? "" : ""} ${priceMatch}`;
-
-    ctx.font = "bold 13px Inter, system-ui, sans-serif";
-    const textWidth = ctx.measureText(displayLabel).width;
-    const badgeWidth = textWidth + padding * 2;
-
-    // Badge background — dark semi-transparent with colored border
-    ctx.fillStyle = "#0a0a0f" + "E8";
-    ctx.beginPath();
-    ctx.roundRect(labelX, labelY, badgeWidth, labelHeight, 5);
-    ctx.fill();
-
-    // Colored left accent bar on badge
-    ctx.fillStyle = line.color;
-    ctx.beginPath();
-    ctx.roundRect(labelX, labelY, 4, labelHeight, [5, 0, 0, 5]);
-    ctx.fill();
-
-    // Badge border
-    ctx.strokeStyle = line.color + "80";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.roundRect(labelX, labelY, badgeWidth, labelHeight, 5);
-    ctx.stroke();
-
-    // Badge text
-    ctx.fillStyle = line.color;
-    ctx.font = "bold 13px Inter, system-ui, sans-serif";
-    ctx.fillText(displayLabel, labelX + padding + 2, labelY + 16);
-
-    // --- Probability badge (pill shape, right of label) ---
-    if (line.hitProbability != null && line.hitProbability > 0) {
-      const probText = `${line.hitProbability}%`;
-      ctx.font = "bold 11px Inter, system-ui, sans-serif";
-      const probWidth = ctx.measureText(probText).width;
-      const probX = labelX + badgeWidth + 6;
-      const probColor = line.hitProbability >= 70 ? "#22c55e" : line.hitProbability >= 40 ? "#eab308" : "#ef4444";
-
-      // Probability pill background
-      ctx.fillStyle = "#0a0a0f" + "E8";
-      ctx.beginPath();
-      ctx.roundRect(probX, labelY, probWidth + padding * 2, labelHeight, 5);
-      ctx.fill();
-
-      // Probability fill bar (shows percentage visually)
-      const barWidth = (probWidth + padding * 2) * (line.hitProbability / 100);
-      ctx.fillStyle = probColor + "30";
-      ctx.beginPath();
-      ctx.roundRect(probX, labelY, barWidth, labelHeight, 5);
-      ctx.fill();
-
-      // Probability border
-      ctx.strokeStyle = probColor + "60";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.roundRect(probX, labelY, probWidth + padding * 2, labelHeight, 5);
-      ctx.stroke();
-
-      // Probability text
-      ctx.fillStyle = probColor;
-      ctx.fillText(probText, probX + padding, labelY + 16);
-    }
-
-    // --- Right-side price tag (TradingView-style) ---
-    const rightPadding = 8;
     if (priceMatch) {
-      ctx.font = "bold 12px monospace";
+      ctx.font = "bold 11px monospace";
       const priceWidth = ctx.measureText(priceMatch).width;
-      const tagWidth = priceWidth + rightPadding * 2;
-      const tagX = width - tagWidth - 6;
-      const tagH = 22;
+      const pad = 6;
+      const tagW = priceWidth + pad * 2;
+      const tagH = 20;
+      const tagX = width - tagW - 4;
       const tagY = y - tagH / 2;
 
       // Tag background
-      ctx.fillStyle = line.color + "E8";
+      ctx.fillStyle = line.color;
+      ctx.globalAlpha = 0.95;
       ctx.beginPath();
-      ctx.roundRect(tagX, tagY, tagWidth, tagH, 3);
+      ctx.roundRect(tagX, tagY, tagW, tagH, 3);
       ctx.fill();
 
-      // Arrow pointing to line
+      // Arrow
       ctx.beginPath();
-      ctx.moveTo(tagX - 5, y);
-      ctx.lineTo(tagX, y - 5);
-      ctx.lineTo(tagX, y + 5);
+      ctx.moveTo(tagX - 4, y);
+      ctx.lineTo(tagX, y - 4);
+      ctx.lineTo(tagX, y + 4);
       ctx.closePath();
       ctx.fill();
 
       // Price text
+      ctx.globalAlpha = 1;
       ctx.fillStyle = "#ffffff";
-      ctx.fillText(priceMatch, tagX + rightPadding, tagY + 15);
-    }
-
-    // --- Strategy annotation text ON the chart (centered, large, semi-transparent) ---
-    if (isEntry || isSL || isTP || isSupport || isResistance) {
-      const strategyText = isEntry ? "ENTRY ZONE"
-        : isSL ? "STOP LOSS — INVALIDATION"
-        : isTP ? "TAKE PROFIT TARGET"
-        : isSupport ? "SUPPORT LEVEL"
-        : "RESISTANCE LEVEL";
-
-      ctx.font = `bold ${isEntry ? 14 : 11}px Inter, system-ui, sans-serif`;
-      const stW = ctx.measureText(strategyText).width;
-      const stX = width / 2 - stW / 2;
-      const stY = y + (isEntry ? 5 : 4);
-
-      // Text shadow for readability
-      ctx.save();
-      ctx.shadowColor = "#000000";
-      ctx.shadowBlur = 6;
-      ctx.fillStyle = line.color + (isEntry ? "70" : "50");
-      ctx.fillText(strategyText, stX, stY);
-      ctx.restore();
+      ctx.fillText(priceMatch, tagX + pad, tagY + 14);
     }
   };
 
@@ -790,10 +582,65 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
           </label>
         ) : (
           <div className="relative">
+            {/* Strategy Legend — above the chart */}
+            {analysis?.tradeSetup && (
+              <div className="bg-zinc-900/95 border border-white/[0.06] rounded-t-xl px-4 py-3">
+                {/* Direction + Key Levels */}
+                <div className="flex flex-wrap items-center gap-3 mb-2">
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold border ${
+                    analysis.tradeSetup.direction === "LONG"
+                      ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400"
+                      : analysis.tradeSetup.direction === "SHORT"
+                      ? "bg-red-500/15 border-red-500/30 text-red-400"
+                      : "bg-amber-500/15 border-amber-500/30 text-amber-400"
+                  }`}>
+                    {analysis.tradeSetup.direction === "LONG" ? "\u25B2" : analysis.tradeSetup.direction === "SHORT" ? "\u25BC" : "\u25C6"}{" "}
+                    {analysis.tradeSetup.direction}
+                  </span>
+                  {analysis.tradeSetup.entry && (
+                    <span className="text-xs font-mono text-blue-400 bg-blue-500/10 px-2 py-1 rounded">
+                      Entry: ${analysis.tradeSetup.entry.toLocaleString()}
+                    </span>
+                  )}
+                  {analysis.tradeSetup.stopLoss && (
+                    <span className="text-xs font-mono text-red-400 bg-red-500/10 px-2 py-1 rounded">
+                      SL: ${analysis.tradeSetup.stopLoss.toLocaleString()}
+                    </span>
+                  )}
+                  {analysis.tradeSetup.takeProfit && (
+                    <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">
+                      TP: ${analysis.tradeSetup.takeProfit.toLocaleString()}
+                    </span>
+                  )}
+                  {analysis.tradeSetup.riskReward && (
+                    <span className="text-xs font-mono text-purple-400 bg-purple-500/10 px-2 py-1 rounded">
+                      R:R {analysis.tradeSetup.riskReward}
+                    </span>
+                  )}
+                  <span className="text-xs text-zinc-500">
+                    {analysis.confidence}% confidence
+                  </span>
+                </div>
+                {/* Line Legend */}
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                  {analysis.lines?.map((l, i) => (
+                    <div key={i} className="flex items-center gap-1.5">
+                      <span className="w-4 h-0.5 rounded-full" style={{ backgroundColor: l.color, borderStyle: l.dashed ? "dashed" : "solid" }} />
+                      <span className="text-[10px] font-mono text-zinc-400">{l.label}</span>
+                      {l.hitProbability > 0 && (
+                        <span className={`text-[9px] font-mono ${l.hitProbability >= 70 ? "text-emerald-500" : l.hitProbability >= 40 ? "text-amber-500" : "text-red-500"}`}>
+                          {l.hitProbability}%
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div ref={containerRef} className="w-full">
               {imageLoaded ? (
                 <canvas ref={canvasRef} width={dimensions.width} height={dimensions.height}
-                  className="w-full block" style={{ height: dimensions.height > 0 ? dimensions.height : "auto" }} />
+                  className={`w-full block ${analysis?.tradeSetup ? "rounded-b-xl" : ""}`} style={{ height: dimensions.height > 0 ? dimensions.height : "auto" }} />
               ) : (
                 <div className="w-full aspect-video flex items-center justify-center bg-zinc-900/50">
                   <div className="animate-pulse text-zinc-500">Loading chart...</div>
