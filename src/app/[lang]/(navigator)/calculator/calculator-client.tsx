@@ -180,7 +180,7 @@ export default function CalculatorClient({
                       : "bg-card border-border hover:bg-accent"
                   }`}
                 >
-                  <div className="w-8 h-8 relative">
+                  <div className="w-10 h-10 relative rounded-lg overflow-hidden">
                     <Image
                       src={ex.logo}
                       alt={ex.name}
