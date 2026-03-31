@@ -49,6 +49,13 @@ export type ChartAnalysisResult = {
   };
   lines: ChartLine[];
   liveContext?: LiveContext;
+  professionalSummary?: {
+    executiveSummary: string;
+    marketStructure: string;
+    tradingThesis: string;
+    keyRisks: string[];
+    keyCatalysts: string[];
+  };
 };
 
 export type ChartLine = {
@@ -146,10 +153,18 @@ Return a JSON object with this EXACT structure:
     {"type": "entry", "yPercent": 45, "label": "Entry $64,200", "color": "#3b82f6", "dashed": false, "hitProbability": 85},
     {"type": "stopLoss", "yPercent": 88, "label": "SL $61,500", "color": "#ef4444", "dashed": true, "hitProbability": 20},
     {"type": "takeProfit", "yPercent": 15, "label": "TP $68,000", "color": "#22c55e", "dashed": true, "hitProbability": 40}
-  ]
+  ],
+  "professionalSummary": {
+    "executiveSummary": "Concise 2-3 sentence institutional-grade overview of the setup, referencing specific prices and probabilities.",
+    "marketStructure": "Description of current market structure: trend phase, key swing points, order flow dynamics.",
+    "tradingThesis": "Clear thesis for the trade: why this direction, what confluence supports it, what invalidates it.",
+    "keyRisks": ["Risk 1 with specific price level", "Risk 2"],
+    "keyCatalysts": ["Catalyst 1 that could drive the move", "Catalyst 2"]
+  }
 }
 
 CRITICAL RULES:
+- Write as if preparing a research note for an institutional trading desk. Use precise language, reference specific price levels, and quantify probabilities.
 - Use REAL prices read from the chart via OCR. Do NOT make up prices.
 - yPercent is vertical position on the image (0 = top, 100 = bottom)
 - hitProbability must be statistically grounded, not arbitrary

@@ -868,6 +868,79 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
             </div>
           </Card>
 
+          {/* Research Brief */}
+          {analysis.professionalSummary && (
+            <Card className="p-6 bg-zinc-950/50 backdrop-blur-sm border-blue-500/20 col-span-full">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-1 h-5 rounded-full bg-blue-500" />
+                <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wider">
+                  {lang === "ko" ? "리서치 브리프" : "Research Brief"}
+                </h3>
+                <span className="text-[10px] font-mono text-zinc-600">
+                  {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                </span>
+              </div>
+
+              <div className="space-y-5">
+                {/* Executive Summary */}
+                <div>
+                  <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.15em] mb-1.5">
+                    {lang === "ko" ? "요약" : "Executive Summary"}
+                  </p>
+                  <p className="text-sm text-zinc-300 leading-relaxed">{analysis.professionalSummary.executiveSummary}</p>
+                </div>
+
+                {/* Market Structure */}
+                <div>
+                  <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.15em] mb-1.5">
+                    {lang === "ko" ? "시장 구조" : "Market Structure"}
+                  </p>
+                  <p className="text-sm text-zinc-300 leading-relaxed">{analysis.professionalSummary.marketStructure}</p>
+                </div>
+
+                {/* Trading Thesis */}
+                <div>
+                  <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.15em] mb-1.5">
+                    {lang === "ko" ? "트레이딩 논거" : "Trading Thesis"}
+                  </p>
+                  <p className="text-sm text-zinc-300 leading-relaxed">{analysis.professionalSummary.tradingThesis}</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Key Risks */}
+                  <div className="rounded-xl bg-red-500/[0.05] border border-red-500/10 p-4">
+                    <p className="text-[10px] font-mono text-red-400 uppercase tracking-[0.15em] mb-2">
+                      {lang === "ko" ? "주요 리스크" : "Key Risks"}
+                    </p>
+                    <ul className="space-y-1.5">
+                      {analysis.professionalSummary.keyRisks?.map((risk, i) => (
+                        <li key={i} className="text-xs text-zinc-400 flex gap-2">
+                          <span className="text-red-400 shrink-0">-</span>
+                          {risk}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Key Catalysts */}
+                  <div className="rounded-xl bg-emerald-500/[0.05] border border-emerald-500/10 p-4">
+                    <p className="text-[10px] font-mono text-emerald-400 uppercase tracking-[0.15em] mb-2">
+                      {lang === "ko" ? "주요 촉매" : "Key Catalysts"}
+                    </p>
+                    <ul className="space-y-1.5">
+                      {analysis.professionalSummary.keyCatalysts?.map((cat, i) => (
+                        <li key={i} className="text-xs text-zinc-400 flex gap-2">
+                          <span className="text-emerald-400 shrink-0">+</span>
+                          {cat}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
+
           {/* Indicators */}
           <Card className="p-6 bg-zinc-950/50 backdrop-blur-sm border-white/10">
             <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">{translations.chartAnalysis_indicators || "Technical Indicators"}</h3>
