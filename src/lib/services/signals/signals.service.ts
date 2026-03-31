@@ -142,34 +142,44 @@ function buildReasons(
 const BINANCE_SYMBOLS = COINS.map((c) => `${c.symbol}USDT`);
 
 async function fetchBinancePrices() {
-  try {
-    // Single batch call for all tickers instead of 10 individual calls
-    const symbols = JSON.stringify(BINANCE_SYMBOLS);
-    const res = await fetch(
-      `https://api.binance.com/api/v3/ticker/24hr?symbols=${encodeURIComponent(symbols)}`,
-      { next: { revalidate: 60 } }
-    );
-    if (!res.ok) throw new Error(`Binance batch: ${res.status}`);
-    const tickers: Array<{ symbol: string; lastPrice: string; priceChangePercent: string; quoteVolume: string }> = await res.json();
+  // Try multiple Binance endpoints (api.binance.com is blocked in US where Vercel deploys)
+  const endpoints = [
+    "https://api.binance.com",
+    "https://data-api.binance.vision",
+    "https://api1.binance.com",
+  ];
 
-    const result: Record<string, { usd: number; usd_24h_change: number; usd_24h_vol: number }> = {};
-    for (const t of tickers) {
-      const coin = COINS.find((c) => `${c.symbol}USDT` === t.symbol);
-      if (coin) {
-        result[coin.id] = {
-          usd: parseFloat(t.lastPrice) || 0,
-          usd_24h_change: parseFloat(t.priceChangePercent) || 0,
-          usd_24h_vol: parseFloat(t.quoteVolume) || 0,
-        };
+  for (const base of endpoints) {
+    try {
+      const symbols = JSON.stringify(BINANCE_SYMBOLS);
+      const res = await fetch(
+        `${base}/api/v3/ticker/24hr?symbols=${encodeURIComponent(symbols)}`,
+        { next: { revalidate: 60 }, signal: AbortSignal.timeout(5000) }
+      );
+      if (!res.ok) continue;
+      const tickers: Array<{ symbol: string; lastPrice: string; priceChangePercent: string; quoteVolume: string }> = await res.json();
+
+      const result: Record<string, { usd: number; usd_24h_change: number; usd_24h_vol: number }> = {};
+      for (const t of tickers) {
+        const coin = COINS.find((c) => `${c.symbol}USDT` === t.symbol);
+        if (coin) {
+          result[coin.id] = {
+            usd: parseFloat(t.lastPrice) || 0,
+            usd_24h_change: parseFloat(t.priceChangePercent) || 0,
+            usd_24h_vol: parseFloat(t.quoteVolume) || 0,
+          };
+        }
       }
-    }
 
-    const hasValidPrices = Object.values(result).some((t) => t.usd > 0);
-    if (!hasValidPrices) throw new Error("Binance returned zero prices");
-    return result;
-  } catch {
-    return fetchCoinGeckoPrices();
+      const hasValidPrices = Object.values(result).some((t) => t.usd > 0);
+      if (hasValidPrices) return result;
+    } catch {
+      continue;
+    }
   }
+
+  // All Binance endpoints failed — fall back to CoinGecko
+  return fetchCoinGeckoPrices();
 }
 
 async function fetchCoinGeckoPrices() {
@@ -236,7 +246,26 @@ function calculateMACD(closes: number[]): { value: number; signal: number; histo
   return { value: macdValue, signal: signalValue, histogram: macdValue - signalValue };
 }
 
-// Fetch klines + sparklines in parallel (10 coins x 2 endpoints = 20 calls)
+// Try fetching klines from multiple Binance endpoints
+async function fetchKline(symbol: string, interval: string, limit: number): Promise<string[][]> {
+  const endpoints = [
+    "https://data-api.binance.vision",
+    "https://api.binance.com",
+    "https://api1.binance.com",
+  ];
+  for (const base of endpoints) {
+    try {
+      const res = await fetch(
+        `${base}/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`,
+        { next: { revalidate: 60 }, signal: AbortSignal.timeout(5000) }
+      );
+      if (res.ok) return res.json();
+    } catch { /* try next */ }
+  }
+  return [];
+}
+
+// Fetch klines + sparklines in parallel (10 coins x 2 calls = 20 parallel)
 async function fetchAllKlinesAndSparklines(): Promise<{
   klines: Record<string, string[][]>;
   sparklines: Record<string, number[]>;
@@ -247,19 +276,11 @@ async function fetchAllKlinesAndSparklines(): Promise<{
   const fetches = COINS.flatMap((coin) => {
     const symbol = `${coin.symbol}USDT`;
     return [
-      // 4h klines for RSI/MACD
-      fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=4h&limit=50`, {
-        next: { revalidate: 60 },
-      })
-        .then((r) => (r.ok ? r.json() : []))
+      fetchKline(symbol, "4h", 50)
         .then((data) => { klines[coin.id] = data; })
         .catch(() => {}),
-      // 1h klines for sparklines
-      fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=24`, {
-        next: { revalidate: 60 },
-      })
-        .then((r) => (r.ok ? r.json() : []))
-        .then((data: (string | number)[][]) => {
+      fetchKline(symbol, "1h", 24)
+        .then((data) => {
           sparklines[coin.id] = data.map((k) => parseFloat(k[4] as string));
         })
         .catch(() => {}),

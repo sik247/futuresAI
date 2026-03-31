@@ -540,14 +540,35 @@ export default function QuantClient({
 
               {/* Signal Rows */}
               {signals.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-16 gap-3">
-                  <div className="h-8 w-8 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
-                  <p className="text-sm text-zinc-400 font-medium">
-                    {lang === "ko" ? "시그널 데이터를 불러오고 있습니다..." : "Loading signal data..."}
-                  </p>
-                  <p className="text-xs text-zinc-600">
-                    {lang === "ko" ? "실시간 시장 분석에 시간이 걸릴 수 있습니다" : "Real-time market analysis may take a moment"}
-                  </p>
+                <div className="divide-y divide-white/[0.03]">
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <div key={i} className="hidden md:grid items-center px-6 py-4 animate-pulse" style={{ gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1fr 1fr 1fr 1.5fr 1.5fr" }}>
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-white/[0.06]" />
+                        <div className="space-y-1.5">
+                          <div className="h-3 w-16 rounded bg-white/[0.06]" />
+                          <div className="h-2 w-12 rounded bg-white/[0.04]" />
+                        </div>
+                      </div>
+                      <div className="flex justify-end"><div className="h-3 w-20 rounded bg-white/[0.06]" /></div>
+                      <div className="flex justify-end"><div className="h-3 w-12 rounded bg-white/[0.06]" /></div>
+                      <div className="flex justify-center"><div className="h-4 w-14 rounded bg-white/[0.04]" /></div>
+                      <div className="flex justify-end"><div className="h-3 w-8 rounded bg-white/[0.06]" /></div>
+                      <div className="flex justify-end"><div className="h-3 w-10 rounded bg-white/[0.06]" /></div>
+                      <div className="flex justify-center"><div className="h-5 w-16 rounded-md bg-white/[0.06]" /></div>
+                      <div className="flex justify-center"><div className="h-5 w-16 rounded-full bg-white/[0.06]" /></div>
+                      <div className="flex justify-end gap-2 items-center">
+                        <div className="h-1.5 w-16 rounded-full bg-white/[0.06]" />
+                        <div className="h-3 w-8 rounded bg-white/[0.04]" />
+                      </div>
+                    </div>
+                  ))}
+                  <div className="md:hidden p-5 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="h-8 w-8 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
+                      <p className="text-sm text-zinc-400">{lang === "ko" ? "시그널 로딩 중..." : "Loading signals..."}</p>
+                    </div>
+                  </div>
                 </div>
               )}
               {signals.map((s) => {
