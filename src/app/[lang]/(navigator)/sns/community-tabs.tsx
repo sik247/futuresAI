@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import gsap from "gsap";
 import Container from "@/components/ui/container";
-import type { KoreanFeedItem } from "./page";
 import type { XFeedItem } from "@/lib/services/social/x-feed.service";
 
 // ── Tab Skeleton (loading placeholder) ───────────────────────────────
@@ -37,10 +36,6 @@ const NewsTab = dynamic(() => import("./tabs/news-tab"), {
 });
 
 const YouTubeTab = dynamic(() => import("./tabs/youtube-tab"), {
-  loading: () => <TabSkeleton />,
-});
-
-const KoreanTab = dynamic(() => import("./tabs/korean-tab"), {
   loading: () => <TabSkeleton />,
 });
 
@@ -79,7 +74,7 @@ interface CommunityTabsProps {
   newsItems: SerializedNewsItem[];
   xFeedItems: XFeedItem[];
   youtubeItems: SerializedYouTubeItem[];
-  koreanFeedItems: KoreanFeedItem[];
+  koreanNewsMap: Record<string, { title: string; body: string }>;
 }
 
 // ── Constants ────────────────────────────────────────────────────────
@@ -89,33 +84,9 @@ const TABS = [
   { key: "xfeed", label: "X Feed" },
   { key: "news", label: "News" },
   { key: "youtube", label: "YouTube" },
-  { key: "korean", label: "Korean" },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
-
-const KOREAN_TYPE_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
-  tweet: {
-    label: "Tweet",
-    color: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-    icon: "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z",
-  },
-  youtube: {
-    label: "YouTube",
-    color: "bg-red-500/15 text-red-400 border-red-500/30",
-    icon: "M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z",
-  },
-  news: {
-    label: "News",
-    color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
-    icon: "M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z",
-  },
-  short: {
-    label: "Short",
-    color: "bg-purple-500/15 text-purple-400 border-purple-500/30",
-    icon: "M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z",
-  },
-};
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -136,9 +107,9 @@ function timeAgo(dateStr: string): string {
 
 interface UnifiedItem {
   id: string;
-  type: "news" | "youtube" | "korean";
+  type: "news" | "youtube";
   timestamp: number;
-  data: SerializedNewsItem | SerializedYouTubeItem | KoreanFeedItem;
+  data: SerializedNewsItem | SerializedYouTubeItem;
 }
 
 // ── Component ────────────────────────────────────────────────────────
@@ -147,12 +118,34 @@ export function CommunityTabs({
   newsItems,
   xFeedItems,
   youtubeItems,
-  koreanFeedItems,
+  koreanNewsMap,
 }: CommunityTabsProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("all");
+  const [isKorean, setIsKorean] = useState(false);
   const tabsRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  // ── Helper to get translated or original news text ──────────────
+  const getNewsText = useCallback(
+    (news: SerializedNewsItem) => {
+      if (isKorean && koreanNewsMap[news.id]) {
+        return koreanNewsMap[news.id];
+      }
+      return { title: news.title, body: news.body };
+    },
+    [isKorean, koreanNewsMap]
+  );
+
+  // ── Translated news items for sub-tabs ──────────────────────────
+  const displayNewsItems = useMemo(() => {
+    if (!isKorean) return newsItems;
+    return newsItems.map((n) => {
+      const translated = koreanNewsMap[n.id];
+      if (!translated) return n;
+      return { ...n, title: translated.title, body: translated.body };
+    });
+  }, [newsItems, isKorean, koreanNewsMap]);
 
   // ── Unified feed for "All" tab ──────────────────────────────────
   const unifiedFeed = useMemo<UnifiedItem[]>(() => {
@@ -176,27 +169,17 @@ export function CommunityTabs({
       });
     });
 
-    koreanFeedItems.slice(0, 4).forEach((k) => {
-      items.push({
-        id: `kr-${k.id}`,
-        type: "korean",
-        timestamp: new Date(k.publishedAt).getTime(),
-        data: k,
-      });
-    });
-
     // Interleave by type for visual variety rather than strict chronological
-    const byType: Record<string, UnifiedItem[]> = { news: [], youtube: [], korean: [] };
-    items.forEach((item) => byType[item.type].push(item));
+    const byType: Record<string, UnifiedItem[]> = { news: [], youtube: [] };
+    items.forEach((item) => byType[item.type]?.push(item));
     const interleaved: UnifiedItem[] = [];
     const maxLen = Math.max(...Object.values(byType).map((a) => a.length));
     for (let i = 0; i < maxLen; i++) {
       if (byType.news[i]) interleaved.push(byType.news[i]);
       if (byType.youtube[i]) interleaved.push(byType.youtube[i]);
-      if (byType.korean[i]) interleaved.push(byType.korean[i]);
     }
     return interleaved;
-  }, [newsItems, xFeedItems, youtubeItems, koreanFeedItems]);
+  }, [newsItems, youtubeItems]);
 
   // ── GSAP tab indicator ───────────────────────────────────────────
   const moveIndicator = useCallback((tabKey: string) => {
@@ -249,6 +232,8 @@ export function CommunityTabs({
     setActiveTab(tab);
   };
 
+  const hasKoreanTranslations = Object.keys(koreanNewsMap).length > 0;
+
   return (
     <section className="py-10">
       <Container className="flex flex-col gap-8">
@@ -259,7 +244,7 @@ export function CommunityTabs({
             <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-zinc-950/90 to-transparent z-20 opacity-0 transition-opacity" />
             <div
               ref={tabsRef}
-              className="flex gap-1 p-1 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm overflow-x-auto no-scrollbar"
+              className="flex gap-1 p-1 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm overflow-x-auto no-scrollbar items-center"
             >
               <div
                 ref={indicatorRef}
@@ -277,16 +262,27 @@ export function CommunityTabs({
                       : "text-zinc-400 hover:text-zinc-200"
                   }`}
                 >
-                  {tab.key === "korean" ? (
-                    <span className="flex items-center gap-1.5">
-                      <span role="img" aria-label="Korean flag">&#127472;&#127479;</span>
-                      {tab.label}
-                    </span>
-                  ) : (
-                    tab.label
-                  )}
+                  {tab.label}
                 </button>
               ))}
+
+              {/* Korean translation toggle */}
+              {hasKoreanTranslations && (
+                <>
+                  <div className="w-px h-6 bg-white/[0.08] mx-1 flex-shrink-0" />
+                  <button
+                    onClick={() => setIsKorean((prev) => !prev)}
+                    className={`relative z-10 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
+                      isKorean
+                        ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
+                        : "text-zinc-400 hover:text-zinc-200"
+                    }`}
+                  >
+                    <span role="img" aria-label="Korean flag" className="text-base leading-none">&#127472;&#127479;</span>
+                    <span>{isKorean ? "한국어" : "Korean"}</span>
+                  </button>
+                </>
+              )}
             </div>
             {/* Right gradient fade indicator */}
             <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-zinc-950/90 to-transparent z-20" />
@@ -301,6 +297,7 @@ export function CommunityTabs({
               {unifiedFeed.map((item) => {
                 if (item.type === "news") {
                   const news = item.data as SerializedNewsItem;
+                  const { title, body } = getNewsText(news);
                   return (
                     <a
                       key={item.id}
@@ -317,7 +314,7 @@ export function CommunityTabs({
                         <div className="relative h-[180px] overflow-hidden">
                           <img
                             src={news.imageUrl}
-                            alt={news.title}
+                            alt={title}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                             loading="lazy"
                           />
@@ -337,9 +334,9 @@ export function CommunityTabs({
                           {timeAgo(news.publishedAt)}
                         </span>
                         <h3 className="text-sm font-semibold text-zinc-100 leading-snug line-clamp-2">
-                          {news.title}
+                          {title}
                         </h3>
-                        <p className="text-xs text-zinc-500 line-clamp-2 flex-1">{news.body}</p>
+                        <p className="text-xs text-zinc-500 line-clamp-2 flex-1">{body}</p>
                         {news.categories.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 pt-1">
                             {news.categories.slice(0, 3).map((cat) => (
@@ -402,59 +399,6 @@ export function CommunityTabs({
                   );
                 }
 
-                if (item.type === "korean") {
-                  const kr = item.data as KoreanFeedItem;
-                  const typeConfig = KOREAN_TYPE_CONFIG[kr.type] || KOREAN_TYPE_CONFIG.news;
-                  const isStroke = kr.type === "news" || kr.type === "short";
-                  return (
-                    <a
-                      key={item.id}
-                      href={kr.sourceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="community-card group relative flex flex-col rounded-xl bg-white/[0.03] border border-white/[0.06] overflow-hidden hover:border-cyan-500/25 transition-all duration-300"
-                    >
-                      {/* Type indicator */}
-                      <div className="absolute top-3 right-3 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/25">
-                        <span>&#127472;&#127479;</span> KR
-                      </div>
-                      {kr.thumbnailUrl && (
-                        <div className="aspect-video relative overflow-hidden">
-                          <img
-                            src={kr.thumbnailUrl}
-                            alt={kr.titleKo || kr.title}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            loading="lazy"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent" />
-                        </div>
-                      )}
-                      <div className="p-4 flex flex-col gap-2.5 flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className={`inline-flex items-center gap-1.5 text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border ${typeConfig.color}`}>
-                            <svg className="w-3 h-3" viewBox="0 0 24 24" fill={isStroke ? "none" : "currentColor"} stroke={isStroke ? "currentColor" : "none"} strokeWidth={isStroke ? "1.5" : "0"}>
-                              <path d={typeConfig.icon} strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                            {typeConfig.label}
-                          </span>
-                          <span className="text-[11px] text-zinc-600">{timeAgo(kr.publishedAt)}</span>
-                        </div>
-                        <h3 className="font-semibold text-zinc-100 text-sm leading-snug line-clamp-2">
-                          {kr.titleKo || kr.title}
-                        </h3>
-                        {(kr.descriptionKo || kr.description) && (
-                          <p className="text-zinc-500 text-xs leading-relaxed line-clamp-2 flex-1">
-                            {kr.descriptionKo || kr.description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 pt-1 border-t border-white/[0.04]">
-                          <span className="text-[11px] text-zinc-600">{kr.sourceName}</span>
-                        </div>
-                      </div>
-                    </a>
-                  );
-                }
-
                 return null;
               })}
             </div>
@@ -462,9 +406,8 @@ export function CommunityTabs({
 
           {/* ── Lazy-loaded tabs ───────────────────────────────────── */}
           {activeTab === "xfeed" && <XFeedTab xFeedItems={xFeedItems} />}
-          {activeTab === "news" && <NewsTab newsItems={newsItems} />}
+          {activeTab === "news" && <NewsTab newsItems={displayNewsItems} />}
           {activeTab === "youtube" && <YouTubeTab youtubeItems={youtubeItems} />}
-          {activeTab === "korean" && <KoreanTab koreanFeedItems={koreanFeedItems} />}
         </div>
       </Container>
     </section>

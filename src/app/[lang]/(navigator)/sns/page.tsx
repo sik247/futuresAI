@@ -7,21 +7,6 @@ import { CommunityTabs } from "./community-tabs";
 import { getDictionary } from "@/i18n";
 import { translateBatch } from "@/lib/services/social/korean-translator.service";
 
-// ── Types ────────────────────────────────────────────────────────────
-
-export interface KoreanFeedItem {
-  id: string;
-  type: "tweet" | "youtube" | "news" | "short";
-  title: string;
-  titleKo?: string;
-  description?: string;
-  descriptionKo?: string;
-  thumbnailUrl?: string;
-  sourceUrl: string;
-  sourceName: string;
-  publishedAt: string;
-}
-
 // ── Metadata ─────────────────────────────────────────────────────────
 
 export const revalidate = 300;
@@ -43,23 +28,6 @@ export const metadata: Metadata = {
 
 // ── Data Fetching ────────────────────────────────────────────────────
 
-async function fetchKoreanFeed(): Promise<KoreanFeedItem[]> {
-  try {
-    const baseUrl =
-      process.env.NEXTAUTH_URL ||
-      process.env.NEXT_PUBLIC_APP_URL ||
-      `http://localhost:${process.env.PORT || 3000}`;
-    const res = await fetch(`${baseUrl}/api/content-bot/korean-feed?limit=20`, {
-      next: { revalidate: 300 },
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.feed || [];
-  } catch {
-    return [];
-  }
-}
-
 function timeAgo(dateInput: string | Date): string {
   const now = Date.now();
   const then = new Date(dateInput).getTime();
@@ -76,10 +44,9 @@ function timeAgo(dateInput: string | Date): string {
 // ── Page Component ───────────────────────────────────────────────────
 
 export default async function SnsPage({ params: { lang } }: { params: { lang: string } }) {
-  const [newsItems, youtubeItems, koreanFeed, xFeedData, t] = await Promise.all([
+  const [newsItems, youtubeItems, xFeedData, t] = await Promise.all([
     fetchCryptoNews().catch(() => []),
     fetchYouTubeFeeds().catch(() => []),
-    fetchKoreanFeed(),
     fetchCryptoFeed().catch(() => []),
     getDictionary(lang),
   ]);
@@ -92,33 +59,31 @@ export default async function SnsPage({ params: { lang } }: { params: { lang: st
   const lastUpdatedMs = allTimestamps.length > 0 ? Math.max(...allTimestamps) : Date.now();
   const updatedAgo = timeAgo(new Date(lastUpdatedMs).toISOString());
 
-  // Translate news for Korean users (limit for speed)
+  // Translate news into Korean (cached server-side, revalidated every 300s)
   const TRANSLATE_LIMIT = 20;
-  const translatedNewsItems = lang === "ko" && newsItems.length > 0
-    ? await (async () => {
-        try {
-          const toTranslate = newsItems.slice(0, TRANSLATE_LIMIT);
-          const rest = newsItems.slice(TRANSLATE_LIMIT);
-          const titles = toTranslate.map((n) => n.title);
-          const bodies = toTranslate.map((n) => n.body.slice(0, 200));
-          const [trTitles, trBodies] = await Promise.all([
-            translateBatch(titles, "en", "ko"),
-            translateBatch(bodies, "en", "ko"),
-          ]);
-          const translated = toTranslate.map((n, i) => ({
-            ...n,
-            title: trTitles[i]?.translated || n.title,
-            body: trBodies[i]?.translated || n.body,
-          }));
-          return [...translated, ...rest];
-        } catch {
-          return newsItems;
-        }
-      })()
-    : newsItems;
+  const koreanNewsMap: Record<string, { title: string; body: string }> = {};
+  if (newsItems.length > 0) {
+    try {
+      const toTranslate = newsItems.slice(0, TRANSLATE_LIMIT);
+      const titles = toTranslate.map((n) => n.title);
+      const bodies = toTranslate.map((n) => n.body.slice(0, 200));
+      const [trTitles, trBodies] = await Promise.all([
+        translateBatch(titles, "en", "ko"),
+        translateBatch(bodies, "en", "ko"),
+      ]);
+      toTranslate.forEach((n, i) => {
+        koreanNewsMap[n.id] = {
+          title: trTitles[i]?.translated || n.title,
+          body: trBodies[i]?.translated || n.body,
+        };
+      });
+    } catch {
+      // Translation failed — Korean toggle will show English fallback
+    }
+  }
 
   // Serialize dates for the client component
-  const serializedNews = translatedNewsItems.map((n) => ({
+  const serializedNews = newsItems.map((n) => ({
     ...n,
     publishedAt: new Date(n.publishedAt).toISOString(),
   }));
@@ -222,7 +187,7 @@ export default async function SnsPage({ params: { lang } }: { params: { lang: st
         newsItems={serializedNews}
         xFeedItems={xFeedData}
         youtubeItems={serializedYoutube}
-        koreanFeedItems={koreanFeed}
+        koreanNewsMap={koreanNewsMap}
       />
 
     </div>
