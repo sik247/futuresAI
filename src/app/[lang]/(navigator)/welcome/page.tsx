@@ -33,10 +33,13 @@ export default async function WelcomePage({
       <Container className="relative z-10 max-w-2xl">
         <div className="text-center mb-10">
           {/* Checkmark animation */}
-          <div className="mx-auto w-20 h-20 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center mb-6">
-            <svg className="w-10 h-10 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
+          <div className="relative mx-auto w-20 h-20 mb-6">
+            <div className="absolute inset-0 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 animate-pulse" />
+            <div className="relative w-full h-full rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center">
+              <svg className="w-10 h-10 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-3">
@@ -56,7 +59,7 @@ export default async function WelcomePage({
             href="https://t.me/FuturesAIOfficial"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center gap-4 p-5 rounded-2xl border border-[#2AABEE]/20 bg-[#2AABEE]/[0.06] hover:bg-[#2AABEE]/[0.12] hover:border-[#2AABEE]/40 transition-all duration-300"
+            className="group flex items-center gap-4 p-5 rounded-2xl border border-[#2AABEE]/20 bg-[#2AABEE]/[0.06] hover:bg-[#2AABEE]/[0.12] hover:border-[#2AABEE]/40 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2AABEE]/50"
           >
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#2AABEE]/20 shrink-0">
               <svg className="w-6 h-6 text-[#2AABEE]" viewBox="0 0 24 24" fill="currentColor">
@@ -82,7 +85,7 @@ export default async function WelcomePage({
           {/* Step 2: Link Exchange Account */}
           <Link
             href={`/${lang}/dashboard`}
-            className="group flex items-center gap-4 p-5 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] hover:bg-emerald-500/[0.12] hover:border-emerald-500/40 transition-all duration-300"
+            className="group flex items-center gap-4 p-5 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] hover:bg-emerald-500/[0.12] hover:border-emerald-500/40 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
           >
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 shrink-0">
               <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -108,7 +111,7 @@ export default async function WelcomePage({
           {/* Step 3: Explore Features */}
           <Link
             href={`/${lang}/quant`}
-            className="group flex items-center gap-4 p-5 rounded-2xl border border-blue-500/20 bg-blue-500/[0.06] hover:bg-blue-500/[0.12] hover:border-blue-500/40 transition-all duration-300"
+            className="group flex items-center gap-4 p-5 rounded-2xl border border-blue-500/20 bg-blue-500/[0.06] hover:bg-blue-500/[0.12] hover:border-blue-500/40 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
           >
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/20 shrink-0">
               <svg className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -136,7 +139,7 @@ export default async function WelcomePage({
         <div className="text-center">
           <Link
             href={`/${lang}/dashboard`}
-            className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-white transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 rounded px-2 py-1"
           >
             {ko ? "대시보드로 바로 이동" : "Go straight to dashboard"}
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

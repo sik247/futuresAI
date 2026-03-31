@@ -411,7 +411,7 @@ export default function QuantClient({
                   key={tab.key}
                   data-tab={tab.key}
                   onClick={() => handleTabChange(tab.key)}
-                  className={`relative z-10 px-6 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
+                  className={`relative z-10 px-6 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-1 focus-visible:ring-offset-zinc-950 ${
                     activeTab === tab.key
                       ? "text-white"
                       : "text-zinc-400 hover:text-zinc-200"
@@ -490,15 +490,20 @@ export default function QuantClient({
                   <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-[0.15em] mb-2">{t.quant_autoRefresh}</p>
                   <span className="text-lg font-mono font-bold text-zinc-400 tabular-nums">{countdownDisplay}</span>
                   <button onClick={handleRefresh} disabled={loading}
-                    className="mt-1 text-xs font-mono text-blue-400 hover:text-blue-300 transition-colors disabled:opacity-40">
-                    {loading ? "..." : t.quant_refreshNow}
+                    className="mt-1 inline-flex items-center gap-1.5 text-xs font-mono text-blue-400 hover:text-blue-300 transition-colors duration-200 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded">
+                    {loading ? (
+                      <>
+                        <span className="h-3 w-3 rounded-full border border-blue-400/40 border-t-blue-400 animate-spin" />
+                        <span>{lang === "ko" ? "갱신 중..." : "Refreshing..."}</span>
+                      </>
+                    ) : t.quant_refreshNow}
                   </button>
                 </div>
               </div>
             </div>
 
             {/* -- Market Summary ----------------------------------------- */}
-            <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] px-6 py-4 mb-8">
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] px-6 py-4 mb-8">
               <p className="text-sm text-zinc-400 leading-relaxed">
                 <span className="text-zinc-200 font-semibold">{t.quant_marketSummary}:</span>{" "}
                 {marketSummary}
@@ -522,13 +527,13 @@ export default function QuantClient({
             >
               {/* Table Header */}
               <div className="hidden md:grid grid-cols-16 gap-0 px-6 py-3 border-b border-white/[0.06] text-[9px] font-mono text-zinc-600 uppercase tracking-[0.15em]" style={{ gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1fr 1fr 1.5fr 1.5fr" }}>
-                <div>Asset</div>
-                <div className="text-right">Price</div>
-                <div className="text-right">24h</div>
-                <div className="text-center">24h</div>
+                <div>{lang === "ko" ? "자산" : "Asset"}</div>
+                <div className="text-right">{lang === "ko" ? "가격" : "Price"}</div>
+                <div className="text-right">24h %</div>
+                <div className="text-center">{lang === "ko" ? "추세" : "Trend"}</div>
                 <div className="text-right">RSI</div>
                 <div className="text-right">MACD</div>
-                <div className="text-center">Signal</div>
+                <div className="text-center">{lang === "ko" ? "시그널" : "Signal"}</div>
                 <div className="text-right">{t.quant_confidence}</div>
               </div>
 
@@ -661,28 +666,36 @@ export default function QuantClient({
 
             {/* -- Reasons/Analysis Panel --------------------------------- */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
-              {signals.map((s) => (
-                <div key={`reasons-${s.symbol}`} className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xs font-mono font-bold text-zinc-300">{s.symbol}</span>
-                    <span className={`text-[10px] font-mono ${s.change24h >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                      {s.change24h >= 0 ? "+" : ""}{s.change24h.toFixed(2)}%
-                    </span>
-                  </div>
-                  <div className="space-y-1.5">
-                    {s.reasons.map((r, i) => (
-                      <div key={i} className="flex items-start gap-2">
-                        <span className="mt-1.5 w-1 h-1 rounded-full bg-zinc-600 flex-shrink-0" />
-                        <span className="text-[12px] text-zinc-400 leading-relaxed">{r}</span>
+              {signals.map((s) => {
+                const signalStyle = SIGNAL_COLORS[s.signal] ?? { bg: "", glow: "" };
+                return (
+                  <div key={`reasons-${s.symbol}`} className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 hover:bg-white/[0.05] hover:border-white/[0.10] transition-all duration-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono font-bold text-zinc-200">{s.symbol}</span>
+                        <span className={`text-[10px] font-mono ${s.change24h >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                          {s.change24h >= 0 ? "+" : ""}{s.change24h.toFixed(2)}%
+                        </span>
                       </div>
-                    ))}
+                      <span className={`px-2 py-0.5 text-[9px] font-mono font-bold rounded-full border ${signalStyle.bg}`}>
+                        {s.signal}
+                      </span>
+                    </div>
+                    <div className="space-y-1.5">
+                      {s.reasons.map((r, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <span className="mt-1.5 w-1 h-1 rounded-full bg-zinc-600 flex-shrink-0" />
+                          <span className="text-[12px] text-zinc-400 leading-relaxed">{r}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* -- Disclaimer -------------------------------------------- */}
-            <div className="rounded-2xl border border-white/[0.04] bg-white/[0.015] p-6 text-center">
+            <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6 text-center">
               <p className="text-[11px] text-zinc-600 leading-relaxed max-w-2xl mx-auto font-mono">
                 {t.quant_disclaimer}
               </p>

@@ -129,7 +129,7 @@ export default function UserDashboard({
           {user.role === "ADMIN" && (
             <Link
               href={`/${lang}/dashboard/admin`}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-medium hover:bg-amber-500/20 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-medium hover:bg-amber-500/20 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50"
             >
               <ShieldCheckIcon className="w-4 h-4" />
               {ko ? "관리자" : "Admin Panel"}
@@ -140,7 +140,7 @@ export default function UserDashboard({
 
       {/* Portfolio Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl shadow-lg shadow-black/30 hover:border-white/[0.12] hover:scale-[1.01] transition-all">
+        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl shadow-lg shadow-black/30 hover:border-white/[0.12] hover:scale-[1.01] transition-all duration-200">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
             {ko ? "포트폴리오 가치" : "Portfolio Value"}
           </p>
@@ -152,7 +152,7 @@ export default function UserDashboard({
           </p>
         </Card>
 
-        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl shadow-lg shadow-black/30 hover:border-white/[0.12] hover:scale-[1.01] transition-all">
+        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl shadow-lg shadow-black/30 hover:border-white/[0.12] hover:scale-[1.01] transition-all duration-200">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
             {ko ? "총 손익" : "Total P&L"}
           </p>
@@ -166,7 +166,7 @@ export default function UserDashboard({
           </div>
         </Card>
 
-        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl shadow-lg shadow-black/30 hover:border-white/[0.12] hover:scale-[1.01] transition-all">
+        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl shadow-lg shadow-black/30 hover:border-white/[0.12] hover:scale-[1.01] transition-all duration-200">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
             {ko ? "24시간 변동" : "24h Change"}
           </p>
@@ -182,7 +182,7 @@ export default function UserDashboard({
           </div>
         </Card>
 
-        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl shadow-lg shadow-black/30 hover:border-white/[0.12] hover:scale-[1.01] transition-all">
+        <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl shadow-lg shadow-black/30 hover:border-white/[0.12] hover:scale-[1.01] transition-all duration-200">
           <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-2">
             {ko ? "크레딧" : "Credits"}
           </p>
@@ -202,7 +202,7 @@ export default function UserDashboard({
             </h3>
             <Link
               href={`/${lang}/portfolio`}
-              className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
+              className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded"
             >
               {ko ? "전체 보기" : "View All"}
             </Link>
@@ -213,7 +213,7 @@ export default function UserDashboard({
               <p className="text-sm text-zinc-500 mb-3">{ko ? "보유 자산이 없습니다" : "No holdings yet"}</p>
               <Link
                 href={`/${lang}/portfolio`}
-                className="text-sm text-blue-400 hover:text-blue-300 font-medium"
+                className="text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded"
               >
                 {ko ? "첫 자산 추가하기" : "Add your first holding"}
               </Link>
@@ -258,7 +258,7 @@ export default function UserDashboard({
             </h3>
             <Link
               href={`/${lang}/chart-ideas/analyze`}
-              className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
+              className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded"
             >
               {ko ? "새 분석" : "New Analysis"}
             </Link>
@@ -269,7 +269,7 @@ export default function UserDashboard({
               <p className="text-sm text-zinc-500 mb-3">{ko ? "분석 내역이 없습니다" : "No analyses yet"}</p>
               <Link
                 href={`/${lang}/chart-ideas/analyze`}
-                className="text-sm text-blue-400 hover:text-blue-300 font-medium"
+                className="text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded"
               >
                 {ko ? "첫 AI 분석 실행하기" : "Run your first AI analysis"}
               </Link>
@@ -321,7 +321,7 @@ export default function UserDashboard({
           </div>
           <Link
             href={`/${lang}/payback`}
-            className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
+            className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded"
           >
             {ko ? "페이백 상세 보기" : "View Payback Details"}
           </Link>
@@ -341,17 +341,17 @@ export default function UserDashboard({
         ) : (
           <>
             {/* Summary row */}
-            <div className="grid grid-cols-3 gap-0 px-6 py-3 border-b border-white/[0.04] bg-white/[0.01]">
-              <div>
-                <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">{ko ? "총 적립" : "Total Earned"}</p>
+            <div className="grid grid-cols-3 divide-x divide-white/[0.04] border-b border-white/[0.04] bg-white/[0.01]">
+              <div className="px-6 py-3">
+                <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider mb-1">{ko ? "총 적립" : "Total Earned"}</p>
                 <p className="text-sm font-mono font-bold text-white">${paybackAccounts.reduce((s, a) => s + a.totalEarned, 0).toFixed(2)}</p>
               </div>
-              <div>
-                <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">{ko ? "미지급" : "Unpaid"}</p>
+              <div className="px-6 py-3">
+                <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider mb-1">{ko ? "미지급" : "Unpaid"}</p>
                 <p className="text-sm font-mono font-bold text-emerald-400">${paybackAccounts.reduce((s, a) => s + a.unpaid, 0).toFixed(2)}</p>
               </div>
-              <div>
-                <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">{ko ? "연결 거래소" : "Exchanges"}</p>
+              <div className="px-6 py-3">
+                <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider mb-1">{ko ? "연결 거래소" : "Exchanges"}</p>
                 <p className="text-sm font-mono font-bold text-white">{paybackAccounts.length}</p>
               </div>
             </div>
@@ -410,13 +410,17 @@ export default function UserDashboard({
       {/* Quick Links */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {QUICK_LINKS.map((link) => (
-          <Link key={link.path} href={`/${lang}/${link.path}`}>
-            <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl hover:border-blue-500/20 hover:bg-white/[0.05] transition-all group cursor-pointer">
-              <link.icon className="w-6 h-6 text-zinc-500 group-hover:text-blue-400 transition-colors mb-3" />
-              <p className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors">
+          <Link
+            key={link.path}
+            href={`/${lang}/${link.path}`}
+            className="group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded-2xl"
+          >
+            <Card className="p-5 bg-white/[0.03] border-white/[0.06] backdrop-blur-xl hover:border-blue-500/20 hover:bg-white/[0.05] transition-all duration-200 cursor-pointer h-full">
+              <link.icon className="w-6 h-6 text-zinc-500 group-hover:text-blue-400 transition-colors duration-200 mb-3" />
+              <p className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors duration-200">
                 {ko ? link.labelKo : link.label}
               </p>
-              <p className="text-xs text-zinc-500 mt-1">{ko ? link.descKo : link.desc}</p>
+              <p className="text-xs text-zinc-500 mt-1 leading-snug">{ko ? link.descKo : link.desc}</p>
             </Card>
           </Link>
         ))}

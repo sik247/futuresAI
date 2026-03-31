@@ -66,11 +66,11 @@ const LoginPage: React.FC<TLoginPage> = async ({ params: { lang } }) => {
 
           {/* Divider */}
           <div className="relative flex items-center mb-6">
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent to-white/[0.08]" />
-            <span className="px-3 text-xs font-mono text-zinc-500 uppercase tracking-wider">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-white/[0.08]" />
+            <span className="px-3 text-xs font-mono text-zinc-500 uppercase tracking-wider shrink-0">
               {t.login_or_continue}
             </span>
-            <div className="flex-1 h-px bg-gradient-to-l from-transparent to-white/[0.08]" />
+            <div className="flex-1 h-px bg-gradient-to-l from-transparent via-white/[0.06] to-white/[0.08]" />
           </div>
 
           {/* Login form */}
@@ -80,7 +80,7 @@ const LoginPage: React.FC<TLoginPage> = async ({ params: { lang } }) => {
           <div className="mt-4 text-center">
             <button
               type="button"
-              className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors duration-200"
+              className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded px-1 py-0.5"
             >
               {t.login_forgot_password}
             </button>
@@ -93,7 +93,7 @@ const LoginPage: React.FC<TLoginPage> = async ({ params: { lang } }) => {
             {t.login_no_account}{" "}
             <Link
               href={`/${lang}/signup`}
-              className="text-blue-400 hover:text-blue-300 font-medium transition-colors duration-200 hover:underline underline-offset-4"
+              className="text-blue-400 hover:text-blue-300 font-medium transition-colors duration-200 hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded"
             >
               {t.signup}
             </Link>
