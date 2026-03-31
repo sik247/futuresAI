@@ -86,7 +86,7 @@ const Footer: React.FC<TFooter> = ({ lang = "en", translations }) => {
             <div className="flex flex-col gap-3.5">
               {QUICK_LINKS.map((link) => (
                 <Link key={link.href} href={`/${lang}/${link.href}`}
-                  className="group text-sm text-zinc-500 hover:text-white transition-all duration-300 flex items-center gap-2">
+                  className="group text-sm text-zinc-500 hover:text-white transition-all duration-300 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded">
                   <span className="w-0 group-hover:w-2 h-px bg-blue-500 transition-all duration-300" />
                   {link.label}
                 </Link>
@@ -102,7 +102,7 @@ const Footer: React.FC<TFooter> = ({ lang = "en", translations }) => {
             <div className="flex flex-col gap-3.5">
               {RESOURCE_LINKS.map((link) => (
                 <Link key={link.href} href={`/${lang}/${link.href}`}
-                  className="group text-sm text-zinc-500 hover:text-white transition-all duration-300 flex items-center gap-2">
+                  className="group text-sm text-zinc-500 hover:text-white transition-all duration-300 flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded">
                   <span className="w-0 group-hover:w-2 h-px bg-blue-500 transition-all duration-300" />
                   {link.label}
                 </Link>
@@ -119,7 +119,7 @@ const Footer: React.FC<TFooter> = ({ lang = "en", translations }) => {
               {CommunityIconsPathList.map((path, idx) => (
                 <li key={idx}>
                   <a href={path.href} target="_blank" rel="noopener noreferrer"
-                    className="group flex items-center justify-center w-10 h-10 rounded-full bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:bg-blue-600/10 hover:border-blue-500/30 hover:shadow-[0_0_16px_rgba(59,130,246,0.2)] hover:-translate-y-0.5 transition-all duration-300">
+                    className="group flex items-center justify-center w-10 h-10 rounded-full bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:bg-blue-600/10 hover:border-blue-500/30 hover:shadow-[0_0_16px_rgba(59,130,246,0.2)] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950">
                     <Image src={path.item} alt={path.alt} width={18} height={18} className="opacity-50 group-hover:opacity-100 transition-opacity duration-300" />
                   </a>
                 </li>
@@ -152,7 +152,7 @@ const Footer: React.FC<TFooter> = ({ lang = "en", translations }) => {
           </p>
           <div className="flex items-center gap-6">
             {LEGAL_LINKS.map((link) => (
-              <Link key={link.href} href={`/${lang}/${link.href}`} className="text-xs text-zinc-600 hover:text-zinc-300 transition-colors duration-300">
+              <Link key={link.href} href={`/${lang}/${link.href}`} className="text-xs text-zinc-600 hover:text-zinc-300 transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded">
                 {link.label}
               </Link>
             ))}

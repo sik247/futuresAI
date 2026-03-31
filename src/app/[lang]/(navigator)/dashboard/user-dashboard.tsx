@@ -360,7 +360,7 @@ export default function UserDashboard({
             {paybackAccounts.map((acc, i) => (
               <div
                 key={acc.id}
-                className={`flex items-center justify-between px-6 py-3.5 hover:bg-white/[0.02] transition-colors ${
+                className={`flex items-center justify-between px-6 py-3.5 hover:bg-white/[0.02] transition-colors cursor-default ${
                   i < paybackAccounts.length - 1 ? "border-b border-white/[0.03]" : ""
                 }`}
               >

@@ -96,6 +96,8 @@ const LoginForm = React.forwardRef<
                 <FormControl>
                   <Input
                     {...field}
+                    type="email"
+                    autoComplete="email"
                     placeholder={t.login_email_placeholder}
                     className="h-11 bg-white/[0.03] border-white/[0.08] text-white placeholder:text-zinc-600 rounded-lg focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 focus:bg-white/[0.05] transition-all duration-200"
                   />
@@ -116,6 +118,7 @@ const LoginForm = React.forwardRef<
                   <Input
                     {...field}
                     type="password"
+                    autoComplete="current-password"
                     placeholder={t.login_password_placeholder}
                     className="h-11 bg-white/[0.03] border-white/[0.08] text-white placeholder:text-zinc-600 rounded-lg focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 focus:bg-white/[0.05] transition-all duration-200"
                   />

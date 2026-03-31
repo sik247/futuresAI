@@ -411,7 +411,7 @@ export default function QuantClient({
                   key={tab.key}
                   data-tab={tab.key}
                   onClick={() => handleTabChange(tab.key)}
-                  className={`relative z-10 px-6 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-1 focus-visible:ring-offset-zinc-950 ${
+                  className={`relative z-10 px-6 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-colors duration-200 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-1 focus-visible:ring-offset-zinc-950 ${
                     activeTab === tab.key
                       ? "text-white"
                       : "text-zinc-400 hover:text-zinc-200"
@@ -561,7 +561,7 @@ export default function QuantClient({
                 return (
                   <div
                     key={s.symbol}
-                    className="group hidden md:grid items-center px-6 py-4 border-b border-white/[0.03] hover:bg-white/[0.03] transition-all duration-200"
+                    className="group hidden md:grid items-center px-6 py-4 border-b border-white/[0.03] hover:bg-white/[0.03] transition-all duration-200 cursor-default"
                     style={{ gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1fr 1fr 1fr 1.5fr 1.5fr" }}
                   >
                     {/* Asset */}

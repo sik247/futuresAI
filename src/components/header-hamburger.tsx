@@ -59,7 +59,7 @@ const HeaderHamburger: React.FC<HeaderHamburgerProps> = ({
   return (
     <div className={className}>
       <Sheet>
-        <SheetTrigger className="flex items-center">
+        <SheetTrigger className="flex items-center justify-center min-w-[44px] min-h-[44px] rounded-lg hover:bg-white/[0.06] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50" aria-label="Open navigation menu">
           <Bars3Icon className="w-6 text-foreground" />
         </SheetTrigger>
         <SheetContent side="left" className="w-full sm:w-[380px] p-0 bg-zinc-950 border-zinc-800/50">

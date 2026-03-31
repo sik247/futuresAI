@@ -82,7 +82,7 @@ export function SocialLoginButtons({ lang }: { lang?: string }) {
           </div>
         </div>
       ) : (
-        <div ref={widgetRef} className="flex justify-center min-h-[44px] items-center" />
+        <div ref={widgetRef} className="flex justify-center min-h-[44px] items-center" aria-label="Sign in with Telegram" />
       )}
 
       {error && (
