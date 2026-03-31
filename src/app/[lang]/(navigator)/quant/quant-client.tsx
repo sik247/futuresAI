@@ -526,13 +526,14 @@ export default function QuantClient({
               className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl shadow-lg shadow-black/40 overflow-hidden mb-8"
             >
               {/* Table Header */}
-              <div className="hidden md:grid grid-cols-16 gap-0 px-6 py-3 border-b border-white/[0.06] text-[9px] font-mono text-zinc-600 uppercase tracking-[0.15em]" style={{ gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1fr 1fr 1.5fr 1.5fr" }}>
+              <div className="hidden md:grid gap-0 px-6 py-3 border-b border-white/[0.06] text-[9px] font-mono text-zinc-600 uppercase tracking-[0.15em]" style={{ gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1fr 1fr 1fr 1.5fr 1.5fr" }}>
                 <div>{lang === "ko" ? "자산" : "Asset"}</div>
                 <div className="text-right">{lang === "ko" ? "가격" : "Price"}</div>
                 <div className="text-right">24h %</div>
                 <div className="text-center">{lang === "ko" ? "추세" : "Trend"}</div>
                 <div className="text-right">RSI</div>
                 <div className="text-right">MACD</div>
+                <div className="text-center">{lang === "ko" ? "방향" : "Direction"}</div>
                 <div className="text-center">{lang === "ko" ? "시그널" : "Signal"}</div>
                 <div className="text-right">{t.quant_confidence}</div>
               </div>
@@ -561,7 +562,7 @@ export default function QuantClient({
                   <div
                     key={s.symbol}
                     className="group hidden md:grid items-center px-6 py-4 border-b border-white/[0.03] hover:bg-white/[0.03] transition-all duration-200"
-                    style={{ gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1fr 1fr 1.5fr 1.5fr" }}
+                    style={{ gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1fr 1fr 1fr 1.5fr 1.5fr" }}
                   >
                     {/* Asset */}
                     <div className="flex items-center gap-3">
@@ -605,6 +606,19 @@ export default function QuantClient({
                       </span>
                     </div>
 
+                    {/* Direction */}
+                    <div className="flex justify-center">
+                      <span className={`px-2.5 py-1 text-[10px] font-mono font-bold rounded-md border ${
+                        s.direction === "LONG"
+                          ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                          : s.direction === "SHORT"
+                          ? "bg-red-500/20 text-red-400 border-red-500/30"
+                          : "bg-zinc-500/20 text-zinc-400 border-zinc-500/30"
+                      }`}>
+                        {s.direction === "LONG" ? "\u25B2 LONG" : s.direction === "SHORT" ? "\u25BC SHORT" : "\u25C6 WAIT"}
+                      </span>
+                    </div>
+
                     {/* Signal */}
                     <div className="flex justify-center">
                       <span className={`px-3 py-1 text-[10px] font-mono font-bold rounded-full border ${signalStyle.bg} ${signalStyle.glow}`}>
@@ -636,6 +650,15 @@ export default function QuantClient({
                           <span className="text-sm font-bold text-white">{s.symbol}</span>
                           <Sparkline data={s.sparkline} />
                         </div>
+                        <span className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded-md border ${
+                          s.direction === "LONG"
+                            ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+                            : s.direction === "SHORT"
+                            ? "bg-red-500/20 text-red-400 border-red-500/30"
+                            : "bg-zinc-500/20 text-zinc-400 border-zinc-500/30"
+                        }`}>
+                          {s.direction === "LONG" ? "\u25B2 LONG" : s.direction === "SHORT" ? "\u25BC SHORT" : "\u25C6 WAIT"}
+                        </span>
                         <span className={`px-2.5 py-1 text-[10px] font-mono font-bold rounded-full border ${signalStyle.bg}`}>{s.signal}</span>
                       </div>
                       <div className="flex justify-between text-xs font-mono">

@@ -5,6 +5,7 @@ export type SignalItem = {
   change24h: number;
   volume24h: number;
   signal: "Strong Buy" | "Buy" | "Neutral" | "Sell" | "Strong Sell";
+  direction: "LONG" | "SHORT" | "NEUTRAL";
   confidence: number;
   reasons: string[];
   rsi: number;
@@ -34,6 +35,8 @@ const COINS = [
   { id: "chainlink", symbol: "LINK", name: "Chainlink" },
 ];
 
+// ── Signal logic ────────────────────────────────────────────────────
+
 function getSignalFromChange(change: number): SignalItem["signal"] {
   if (change > 5) return "Strong Buy";
   if (change > 2) return "Buy";
@@ -46,19 +49,32 @@ function applyRsiFilter(
   signal: SignalItem["signal"],
   rsi: number
 ): SignalItem["signal"] {
-  if (
-    rsi > 70 &&
-    (signal === "Buy" || signal === "Strong Buy")
-  ) {
-    return "Neutral";
-  }
-  if (
-    rsi < 30 &&
-    (signal === "Sell" || signal === "Strong Sell")
-  ) {
-    return "Neutral";
-  }
+  if (rsi > 70 && (signal === "Buy" || signal === "Strong Buy")) return "Neutral";
+  if (rsi < 30 && (signal === "Sell" || signal === "Strong Sell")) return "Neutral";
   return signal;
+}
+
+function deriveDirection(
+  signal: SignalItem["signal"],
+  rsi: number,
+  macdHistogram: number
+): SignalItem["direction"] {
+  // Strong signals override
+  if (signal === "Strong Buy") return "LONG";
+  if (signal === "Strong Sell") return "SHORT";
+
+  // Use RSI + MACD confluence for weaker signals
+  const rsiBullish = rsi < 55;
+  const macdBullish = macdHistogram > 0;
+
+  if (signal === "Buy" && (rsiBullish || macdBullish)) return "LONG";
+  if (signal === "Sell" && (!rsiBullish || !macdBullish)) return "SHORT";
+
+  // Check MACD + RSI confluence for neutral
+  if (rsiBullish && macdBullish) return "LONG";
+  if (!rsiBullish && !macdBullish) return "SHORT";
+
+  return "NEUTRAL";
 }
 
 function getConfidence(
@@ -80,7 +96,6 @@ function getConfidence(
   if (isBtc && btcAboveSma) confidence += 10;
   else if (isBtc) confidence -= 5;
 
-  // RSI extremes indicate clearer signals
   if (rsi > 70 || rsi < 30) confidence += 10;
 
   return Math.min(Math.max(confidence, 10), 95);
@@ -122,38 +137,37 @@ function buildReasons(
   return reasons;
 }
 
+// ── Data fetching (optimized — batch calls) ─────────────────────────
+
+const BINANCE_SYMBOLS = COINS.map((c) => `${c.symbol}USDT`);
+
 async function fetchBinancePrices() {
-  const symbols = COINS.map((c) => ({ id: c.id, symbol: `${c.symbol}USDT` }));
-
   try {
-    const tickers = await Promise.all(
-      symbols.map(async (s) => {
-        const res = await fetch(
-          `https://api.binance.com/api/v3/ticker/24hr?symbol=${s.symbol}`,
-          { next: { revalidate: 60 } }
-        );
-        if (!res.ok) throw new Error(`Binance ${s.symbol}: ${res.status}`);
-        const data = await res.json();
-        return {
-          id: s.id,
-          usd: parseFloat(data.lastPrice) || 0,
-          usd_24h_change: parseFloat(data.priceChangePercent) || 0,
-          usd_24h_vol: parseFloat(data.quoteVolume) || 0,
-        };
-      })
+    // Single batch call for all tickers instead of 10 individual calls
+    const symbols = JSON.stringify(BINANCE_SYMBOLS);
+    const res = await fetch(
+      `https://api.binance.com/api/v3/ticker/24hr?symbols=${encodeURIComponent(symbols)}`,
+      { next: { revalidate: 60 } }
     );
-
-    // Verify we got actual prices (not all zeros)
-    const hasValidPrices = tickers.some((t) => t.usd > 0);
-    if (!hasValidPrices) throw new Error("Binance returned zero prices");
+    if (!res.ok) throw new Error(`Binance batch: ${res.status}`);
+    const tickers: Array<{ symbol: string; lastPrice: string; priceChangePercent: string; quoteVolume: string }> = await res.json();
 
     const result: Record<string, { usd: number; usd_24h_change: number; usd_24h_vol: number }> = {};
     for (const t of tickers) {
-      result[t.id] = { usd: t.usd, usd_24h_change: t.usd_24h_change, usd_24h_vol: t.usd_24h_vol };
+      const coin = COINS.find((c) => `${c.symbol}USDT` === t.symbol);
+      if (coin) {
+        result[coin.id] = {
+          usd: parseFloat(t.lastPrice) || 0,
+          usd_24h_change: parseFloat(t.priceChangePercent) || 0,
+          usd_24h_vol: parseFloat(t.quoteVolume) || 0,
+        };
+      }
     }
+
+    const hasValidPrices = Object.values(result).some((t) => t.usd > 0);
+    if (!hasValidPrices) throw new Error("Binance returned zero prices");
     return result;
   } catch {
-    // Fallback to CoinGecko if Binance fails
     return fetchCoinGeckoPrices();
   }
 }
@@ -179,6 +193,8 @@ async function fetchCoinGeckoPrices() {
   }
   return result;
 }
+
+// ── Technical indicators ────────────────────────────────────────────
 
 function calculateRSI(closes: number[], period = 14): number {
   if (closes.length < period + 1) return 50;
@@ -220,47 +236,47 @@ function calculateMACD(closes: number[]): { value: number; signal: number; histo
   return { value: macdValue, signal: signalValue, histogram: macdValue - signalValue };
 }
 
-async function fetchAllKlines(): Promise<Record<string, string[][]>> {
-  const results: Record<string, string[][]> = {};
-  const fetches = COINS.map(async (coin) => {
-    try {
-      const res = await fetch(
-        `https://api.binance.com/api/v3/klines?symbol=${coin.symbol}USDT&interval=4h&limit=50`,
-        { next: { revalidate: 60 } }
-      );
-      if (!res.ok) return;
-      results[coin.id] = await res.json();
-    } catch { /* skip */ }
+// Fetch klines + sparklines in parallel (10 coins x 2 endpoints = 20 calls)
+async function fetchAllKlinesAndSparklines(): Promise<{
+  klines: Record<string, string[][]>;
+  sparklines: Record<string, number[]>;
+}> {
+  const klines: Record<string, string[][]> = {};
+  const sparklines: Record<string, number[]> = {};
+
+  const fetches = COINS.flatMap((coin) => {
+    const symbol = `${coin.symbol}USDT`;
+    return [
+      // 4h klines for RSI/MACD
+      fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=4h&limit=50`, {
+        next: { revalidate: 60 },
+      })
+        .then((r) => (r.ok ? r.json() : []))
+        .then((data) => { klines[coin.id] = data; })
+        .catch(() => {}),
+      // 1h klines for sparklines
+      fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1h&limit=24`, {
+        next: { revalidate: 60 },
+      })
+        .then((r) => (r.ok ? r.json() : []))
+        .then((data: (string | number)[][]) => {
+          sparklines[coin.id] = data.map((k) => parseFloat(k[4] as string));
+        })
+        .catch(() => {}),
+    ];
   });
+
   await Promise.allSettled(fetches);
-  return results;
+  return { klines, sparklines };
 }
 
-async function fetchSparklineData(): Promise<Record<string, number[]>> {
-  const results: Record<string, number[]> = {};
-  const fetches = COINS.map(async (coin) => {
-    try {
-      const res = await fetch(
-        `https://api.binance.com/api/v3/klines?symbol=${coin.symbol}USDT&interval=1h&limit=24`,
-        { next: { revalidate: 60 } }
-      );
-      if (!res.ok) return;
-      const klines = await res.json();
-      results[coin.id] = klines.map((k: (string | number)[]) => parseFloat(k[4] as string)); // close prices
-    } catch { /* skip */ }
-  });
-  await Promise.allSettled(fetches);
-  return results;
-}
+// ── Main fetch (optimized: 3 parallel calls instead of 31 sequential) ──
 
 export async function fetchMarketSignals(): Promise<MarketSignals> {
-  const [priceData, fngRes, allKlines, sparklineData] = await Promise.all([
+  const [priceData, fngRes, { klines: allKlines, sparklines: sparklineData }] = await Promise.all([
     fetchBinancePrices(),
-    fetch("https://api.alternative.me/fng/?limit=1", {
-      next: { revalidate: 300 },
-    }),
-    fetchAllKlines(),
-    fetchSparklineData(),
+    fetch("https://api.alternative.me/fng/?limit=1", { next: { revalidate: 300 } }),
+    fetchAllKlinesAndSparklines(),
   ]);
 
   const fngData = await fngRes.json();
@@ -270,19 +286,9 @@ export async function fetchMarketSignals(): Promise<MarketSignals> {
   const fearGreedValue = parseInt(fngEntry.value, 10);
   const fearGreedClass: string = fngEntry.value_classification;
 
-  // BTC SMA calculation from OHLC (close prices are index 4)
+  // BTC SMA
   const btcRawKlines = allKlines["bitcoin"] ?? [];
-  const ohlcData: number[][] = Array.isArray(btcRawKlines)
-    ? btcRawKlines.map((k) => [
-        parseFloat(k[0]),
-        parseFloat(k[1]),
-        parseFloat(k[2]),
-        parseFloat(k[3]),
-        parseFloat(k[4]),
-      ])
-    : [];
-
-  const closes = Array.isArray(ohlcData) ? ohlcData.map((c) => c[4]) : [];
+  const closes = btcRawKlines.map((k) => parseFloat(k[4]));
   const sma = closes.length > 0 ? closes.reduce((a, b) => a + b, 0) / closes.length : 0;
   const latestClose = closes.length > 0 ? closes[closes.length - 1] : 0;
   const btcAboveSma = latestClose > sma;
@@ -296,17 +302,15 @@ export async function fetchMarketSignals(): Promise<MarketSignals> {
     const volume24h: number = data?.usd_24h_vol ?? 0;
     const isBtc = coin.id === "bitcoin";
 
-    // RSI & MACD from 4h klines
     const rawKlines = allKlines[coin.id] ?? [];
     const coinCloses = rawKlines.map((k) => parseFloat(k[4]));
     const rsi = calculateRSI(coinCloses);
     const macd = calculateMACD(coinCloses);
-
-    // Sparkline from 1h klines
     const sparkline = sparklineData[coin.id] ?? [];
 
     const baseSignal = getSignalFromChange(change24h);
     const signal = applyRsiFilter(baseSignal, rsi);
+    const direction = deriveDirection(signal, rsi, macd.histogram);
 
     return {
       coin: coin.name,
@@ -315,6 +319,7 @@ export async function fetchMarketSignals(): Promise<MarketSignals> {
       change24h,
       volume24h,
       signal,
+      direction,
       confidence: getConfidence(change24h, fearGreedValue, isBtc, btcAboveSma, rsi),
       reasons: buildReasons(change24h, fearGreedValue, fearGreedClass, isBtc, btcAboveSma, rsi),
       rsi,
