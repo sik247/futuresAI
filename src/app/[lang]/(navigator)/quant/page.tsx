@@ -4,17 +4,33 @@ import { getDictionary } from "@/i18n";
 import QuantClient from "./quant-client";
 
 export const metadata: Metadata = {
-  title: "AI Quant Terminal",
+  title: "AI Quant Terminal - Real-Time Crypto Trading Signals",
   description:
-    "Real-time AI-powered trading signals, chart analysis, and quantitative insights for professional crypto traders.",
+    "Real-time AI-powered crypto trading signals, RSI/MACD indicators, chart analysis, and quantitative market insights for professional futures traders. Updated every 60 seconds.",
   keywords: [
     "AI quant terminal",
-    "crypto signals",
-    "chart analysis",
+    "crypto trading signals",
+    "AI chart analysis",
     "quantitative trading",
     "market sentiment",
     "fear greed index",
+    "RSI MACD signals",
+    "futures trading AI",
+    "crypto intelligence",
+    "bitcoin trading signals",
   ],
+  openGraph: {
+    title: "AI Quant Terminal - Real-Time Crypto Trading Signals | Futures AI",
+    description:
+      "Real-time AI-powered crypto trading signals, RSI/MACD indicators, chart analysis, and quantitative market insights for professional futures traders.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AI Quant Terminal - Real-Time Crypto Trading Signals | Futures AI",
+    description:
+      "Real-time AI-powered crypto trading signals, RSI/MACD indicators, chart analysis, and quantitative market insights for professional futures traders.",
+  },
 };
 
 export const revalidate = 60;

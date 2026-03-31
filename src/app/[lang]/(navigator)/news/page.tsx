@@ -8,10 +8,33 @@ import { translateBatch } from "@/lib/services/social/korean-translator.service"
 export const revalidate = 300; // Revalidate every 5 minutes (avoids build-time translation timeout)
 
 export const metadata: Metadata = {
-  title: "Crypto News and Market Updates",
+  title: "Crypto News and Market Updates - Latest Bitcoin & Altcoin News",
   description:
-    "Latest cryptocurrency news, Bitcoin and altcoin market updates, and real-time trading insights aggregated from top sources. Stay informed with Futures AI.",
-  keywords: ["crypto news", "bitcoin news", "cryptocurrency updates", "market intelligence", "trading insights"],
+    "Latest cryptocurrency news, Bitcoin and altcoin market updates, and real-time trading insights aggregated from top sources. Korean-translated content available. Stay informed with Futures AI.",
+  keywords: [
+    "crypto news",
+    "bitcoin news today",
+    "cryptocurrency market updates",
+    "altcoin news",
+    "market intelligence",
+    "trading insights",
+    "crypto market analysis",
+    "blockchain news",
+    "DeFi news",
+    "crypto news Korean",
+  ],
+  openGraph: {
+    title: "Crypto News and Market Updates - Latest Bitcoin & Altcoin News | Futures AI",
+    description:
+      "Latest cryptocurrency news, Bitcoin and altcoin market updates, and real-time trading insights aggregated from top sources. Korean-translated content available.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Crypto News and Market Updates - Latest Bitcoin & Altcoin News | Futures AI",
+    description:
+      "Latest cryptocurrency news, Bitcoin and altcoin market updates, and real-time trading insights aggregated from top sources.",
+  },
 };
 
 const TRENDING_TICKERS = [

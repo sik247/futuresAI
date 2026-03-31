@@ -22,6 +22,13 @@ const ChartAnalyzer = dynamic(
   }
 );
 
+const QuantBlog = dynamic(
+  () => import("./quant-blog"),
+  {
+    ssr: false,
+  }
+);
+
 const QuantTools = dynamic(
   () => import("./quant-tools"),
   {
@@ -758,6 +765,13 @@ export default function QuantClient({
             {toolsLoaded && <QuantTools lang={lang} />}
           </div>
         )}
+      </div>
+
+      {/* ============================================================ */}
+      {/*  QUANT RESEARCH BLOG                                         */}
+      {/* ============================================================ */}
+      <div className="border-t border-white/[0.06]">
+        <QuantBlog lang={lang} />
       </div>
     </div>
   );

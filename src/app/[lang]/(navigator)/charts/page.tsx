@@ -10,10 +10,33 @@ import { MarketCorrelations, TopCoinsTable } from "./market-data";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Crypto Charts and Market Analysis",
+  title: "Crypto Charts and Market Analysis - TradingView Terminal",
   description:
-    "Professional crypto charting terminal with multi-chart TradingView views, Fear and Greed index, market correlations, and real-time screener. Powered by Futures AI.",
-  keywords: ["crypto charts", "TradingView", "market analysis", "fear greed index", "crypto screener", "bitcoin chart"],
+    "Professional crypto charting terminal with multi-chart TradingView views, Fear and Greed index, market correlations, top coins dashboard, and real-time screener. Powered by Futures AI.",
+  keywords: [
+    "crypto charts",
+    "TradingView crypto",
+    "bitcoin chart analysis",
+    "market analysis",
+    "fear greed index",
+    "crypto screener",
+    "market correlations",
+    "crypto market data",
+    "multi-chart terminal",
+    "BTC ETH chart",
+  ],
+  openGraph: {
+    title: "Crypto Charts and Market Analysis - TradingView Terminal | Futures AI",
+    description:
+      "Professional crypto charting terminal with multi-chart TradingView views, Fear and Greed index, market correlations, and real-time screener.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Crypto Charts and Market Analysis - TradingView Terminal | Futures AI",
+    description:
+      "Professional crypto charting terminal with multi-chart TradingView views, Fear and Greed index, market correlations, and real-time screener.",
+  },
 };
 
 /* ──────────────────────────── Data fetchers ──────────────────────────── */

@@ -25,7 +25,7 @@ const notoSansKR = Noto_Sans_KR({
   display: "swap",
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://futuresai.io";
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://futuresai.co";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -72,26 +72,29 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
+    alternateLocale: "ko_KR",
     url: baseUrl,
     siteName: "Futures AI",
     title: "Futures AI - AI-Powered Crypto Trading Intelligence",
     description:
-      "AI-powered crypto trading signals, whale tracking, real-time charts, market analytics, and trading rebates.",
+      "AI-powered crypto trading signals, whale tracking, real-time charts, market analytics, and trading rebates. Your all-in-one crypto trading intelligence platform.",
     images: [
       {
-        url: `${baseUrl}/images/futures-ai-logo.png`,
+        url: `${baseUrl}/og-image.png`,
         width: 1200,
         height: 630,
         alt: "Futures AI - AI-Powered Crypto Trading Intelligence",
+        type: "image/png",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
+    site: "@TetherBase",
     title: "Futures AI - AI-Powered Crypto Trading Intelligence",
     description:
       "AI-powered crypto trading signals, whale tracking, real-time charts, market analytics, and trading rebates.",
-    images: [`${baseUrl}/images/futures-ai-logo.png`],
+    images: [`${baseUrl}/og-image.png`],
     creator: "@TetherBase",
   },
   alternates: {
@@ -99,6 +102,13 @@ export const metadata: Metadata = {
     languages: {
       en: `${baseUrl}/en`,
       ko: `${baseUrl}/ko`,
+    },
+  },
+  // Naver Search Advisor verification
+  // Register at https://searchadvisor.naver.com/ to get your site verification code
+  verification: {
+    other: {
+      "naver-site-verification": "futuresai_naver_verification",
     },
   },
 };

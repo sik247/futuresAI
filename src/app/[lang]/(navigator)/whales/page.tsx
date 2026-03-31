@@ -4,10 +4,34 @@ import WhalesAnimations from "./whales-animations";
 import WhaleActivityFeed from "./whale-activity-feed";
 
 export const metadata: Metadata = {
-  title: "Whale and Entity Tracker",
+  title: "Crypto Whale and Entity Tracker - On-Chain Intelligence",
   description:
-    "Track crypto whale wallets, institutional funds like BlackRock and MicroStrategy, and live on-chain transaction activity. On-chain intelligence by Futures AI.",
-  keywords: ["whale tracking", "crypto whales", "on-chain analytics", "institutional crypto", "wallet tracker", "ethereum wallets"],
+    "Track crypto whale wallets, institutional funds like BlackRock, Grayscale, and MicroStrategy, and live on-chain Ethereum transaction activity. On-chain intelligence by Futures AI.",
+  keywords: [
+    "crypto whale tracker",
+    "on-chain analytics",
+    "institutional crypto holdings",
+    "wallet tracker",
+    "ethereum wallet monitor",
+    "BlackRock bitcoin ETF",
+    "MicroStrategy bitcoin",
+    "Grayscale GBTC",
+    "crypto whale alerts",
+    "vitalik wallet",
+    "blockchain intelligence",
+  ],
+  openGraph: {
+    title: "Crypto Whale and Entity Tracker - On-Chain Intelligence | Futures AI",
+    description:
+      "Track crypto whale wallets, institutional funds like BlackRock and MicroStrategy, and live on-chain Ethereum transaction activity.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Crypto Whale and Entity Tracker - On-Chain Intelligence | Futures AI",
+    description:
+      "Track crypto whale wallets, institutional funds like BlackRock and MicroStrategy, and live on-chain Ethereum transaction activity.",
+  },
 };
 
 /* ------------------------------------------------------------------ */

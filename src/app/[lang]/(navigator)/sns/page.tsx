@@ -12,18 +12,33 @@ import { translateBatch } from "@/lib/services/social/korean-translator.service"
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "Crypto Community Hub - Social Feed & Live Streams",
+  title: "Crypto Community Hub - Social Feed, News & Live Streams",
   description:
-    "Real-time crypto news, X feed from top analysts and whale trackers, YouTube analysis, Korean translated content, live trading streams, and Futures AI shorts.",
+    "Real-time crypto news, X (Twitter) feed from top analysts and whale trackers, YouTube analysis, Korean translated content, live trading streams, and Futures AI shorts.",
   keywords: [
-    "crypto twitter",
-    "crypto social",
-    "live trading streams",
+    "crypto twitter feed",
+    "crypto social hub",
+    "live crypto trading streams",
     "crypto analysts",
     "whale alerts",
-    "crypto news",
-    "crypto youtube",
+    "crypto news aggregator",
+    "crypto youtube analysis",
+    "bitcoin twitter",
+    "crypto community",
+    "telegram crypto signals",
   ],
+  openGraph: {
+    title: "Crypto Community Hub - Social Feed, News & Live Streams | Futures AI",
+    description:
+      "Real-time crypto news, X feed from top analysts, YouTube analysis, live trading streams, and Futures AI Telegram signals — all in one place.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Crypto Community Hub - Social Feed, News & Live Streams | Futures AI",
+    description:
+      "Real-time crypto news, X feed from top analysts, YouTube analysis, live trading streams, and Futures AI Telegram signals — all in one place.",
+  },
 };
 
 // ── Data Fetching ────────────────────────────────────────────────────

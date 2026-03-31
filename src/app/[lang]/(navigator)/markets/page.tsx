@@ -3,10 +3,32 @@ import { Metadata } from "next";
 import MarketsClient from "./markets-client";
 
 export const metadata: Metadata = {
-  title: "Crypto Prediction Markets",
+  title: "Crypto Prediction Markets - Live Polymarket Data",
   description:
-    "Live prediction markets from Polymarket. Track real-time probabilities, volume, and trends across crypto and global events. Market intelligence by Futures AI.",
-  keywords: ["prediction markets", "Polymarket", "crypto predictions", "market probabilities", "event trading"],
+    "Live prediction markets from Polymarket. Track real-time probabilities, trading volume, and trends across crypto and global events. Market intelligence by Futures AI.",
+  keywords: [
+    "crypto prediction markets",
+    "Polymarket",
+    "crypto predictions",
+    "market probabilities",
+    "event trading",
+    "bitcoin price prediction",
+    "crypto event markets",
+    "decentralized prediction market",
+    "crypto betting odds",
+  ],
+  openGraph: {
+    title: "Crypto Prediction Markets - Live Polymarket Data | Futures AI",
+    description:
+      "Track real-time probabilities, trading volume, and trends across crypto and global prediction markets. Powered by Polymarket data.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Crypto Prediction Markets - Live Polymarket Data | Futures AI",
+    description:
+      "Track real-time probabilities, trading volume, and trends across crypto and global prediction markets. Powered by Polymarket data.",
+  },
 };
 
 function formatVolume(vol: number | string) {
