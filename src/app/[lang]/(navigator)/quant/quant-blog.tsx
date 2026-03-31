@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 import { QUANT_BLOG_POSTS, type QuantBlogPost, type TradeSetup } from "@/lib/data/quant-blog-posts";
 
@@ -117,64 +118,22 @@ function TradeSetupPanel({
 }
 
 /* ------------------------------------------------------------------ */
-/*  Content renderer (markdown-style → basic HTML)                     */
-/* ------------------------------------------------------------------ */
-function ContentBody({ content }: { content: string }) {
-  const lines = content.split("\n");
-  return (
-    <div className="text-sm text-zinc-400 leading-relaxed space-y-3 mt-4 font-mono">
-      {lines.map((line, i) => {
-        if (line.startsWith("## ")) {
-          return (
-            <h3 key={i} className="text-xs font-bold text-zinc-200 uppercase tracking-[0.12em] mt-5 mb-1 font-mono">
-              {line.replace("## ", "")}
-            </h3>
-          );
-        }
-        if (line.startsWith("**") && line.endsWith("**")) {
-          return (
-            <p key={i} className="text-zinc-300 font-semibold text-xs">
-              {line.replace(/\*\*/g, "")}
-            </p>
-          );
-        }
-        if (line.trim() === "") return null;
-        // Inline bold replacement
-        const parts = line.split(/(\*\*[^*]+\*\*)/g);
-        return (
-          <p key={i} className="text-[13px] text-zinc-400 leading-relaxed">
-            {parts.map((part, j) =>
-              part.startsWith("**") && part.endsWith("**") ? (
-                <strong key={j} className="text-zinc-200 font-semibold">
-                  {part.replace(/\*\*/g, "")}
-                </strong>
-              ) : (
-                part
-              )
-            )}
-          </p>
-        );
-      })}
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /*  Blog card                                                           */
 /* ------------------------------------------------------------------ */
 function BlogCard({ post, lang }: { post: QuantBlogPost; lang: string }) {
-  const [expanded, setExpanded] = useState(false);
   const isKo = lang === "ko";
 
   const priceFormatted =
     post.price >= 1000
       ? `$${post.price.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-      : `$${post.price.toFixed(2)}`;
+      : `$${post.price.toFixed(4)}`;
+
+  const postUrl = `/${lang}/quant/blog/${post.slug}`;
 
   return (
-    <article className="group relative flex flex-col rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] transition-colors duration-300 overflow-hidden cursor-pointer">
-      {/* Chart image */}
-      <div className="relative overflow-hidden">
+    <article className="group relative flex flex-col rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] transition-colors duration-300 overflow-hidden">
+      {/* Chart image — links to post */}
+      <Link href={postUrl} className="block relative overflow-hidden">
         <img
           src={post.chartImage}
           alt={`${post.coin} 4H chart`}
@@ -196,14 +155,16 @@ function BlogCard({ post, lang }: { post: QuantBlogPost; lang: string }) {
             {post.change24h.toFixed(2)}%
           </span>
         </div>
-      </div>
+      </Link>
 
       {/* Card body */}
       <div className="flex flex-col flex-1 p-5 gap-3">
-        {/* Title */}
-        <h2 className="text-sm font-semibold text-zinc-100 leading-snug">
-          {isKo ? post.titleKo : post.title}
-        </h2>
+        {/* Title — links to post */}
+        <Link href={postUrl}>
+          <h2 className="text-sm font-semibold text-zinc-100 leading-snug hover:text-blue-300 transition-colors">
+            {isKo ? post.titleKo : post.title}
+          </h2>
+        </Link>
 
         {/* Excerpt */}
         <p className="text-[13px] text-zinc-500 leading-relaxed line-clamp-3">
@@ -234,22 +195,16 @@ function BlogCard({ post, lang }: { post: QuantBlogPost; lang: string }) {
           isKo={isKo}
         />
 
-        {/* Expanded content */}
-        {expanded && <ContentBody content={post.content} />}
-
-        {/* Read more / collapse */}
-        <button
-          onClick={() => setExpanded((v) => !v)}
-          className="mt-auto pt-2 text-[12px] font-mono font-semibold text-blue-400 hover:text-blue-300 transition-colors text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
+        {/* Read Full Analysis button */}
+        <Link
+          href={postUrl}
+          className="mt-auto pt-2 inline-flex items-center gap-1.5 text-[12px] font-mono font-semibold text-blue-400 hover:text-blue-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
         >
-          {expanded
-            ? isKo
-              ? "접기"
-              : "Collapse"
-            : isKo
-            ? "전체 분석 보기 +"
-            : "Read full analysis +"}
-        </button>
+          {isKo ? "전체 분석 보기" : "Read Full Analysis"}
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
       </div>
     </article>
   );
