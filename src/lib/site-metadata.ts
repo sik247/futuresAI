@@ -11,5 +11,5 @@ export function resolveMetadataBase(): URL {
   if (process.env.VERCEL_URL) {
     return new URL(`https://${process.env.VERCEL_URL}`);
   }
-  return new URL("https://futuresai.co");
+  return new URL("https://futuresai.io");
 }

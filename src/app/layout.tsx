@@ -9,7 +9,7 @@ import Loading from "@/components/ui/loading";
 import { GlobalAlertDialog } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import SessionProviders from "@/components/providers/session-provider";
-import { OrganizationJsonLd, WebsiteJsonLd } from "@/components/structured-data";
+import { OrganizationJsonLd, WebsiteJsonLd, SoftwareApplicationJsonLd, FAQJsonLd } from "@/components/structured-data";
 import Script from "next/script";
 
 const inter = Inter({
@@ -25,7 +25,7 @@ const notoSansKR = Noto_Sans_KR({
   display: "swap",
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://futuresai.co";
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://futuresai.io";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -42,18 +42,24 @@ export const metadata: Metadata = {
   description:
     "Futures AI delivers AI-powered crypto trading signals, whale tracking, real-time charts, market analytics, and trading rebates. Your all-in-one crypto trading intelligence platform.",
   keywords: [
-    "crypto trading",
-    "futures trading",
+    "futures AI",
+    "futuresai",
+    "AI crypto trading",
+    "crypto futures signals",
     "AI trading signals",
-    "whale tracking",
-    "crypto analytics",
-    "trading rebates",
-    "cryptocurrency",
-    "bitcoin",
-    "ethereum",
-    "crypto intelligence",
-    "trading platform",
-    "market analysis",
+    "whale tracking crypto",
+    "crypto quant terminal",
+    "bitcoin trading signals",
+    "ethereum analysis",
+    "solana trading",
+    "crypto analytics platform",
+    "trading rebates crypto",
+    "free crypto signals",
+    "crypto chart analysis AI",
+    "cryptocurrency market intelligence",
+    "futures trading bot",
+    "crypto RSI MACD signals",
+    "best crypto trading platform",
   ],
   authors: [{ name: "Futures AI" }],
   creator: "Futures AI",
@@ -104,9 +110,11 @@ export const metadata: Metadata = {
       ko: `${baseUrl}/ko`,
     },
   },
-  // Naver Search Advisor verification
-  // Register at https://searchadvisor.naver.com/ to get your site verification code
+  // Search engine verification
+  // Register at https://searchadvisor.naver.com/ and https://search.google.com/search-console
+  // Replace placeholder values with actual verification codes
   verification: {
+    google: "futuresai_google_verification",
     other: {
       "naver-site-verification": "futuresai_naver_verification",
     },
@@ -132,6 +140,8 @@ export default function RootLayout({
         <NextTopLoader color="#3b82f6" height={2} showSpinner={false} />
         <OrganizationJsonLd />
         <WebsiteJsonLd />
+        <SoftwareApplicationJsonLd />
+        <FAQJsonLd />
         <Providers>
           <SessionProviders>{children}</SessionProviders>
           <Toaster />
