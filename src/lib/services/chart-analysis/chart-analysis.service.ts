@@ -270,7 +270,8 @@ function buildLiveContext(
 export async function analyzeChart(
   imageUrl: string,
   priceData?: PriceAgentResult | null,
-  webResults?: WebSearchResult[] | null
+  webResults?: WebSearchResult[] | null,
+  lang: string = "en"
 ): Promise<ChartAnalysisResult> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -288,9 +289,10 @@ export async function analyzeChart(
   const { base64, mimeType } = await fetchImageAsBase64(imageUrl);
 
   const liveBlock = buildLiveContextBlock(priceData || null, webResults || null);
-  const fullPrompt = liveBlock
-    ? CHART_ANALYSIS_PROMPT + liveBlock
-    : CHART_ANALYSIS_PROMPT;
+  const langInstruction = lang === "ko"
+    ? "\n\nIMPORTANT: Write ALL text fields (summary, professionalSummary, patterns, indicators values, volumeProfile, bollingerPosition, rsiDivergence, statisticalTargets timeframe, fibonacciLevels significance) in Korean (한국어). Keep technical terms (LONG, SHORT, BUY, SELL, NEUTRAL, BULLISH, BEARISH) in English. Price numbers stay as numbers."
+    : "";
+  const fullPrompt = CHART_ANALYSIS_PROMPT + (liveBlock || "") + langInstruction;
 
   const result = await model.generateContent([
     fullPrompt,

@@ -4,7 +4,8 @@ import { analyzeChart, type ChartAnalysisResult } from "./chart-analysis.service
 
 export async function runMultiAgentAnalysis(
   imageUrl: string,
-  pair: string
+  pair: string,
+  lang: string = "en"
 ): Promise<{
   analysis: ChartAnalysisResult;
   priceData: PriceAgentResult | null;
@@ -29,7 +30,7 @@ export async function runMultiAgentAnalysis(
   }
 
   // Phase 2: Run quant agent with all available context
-  const analysis = await analyzeChart(imageUrl, priceData, webResults);
+  const analysis = await analyzeChart(imageUrl, priceData, webResults, lang);
 
   return { analysis, priceData, webResults };
 }

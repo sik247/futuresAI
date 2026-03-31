@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { imageUrl, pair } = await req.json();
+    const { imageUrl, pair, lang } = await req.json();
     if (!imageUrl) {
       return NextResponse.json(
         { error: "Image URL is required" },
@@ -50,7 +50,8 @@ export async function POST(req: NextRequest) {
     // Run multi-agent analysis
     const { analysis, priceData, webResults } = await runMultiAgentAnalysis(
       imageUrl,
-      pair
+      pair,
+      lang || "en"
     );
 
     // Create analysis record (auto-charged for subscribers)

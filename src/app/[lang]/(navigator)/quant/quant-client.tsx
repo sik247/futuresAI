@@ -101,6 +101,30 @@ const SIGNAL_COLORS: Record<string, { bg: string; glow: string }> = {
 
 const AUTO_REFRESH_INTERVAL = 300;
 
+/* -- Korean translations for signal reasons/summaries -- */
+const REASON_KO: Record<string, string> = {
+  "Strong upward momentum in the last 24h": "24시간 내 강한 상승 모멘텀",
+  "Positive price movement in the last 24h": "24시간 내 긍정적 가격 움직임",
+  "Price consolidating within a tight range": "좁은 범위에서 가격 횡보 중",
+  "Downward pressure observed in the last 24h": "24시간 내 하방 압력 관찰",
+  "Significant sell-off in the last 24h": "24시간 내 대규모 매도세",
+  "BTC trading above 7-day SMA - bullish trend": "BTC 7일 SMA 위에서 거래 중 - 강세 추세",
+  "BTC trading below 7-day SMA - bearish trend": "BTC 7일 SMA 아래에서 거래 중 - 약세 추세",
+  "Market conditions are generally favorable with bullish momentum across major assets.": "시장 상황은 주요 자산 전반에 걸쳐 강세 모멘텀으로 전반적으로 유리합니다.",
+  "Market conditions show bearish pressure. Consider risk management strategies.": "시장 상황은 약세 압력을 보이고 있습니다. 리스크 관리 전략을 고려하세요.",
+  "Market is in a consolidation phase. Mixed signals across major assets.": "시장은 횡보 국면에 있습니다. 주요 자산 전반에 혼합된 신호가 나타나고 있습니다.",
+};
+function translateText(text: string, isKo: boolean): string {
+  if (!isKo) return text;
+  // Check exact match first
+  if (REASON_KO[text]) return REASON_KO[text];
+  // Check partial matches for RSI/sentiment reasons
+  if (text.includes("overbought")) return text.replace("overbought territory", "과매수 영역");
+  if (text.includes("oversold")) return text.replace("oversold territory", "과매도 영역");
+  if (text.includes("Market sentiment:")) return text.replace("Market sentiment:", "시장 심리:");
+  return text;
+}
+
 const TABS = [
   { key: "signals", labelKey: "quant_signals" as const },
   { key: "chart", labelKey: "quant_chartAnalysis" as const },
@@ -513,7 +537,7 @@ export default function QuantClient({
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] px-6 py-4 mb-8">
               <p className="text-sm text-zinc-400 leading-relaxed">
                 <span className="text-zinc-200 font-semibold">{t.quant_marketSummary}:</span>{" "}
-                {marketSummary}
+                {translateText(marketSummary, lang === "ko")}
               </p>
             </div>
 
@@ -736,7 +760,7 @@ export default function QuantClient({
                       {s.reasons.map((r, i) => (
                         <div key={i} className="flex items-start gap-2">
                           <span className="mt-1.5 w-1 h-1 rounded-full bg-zinc-600 flex-shrink-0" />
-                          <span className="text-[12px] text-zinc-400 leading-relaxed">{r}</span>
+                          <span className="text-[12px] text-zinc-400 leading-relaxed">{translateText(r, lang === "ko")}</span>
                         </div>
                       ))}
                     </div>

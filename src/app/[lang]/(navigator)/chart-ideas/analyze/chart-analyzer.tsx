@@ -331,7 +331,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
       const res = await fetch("/api/chart-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageUrl, pair: selectedPair }),
+        body: JSON.stringify({ imageUrl, pair: selectedPair, lang }),
       });
       if (!res.ok) {
         const data = await res.json();
