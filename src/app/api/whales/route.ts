@@ -11,6 +11,7 @@ const WALLETS = [
   { name: "Binance Hot Wallet", address: "0x28C6c06298d514Db089934071355E5743bf21d60", entity: "Binance", type: "exchange" },
   { name: "Kraken Hot Wallet", address: "0x2910543af39aba0cd09dbb2d50200b3e800a63d2", entity: "Kraken", type: "exchange" },
   { name: "Arbitrum Foundation", address: "0xd5B31E7C3F4C9cfe5E7D48481437F2B3E16f7B6a", entity: "Arbitrum", type: "foundation" },
+  { name: "19-Win Streak Whale", address: "0xd3cb1823da2ff584dec3f49ef6a3eea51471e5bc", entity: "Unknown", type: "whale" },
 ];
 
 const INSTITUTIONS = [
