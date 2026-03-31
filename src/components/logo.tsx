@@ -8,11 +8,11 @@ const Logo: React.FC = () => {
     <Link href="/" className="flex items-center">
       <div className="w-28 md:w-32 lg:w-36 h-auto">
         <Image
-          src="/images/futuresai-logo.svg"
+          src="/images/futuresai-logo.jpeg"
           alt="FuturesAI"
-          width={220}
-          height={48}
-          className="w-full h-auto"
+          width={1179}
+          height={355}
+          className="w-full h-auto rounded"
           priority
         />
       </div>
