@@ -59,10 +59,11 @@ export default async function SnsPage({ params: { lang } }: { params: { lang: st
   const lastUpdatedMs = allTimestamps.length > 0 ? Math.max(...allTimestamps) : Date.now();
   const updatedAgo = timeAgo(new Date(lastUpdatedMs).toISOString());
 
-  // Translate news into Korean (cached server-side, revalidated every 300s)
+  // Translate news into Korean when on Korean route
+  const isKo = lang === "ko";
   const TRANSLATE_LIMIT = 20;
   const koreanNewsMap: Record<string, { title: string; body: string }> = {};
-  if (newsItems.length > 0) {
+  if (isKo && newsItems.length > 0) {
     try {
       const toTranslate = newsItems.slice(0, TRANSLATE_LIMIT);
       const titles = toTranslate.map((n) => n.title);
@@ -78,7 +79,7 @@ export default async function SnsPage({ params: { lang } }: { params: { lang: st
         };
       });
     } catch {
-      // Translation failed — Korean toggle will show English fallback
+      // Translation failed — show English fallback
     }
   }
 
@@ -188,6 +189,7 @@ export default async function SnsPage({ params: { lang } }: { params: { lang: st
         xFeedItems={xFeedData}
         youtubeItems={serializedYoutube}
         koreanNewsMap={koreanNewsMap}
+        lang={lang}
       />
 
     </div>

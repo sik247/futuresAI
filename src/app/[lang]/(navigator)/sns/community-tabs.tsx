@@ -75,6 +75,7 @@ interface CommunityTabsProps {
   xFeedItems: XFeedItem[];
   youtubeItems: SerializedYouTubeItem[];
   koreanNewsMap: Record<string, { title: string; body: string }>;
+  lang?: string;
 }
 
 // ── Constants ────────────────────────────────────────────────────────
@@ -119,9 +120,10 @@ export function CommunityTabs({
   xFeedItems,
   youtubeItems,
   koreanNewsMap,
+  lang,
 }: CommunityTabsProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("all");
-  const [isKorean, setIsKorean] = useState(false);
+  const [isKorean, setIsKorean] = useState(lang === "ko");
   const tabsRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
