@@ -1,3 +1,10 @@
+export interface TradeSetup {
+  entry: number;
+  stopLoss: number;
+  takeProfit: number;
+  riskReward: string;
+}
+
 export interface QuantBlogPost {
   id: string;
   slug: string;
@@ -13,6 +20,9 @@ export interface QuantBlogPost {
   price: number;
   change24h: number;
   rsi: number;
+  tradeSetup: TradeSetup;
+  supportLevels: number[];
+  resistanceLevels: number[];
   publishedAt: string;
   author: string;
 }
@@ -67,6 +77,9 @@ On-chain volume at the $65,000–$67,000 range is the thickest cluster in the la
     price: 67721,
     change24h: 1.38,
     rsi: 52,
+    tradeSetup: { entry: 68500, stopLoss: 66800, takeProfit: 73000, riskReward: "1:2.6" },
+    supportLevels: [66800, 65200, 63800],
+    resistanceLevels: [68500, 70200, 73000],
     publishedAt: "2026-03-31T00:00:00.000Z",
     author: "FuturesAI Quant Desk",
   },
@@ -121,6 +134,9 @@ Staking deposits are stable (unchanged), suggesting long-term holders are not pa
     price: 2066,
     change24h: 1.98,
     rsi: 44,
+    tradeSetup: { entry: 2066, stopLoss: 2150, takeProfit: 1900, riskReward: "1:2.0" },
+    supportLevels: [2000, 1900, 1780],
+    resistanceLevels: [2150, 2380, 2550],
     publishedAt: "2026-03-31T00:00:00.000Z",
     author: "FuturesAI Quant Desk",
   },
@@ -175,6 +191,9 @@ The Solana Q4 revenue data is not yet reflected in price. Catalysts that could u
     price: 83.64,
     change24h: 1.33,
     rsi: 41,
+    tradeSetup: { entry: 80.00, stopLoss: 78.90, takeProfit: 100.00, riskReward: "1:3.8" },
+    supportLevels: [80.00, 75.40, 68.00],
+    resistanceLevels: [87.50, 93.00, 100.00],
     publishedAt: "2026-03-31T00:00:00.000Z",
     author: "FuturesAI Quant Desk",
   },

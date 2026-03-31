@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import gsap from "gsap";
-import { QUANT_BLOG_POSTS, type QuantBlogPost } from "@/lib/data/quant-blog-posts";
+import { QUANT_BLOG_POSTS, type QuantBlogPost, type TradeSetup } from "@/lib/data/quant-blog-posts";
 
 /* ------------------------------------------------------------------ */
 /*  Direction badge                                                     */
@@ -40,6 +40,79 @@ function RsiPill({ rsi }: { rsi: number }) {
     <span className={`px-2 py-0.5 text-[10px] font-mono font-semibold rounded border ${color}`}>
       RSI {rsi}
     </span>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Trade setup panel (TradingView-style)                              */
+/* ------------------------------------------------------------------ */
+function TradeSetupPanel({
+  setup,
+  direction,
+  supportLevels,
+  resistanceLevels,
+  isKo,
+}: {
+  setup: TradeSetup;
+  direction: QuantBlogPost["direction"];
+  supportLevels: number[];
+  resistanceLevels: number[];
+  isKo: boolean;
+}) {
+  const fmt = (n: number) =>
+    n >= 1000
+      ? `$${n.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+      : `$${n.toFixed(2)}`;
+
+  return (
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+      {/* Header */}
+      <div className={`px-4 py-2 text-[10px] font-mono font-bold uppercase tracking-[0.15em] ${
+        direction === "LONG"
+          ? "bg-emerald-500/10 text-emerald-400 border-b border-emerald-500/20"
+          : direction === "SHORT"
+          ? "bg-red-500/10 text-red-400 border-b border-red-500/20"
+          : "bg-zinc-800/50 text-zinc-400 border-b border-white/[0.06]"
+      }`}>
+        {isKo ? "트레이드 셋업" : "Trade Setup"} - {direction === "LONG" ? "LONG" : direction === "SHORT" ? "SHORT" : "WAIT"}
+      </div>
+
+      {/* Entry / SL / TP grid */}
+      <div className="grid grid-cols-3 divide-x divide-white/[0.04]">
+        <div className="p-3 text-center">
+          <p className="text-[9px] font-mono text-zinc-600 uppercase mb-1">{isKo ? "진입가" : "Entry"}</p>
+          <p className="text-sm font-mono font-bold text-blue-400">{fmt(setup.entry)}</p>
+        </div>
+        <div className="p-3 text-center">
+          <p className="text-[9px] font-mono text-zinc-600 uppercase mb-1">{isKo ? "손절가" : "Stop Loss"}</p>
+          <p className="text-sm font-mono font-bold text-red-400">{fmt(setup.stopLoss)}</p>
+        </div>
+        <div className="p-3 text-center">
+          <p className="text-[9px] font-mono text-zinc-600 uppercase mb-1">{isKo ? "목표가" : "Take Profit"}</p>
+          <p className="text-sm font-mono font-bold text-emerald-400">{fmt(setup.takeProfit)}</p>
+        </div>
+      </div>
+
+      {/* R:R + Levels */}
+      <div className="px-4 py-3 border-t border-white/[0.04] flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-[10px] font-mono text-zinc-500">R:R</span>
+          <span className="text-xs font-mono font-bold text-purple-400">{setup.riskReward}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {supportLevels.slice(0, 2).map((l, i) => (
+            <span key={`s${i}`} className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500/70 border border-emerald-500/15">
+              S{i + 1}: {fmt(l)}
+            </span>
+          ))}
+          {resistanceLevels.slice(0, 1).map((l, i) => (
+            <span key={`r${i}`} className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-red-500/10 text-red-500/70 border border-red-500/15">
+              R1: {fmt(l)}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -151,6 +224,15 @@ function BlogCard({ post, lang }: { post: QuantBlogPost; lang: string }) {
             {post.author}
           </span>
         </div>
+
+        {/* Trade Setup Panel */}
+        <TradeSetupPanel
+          setup={post.tradeSetup}
+          direction={post.direction}
+          supportLevels={post.supportLevels}
+          resistanceLevels={post.resistanceLevels}
+          isKo={isKo}
+        />
 
         {/* Expanded content */}
         {expanded && <ContentBody content={post.content} />}
