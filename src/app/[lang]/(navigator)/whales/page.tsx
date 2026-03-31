@@ -2,6 +2,7 @@ import Container from "@/components/ui/container";
 import { Metadata } from "next";
 import WhalesAnimations from "./whales-animations";
 import WhaleActivityFeed from "./whale-activity-feed";
+import { fetchAllHLWhales } from "@/lib/services/whales/hyperliquid.service";
 
 export const metadata: Metadata = {
   title: "Crypto Whale and Entity Tracker - On-Chain Intelligence",
@@ -48,6 +49,9 @@ const WALLETS = [
   { name: "Kraken Hot Wallet", address: "0x2910543af39aba0cd09dbb2d50200b3e800a63d2", entity: "Kraken", type: "exchange" },
   { name: "Arbitrum Foundation", address: "0xd5B31E7C3F4C9cfe5E7D48481437F2B3E16f7B6a", entity: "Arbitrum", type: "foundation" },
   { name: "19-Win Streak Whale", address: "0xd3cb1823da2ff584dec3f49ef6a3eea51471e5bc", entity: "Unknown", type: "whale" },
+  { name: "Abraxas Capital", address: "0xEED815cE05450EE05aDA8D6a6aF4E1a55D0Ae0ea", entity: "Abraxas Capital", type: "whale" },
+  { name: "Galaxy Digital", address: "0x8103B00AAd38C14Fd55E30c808D665a7C46A77B1", entity: "Galaxy Digital", type: "whale" },
+  { name: "Wintermute", address: "0x00000000AE347930bD1E7B0F35588b92280f9e75", entity: "Wintermute", type: "whale" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -279,8 +283,11 @@ export default async function WhalesPage() {
     recentTokenTxs: TokenTxEntry[];
   };
 
-  // Fetch ETH price first
-  const ethPrice = await fetchEthPrice();
+  // Fetch ETH price and Hyperliquid data in parallel
+  const [ethPrice, hlWhales] = await Promise.all([
+    fetchEthPrice(),
+    fetchAllHLWhales(),
+  ]);
 
   // Fetch all wallet data sequentially to respect free-tier rate limits
   const walletsData: WalletData[] = [];
@@ -575,6 +582,117 @@ export default async function WhalesPage() {
           </div>
 
           <WhaleActivityFeed />
+        </Container>
+      </section>
+
+      {/* ---- Divider ---- */}
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+      {/* ---- Hyperliquid Whale Positions ---- */}
+      <section className="py-16 sm:py-20">
+        <Container>
+          <div data-whale-heading className="mb-10">
+            <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-zinc-600 mb-3">
+              Hyperliquid Perps
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+              Whale Positions
+            </h2>
+            <p className="text-sm text-zinc-500 mt-2 max-w-md">
+              Live perpetuals positions held by known crypto whales on Hyperliquid.
+            </p>
+          </div>
+
+          {hlWhales.length === 0 ? (
+            <p className="text-sm font-mono text-zinc-600">No position data available.</p>
+          ) : (
+            <div data-whale-grid className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {hlWhales.map((whale) => (
+                <div
+                  key={whale.address}
+                  data-whale-card
+                  className="rounded-xl backdrop-blur-md bg-white/[0.03] border border-amber-500/10 border-l-2 border-l-amber-500 p-5 transition-all duration-300 hover:bg-white/[0.04] hover:border-white/[0.1]"
+                >
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.06] text-xs font-bold text-amber-400">
+                        {whale.name.charAt(0)}
+                      </span>
+                      <div>
+                        <h3 className="text-sm font-semibold text-white leading-tight">
+                          {whale.name}
+                        </h3>
+                        <a
+                          href={`https://app.hyperliquid.xyz/explorer/address/${whale.address}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] font-mono text-zinc-600 hover:text-white transition-colors"
+                        >
+                          {whale.address.slice(0, 6)}...{whale.address.slice(-4)}
+                          <svg className="w-2.5 h-2.5 inline ml-1 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17L17 7M17 7H7M17 7v10" />
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded bg-white/[0.04] text-[9px] font-mono uppercase tracking-wider text-zinc-500">
+                      HL Perps
+                    </span>
+                  </div>
+
+                  {/* Account stats */}
+                  <div className="flex gap-4 mb-4">
+                    <div>
+                      <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-zinc-600 mb-1">Account Value</p>
+                      <p className="text-lg font-bold font-mono text-white">
+                        ${whale.accountValue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-zinc-600 mb-1">Total Notional</p>
+                      <p className="text-lg font-bold font-mono text-zinc-300">
+                        ${whale.totalNotional.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Positions */}
+                  {whale.positions.length > 0 ? (
+                    <div>
+                      <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-zinc-700 mb-2">Open Positions</p>
+                      <div className="space-y-1.5">
+                        {whale.positions.slice(0, 5).map((pos, i) => (
+                          <div
+                            key={`${pos.coin}-${i}`}
+                            className="flex items-center justify-between text-[11px] py-1 px-2 rounded bg-white/[0.02] border border-white/[0.04]"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className={`text-[9px] font-mono font-bold w-9 ${pos.direction === "LONG" ? "text-emerald-400" : "text-red-400"}`}>
+                                {pos.direction}
+                              </span>
+                              <span className="font-mono font-semibold text-zinc-300">{pos.coin}</span>
+                              <span className="font-mono text-zinc-600 text-[10px]">{pos.leverage}x</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className={`font-mono text-[10px] ${pos.unrealizedPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                                {pos.unrealizedPnl >= 0 ? "+" : ""}${pos.unrealizedPnl.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                              </span>
+                              <span className="font-mono text-zinc-600 text-[10px]">
+                                {pos.roe >= 0 ? "+" : ""}{pos.roe.toFixed(1)}%
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs font-mono text-zinc-700">No open positions</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </Container>
       </section>
 

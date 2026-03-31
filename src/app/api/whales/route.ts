@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { fetchAllHLWhales } from "@/lib/services/whales/hyperliquid.service";
 
 export const revalidate = 300; // 5 minutes
 
@@ -12,6 +13,9 @@ const WALLETS = [
   { name: "Kraken Hot Wallet", address: "0x2910543af39aba0cd09dbb2d50200b3e800a63d2", entity: "Kraken", type: "exchange" },
   { name: "Arbitrum Foundation", address: "0xd5B31E7C3F4C9cfe5E7D48481437F2B3E16f7B6a", entity: "Arbitrum", type: "foundation" },
   { name: "19-Win Streak Whale", address: "0xd3cb1823da2ff584dec3f49ef6a3eea51471e5bc", entity: "Unknown", type: "whale" },
+  { name: "Abraxas Capital", address: "0xEED815cE05450EE05aDA8D6a6aF4E1a55D0Ae0ea", entity: "Abraxas Capital", type: "whale" },
+  { name: "Galaxy Digital", address: "0x8103B00AAd38C14Fd55E30c808D665a7C46A77B1", entity: "Galaxy Digital", type: "whale" },
+  { name: "Wintermute", address: "0x00000000AE347930bD1E7B0F35588b92280f9e75", entity: "Wintermute", type: "whale" },
 ];
 
 const INSTITUTIONS = [
@@ -168,7 +172,10 @@ async function fetchWalletData(wallet: (typeof WALLETS)[number], globalEthPrice:
 
 export async function GET() {
   try {
-    const ethPrice = await fetchEthPrice();
+    const [ethPrice, hyperliquid] = await Promise.all([
+      fetchEthPrice(),
+      fetchAllHLWhales(),
+    ]);
 
     const results: Awaited<ReturnType<typeof fetchWalletData>>[] = [];
 
@@ -195,6 +202,7 @@ export async function GET() {
     return NextResponse.json({
       wallets: results,
       institutions: INSTITUTIONS,
+      hyperliquid,
       ethPrice,
       totalPortfolioUsd,
       walletCount: results.length,
@@ -206,6 +214,7 @@ export async function GET() {
       {
         wallets: [],
         institutions: [],
+        hyperliquid: [],
         ethPrice: 0,
         totalPortfolioUsd: 0,
         walletCount: 0,
