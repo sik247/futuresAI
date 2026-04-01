@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,72 +11,264 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model User {
+  id               String            @id @default(cuid())
+  email            String            @unique
+  password         String?
+  name             String
+  nickname         String            @default("")
+  phoneNumber      String            @default("")
+  imageUrl         String            @default("/images/profile.png")
+  role             Role              @default(USER)
+  credits          Float             @default(0)
+  createdAt        DateTime          @default(now()) @db.Timestamptz()
+  updatedAt        DateTime          @updatedAt @db.Timestamptz()
+  exchangeAccounts ExchangeAccount[]
+  followers        User[]            @relation("UserFollows")
+  followings       User[]            @relation("UserFollows")
+  posts            Post[]
+  comments         Comment[]
+  postLikes        PostLike[]
+  commentLikes     CommentLike[]
+  chartIdeas       ChartIdea[]
+  withdrawals      Withdrawal[]
+  chartAnalyses    ChartAnalysis[]
+  accounts         Account[]
+  subscriptions    Subscription[]
+  analysisUsages   AnalysisUsage[]
+  portfolios       Portfolio[]
+}
+
 model Account {
-  id                String  @id
+  id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?
+  id_token          String? @db.Text
   session_state     String?
-  User              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
 
-model AnalysisUsage {
-  id          String   @id
-  userId      String
-  periodStart DateTime @db.Timestamptz(6)
-  usageCount  Int      @default(0)
-  User        User     @relation(fields: [userId], references: [id])
+model Post {
+  id        String     @id @default(cuid())
+  title     String
+  content   String
+  imageUrl  String
+  isLong    Boolean    @default(false)
+  createdAt DateTime   @default(now()) @db.Timestamptz()
+  updatedAt DateTime   @updatedAt @db.Timestamptz()
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+  comments  Comment[]
+  likes     PostLike[]
+  hashTags  HashTag[]
+}
 
-  @@unique([userId, periodStart])
+model Comment {
+  id        String        @id @default(cuid())
+  content   String
+  createdAt DateTime      @default(now()) @db.Timestamptz()
+  updatedAt DateTime      @updatedAt @db.Timestamptz()
+  Children  Comment[]     @relation("Comment_Children")
+  parent    Comment?      @relation("Comment_Children", fields: [parentId], references: [id])
+  parentId  String?
+  userId    String
+  user      User          @relation(fields: [userId], references: [id])
+  postId    String
+  post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  likes     CommentLike[]
+}
+
+model PostLike {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model CommentLike {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+}
+
+model HashTag {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  posts     Post[]
+}
+
+model Verification {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum BannerType {
+  EVENT
+  INTRODUCE
 }
 
 model Banner {
-  id          String     @id
+  id          String     @id @default(cuid())
   title       String
   description String
   imageUrl    String
   active      Boolean
   type        BannerType @default(EVENT)
-  createdAt   DateTime   @default(now()) @db.Timestamptz(6)
-  updatedAt   DateTime   @db.Timestamptz(6)
+  createdAt   DateTime   @default(now()) @db.Timestamptz()
+  updatedAt   DateTime   @updatedAt @db.Timestamptz()
 }
 
-model ChartAnalysis {
-  id               String         @id
+model Exchange {
+  id               String            @id @default(cuid())
+  name             String
   imageUrl         String
-  pair             String?
-  cost             Float          @default(50.0)
-  status           AnalysisStatus @default(PENDING)
-  summary          String
-  trend            String
-  patterns         String
-  supportLevels    String
-  resistanceLevels String
-  indicators       String
-  tradeSetup       String
-  analysisData     String?
-  riskScore        Int            @default(0)
-  confidence       Int            @default(0)
-  userId           String
-  chargedAt        DateTime?      @db.Timestamptz(6)
-  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
-  updatedAt        DateTime       @db.Timestamptz(6)
-  newsContext      String?
-  priceContext     String?
-  User             User           @relation(fields: [userId], references: [id])
+  titleImageUrl    String
+  paybackRatio     Float
+  discountRatio    Float
+  limitFee         Float
+  marketFee        Float
+  type             String
+  tag              String
+  averageIncome    Int
+  link             String            @default("")
+  exchangeAccounts ExchangeAccount[]
+  createdAt        DateTime          @default(now()) @db.Timestamptz()
+  updatedAt        DateTime          @updatedAt @db.Timestamptz()
+}
+
+enum ExchangeAccountStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+}
+
+model ExchangeAccount {
+  id              String                @id @default(cuid())
+  uid             String                @unique
+  userId          String
+  user            User                  @relation(fields: [userId], references: [id])
+  status          ExchangeAccountStatus @default(ACTIVE)
+  exchangeId      String
+  exchange        Exchange              @relation(fields: [exchangeId], references: [id])
+  createdAt       DateTime              @default(now()) @db.Timestamptz()
+  updatedAt       DateTime              @updatedAt @db.Timestamptz()
+  totalCommission Float                 @default(0)
+  screenshotUrl   String?
+  trades          Trade[]
+  withdrawal      Withdrawal[]
+}
+
+enum TradeStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model Trade {
+  id              String          @id @default(cuid())
+  accountId       String
+  exchangeAccount ExchangeAccount @relation(fields: [accountId], references: [id])
+  amount          Float
+  payback         Float
+  withdrawId      String?
+  withdraw        Withdrawal?     @relation(fields: [withdrawId], references: [id])
+  status          TradeStatus     @default(PENDING)
+  apiCreatedAt    DateTime        @default(now()) @db.Timestamptz()
+  createdAt       DateTime        @default(now()) @db.Timestamptz()
+  updatedAt       DateTime        @updatedAt @db.Timestamptz()
+
+  @@unique([accountId, apiCreatedAt, amount], name: "unique_trade")
+}
+
+enum WithdrawalStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model Withdrawal {
+  id               String            @id @default(cuid())
+  exchangeAccounts ExchangeAccount[]
+  amount           Float
+  trades           Trade[]
+  status           WithdrawalStatus  @default(PENDING)
+  network          String            @default("TRC20")
+  address          String            @default("")
+  userId           String?
+  user             User?             @relation(fields: [userId], references: [id])
+  paidAt           DateTime?         @db.Timestamptz()
+  adminNote        String?
+  createdAt        DateTime          @default(now()) @db.Timestamptz()
+  updatedAt        DateTime          @updatedAt @db.Timestamptz()
+}
+
+model PaybackCalculation {
+  id           String   @id @default(cuid())
+  exchangeName String
+  tradeType    String
+  volume       Float
+  leverage     Int      @default(1)
+  makerPct     Int      @default(30)
+  monthlyFees  Float
+  payback      Float
+  yearlySavings Float
+  createdAt    DateTime @default(now()) @db.Timestamptz()
+}
+
+model News {
+  id        String   @id @default(cuid())
+  linkUrl   String
+  title     String
+  content   String
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  linkUrl   String
+  imageUrl  String
+  title     String
+  content   String
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+}
+
+enum TradeDirection {
+  LONG
+  SHORT
 }
 
 model ChartIdea {
-  id          String         @id
+  id          String         @id @default(cuid())
   imageUrl    String
   pair        String
   direction   TradeDirection
@@ -82,290 +277,9 @@ model ChartIdea {
   takeProfit  Float
   description String
   userId      String
-  createdAt   DateTime       @default(now()) @db.Timestamptz(6)
-  updatedAt   DateTime       @db.Timestamptz(6)
-  User        User           @relation(fields: [userId], references: [id])
-}
-
-model Comment {
-  id            String        @id
-  content       String
-  createdAt     DateTime      @default(now()) @db.Timestamptz(6)
-  updatedAt     DateTime      @db.Timestamptz(6)
-  userId        String
-  postId        String
-  parentId      String?
-  Comment       Comment?      @relation("CommentToComment", fields: [parentId], references: [id])
-  other_Comment Comment[]     @relation("CommentToComment")
-  Post          Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
-  User          User          @relation(fields: [userId], references: [id])
-  CommentLike   CommentLike[]
-}
-
-model CommentLike {
-  id        String   @id
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime @db.Timestamptz(6)
-  userId    String
-  commentId String
-  Comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  User      User     @relation(fields: [userId], references: [id])
-}
-
-model ContentBotLog {
-  id        String   @id
-  action    String
-  details   String
-  itemCount Int      @default(0)
-  createdAt DateTime @default(now())
-
-  @@index([action])
-  @@index([createdAt])
-}
-
-model Event {
-  id        String   @id
-  imageUrl  String
-  title     String
-  content   String
-  startDate DateTime
-  endDate   DateTime
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime @db.Timestamptz(6)
-  linkUrl   String
-}
-
-model Exchange {
-  id              String            @id
-  name            String
-  imageUrl        String
-  paybackRatio    Float
-  discountRatio   Float
-  limitFee        Float
-  marketFee       Float
-  type            String
-  tag             String
-  averageIncome   Int
-  createdAt       DateTime          @default(now()) @db.Timestamptz(6)
-  updatedAt       DateTime          @db.Timestamptz(6)
-  link            String            @default("")
-  titleImageUrl   String
-  ExchangeAccount ExchangeAccount[]
-}
-
-model ExchangeAccount {
-  id              String                @id
-  uid             String                @unique
-  userId          String
-  exchangeId      String
-  createdAt       DateTime              @default(now()) @db.Timestamptz(6)
-  updatedAt       DateTime              @db.Timestamptz(6)
-  status          ExchangeAccountStatus @default(ACTIVE)
-  totalCommission Float                 @default(0)
-  screenshotUrl   String?
-  Exchange        Exchange              @relation(fields: [exchangeId], references: [id])
-  User            User                  @relation(fields: [userId], references: [id])
-  Trade           Trade[]
-  Withdrawal      Withdrawal[]
-}
-
-model HashTag {
-  id        String   @id
-  name      String
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime @db.Timestamptz(6)
-  Post      Post[]
-}
-
-model Holding {
-  id          String    @id
-  coinId      String
-  symbol      String
-  name        String
-  quantity    Float
-  avgBuyPrice Float
-  portfolioId String
-  createdAt   DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt   DateTime  @db.Timestamptz(6)
-  Portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
-
-  @@unique([portfolioId, coinId])
-  @@index([portfolioId])
-}
-
-model ManagedContent {
-  id             String   @id
-  type           String
-  sourceUrl      String   @unique
-  title          String
-  titleKo        String   @default("")
-  description    String
-  descriptionKo  String   @default("")
-  thumbnailUrl   String?
-  sourceName     String
-  sourceCategory String
-  publishedAt    DateTime
-  fetchedAt      DateTime @default(now())
-  status         String   @default("pending")
-  metadata       Json     @default("{}")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime
-
-  @@index([publishedAt])
-  @@index([status])
-  @@index([type])
-  @@index([type, status])
-}
-
-model News {
-  id        String   @id
-  content   String
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime @db.Timestamptz(6)
-  linkUrl   String
-  title     String
-}
-
-model PaybackCalculation {
-  id            String   @id
-  exchangeName  String
-  tradeType     String
-  volume        Float
-  leverage      Int      @default(1)
-  makerPct      Int      @default(30)
-  monthlyFees   Float
-  payback       Float
-  yearlySavings Float
-  createdAt     DateTime @default(now()) @db.Timestamptz(6)
-}
-
-model Portfolio {
-  id                String              @id
-  name              String              @default("My Portfolio")
-  userId            String
-  createdAt         DateTime            @default(now()) @db.Timestamptz(6)
-  updatedAt         DateTime            @db.Timestamptz(6)
-  Holding           Holding[]
-  User              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  PortfolioSnapshot PortfolioSnapshot[]
-
-  @@index([userId])
-}
-
-model PortfolioSnapshot {
-  id          String    @id
-  portfolioId String
-  totalValue  Float
-  totalCost   Float
-  snapshotAt  DateTime  @default(now()) @db.Timestamptz(6)
-  Portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
-
-  @@index([portfolioId, snapshotAt])
-}
-
-model Post {
-  id        String     @id
-  title     String
-  content   String
-  imageUrl  String
-  createdAt DateTime   @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime   @db.Timestamptz(6)
-  userId    String
-  isLong    Boolean    @default(false)
-  Comment   Comment[]
-  User      User       @relation(fields: [userId], references: [id])
-  PostLike  PostLike[]
-  HashTag   HashTag[]
-}
-
-model PostLike {
-  id        String   @id
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime @db.Timestamptz(6)
-  userId    String
-  postId    String
-  Post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  User      User     @relation(fields: [userId], references: [id])
-}
-
-model Subscription {
-  id                 String             @id
-  userId             String
-  status             SubscriptionStatus @default(ACTIVE)
-  currentPeriodStart DateTime           @db.Timestamptz(6)
-  currentPeriodEnd   DateTime           @db.Timestamptz(6)
-  createdAt          DateTime           @default(now()) @db.Timestamptz(6)
-  User               User               @relation(fields: [userId], references: [id])
-
-  @@index([userId, status])
-}
-
-model Trade {
-  id              String          @id
-  accountId       String
-  amount          Float
-  payback         Float
-  withdrawId      String?
-  status          TradeStatus     @default(PENDING)
-  createdAt       DateTime        @default(now()) @db.Timestamptz(6)
-  updatedAt       DateTime        @db.Timestamptz(6)
-  apiCreatedAt    DateTime        @default(now()) @db.Timestamptz(6)
-  ExchangeAccount ExchangeAccount @relation(fields: [accountId], references: [id])
-  Withdrawal      Withdrawal?     @relation(fields: [withdrawId], references: [id])
-
-  @@unique([accountId, apiCreatedAt, amount])
-}
-
-model User {
-  id              String            @id
-  email           String            @unique
-  password        String?
-  name            String
-  phoneNumber     String            @default("")
-  createdAt       DateTime          @default(now()) @db.Timestamptz(6)
-  updatedAt       DateTime          @db.Timestamptz(6)
-  imageUrl        String            @default("/images/profile.png")
-  nickname        String            @default("")
-  credits         Float             @default(0)
-  role            Role              @default(USER)
-  Account         Account[]
-  AnalysisUsage   AnalysisUsage[]
-  ChartAnalysis   ChartAnalysis[]
-  ChartIdea       ChartIdea[]
-  Comment         Comment[]
-  CommentLike     CommentLike[]
-  ExchangeAccount ExchangeAccount[]
-  Portfolio       Portfolio[]
-  Post            Post[]
-  PostLike        PostLike[]
-  Subscription    Subscription[]
-  Withdrawal      Withdrawal[]
-  User_A          User[]            @relation("UserFollows")
-  User_B          User[]            @relation("UserFollows")
-}
-
-model Verification {
-  id        String   @id
-  email     String
-  code      String
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime @db.Timestamptz(6)
-}
-
-model Withdrawal {
-  id              String            @id
-  amount          Float
-  status          WithdrawalStatus  @default(PENDING)
-  createdAt       DateTime          @default(now()) @db.Timestamptz(6)
-  updatedAt       DateTime          @db.Timestamptz(6)
-  address         String            @default("")
-  network         String            @default("TRC20")
-  adminNote       String?
-  paidAt          DateTime?         @db.Timestamptz(6)
-  userId          String?
-  Trade           Trade[]
-  User            User?             @relation(fields: [userId], references: [id])
-  ExchangeAccount ExchangeAccount[]
+  user        User           @relation(fields: [userId], references: [id])
+  createdAt   DateTime       @default(now()) @db.Timestamptz()
+  updatedAt   DateTime       @updatedAt @db.Timestamptz()
 }
 
 enum AnalysisStatus {
@@ -375,20 +289,65 @@ enum AnalysisStatus {
   REFUNDED
 }
 
-enum BannerType {
-  EVENT
-  INTRODUCE
+model ChartAnalysis {
+  id              String         @id @default(cuid())
+  imageUrl        String
+  pair            String?
+  cost            Float          @default(50.0)
+  status          AnalysisStatus @default(PENDING)
+  // AI analysis results (stored as JSON)
+  summary         String
+  trend           String
+  patterns        String         @db.Text
+  supportLevels   String         @db.Text
+  resistanceLevels String        @db.Text
+  indicators      String         @db.Text
+  tradeSetup      String         @db.Text
+  analysisData    String?        @db.Text
+  newsContext     String?        @db.Text
+  priceContext    String?        @db.Text
+  riskScore       Int            @default(0)
+  confidence      Int            @default(0)
+  userId          String
+  user            User           @relation(fields: [userId], references: [id])
+  chargedAt       DateTime?      @db.Timestamptz()
+  createdAt       DateTime       @default(now()) @db.Timestamptz()
+  updatedAt       DateTime       @updatedAt @db.Timestamptz()
 }
 
-enum ExchangeAccountStatus {
-  PENDING
-  ACTIVE
-  INACTIVE
+model ManagedContent {
+  id             String   @id @default(cuid())
+  type           String   // 'tweet' | 'youtube' | 'news' | 'short'
+  sourceUrl      String   @unique
+  title          String
+  titleKo        String   @default("")
+  description    String   @db.Text
+  descriptionKo  String   @default("") @db.Text
+  thumbnailUrl   String?
+  sourceName     String
+  sourceCategory String
+  publishedAt    DateTime
+  fetchedAt      DateTime @default(now())
+  status         String   @default("pending") // 'pending' | 'translated' | 'published' | 'archived'
+  metadata       Json     @default("{}")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([type])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([type, status])
 }
 
-enum Role {
-  USER
-  ADMIN
+model ContentBotLog {
+  id        String   @id @default(cuid())
+  action    String   // 'aggregate' | 'translate' | 'publish' | 'error'
+  details   String   @db.Text
+  itemCount Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([action])
+  @@index([createdAt])
 }
 
 enum SubscriptionStatus {
@@ -397,19 +356,64 @@ enum SubscriptionStatus {
   EXPIRED
 }
 
-enum TradeDirection {
-  LONG
-  SHORT
+model Subscription {
+  id                 String             @id @default(cuid())
+  userId             String
+  user               User               @relation(fields: [userId], references: [id])
+  status             SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart DateTime           @db.Timestamptz()
+  currentPeriodEnd   DateTime           @db.Timestamptz()
+  createdAt          DateTime           @default(now()) @db.Timestamptz()
+
+  @@index([userId, status])
 }
 
-enum TradeStatus {
-  PENDING
-  SUCCESS
-  FAILED
+model AnalysisUsage {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  periodStart DateTime @db.Timestamptz()
+  usageCount  Int      @default(0)
+
+  @@unique([userId, periodStart])
 }
 
-enum WithdrawalStatus {
-  PENDING
-  SUCCESS
-  FAILED
+model Portfolio {
+  id        String              @id @default(cuid())
+  name      String              @default("My Portfolio")
+  userId    String
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  holdings  Holding[]
+  snapshots PortfolioSnapshot[]
+  createdAt DateTime            @default(now()) @db.Timestamptz()
+  updatedAt DateTime            @updatedAt @db.Timestamptz()
+
+  @@index([userId])
+}
+
+model Holding {
+  id          String    @id @default(cuid())
+  coinId      String
+  symbol      String
+  name        String
+  quantity    Float
+  avgBuyPrice Float
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now()) @db.Timestamptz()
+  updatedAt   DateTime  @updatedAt @db.Timestamptz()
+
+  @@unique([portfolioId, coinId])
+  @@index([portfolioId])
+}
+
+model PortfolioSnapshot {
+  id          String   @id @default(cuid())
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  totalValue  Float
+  totalCost   Float
+  snapshotAt  DateTime @default(now()) @db.Timestamptz()
+
+  @@index([portfolioId, snapshotAt])
 }
