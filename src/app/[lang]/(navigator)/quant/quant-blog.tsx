@@ -1,9 +1,136 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useCallback, useState } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { QUANT_BLOG_POSTS, type QuantBlogPost, type TradeSetup } from "@/lib/data/quant-blog-posts";
+
+/* ------------------------------------------------------------------ */
+/*  Annotated chart — draws Entry/SL/TP lines on the chart image       */
+/* ------------------------------------------------------------------ */
+function AnnotatedChart({
+  src,
+  alt,
+  tradeSetup,
+  direction,
+  className,
+}: {
+  src: string;
+  alt: string;
+  tradeSetup: TradeSetup;
+  direction: QuantBlogPost["direction"];
+  className?: string;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  const draw = useCallback(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const w = container.clientWidth;
+      const h = (w / img.naturalWidth) * img.naturalHeight;
+      canvas.width = w;
+      canvas.height = h;
+      ctx.drawImage(img, 0, 0, w, h);
+
+      // Only draw lines for posts with real trade setups
+      if (tradeSetup.entry === 0) { setLoaded(true); return; }
+
+      // Map price levels to Y positions (use chart proportions)
+      // We place entry at 45%, SL at 70%, TP at 15% of chart height
+      const entryY = direction === "SHORT" ? h * 0.35 : h * 0.45;
+      const slY = direction === "SHORT" ? h * 0.18 : h * 0.68;
+      const tpY = direction === "SHORT" ? h * 0.65 : h * 0.20;
+
+      const fmt = (n: number) => n >= 1000 ? `$${n.toLocaleString()}` : `$${n.toFixed(n >= 10 ? 2 : 4)}`;
+
+      // Draw Entry line (blue, dashed)
+      drawLine(ctx, w, entryY, "#3B82F6", [8, 4], `Entry ${fmt(tradeSetup.entry)}`, 2);
+      // Draw Stop Loss line (red, dashed)
+      drawLine(ctx, w, slY, "#EF4444", [6, 3], `SL ${fmt(tradeSetup.stopLoss)}`, 1.5);
+      // Draw Take Profit line (green, dashed)
+      drawLine(ctx, w, tpY, "#22C55E", [6, 3], `TP ${fmt(tradeSetup.takeProfit)}`, 1.5);
+
+      // Draw zones between entry and SL/TP
+      // Risk zone (entry to SL)
+      ctx.fillStyle = "rgba(239, 68, 68, 0.06)";
+      ctx.fillRect(0, Math.min(entryY, slY), w, Math.abs(slY - entryY));
+      // Reward zone (entry to TP)
+      ctx.fillStyle = "rgba(34, 197, 94, 0.06)";
+      ctx.fillRect(0, Math.min(entryY, tpY), w, Math.abs(tpY - entryY));
+
+      setLoaded(true);
+    };
+    img.src = src;
+  }, [src, tradeSetup, direction]);
+
+  useEffect(() => { draw(); }, [draw]);
+
+  return (
+    <div ref={containerRef} className={className}>
+      <canvas ref={canvasRef} className="w-full block" style={{ display: loaded ? "block" : "none" }} />
+      {!loaded && <div className="w-full h-52 bg-white/[0.03] animate-pulse" />}
+    </div>
+  );
+}
+
+function drawLine(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  y: number,
+  color: string,
+  dash: number[],
+  label: string,
+  lineWidth: number
+) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lineWidth;
+  ctx.setLineDash(dash);
+  ctx.globalAlpha = 0.85;
+  ctx.beginPath();
+  ctx.moveTo(0, y);
+  ctx.lineTo(width, y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Right-side price tag
+  ctx.font = "bold 10px monospace";
+  const textW = ctx.measureText(label).width;
+  const pad = 5;
+  const tagW = textW + pad * 2;
+  const tagH = 16;
+  const tagX = width - tagW - 3;
+  const tagY = y - tagH / 2;
+
+  ctx.globalAlpha = 0.92;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.roundRect(tagX, tagY, tagW, tagH, 2);
+  ctx.fill();
+
+  // Arrow
+  ctx.beginPath();
+  ctx.moveTo(tagX - 3, y);
+  ctx.lineTo(tagX, y - 3);
+  ctx.lineTo(tagX, y + 3);
+  ctx.closePath();
+  ctx.fill();
+
+  // Text
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillText(label, tagX + pad, tagY + 12);
+  ctx.restore();
+}
 
 /* ------------------------------------------------------------------ */
 /*  Direction badge                                                     */
@@ -132,15 +259,17 @@ function BlogCard({ post, lang }: { post: QuantBlogPost; lang: string }) {
 
   return (
     <article className="group relative flex flex-col rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] transition-colors duration-300 overflow-hidden">
-      {/* Chart image — links to post */}
+      {/* Annotated chart — links to post */}
       <Link href={postUrl} className="block relative overflow-hidden">
-        <img
+        <AnnotatedChart
           src={post.chartImage}
           alt={`${post.coin} 4H chart`}
-          className="w-full h-52 object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          tradeSetup={post.tradeSetup}
+          direction={post.direction}
+          className="w-full"
         />
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent pointer-events-none" />
         <DirectionBadge direction={post.direction} />
         {/* Coin label bottom-left of image */}
         <div className="absolute bottom-3 left-3 flex items-baseline gap-2">

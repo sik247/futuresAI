@@ -127,6 +127,7 @@ function translateText(text: string, isKo: boolean): string {
 
 const TABS = [
   { key: "signals", labelKey: "quant_signals" as const },
+  { key: "reports", labelKey: "quant_reports" as const },
   { key: "chart", labelKey: "quant_chartAnalysis" as const },
   { key: "tools", labelKey: "quant_tools" as const },
 ] as const;
@@ -778,6 +779,12 @@ export default function QuantClient({
           </div>
         )}
 
+        {activeTab === "reports" && (
+          <div>
+            <QuantBlog lang={lang} />
+          </div>
+        )}
+
         {activeTab === "chart" && (
           <div>
             <ChartAnalyzer lang={lang} translations={t} />
@@ -789,13 +796,6 @@ export default function QuantClient({
             {toolsLoaded && <QuantTools lang={lang} />}
           </div>
         )}
-      </div>
-
-      {/* ============================================================ */}
-      {/*  QUANT RESEARCH BLOG                                         */}
-      {/* ============================================================ */}
-      <div className="border-t border-white/[0.06]">
-        <QuantBlog lang={lang} />
       </div>
     </div>
   );
