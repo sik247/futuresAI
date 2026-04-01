@@ -123,6 +123,19 @@ export default function AdminDashboard() {
   const [chartFilter, setChartFilter] = useState<"ALL" | "PENDING" | "CHARGED" | "REFUNDED">("ALL");
   const [testLoading, setTestLoading] = useState(false);
   const [pendingAccounts, setPendingAccounts] = useState<any[]>([]);
+  const [userPaybacks, setUserPaybacks] = useState<any[]>([]);
+  const [paybackSummary, setPaybackSummary] = useState<any>(null);
+
+  const fetchUserPaybacks = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/user-paybacks");
+      if (res.ok) {
+        const data = await res.json();
+        setUserPaybacks(data.accounts || []);
+        setPaybackSummary(data.summary || null);
+      }
+    } catch { /* keep previous */ }
+  }, []);
 
   const fetchPendingAccounts = useCallback(async () => {
     try {
@@ -164,7 +177,8 @@ export default function AdminDashboard() {
     fetchRequests();
     fetchChartAnalyses();
     fetchPendingAccounts();
-  }, [fetchData, fetchRequests, fetchChartAnalyses, fetchPendingAccounts]);
+    fetchUserPaybacks();
+  }, [fetchData, fetchRequests, fetchChartAnalyses, fetchPendingAccounts, fetchUserPaybacks]);
 
   async function handleApprove(id: string) {
     setActionLoading(id);
@@ -253,7 +267,7 @@ export default function AdminDashboard() {
               {testLoading ? "Creating..." : "Test Payback"}
             </button>
             <button
-              onClick={() => { fetchData(); fetchRequests(); fetchChartAnalyses(); fetchPendingAccounts(); }}
+              onClick={() => { fetchData(); fetchRequests(); fetchChartAnalyses(); fetchPendingAccounts(); fetchUserPaybacks(); }}
               disabled={loading}
               className="px-4 py-2 rounded-xl border border-white/[0.06] bg-white/[0.03] text-sm font-medium text-zinc-300 hover:border-white/[0.12] hover:bg-white/[0.05] transition-all disabled:opacity-50"
             >
@@ -338,6 +352,108 @@ export default function AdminDashboard() {
                 </table>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* ============================================================ */}
+        {/*  USER PAYBACKS BY UID                                        */}
+        {/* ============================================================ */}
+        <div className="mb-10">
+          <SectionHeader
+            title="User Paybacks"
+            subtitle="All user exchange accounts and accumulated payback"
+            color="bg-cyan-500/70"
+            badge={paybackSummary ? `${paybackSummary.totalAccounts} accounts · $${paybackSummary.totalEarned.toFixed(2)} total` : ""}
+          />
+
+          {paybackSummary && (
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
+              <div className="rounded-lg border border-white/[0.06] bg-white/[0.03] p-3">
+                <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">Accounts</p>
+                <p className="text-lg font-mono font-bold text-white">{paybackSummary.totalAccounts}</p>
+              </div>
+              <div className="rounded-lg border border-white/[0.06] bg-white/[0.03] p-3">
+                <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">Active</p>
+                <p className="text-lg font-mono font-bold text-emerald-400">{paybackSummary.activeAccounts}</p>
+              </div>
+              <div className="rounded-lg border border-white/[0.06] bg-white/[0.03] p-3">
+                <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">Total Earned</p>
+                <p className="text-lg font-mono font-bold text-white">${paybackSummary.totalEarned.toFixed(2)}</p>
+              </div>
+              <div className="rounded-lg border border-white/[0.06] bg-white/[0.03] p-3">
+                <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">Unpaid</p>
+                <p className="text-lg font-mono font-bold text-amber-400">${paybackSummary.totalUnpaid.toFixed(2)}</p>
+              </div>
+              <div className="rounded-lg border border-white/[0.06] bg-white/[0.03] p-3">
+                <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">Trades</p>
+                <p className="text-lg font-mono font-bold text-white">{paybackSummary.totalTrades}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] overflow-hidden">
+            {/* Table Header */}
+            <div className="hidden sm:grid gap-0 px-5 py-3 border-b border-white/[0.06] text-[9px] font-mono text-zinc-600 uppercase tracking-[0.15em]" style={{ gridTemplateColumns: "1.5fr 1fr 1fr 1fr 1fr 1fr 0.8fr" }}>
+              <div>User</div>
+              <div>Exchange</div>
+              <div>UID</div>
+              <div className="text-right">Trades</div>
+              <div className="text-right">Earned</div>
+              <div className="text-right">Unpaid</div>
+              <div className="text-center">Status</div>
+            </div>
+
+            {userPaybacks.length === 0 ? (
+              <div className="p-8 text-center text-zinc-500 text-sm">No exchange accounts linked yet</div>
+            ) : (
+              userPaybacks.map((acc: any, i: number) => (
+                <div
+                  key={acc.id}
+                  className={`hidden sm:grid gap-0 items-center px-5 py-3.5 hover:bg-white/[0.02] transition-colors ${i < userPaybacks.length - 1 ? "border-b border-white/[0.03]" : ""}`}
+                  style={{ gridTemplateColumns: "1.5fr 1fr 1fr 1fr 1fr 1fr 0.8fr" }}
+                >
+                  <div>
+                    <p className="text-sm font-medium text-white truncate">{acc.userName || "Unknown"}</p>
+                    <p className="text-[10px] text-zinc-500 font-mono truncate">{acc.userEmail}</p>
+                  </div>
+                  <div className="text-sm text-zinc-300">{acc.exchangeName}</div>
+                  <div className="text-xs font-mono text-zinc-400">{acc.uid}</div>
+                  <div className="text-right text-sm font-mono text-zinc-300">{acc.tradeCount}</div>
+                  <div className="text-right text-sm font-mono font-bold text-white">${acc.totalEarned.toFixed(2)}</div>
+                  <div className="text-right text-sm font-mono font-bold text-amber-400">${acc.unpaid.toFixed(2)}</div>
+                  <div className="flex justify-center">
+                    <StatusBadge status={acc.status} />
+                  </div>
+                </div>
+              ))
+            )}
+
+            {/* Mobile cards */}
+            <div className="sm:hidden divide-y divide-white/[0.04]">
+              {userPaybacks.map((acc: any) => (
+                <div key={`m-${acc.id}`} className="p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-white">{acc.userName}</span>
+                    <StatusBadge status={acc.status} />
+                  </div>
+                  <div className="flex justify-between text-xs font-mono">
+                    <span className="text-zinc-500">{acc.exchangeName} · {acc.uid}</span>
+                  </div>
+                  <div className="flex justify-between text-xs font-mono">
+                    <span className="text-zinc-400">Earned</span>
+                    <span className="text-white font-bold">${acc.totalEarned.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs font-mono">
+                    <span className="text-zinc-400">Unpaid</span>
+                    <span className="text-amber-400 font-bold">${acc.unpaid.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs font-mono">
+                    <span className="text-zinc-400">Trades</span>
+                    <span className="text-zinc-300">{acc.tradeCount}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
