@@ -118,33 +118,49 @@ async function callGoogleTranslate(text: string, from: string, to: string): Prom
   const encodedText = encodeURIComponent(text);
   const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodedText}`;
 
+  try {
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
+      headers: { 'User-Agent': 'CryptoX/1.0' },
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+    if (!Array.isArray(data) || !Array.isArray(data[0])) {
+      throw new Error('Unexpected response format');
+    }
+
+    const translatedParts: string[] = [];
+    for (const segment of data[0]) {
+      if (Array.isArray(segment) && typeof segment[0] === 'string') {
+        translatedParts.push(segment[0]);
+      }
+    }
+    return translatedParts.join('');
+  } catch (err) {
+    // Google rate-limited or blocked — try MyMemory fallback
+    console.log(`[translator] Google failed (${err instanceof Error ? err.message : 'unknown'}), trying MyMemory fallback`);
+    return callMyMemoryTranslate(text, from, to);
+  }
+}
+
+async function callMyMemoryTranslate(text: string, from: string, to: string): Promise<string> {
+  const langPair = `${from}|${to}`;
+  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${encodeURIComponent(langPair)}`;
+
   const res = await fetch(url, {
-    signal: AbortSignal.timeout(10000),
-    headers: {
-      'User-Agent': 'CryptoX/1.0',
-    },
+    signal: AbortSignal.timeout(8000),
   });
 
-  if (!res.ok) {
-    throw new Error(`Google Translate returned HTTP ${res.status}`);
-  }
+  if (!res.ok) throw new Error(`MyMemory returned HTTP ${res.status}`);
 
-  // Response is a nested array structure
-  // response[0] contains translation segments, each segment[0] is the translated text
   const data = await res.json();
-
-  if (!Array.isArray(data) || !Array.isArray(data[0])) {
-    throw new Error('Unexpected response format from Google Translate');
+  if (data?.responseStatus === 200 && data?.responseData?.translatedText) {
+    return data.responseData.translatedText;
   }
 
-  const translatedParts: string[] = [];
-  for (const segment of data[0]) {
-    if (Array.isArray(segment) && typeof segment[0] === 'string') {
-      translatedParts.push(segment[0]);
-    }
-  }
-
-  return translatedParts.join('');
+  throw new Error('MyMemory returned no translation');
 }
 
 // ── Smart text chunking ─────────────────────────────────────────────

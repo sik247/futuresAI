@@ -151,7 +151,7 @@ const handleBingx: IHandler = async (exchangeAccount) => {
     parsed.data.list.map((item: any) => ({
       amount: parseFloat(item.commission || "0"),
       payback: parseFloat(item.commission || "0"),
-      date: new Date(parseInt(item.time || Date.now())),
+      date: new Date(item.time != null && item.time !== "" ? parseInt(item.time) : Date.now()),
     }))
   );
   return { newTrades };
