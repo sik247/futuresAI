@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { QUANT_BLOG_POSTS, type QuantBlogPost, type TradeSetup } from "@/lib/data/quant-blog-posts";
 import AdSenseUnit from "./adsense-unit";
+import AnnotatedChart from "./annotated-chart";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                             */
@@ -386,14 +387,18 @@ export default function QuantBlogPostPage({
           </p>
         </header>
 
-        {/* Chart image */}
+        {/* Annotated chart with Entry/SL/TP lines */}
         <div className="relative rounded-2xl overflow-hidden border border-white/[0.06] mb-2">
-          <img
+          <AnnotatedChart
             src={post.chartImage}
             alt={`${post.coin} 4H chart`}
-            className="w-full object-cover"
+            entry={post.tradeSetup.entry}
+            stopLoss={post.tradeSetup.stopLoss}
+            takeProfit={post.tradeSetup.takeProfit}
+            direction={post.direction}
+            supportLevels={post.supportLevels}
+            resistanceLevels={post.resistanceLevels}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/60 via-transparent to-transparent pointer-events-none" />
           {/* Direction badge overlay */}
           <div className="absolute top-4 right-4">
             <DirectionBadge direction={post.direction} />
@@ -458,7 +463,7 @@ export default function QuantBlogPostPage({
 
         {/* Article content */}
         <article className="mb-8">
-          <ContentBody content={post.content} />
+          <ContentBody content={isKo ? post.contentKo : post.content} />
         </article>
 
         {/* Author row */}

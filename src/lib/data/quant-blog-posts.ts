@@ -13,6 +13,7 @@ export interface QuantBlogPost {
   excerpt: string;
   excerptKo: string;
   content: string;
+  contentKo: string;
   coin: string;
   symbol: string;
   direction: "LONG" | "SHORT" | "NEUTRAL";
@@ -70,6 +71,39 @@ On-chain volume at the $65,000–$67,000 range is the thickest cluster in the la
 ## Verdict
 
 **NEUTRAL.** Technicals are balanced at a decision point. The recovery is not yet confirmed as trend reversal. Waiting for a decisive 4H close above $68,500 before considering a long. Shorts are equally premature without a clear rejection candle.`,
+    contentKo: `## 구조
+
+4시간봉 차트에서 BTC는 $63,800~$68,500 사이의 10일 압축 레인지 내에서 횡보 중입니다. 현재 $67,721 캔들은 이 레인지의 상단 경계에 위치합니다. 이전 돌파 시도는 $68,420에서 고점을 찍은 뒤 급격히 되돌려졌으며, 그 위꼬리가 현재 단기 핵심 저항선입니다.
+
+## 핵심 레벨
+
+**저항선:** $68,500 (레인지 상단 / 돌파 실패 위꼬리), $70,200 (12월 횡보 기반), $73,000 (역대 최고가)
+
+**지지선:** $66,800 (4H 50 EMA), $65,200 (최근 스윙 저점 / 수요 구간), $63,800 (레인지 하단)
+
+## RSI / MACD
+
+RSI 52는 중간 레인지로 중립입니다. BTC가 $63,800까지 하락할 때 기록했던 이전 과매도 31 수준이 완전히 해소되어 평균회귀 랠리가 한계에 가까워졌음을 시사합니다. MACD 히스토그램은 +48로 소폭 양전이나 시그널선 교차가 저거래량에서 발생해 강한 확신 신호는 아닙니다.
+
+주봉 RSI 48은 2023년 1월 이후 처음으로 50 아래로 교차했는데, 역사적으로 이는 중기 분배 국면을 예고했습니다. 이 맥락은 현재 롱 추격을 경계해야 하는 근거입니다.
+
+## 거래량 프로파일
+
+$65,000~$67,000 구간의 온체인 거래량은 지난 30일 기준 가장 두꺼운 클러스터(고거래량 노드)입니다. BTC는 현재 이 클러스터 위에서 거래 중이어서 지지적입니다. 다만, 스팟 거래소 유출은 정상화됐으며 대형 지갑의 의미 있는 축적 신호는 없습니다.
+
+## 거시 환경
+
+주봉 변동: -4.49%. 3개월 변동: -23.47%. 중기 추세는 명확히 약세입니다. 현재 +1.38% 일일 상승은 강세파가 종가 기준 $68,500을 지켜내기 전까지는 데드캣 바운스 후보입니다.
+
+## 리스크 / 리워드
+
+**강세 시나리오:** $68,500 돌파 종가 시 $70,200 이후 $73,000 목표. $66,800 아래에서 손절. $67,721 진입 시 R/R 약 2.4:1.
+
+**약세 시나리오:** $68,500에서 거부되면 레인지 천장이 확인되고 $65,200, 나아가 $63,800 재테스트가 열립니다.
+
+## 판단
+
+**중립.** 기술적 지표는 결정적 분기점에서 균형을 이루고 있습니다. 회복세는 아직 추세 전환으로 확인되지 않았습니다. $68,500 위 결정적인 4시간봉 종가 확인 전까지 롱 진입을 보류합니다. 명확한 거부 캔들 없이 숏 진입 역시 시기상조입니다.`,
     coin: "Bitcoin",
     symbol: "BTC",
     direction: "NEUTRAL",
@@ -127,6 +161,41 @@ Staking deposits are stable (unchanged), suggesting long-term holders are not pa
 ## Verdict
 
 **SHORT bias.** The structural trend, whale flows, and ETF outflows all point lower. The RSI divergence is a caution flag against aggressive shorts near $2,000, but it is not a buy signal in isolation. Tight-stop long attempts around $2,000 are a specialist trade; broad trend following still favors the downside. Position sizing should be reduced given the proximity to a major psychological level.`,
+    contentKo: `## 구조
+
+ETH는 2025년 12월 $4,100 거부 이후 지속적인 하락 추세에 있습니다. 4시간봉 차트에서 저고점-저저점 시퀀스가 유지되고 있습니다. 현재 $2,066는 두 세션 전 $1,997을 터치한 뒤 +1.98% 소폭 반등으로, $2,000 심리적 지지선을 간신히 지키는 수준입니다.
+
+## 핵심 레벨
+
+**저항선:** $2,150 (4H 50 EMA, 하락 추세선), $2,380 (4H 200 EMA), $2,550 (이전 횡보 기반)
+
+**지지선:** $2,000 (심리적 / 이전 주봉 종가), $1,900 (2024년 돌파 재테스트 구간), $1,780 (2024년 돌파 기반 — 강세 사이클 무효화 레벨)
+
+## RSI / MACD
+
+RSI 44는 과매도 영역에 근접하지만 ETH 평균회귀 바운스를 역사적으로 예고했던 30 레벨에는 아직 미치지 못했습니다. 결정적으로, 마지막 두 저점($2,040 → $1,997)에서 RSI 는 더 높은 저점(38 → 44)을 형성하며 강세 다이버전스가 출현했습니다. 이 다이버전스가 현재 롱 포지션을 위한 유일한 기술적 근거입니다.
+
+MACD 히스토그램은 +12로 전환됐으나 깊은 음권에서 상승한 것입니다. 제로선 교차가 실현된다면 8주 만에 첫 것으로 주목할 만합니다.
+
+## 온체인 / 플로우 데이터
+
+지난 30일 스팟 ETF 순유출 $222M은 기관 투자자가 노출을 줄이고 있음을 의미합니다. 지난 14일간 고래 지갑의 거래소 입금이 증가해 분배 패턴과 일치합니다. 거래소 공급량은 전월 대비 3.2% 증가했습니다.
+
+스테이킹 예치량은 안정적(변화 없음)으로, 장기 보유자가 패닉 셀링을 하지 않음을 시사하나 신규 수요는 부재합니다.
+
+## 거시 환경
+
+주봉: -3.99%. 월봉: +5.17% ($1,997 저점 반등). 3개월: -30.52%. 단기 월봉 회복은 훼손된 중기 차트를 배경으로 발생하고 있습니다. ETH는 연초 대비 BTC 대비 26%p 언더퍼폼했습니다.
+
+## 리스크 / 리워드
+
+**강세 시나리오:** RSI 다이버전스 실현, $2,150 돌파 종가 시 숏 커버 스퀴즈로 $2,380 목표. 진입 $2,066, 목표 $2,380, 손절 $1,970. R/R 약 3.0:1.
+
+**약세 시나리오:** $2,000 거래량 돌파 하락. 다음 주요 지지는 $1,900, 이후 $1,780. $1,780 붕괴 시 전체 사이클 무효화 및 가속 매도 트리거.
+
+## 판단
+
+**숏 바이어스.** 구조적 추세, 고래 플로우, ETF 유출 모두 하락을 가리킵니다. RSI 다이버전스는 $2,000 근방의 공격적 숏에 대한 경고 신호이나 단독으로는 매수 신호가 아닙니다. $2,000 근방의 타이트-스탑 롱 시도는 전문가 트레이드이며, 전반적인 추세 추종은 여전히 하락 방향입니다. 주요 심리 레벨 근방임을 감안해 포지션 사이징을 줄여야 합니다.`,
     coin: "Ethereum",
     symbol: "ETH",
     direction: "SHORT",
@@ -184,6 +253,41 @@ The Solana Q4 revenue data is not yet reflected in price. Catalysts that could u
 ## Verdict
 
 **NEUTRAL with long bias on dips.** The fundamental-price divergence is a medium-term bullish input, but not a near-term trigger. The chart requires confirmation: a close above $87.50 with volume expansion would be the entry signal for a momentum long. Aggressive entries at $80.00 on a test are viable with tight stops. Avoid chasing the current price; the setup requires patience for the setup to complete.`,
+    contentKo: `## 디버전스 셋업
+
+SOL은 $83.64에서 거래 중이며 3개월간 33.07% 하락했습니다. 한편 솔라나의 온체인 수익은 2025년 4분기 DEX 거래량(Raydium, Jupiter), 밈코인 런치패드 수수료, 기관 DeFi 활동에 힘입어 급증했습니다. 이는 전형적인 가격-펀더멘탈 디버전스를 만들어냅니다. 네트워크는 역대 최고 수준의 경제 활동을 창출하고 있지만 토큰 가격은 수분기 최저치 근방에 있습니다.
+
+이런 유형의 디버전스는 암호화폐 약세 구간에서 드문 일이 아니지만, 구조적 지지선에서의 롱 포지션 리스크 프로파일을 압축시킵니다.
+
+## 구조
+
+4시간봉 차트에서 SOL은 $120 구간에서 급락 이후 $80.00~$87.50 사이에서 횡보 중입니다. 현재 $83.64는 7일간의 수평 베이스 안에 있으며, 이는 하락 추세에서 첫 번째 지속적인 멈춤입니다. 이는 매집 구간이거나 추가 하락 전 데드캣 횡보일 수 있습니다.
+
+## 핵심 레벨
+
+**저항선:** $87.50 (4H 레인지 상단 / 수평 횡보 구간), $93.00 (4H 50 EMA), $100.00 (심리적 레벨 + 이전 지지-저항 전환)
+
+**지지선:** $80.00 (레인지 하단, 깔끔한 라운드 넘버), $75.40 (2024년 8월 저점), $68.00 (2024년 돌파 기반 — 완전 무효화)
+
+## RSI / MACD
+
+RSI 41은 중립 이하이나 SOL의 역사적 과매도 극단(사이클 조정 시 통상 28~32)에는 도달하지 못했습니다. 미묘한 RSI 다이버전스가 있습니다. 2주 전 가격은 $78.50 저저점을 만들었으나 RSI는 이를 확인하지 않아 4H 강세 다이버전스를 형성했습니다. 이 다이버전스가 유효했고 가격은 $83.64로 회복됐습니다.
+
+MACD는 -0.3 히스토그램으로 플랫, 매도 모멘텀이 정체됐지만 아직 반전은 아닙니다. 히스토그램 제로 크로스가 첫 번째 확인 신호가 됩니다.
+
+## 펀더멘탈 촉매제
+
+솔라나 4분기 수익 데이터는 아직 가격에 반영되지 않았습니다. 가격 발견을 촉발할 수 있는 촉매제: (1) 솔라나 ETF 승인 기대감 재점화, (2) 집계 플랫폼에 공개되는 DEX 거래량 데이터의 내러티브 영향, (3) 수익-가격 비율을 언급하는 기관 리포트. 이 중 어느 것도 확실하지 않으며, 현재 가격에 내재된 옵션가치입니다.
+
+## 리스크 / 리워드
+
+**강세 시나리오:** $80.00 지지 유지, RSI 다이버전스 확인, $87.50 돌파 종가 시 $93.00 이후 $100.00 목표. 진입 $83.64, 목표 $100.00, 손절 $78.90. R/R 약 3.8:1.
+
+**약세 시나리오:** $80.00 거래량 붕괴 시 $75.40, 나아가 $68.00 목표. 네트워크 수익이 반전되면 펀더멘탈 디버전스 논리 붕괴.
+
+## 판단
+
+**딥에서 롱 바이어스를 가진 중립.** 펀더멘탈-가격 디버전스는 중기 강세 인풋이나 단기 트리거는 아닙니다. 차트는 확인이 필요합니다. 거래량 확장을 동반한 $87.50 돌파 종가가 모멘텀 롱의 진입 신호입니다. $80.00 테스트 시 공격적 진입은 타이트한 손절과 함께 유효합니다. 현재 가격을 추격 매수하지 마십시오. 셋업이 완성되기를 기다리는 인내가 필요합니다.`,
     coin: "Solana",
     symbol: "SOL",
     direction: "NEUTRAL",
@@ -237,6 +341,37 @@ Volume has declined sharply during the consolidation phase — a classic sign of
 ## Verdict
 
 **LONG bias.** The triple-tested support at $1.22, declining volume, and neutral-recovering RSI are consistent with late accumulation. Preferred entry is on a retest of $1.22–$1.25 with a tight stop at $1.19. Aggressive entries at current levels ($1.32) are valid with the stop at $1.22. A daily close above $1.40 would accelerate the position.`,
+    contentKo: `## 구조
+
+XRP는 $1.3154에서 당일 0.66% 하락하며, 4시간봉 차트에서 $1.22~$1.40 사이의 촘촘한 수평 횡보를 약 18일째 유지하고 있습니다. 이 레인지가 유지된다는 것은 이전 매도세가 현재 가격에서 공급을 소진했음을 시사합니다. 변동성 압축은 후기 매집 또는 돌파 전 코일링의 전형적인 특징입니다.
+
+보다 넓은 맥락: XRP는 2025년 말 $3.00 근처에서 고점을 찍은 뒤 55% 이상 하락했습니다. 그러나 가격은 $1.22 레벨에서 꾸준한 수요를 찾고 있으며, 세 차례의 독립적인 테스트가 각각 급격한 회복을 만들어냈습니다. 이는 해당 구간에 기관 매수 관심이 있음을 나타냅니다.
+
+## 핵심 레벨
+
+**저항선:** $1.40 (레인지 상단 / 4H 50 EMA), $1.50 (주요 심리적 레벨 + 이전 횡보 구간), $1.65 (측정 이동 목표)
+
+**지지선:** $1.22 (레인지 하단 / 세 차례 테스트된 수요 구간), $1.10 (2024년 돌파 재테스트 레벨), $0.95 (강세 사이클 이전 기반)
+
+## RSI / MACD
+
+RSI 46은 중립으로, 2주 전 38 과매도 수준에서 회복됐습니다. 가격 돌파 없이 RSI가 회복되는 것은 완만한 긍정 신호입니다. RSI가 40 위에서 기반을 쌓고 있습니다. MACD 히스토그램은 제로 근방에서 플랫하며, 추세는 미결정이지만 마지막 모멘텀 리딩은 +0.004로 소폭 양전이었습니다.
+
+주봉 차트에서 RSI는 전체 횡보 구간 동안 40 아래로 내려가지 않았으며, 이는 이전 XRP 약세 사이클과의 다이버전스입니다.
+
+## 거래량 프로파일
+
+횡보 구간 동안 거래량이 급감했습니다. 공급 소진의 전형적인 신호입니다. 최근 세 세션 모두 평균 이하의 거래량을 기록해 현재 레벨에서 매도자가 고갈되는 것과 일치합니다. $1.40 위에서의 거래량 확장이 롱 진입의 핵심 확인 신호가 됩니다.
+
+## 리스크 / 리워드
+
+**강세 시나리오:** 진입 $1.32, 손절 $1.22 (수요 구간 하단), 목표 $1.65. 리스크 $0.10, 리워드 $0.33. R:R 1:3.3.
+
+**약세 시나리오:** 일봉 종가 기준 $1.22 붕괴 시 매집 논리 무효화. $1.10 이후 $0.95 테스트 개방.
+
+## 판단
+
+**롱 바이어스.** $1.22에서의 세 차례 테스트, 감소하는 거래량, 중립에서 회복 중인 RSI는 후기 매집과 일치합니다. 선호 진입은 $1.22~$1.25 재테스트 시 $1.19에 타이트한 손절. 현재 레벨($1.32)에서의 공격적 진입은 $1.22 손절과 함께 유효합니다. 일봉 기준 $1.40 돌파 종가는 포지션을 가속시킵니다.`,
     coin: "XRP",
     symbol: "XRP",
     direction: "LONG",
@@ -292,6 +427,39 @@ The Binance ecosystem remains the highest-fee-revenue exchange infrastructure in
 ## Verdict
 
 **NEUTRAL.** BNB is neither trending nor breaking down. It is the defensive altcoin play in the current environment. The $600 defense is constructive and the burn mechanics add non-speculative demand. A range trade between $590–$630 with tight stops is viable. Directional traders should wait for a confirmed break above $630.`,
+    contentKo: `## 구조
+
+BNB는 $605.36로 당일 0.65% 소폭 하락했습니다. 4시간봉 차트에서 BNB는 지난 22일간 $585~$630 사이에서 횡보했습니다. 광범위한 암호화폐 시장 조정을 고려하면 비교적 좁은 횡보 범위이며, 대부분의 알트코인에 비해 BNB가 매도 압력을 더 효율적으로 흡수하고 있음을 시사합니다.
+
+$600 레벨은 강하게 방어되고 있습니다. 4시간봉 캔들 4개가 $600 아래로 위꼬리를 형성했지만 모두 위에서 종가를 기록했습니다. 해당 라운드 넘버의 방어는 의미 있는 가격 행동입니다. 수동적 매수가 아닌 능동적 매수자가 있다는 신호입니다.
+
+## 핵심 레벨
+
+**저항선:** $630 (4H 레인지 상단 / 50 EMA), $660 (2월 이전 횡보 기반), $680 (측정 이동 목표)
+
+**지지선:** $590 (4H 수요 클러스터), $565 (2026년 1월 스윙 저점), $540 (2025년 3분기 기반)
+
+## RSI / MACD
+
+RSI 48은 3주 동안 42~55 사이를 오갔습니다. 전형적인 레인지 바운드 리딩입니다. 어느 방향으로도 추세 모멘텀이 없습니다. MACD 선들은 제로 근방에서 얽혀 있어 방향 불명확성을 확인합니다. 히스토그램 확장을 동반한 시그널선 상향 돌파가 강세 진입의 첫 모멘텀 트리거가 될 것입니다.
+
+주봉 RSI 44는 다소 눌려 있으나 극단에는 없으며, 급락이 아닌 횡보 국면과 일치합니다.
+
+## 펀더멘탈 맥락
+
+BNB 소각 메커니즘은 2025년 4분기 약 147만 BNB를 소각해 공급량의 약 0.8% 분기별 감소를 이뤘습니다. BNB 체인 트랜잭션 증가(DEX, 게임파이, 밈 런치패드)와 결합해 토큰에는 순수 투기 자산이 결여한 진정한 수요 측 지지가 있습니다.
+
+바이낸스 생태계는 암호화폐 최고 수수료 수익 거래소 인프라로 남아 있어 BNB 아래에 수요 하한선을 제공합니다.
+
+## 리스크 / 리워드
+
+**강세 시나리오:** 레인지 돌파 시 진입 $610, 손절 $585 ($590 지지선 하단), 목표 $680. 리스크 $25, 리워드 $70. R:R 1:2.8.
+
+**약세 시나리오:** $585 거래량 붕괴 시 $565 및 $540 테스트 개방. 암호화폐 시장 거래량이 급격히 위축되면 펀더멘탈 내러티브 약화.
+
+## 판단
+
+**중립.** BNB는 추세도 붕괴도 아닙니다. 현재 환경에서 방어적인 알트코인 포지션입니다. $600 방어는 긍정적이며 소각 메커니즘은 비투기적 수요를 추가합니다. $590~$630 사이의 레인지 트레이드는 타이트한 손절과 함께 유효합니다. 방향성 트레이더는 $630 확인 돌파를 기다려야 합니다.`,
     coin: "BNB",
     symbol: "BNB",
     direction: "NEUTRAL",
@@ -345,6 +513,37 @@ Volume has contracted steadily as the triangle has tightened — a hallmark of t
 ## Verdict
 
 **NEUTRAL — approaching inflection point.** The triangle setup is valid and approaching resolution. RSI near oversold suggests a modest upside bias, but the pattern is symmetric and requires confirmation. Traders should set alerts at $0.0950 and $0.0790 and size the position for the breakout rather than anticipating it. A close outside the triangle on above-average volume is the trigger.`,
+    contentKo: `## 구조
+
+DOGE는 $0.09045로 당일 0.42% 하락하며, 지난 14일간 4시간봉 차트에서 교과서적인 대칭 삼각형을 형성하고 있습니다. 상단 추세선은 $0.1050에서 현재까지의 저고점 시리즈를 연결하고, 하단 추세선은 $0.0790에서의 고저점 시리즈를 연결합니다. 이 두 선은 약 3~4일 후 꼭짓점에서 만납니다.
+
+삼각형은 현재 시점에서 약 $0.015의 폭으로 좁혀졌습니다. 패턴의 측정 목표는 이탈 방향으로 약 29%로, 상방 목표 $0.1150, 하방 목표 $0.0640입니다.
+
+## 핵심 레벨
+
+**저항선:** $0.0950 (상단 추세선 / 4H 레인지 고점), $0.1050 (2025년 11월 스윙 고점), $0.1150 (측정 이동 목표 / 심리적 레벨)
+
+**지지선:** $0.0850 (하단 추세선), $0.0790 (삼각형 기반 / 레인지 하단), $0.0700 (2024년 횡보 구간)
+
+## RSI / MACD
+
+RSI 38은 과매도 경계에 근접하지만 아직 도달하지 않았습니다. 이전 DOGE 압축 패턴에서 RSI는 최종 항복/반전 전 30~32까지 도달하는 경향이 있습니다. 현재 38 리딩은 과매도 바운스가 가능해지기 전까지 추가 하락 모멘텀이 제한적임을 의미합니다.
+
+MACD 히스토그램은 -0.00028으로 제로에 매우 근접, 하방 모멘텀 손실이 명확히 정체되고 있습니다.
+
+## 거래량 분석
+
+삼각형이 좁혀짐에 따라 거래량은 꾸준히 줄었습니다. 패턴 유효성의 특징입니다. 일평균 거래량은 DOGE가 $0.12 위에서 거래될 때의 고점 대비 58% 감소했습니다. 이 거래량의 삼각형 꼭짓점 압축이 셋업입니다. 이탈 캔들은 평균 거래량을 크게 상회해야 이동을 확인합니다.
+
+## 리스크 / 리워드
+
+**강세 시나리오 ($0.0950 위 돌파):** 재테스트 시 진입 $0.0850 또는 돌파 시 $0.0960, 손절 $0.0790, 목표 $0.1150. R:R 1:5.0.
+
+**약세 시나리오 ($0.0790 하단 이탈):** $0.0640~$0.0700 구간 목표. 강세 구조 완전 무효화.
+
+## 판단
+
+**중립 — 변곡점 접근.** 삼각형 셋업은 유효하며 해소에 근접하고 있습니다. 과매도 근방의 RSI는 소폭 상방 바이어스를 시사하지만 패턴은 대칭적이며 확인이 필요합니다. 트레이더는 $0.0950 및 $0.0790에 알림을 설정하고 미리 이탈 방향을 예측하는 대신 이탈을 위한 포지션 사이징을 해야 합니다. 평균 이상의 거래량을 동반한 삼각형 외 종가가 트리거입니다.`,
     coin: "Dogecoin",
     symbol: "DOGE",
     direction: "NEUTRAL",
@@ -398,6 +597,37 @@ Cardano's development velocity has slowed in public perception despite continued
 ## Verdict
 
 **SHORT bias.** The combination of a decelerating fundamental narrative, a sustained downtrend with no absorption evidence, and proximity to a historically significant but not yet tested support level creates a high-probability short setup. The stop above $0.2580 is clearly defined. Position sizing should be conservative given the proximity to the multi-year support — that level could produce a violent snapback on any positive catalyst.`,
+    contentKo: `## 구조
+
+ADA는 $0.2409에서 당일 1.03% 하락하며, $0.2200~$0.2400의 다년 지지 구간에 근접해 있습니다. 이 구간은 ADA가 $3.10까지 포물선 상승을 시작하기 전 2020~2021년 사이클의 횡보 기반이었습니다. 장기 하락 이후 이 레벨로의 복귀는 역사적으로 중요한 구조적 변곡점입니다.
+
+4시간봉 차트에서 추세는 명확한 저고점-저저점 시퀀스입니다. 의미 있는 횡보 구간이 없으며, 가격은 2025년 4분기 고점 $0.80에서 방향성 하락 중입니다. 현재 구조에는 아직 흡수나 매집의 증거가 없습니다.
+
+## 핵심 레벨
+
+**저항선:** $0.2580 (4H 50 EMA / 최근 스윙 고점), $0.2800 (2026년 1분기 이전 횡보 구간), $0.3100 (주봉 200 EMA)
+
+**지지선:** $0.2200 (다년 구조적 저점), $0.1950 (현재 레인지의 측정 이동 목표), $0.1700 (2021년 강세 사이클 전 기반 — 완전 무효화 레벨)
+
+## RSI / MACD
+
+일봉 RSI 35는 과매도에 근접하지만 ADA 수주간 바운스를 역사적으로 예고했던 극단 수준(25~28)에는 아직 미치지 못했습니다. 4H RSI는 장중 28에 터치한 뒤 소폭 회복해 잠재적 다이버전스를 만들지만 아직 확인되지 않았습니다.
+
+MACD는 일봉에서 음전이며 확대 중입니다. 히스토그램 크로스오버 신호가 없습니다. 모멘텀은 여전히 확실히 하방입니다.
+
+## 펀더멘탈 맥락
+
+카르다노의 개발 속도는 지속적인 온체인 활동에도 불구하고 공개 인식에서 둔화됐습니다. 2025년 Voltaire 거버넌스 시대가 출범했지만 카르다노의 DeFi 채택은 솔라나, Base, BNB 체인을 따라가지 못했습니다. 펀더멘탈 내러티브는 이전 사이클 대비 약화되어 이전에 높은 밸류에이션을 지지했던 투기적 프리미엄이 사라졌습니다.
+
+## 리스크 / 리워드
+
+**숏 시나리오:** 진입 $0.2409 (현재), 손절 $0.2580 (4H 50 EMA 상단), 목표 $0.1950. 리스크 $0.017, 리워드 $0.046. R:R 1:2.7.
+
+**강세 시나리오:** RSI 과매도 바운스로 $0.2580 복귀. 긍정적으로 보려면 일봉 $0.2580 종가 돌파 필요.
+
+## 판단
+
+**숏 바이어스.** 둔화되는 펀더멘탈 내러티브, 흡수 증거 없는 지속 하락추세, 역사적으로 중요하지만 아직 테스트되지 않은 지지선 근접의 조합이 고확률 숏 셋업을 만듭니다. $0.2580 위의 손절은 명확합니다. 다년 지지 근방임을 고려해 포지션 사이징은 보수적으로 유지해야 합니다. 긍정적 촉매 시 그 레벨에서 격렬한 스냅백이 나올 수 있습니다.`,
     coin: "Cardano",
     symbol: "ADA",
     direction: "SHORT",
@@ -451,6 +681,37 @@ KB Card serves approximately 7 million active cardholders in South Korea. If eve
 ## Verdict
 
 **LONG bias on dips.** The KB Card catalyst plus proximity to a multi-year demand zone makes this a fundamentally-supported technical setup. Preferred entry on a retest of $8.50 or $8.00 with stops below $7.80. Current price at $8.76 is within the entry zone — a small initial position now with the ability to add on a confirmed RSI divergence is the optimal sizing approach.`,
+    contentKo: `## 구조
+
+AVAX는 $8.76으로 당일 0.57% 하락하며 3년 최저치 근방에 있습니다. 4시간봉 차트는 2026년 1월 $18에서 시작된 하락 국면이 가장 최근 단계임을 보여줍니다. 자산은 $50 고점 대비 82% 이상 하락했습니다. 가격은 이제 2023년 약세장 매집 국면에서 형성된 $7.50~$8.50 주요 수요 구간에 근접하고 있습니다.
+
+KB카드 발표(한국 소비자 대상 블록체인 기반 로열티 리워드 시스템 개발 파트너십)는 아직 가격을 유의미하게 움직이지 않았습니다. 시장이 아직 반영하지 않았거나 투기적인 것으로 할인하고 있습니다. 구체적인 파트너십과 가격 정체/하락 사이의 이 괴리가 트레이드 논리입니다.
+
+## 핵심 레벨
+
+**저항선:** $9.50 (4H 50 EMA / 이전 붕괴 구간), $10.50 (핵심 구조적 레벨), $11.00 ($8.50 기반의 측정 이동 목표)
+
+**지지선:** $8.00 (라운드 넘버 / 2023년 매집 구간), $7.50 (2023년 스윙 저점), $6.80 (전체 사이클 무효화)
+
+## RSI / MACD
+
+RSI 39는 4H 차트 과매도 경계 근방입니다. 이번 사이클에서 AVAX의 이전 회복은 RSI 32~36에서 시작됐습니다. 일봉 RSI 다이버전스(가격 신저점 형성 시 RSI 고저점)가 고신뢰 진입 신호가 될 것입니다. 아직 확인되지 않았으나 향후 48시간을 면밀히 주시해야 합니다.
+
+MACD 히스토그램은 -0.14로 음전이나 기울기가 평탄화되고 있어 이전 패턴에서 크로스오버를 앞두는 신호입니다.
+
+## 펀더멘탈 촉매제 평가
+
+KB카드는 한국에서 약 700만 명의 활성 카드 소지자를 보유합니다. 5%만이 AVAX 기반 리워드 프로그램을 채택해도 35만 명의 신규 지갑 보유자가 생깁니다. 구현 일정은 2026년 3분기로, 이는 선행 촉매제입니다. 시장은 일반적으로 출시 2~4개월 전에 이런 발전을 반영합니다. 그 기간은 5~6월에 시작됩니다. 현재 가격이 조기 포지셔닝을 의미할 수 있습니다.
+
+## 리스크 / 리워드
+
+**강세 시나리오:** 딥에서 진입 $8.50, 손절 $7.80, 목표 $11.00. 리스크 $0.70, 리워드 $2.50. R:R 1:3.6.
+
+**약세 시나리오:** $8.00 붕괴. 파트너십 뉴스가 구현 지연으로 "뉴스에 팔아라" 상황이 됨. $7.50 및 $6.80 개방.
+
+## 판단
+
+**딥에서 롱 바이어스.** KB카드 촉매제와 다년 수요 구간 근접은 펀더멘탈로 지지된 기술적 셋업입니다. $8.50 또는 $8.00 재테스트 시 진입 선호, 손절은 $7.80 하단. 현재 $8.76 가격은 진입 구간 내이므로 소규모 초기 포지션을 취하고 RSI 다이버전스 확인 시 추가 매수하는 것이 최적의 사이징 접근입니다.`,
     coin: "Avalanche",
     symbol: "AVAX",
     direction: "LONG",
@@ -506,6 +767,39 @@ However, "technically superior" is not a reliable price catalyst. Ethereum Class
 ## Verdict
 
 **NEUTRAL.** This is a genuine value-versus-value-trap dilemma. The RSI oversold condition supports a tactical long with defined risk; the structural downtrend and overhead supply argue against conviction sizing. A speculative small position with entry $1.20, stop $1.08, and willingness to add only after $1.40 is reclaimed is the disciplined approach. RevX TVL data in the coming weeks will determine whether the fundamental re-rating thesis has merit.`,
+    contentKo: `## 구조
+
+DOT는 $1.237로 당일 0.48% 하락하며 2020년 이후 최저가 근방에 있습니다. 4시간봉 차트는 일시적 반등 후 지속적으로 매도되는 지속적인 하락 추세를 보여줍니다. $1.15에서 $1.35로의 가장 최근 반등은 48시간 내에 매도됐으며, 상단 공급이 여전히 두텁다는 것을 나타냅니다.
+
+연초 대비 70% 하락은 많은 이전 투자자를 상단 저항으로 전환시켰습니다. 2026년에 DOT를 산 사람은 누구나 손실 중이며 강세 시 매도할 수 있습니다. 이 공급 역학은 모든 회복 시도의 핵심 역풍입니다.
+
+## 핵심 레벨
+
+**저항선:** $1.35 (4H 50 EMA / 최근 스윙 고점), $1.50 (이전 기반 / 주봉 50 EMA), $1.60 (측정 이동 목표)
+
+**지지선:** $1.15 (최근 스윙 저점), $1.00 (심리적 라운드 넘버), $0.85 (2020년 약세장 저점 — 완전 무효화)
+
+## RSI / MACD
+
+RSI 33은 4H 차트에서 과매도 바로 위입니다. 일봉 RSI 28은 기술적으로 과매도 영역으로, 역사적으로 DOT의 2~3주 단기 랠리(30~50%)를 예고했습니다. 그러나 구조적 하락추세에서의 단기 랠리는 투자 기회가 아닌 트레이딩 기회입니다.
+
+MACD 일봉 히스토그램은 깊은 음권에서 좁혀지고 있어 매도 모멘텀이 소진 중임을 시사합니다. 현재 활성화된 유일한 긍정적 기술 신호입니다.
+
+## RevX 질문
+
+RevX는 공유 보안 모델을 활용하면서 다수의 폴카닷 파라체인의 수익을 집계하도록 설계된 파라체인입니다. 기술적 메리트는 실재합니다. 폴카닷 아키텍처는 크로스체인 보안 보장 측면에서 일부 경쟁자보다 진정으로 우수합니다.
+
+하지만 "기술적으로 우수하다"는 것은 신뢰할 수 있는 가격 촉매제가 아닙니다. Ethereum Classic, Decred, 그 외 많은 기술적으로 건전한 프로젝트들은 펀더멘탈만으로는 암호화폐의 거시 심리 역풍을 극복할 수 없음을 보여줬습니다. RevX는 빠르게 의미 있는 TVL을 유치해야 합니다. 시장은 DOT에게 미래 실행에 대한 기회를 주지 않고 있습니다.
+
+## 리스크 / 리워드
+
+**강세 시나리오:** RSI 과매도 바운스, RevX TVL 데이터가 재평가 트리거. 진입 $1.20, 손절 $1.08, 목표 $1.60. 리스크 $0.12, 리워드 $0.40. R:R 1:3.3.
+
+**약세 시나리오:** $1.15 거래량 붕괴. $1.00 심리 지지가 다음 라인. 붕괴 시 $0.85 개방.
+
+## 판단
+
+**중립.** 이것은 진정한 가치 대 가치함정 딜레마입니다. RSI 과매도 조건은 정의된 리스크로 전술적 롱을 지지하나, 구조적 하락추세와 상단 공급은 확신 있는 사이징에 반대됩니다. 진입 $1.20, 손절 $1.08, $1.40 회복 후에만 추가 매수하는 소규모 투기적 포지션이 규율 있는 접근입니다. 향후 몇 주의 RevX TVL 데이터가 펀더멘탈 재평가 논리의 타당성을 판단합니다.`,
     coin: "Polkadot",
     symbol: "DOT",
     direction: "NEUTRAL",
@@ -561,6 +855,39 @@ Critically, CCIP fees generate LINK demand directly — protocols must hold or p
 ## Verdict
 
 **LONG.** The combination of relative price strength (not making new lows while peers do), a multi-week RSI bullish divergence, a MACD histogram zero-cross, and accelerating CCIP fundamental adoption constitutes a genuine long setup. This is not a speculative moonshot — it is a technically and fundamentally supported position with clear invalidation below $7.90. Sizing at 1.5–2x normal allocation is justified given the quality of the setup.`,
+    contentKo: `## 구조
+
+LINK는 $8.62로 당일 보합이며, 지난 16일간 $8.00~$9.50 사이의 수평 기반을 쌓고 있습니다. 2025년 말 $25 고점 이후 하락 이후 첫 번째 확장된 횡보 구간입니다. 4시간봉 차트는 이 레인지 내에서 고저점 시리즈를 보여줍니다($8.05, $8.22, $8.41). 전체 추세가 여전히 약세임에도 불구하고 근접 구조적 개선이 나타나고 있습니다.
+
+핵심 관찰: LINK는 대부분의 알트코인이 계속 하락하는 동안 신저점을 만들지 않고 있습니다. 하락 시장에서의 상대적 강세는 종종 매집의 초기 신호입니다.
+
+## 핵심 레벨
+
+**저항선:** $9.50 (4H 레인지 상단 / 50 EMA), $10.50 (4H 200 EMA), $12.00 (측정 이동 목표 / 2025년 4분기 이전 지지)
+
+**지지선:** $8.00 (레인지 하단 / 수요 구간), $7.50 (2023년 매집 기반), $6.80 (전체 사이클 무효화 레벨)
+
+## RSI / MACD
+
+RSI 42는 중립 이하이나 2주 전 35에서 회복 중입니다. RSI(고저점 형성)와 가격(유사한 저점 형성) 사이의 다이버전스는 교과서적 강세 다이버전스 셋업입니다. 이 다이버전스는 16일 기간을 고려하면 더욱 의미 있습니다. 단기 다이버전스는 노이즈이나 다주간 다이버전스는 신호입니다.
+
+MACD 히스토그램은 6주 만에 처음으로 4시간봉에서 제로 위로 교차했습니다. 미미하지만 구체적인 기술적 개선입니다. 시그널선 크로스가 대기 중입니다.
+
+## 펀더멘탈 맥락: CCIP 논리
+
+체인링크의 CCIP(크로스체인 상호운용성 프로토콜)는 현재 SWIFT, ANZ 은행, 40개 이상의 주요 DeFi 프로토콜에 통합됐습니다. 이것은 실제 기관 채택입니다. 프로토콜은 지난 6개월간 240% 성장한 크로스체인 메시지 볼륨을 처리합니다.
+
+결정적으로, CCIP 수수료는 LINK 수요를 직접 생성합니다. 프로토콜은 오라클 서비스 비용 지불을 위해 LINK를 보유하거나 구매해야 합니다. CCIP 볼륨이 성장함에 따라 LINK 토큰에 대한 구조적 수요도 증가합니다. 이것은 채택과 토큰 가치 사이의 직접적인 피드백 루프로, 아직 가격에 반영되지 않았습니다.
+
+## 리스크 / 리워드
+
+**강세 시나리오:** 강세 다이버전스 확인, $9.50 돌파 시 모멘텀 롱으로 $12.00 목표. 진입 $8.62, 손절 $7.90, 목표 $12.00. 리스크 $0.72, 리워드 $3.38. R:R 1:4.7.
+
+**약세 시나리오:** $8.00 붕괴. CCIP 성장 둔화 또는 SWIFT 관계 해소. $7.50 이후 $6.80 목표.
+
+## 판단
+
+**롱.** 상대적 가격 강세(동종 대비 신저점 미갱신), 다주간 RSI 강세 다이버전스, MACD 히스토그램 제로 크로스, 가속하는 CCIP 펀더멘탈 채택의 조합이 진정한 롱 셋업을 구성합니다. 이것은 투기적 기대가 아닙니다. $7.90 이하에서 명확한 무효화 기준이 있는 기술적, 펀더멘탈로 지지된 포지션입니다. 셋업의 품질을 고려해 정상 배분의 1.5~2배 사이징이 정당화됩니다.`,
     coin: "Chainlink",
     symbol: "LINK",
     direction: "LONG",
@@ -620,6 +947,43 @@ Arguments for healthy correction:
 ## Verdict
 
 **NEUTRAL with constructive Q2 bias.** The bear arguments are real but insufficient to call a cycle end. The absence of a structural crypto-specific catalyst (no LUNA equivalent) and the presence of macro tailwinds (DXY weakness, oversold weekly RSI) suggest this is more likely a correction within a secular bull than a new bear cycle. Q2 2026 positioning should lean long with reduced leverage and strict stops at key structural levels.`,
+    contentKo: `## 2026년 1분기 수치
+
+암호화폐 시장은 2025년 4분기 폭발적인 랠리 이후 역대 최고치 근방에서 2026년 1분기에 진입했습니다. 비트코인은 2025년 12월 22일 $100,800에 도달했습니다. 총 시총은 $3.72조를 기록했습니다. 2026년 3월 31일 기준 총 시총은 $2.10조로, 90일간 $1.62조, 즉 43.5% 하락했습니다.
+
+맥락: 이것은 암호화폐 시장 역사상 세 번째로 큰 분기 하락입니다. 더 큰 하락은 2022년 2분기(LUNA 붕괴, -59%)와 2018년 1분기(ICO 버블 해소, -67%)였습니다. 이 두 차례는 "건전한 조정"이 아니었으며 모두 장기 약세장에 선행했습니다.
+
+## 주요 거시 동인
+
+**달러 강세에서 약세로:** DXY는 연준 금리 인하 기대가 후퇴하며 2026년 1월 107.8에서 고점을 찍었습니다. DXY는 이후 100.4로 하락했으며, 이는 역사적으로 위험 자산 회복과 상관관계가 있는 중요한 반전입니다. 이 1분기 말의 달러 약세가 2분기의 가장 중요한 거시 발전입니다.
+
+**주식 시장 상관관계:** 암호화폐의 나스닥 상관관계는 1분기에 0.78로 2022년 3분기 이후 최고치를 기록했습니다. 나스닥이 고점 대비 18% 조정하는 동안 암호화폐는 43% 조정됐습니다. 주식 위험 회피에 대한 암호화폐의 증폭된 베타가 예상대로 움직였습니다.
+
+**기관 로테이션:** 비트코인 현물 ETF 플로우는 2월과 3월에 마이너스로 전환되어 생태계에서 약 $84억을 빼냈습니다. 이것은 2025년 4분기의 $180억 유입에서 상당한 반전입니다. ETF 플로우 데이터는 현재 비트코인의 가장 중요한 한계 수요 지표입니다.
+
+## RSI 및 기술적 상태
+
+총 시총 주봉 RSI는 3월 중순 34에 도달했습니다. 거시 레벨에서 주봉 과매도에 근접했습니다. 주봉 과매도의 RSI는 역사적으로 암호화폐 장기 강세 사이클에서 3~6개월 회복 기간에 선행했습니다.
+
+비트코인 도미넌스는 1분기 동안 54%에서 61%로 상승했으며, 이는 조정 기간에 발생하는 암호화폐 내 특징적인 "품질로의 도피"를 반영합니다. 이것은 강세 사이클 패턴이지 약세 사이클 패턴이 아닙니다. 약세 사이클에서는 도미넌스가 조정 기간보다 상승하는 경향이 있습니다.
+
+## 하락장 vs 건전한 조정: 스코어카드
+
+하락장 논거(지속적인 다년 하락):
+- 43% 1분기 하락은 역사적으로 심각
+- ETF 순유출은 기관 분배를 나타냄
+- 거시 불확실성이 여전히 상승
+
+건전한 조정 논거:
+- 비트코인 도미넌스 상승(강세 사이클 행동)
+- DXY가 2분기로 약화(역사적으로 암호화폐에 긍정적)
+- 주봉 RSI 과매도 레벨
+- 주요 프로토콜 실패나 사기 촉매제 없음(2022년과 달리)
+- 온체인 장기 보유자 매집 여전히 상승
+
+## 판단
+
+**긍정적 2분기 바이어스를 가진 중립.** 약세 논거는 실재하지만 사이클 종료를 선언하기에 불충분합니다. 구조적 암호화폐 특정 촉매제(LUNA 등가물 없음)의 부재와 거시 순풍(DXY 약세, 과매도 주봉 RSI)의 존재는 이것이 새로운 약세 사이클보다는 장기 강세장 내 조정일 가능성이 더 높음을 시사합니다. 2026년 2분기 포지셔닝은 핵심 구조 레벨에서 엄격한 손절과 레버리지 축소로 롱 방향으로 기울어야 합니다.`,
     coin: "Market",
     symbol: "TOTAL",
     direction: "NEUTRAL",
@@ -676,6 +1040,40 @@ A DXY break below 100.0 targets 97.5 — historically consistent with a 20–30%
 ## Verdict
 
 **LONG crypto on DXY weakness continuation.** The macro setup for Q2 2026 is more favorable than the Q1 price action suggests. DXY weakness, approaching rate cuts, and oversold crypto weekly RSI create a convergence of tailwinds. The primary risk is a surprise inflation resurgence that forces the Fed to reverse course, which would be DXY-bullish and crypto-bearish. That risk is real but not currently priced as the base case.`,
+    contentKo: `## DXY 기술적 개요
+
+미국 달러 인덱스(DXY)는 100.42로 당일 0.07% 하락했지만, 더 중요하게는 2026년 1월 107.8 고점 대비 6.8% 하락했습니다. 4시간봉 차트는 DXY가 200일 이동평균선 아래로 이탈해 100.0 심리 지지선을 테스트 중임을 보여줍니다. 100.0 이하에서의 지속적인 이탈은 달러 약세 가속화의 역사적 선례가 있는 중요한 기술적 이벤트가 될 것입니다.
+
+DXY는 연준 관리들이 1분기 금리 인하 기대에 반론을 제기하면서 1월 14일 고점을 찍었습니다. 이후 예상보다 약한 노동 시장 데이터와 하락하는 인플레이션 수치로 연준이 완화 복귀를 시사하게 됐고, 달러는 약세를 보였습니다.
+
+## 역사적 상관관계: DXY vs 암호화폐
+
+DXY와 암호화폐 총 시총 사이의 역의 상관관계는 암호화폐 거시 분석에서 가장 일관된 관계 중 하나입니다.
+
+**2020년:** DXY가 103에서 90으로 하락(3월~12월). 총 암호화폐 시총이 $1,500억에서 $7,500억으로 상승(+400%).
+
+**2021~2022년:** DXY가 90에서 114로 회복. 암호화폐 시총이 $3조에서 $8,000억으로 하락(-73%).
+
+**2022~2023년:** DXY가 114에서 100으로 하락. 암호화폐가 $8,000억에서 $1.7조로 회복(+113%).
+
+**현재(2025~2026년):** DXY가 107.8에서 고점을 찍고 현재 100.4. 총 암호화폐 시총이 $3.7조에서 $2.1조로 하락. 역사적 관계가 유효하다면 현재 DXY 하락은 암호화폐 안정화와 회복의 선행 신호입니다.
+
+## 연준 정책 맥락
+
+현재 FOMC 컨센서스는 2026년에 2~3회 금리 인하로, 6월부터 시작됩니다. 3월 31일 기준 연방기금 선물 시장은 6월 인하 확률을 68%로 반영 중입니다. 각 금리 인하 발표는 역사적으로 암호화폐에 위험 선호 촉매제로 작용했습니다. 특히 발표 전후 48~72시간 동안 그랬습니다.
+
+향후 90일간 DXY 경로는 주로 미국 경제 데이터가 계속 약화될지(DXY 하락, 암호화폐 강세) 아니면 재가속할지(DXY 상승, 암호화폐 역풍)에 달려 있습니다.
+
+## 핵심 DXY 레벨
+
+**DXY 저항:** 103.5 (200일 MA), 107.8 (1월 고점)
+**DXY 지지:** 100.0 (심리적), 97.5 (2024년 저점), 94.0 (2023년 저점)
+
+DXY의 100.0 이탈 시 97.5 목표. 역사적으로 다음 분기에 총 암호화폐 시총 20~30% 확장과 일치합니다.
+
+## 판단
+
+**DXY 약세 지속 시 암호화폐 롱.** 2026년 2분기 거시 셋업은 1분기 가격 행동이 시사하는 것보다 더 우호적입니다. DXY 약세, 다가오는 금리 인하, 과매도 암호화폐 주봉 RSI는 순풍의 수렴을 만들어냅니다. 주요 리스크는 연준이 방향을 되돌리게 만드는 예상치 못한 인플레이션 재급등으로, DXY 강세 및 암호화폐 약세로 이어집니다. 그 리스크는 실재하지만 현재 기본 시나리오로 반영되지 않았습니다.`,
     coin: "Macro",
     symbol: "DXY",
     direction: "LONG",
@@ -737,6 +1135,45 @@ Key VIX levels to monitor:
 ## Verdict
 
 **LONG (contrarian).** Based on historical precedent, the current VIX reading of 28.6 in the context of a crypto bull cycle is a high-probability 60–90 day contrarian long opportunity. This is not a near-term trade — it is a medium-term positioning opportunity for investors with a 2–3 month horizon. Entries should be scaled in over 2–4 weeks as VIX continues to normalize. Suggested allocation: 25% position now, add 25% at VIX 25, add 25% at VIX 20, reserve 25% for confirmation.`,
+    contentKo: `## VIX 개요
+
+CBOE 변동성 지수(VIX)는 28.6으로, 지난주 잠깐 32.4에 터치한 뒤 당일 6.57% 하락했습니다. VIX는 주식 시장의 "공포 지표"로도 불리며 S&P 500 옵션의 내재 변동성을 측정합니다. VIX가 상승하면 시장 참여자들이 하방 보호에 프리미엄을 지불하고 있으며 광범위한 공포와 불확실성을 반영합니다.
+
+VIX는 14거래일 연속으로 "상승" 공포의 역사적 평균 임계값인 20 위를 유지했습니다. 이는 2023년 지역 은행 위기 이후 가장 긴 20 이상 지속 기간입니다.
+
+## VIX와 암호화폐: 역발상 프레임워크
+
+VIX 상승 리딩은 60~90일 선행 기준으로 분석할 때 역설적으로 암호화폐 자산에 매력적인 선행 수익과 관련됩니다. 메커니즘:
+
+**1단계(VIX 급등):** 모든 위험 자산에서 강제 레버리지 해소. 암호화폐는 종종 주식보다 20~40% 빠르게 매도됩니다. 이것이 현재 우리가 있는 고통 단계입니다.
+
+**2단계(VIX 안정화):** 헤지펀드와 패밀리 오피스가 주식 헤지를 줄여 자본이 위험 자산으로 다시 흘러갑니다. 암호화폐는 보통 여기서 회복을 시작합니다.
+
+**3단계(VIX 20 아래 정상화):** 완전한 위험 선호 재참여. 암호화폐는 종종 2단계 기관 포지셔닝 위에 소매와 기관 FOMO가 쌓이면서 이 회복을 주도합니다.
+
+## VIX 25~35 리딩의 역사적 사례
+
+2019년 이후 VIX가 암호화폐 강세 사이클 동안 25~35 범위에 진입한 9개의 비교 가능한 사례를 보면:
+
+- 60일 후 평균 암호화폐 시총 수익: +23.4%
+- 90일 후 평균 암호화폐 시총 수익: +41.7%
+- 60일 양의 수익 사례: 9개 중 7개(78%)
+- 90일 양의 수익 사례: 9개 중 8개(89%)
+
+두 개의 음의 사례는 모두 VIX가 40 이상으로 지속 급등한 경우와 겹쳤습니다(2020년 3월 COVID, 2022년 금리 충격). VIX가 20 아래로 정상화된다면 역사적 기본 비율은 강하게 암호화폐 양의 수익을 지지합니다.
+
+## 현재 VIX 궤적
+
+VIX의 단일 세션 6.57% 하락(30.6에서 28.6으로)은 12일 급등 이후 첫 번째 의미 있는 후퇴입니다. 이것은 VIX 고점이 형성되는 전형적인 패턴입니다. 추가 확인은: VIX가 25 아래, 이후 향후 2~3주에 걸쳐 20 아래로 종가를 기록하는 것입니다.
+
+모니터링할 핵심 VIX 레벨:
+- **25:** 첫 번째 정상화 신호 — 위험 선호 복귀
+- **20:** 완전 정상화 — 위험 선호 환경
+- **32+(리스크):** VIX가 재가속하면 조정 연장
+
+## 판단
+
+**롱 (역발상).** 역사적 선례에 기반하면 암호화폐 강세 사이클 맥락에서 현재 VIX 28.6 리딩은 60~90일 기준 고확률 역발상 롱 기회입니다. 이것은 단기 트레이드가 아닙니다. 2~3개월 기간을 가진 투자자를 위한 중기 포지셔닝 기회입니다. 진입은 VIX가 계속 정상화됨에 따라 2~4주에 걸쳐 분할 매수해야 합니다. 권장 배분: 지금 25% 포지션, VIX 25에서 25% 추가, VIX 20에서 25% 추가, 확인을 위해 25% 예비.`,
     coin: "Macro",
     symbol: "VIX",
     direction: "LONG",
