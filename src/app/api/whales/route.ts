@@ -4,18 +4,15 @@ import { fetchAllHLWhales } from "@/lib/services/whales/hyperliquid.service";
 export const revalidate = 300; // 5 minutes
 
 const WALLETS = [
+  // $100M+ wallets
   { name: "WLFI Treasury", address: "0x5be9a4959308A0D0c7bC0870E319314d8D957dBB", entity: "World Liberty Financial", type: "treasury" },
-  { name: "WLFI Operations", address: "0x97f1f8003ad0fb1c99361170310c65dc84f921e3", entity: "World Liberty Financial", type: "operations" },
-  { name: "vitalik.eth", address: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", entity: "Ethereum Foundation", type: "founder" },
   { name: "Justin Sun", address: "0x176F3DAb24a159341c0509bB36B833E7fdd0a132", entity: "TRON / HTX", type: "whale" },
-  { name: "WBTC Deployer", address: "0x2faf487a4414fe77e2327f0bf4ae2a264a776ad2", entity: "FTX / Alameda", type: "exchange" },
-  { name: "Binance Hot Wallet", address: "0x28C6c06298d514Db089934071355E5743bf21d60", entity: "Binance", type: "exchange" },
-  { name: "Kraken Hot Wallet", address: "0x2910543af39aba0cd09dbb2d50200b3e800a63d2", entity: "Kraken", type: "exchange" },
-  { name: "Arbitrum Foundation", address: "0xd5B31E7C3F4C9cfe5E7D48481437F2B3E16f7B6a", entity: "Arbitrum", type: "foundation" },
-  { name: "19-Win Streak Whale", address: "0xd3cb1823da2ff584dec3f49ef6a3eea51471e5bc", entity: "Unknown", type: "whale" },
-  { name: "Abraxas Capital", address: "0xEED815cE05450EE05aDA8D6a6aF4E1a55D0Ae0ea", entity: "Abraxas Capital", type: "whale" },
-  { name: "Galaxy Digital", address: "0x8103B00AAd38C14Fd55E30c808D665a7C46A77B1", entity: "Galaxy Digital", type: "whale" },
-  { name: "Wintermute", address: "0x00000000AE347930bD1E7B0F35588b92280f9e75", entity: "Wintermute", type: "whale" },
+  { name: "Binance Hot Wallet 1", address: "0x28C6c06298d514Db089934071355E5743bf21d60", entity: "Binance", type: "exchange" },
+  { name: "Binance Cold Wallet", address: "0xBE0eB53F46cd790Cd13851d5EFf43D12404d33E8", entity: "Binance", type: "exchange" },
+  { name: "Bitfinex", address: "0x1151314c646Ce4E0eFD76d1aF4760aE66a9Fe30F", entity: "Bitfinex", type: "exchange" },
+  { name: "Coinbase Prime", address: "0xA090e606E30bD747d4E6245a1517EbE430F0057e", entity: "Coinbase", type: "exchange" },
+  { name: "Robinhood", address: "0x40B38765696e3d5d8d9d834D8AaD4bB6e418E489", entity: "Robinhood", type: "exchange" },
+  { name: "OKX Hot Wallet", address: "0x6cC5F688a315f3dC28A7781717a9A798a59fDA7b", entity: "OKX", type: "exchange" },
 ];
 
 const INSTITUTIONS = [
