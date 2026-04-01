@@ -237,7 +237,7 @@ export default function QuantClient({
   translations: Dictionary;
 }) {
   const [data, setData] = useState<MarketSignals>(initialData);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(initialData.signals.length === 0);
   const [activeTab, setActiveTab] = useState<TabKey>("signals");
   const [chartLoaded, setChartLoaded] = useState(false);
   const [toolsLoaded, setToolsLoaded] = useState(false);
@@ -319,6 +319,14 @@ export default function QuantClient({
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  // Auto-fetch on mount if server-side data came back empty
+  useEffect(() => {
+    if (initialData.signals.length === 0) {
+      refresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { display: countdownDisplay, reset: resetCountdown } =
@@ -572,34 +580,65 @@ export default function QuantClient({
 
               {/* Signal Rows */}
               {signals.length === 0 && (
-                <div className="divide-y divide-white/[0.03]">
-                  {Array.from({ length: 10 }).map((_, i) => (
-                    <div key={i} className="hidden md:grid items-center px-6 py-4 animate-pulse" style={{ gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1fr 1fr 1fr 1.5fr 1.5fr" }}>
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-white/[0.06]" />
-                        <div className="space-y-1.5">
-                          <div className="h-3 w-16 rounded bg-white/[0.06]" />
-                          <div className="h-2 w-12 rounded bg-white/[0.04]" />
+                <div className="relative">
+                  {/* Prominent analyzing overlay */}
+                  <div className="flex flex-col items-center justify-center py-16 gap-5">
+                    <div className="relative w-16 h-16">
+                      <div className="absolute inset-0 rounded-full border-2 border-blue-500/20 animate-ping" />
+                      <div className="absolute inset-1 rounded-full border-2 border-t-blue-500 border-r-blue-500/30 border-b-transparent border-l-transparent animate-spin" />
+                      <div className="absolute inset-3 rounded-full bg-blue-500/10 flex items-center justify-center">
+                        <svg className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-semibold text-zinc-200 mb-1">
+                        {lang === "ko" ? "실시간 시장 분석 중..." : "Analyzing Live Markets..."}
+                      </p>
+                      <p className="text-xs text-zinc-500 max-w-xs">
+                        {lang === "ko"
+                          ? "10개 코인의 RSI, MACD, 가격 데이터를 Binance에서 가져오고 있습니다"
+                          : "Fetching RSI, MACD, and price data for 10 coins from Binance"}
+                      </p>
+                    </div>
+                    {/* Analysis steps animation */}
+                    <div className="flex flex-col gap-2 mt-2">
+                      {[
+                        { en: "Connecting to Binance...", ko: "Binance 연결 중..." },
+                        { en: "Calculating RSI & MACD...", ko: "RSI & MACD 계산 중..." },
+                        { en: "Generating signals...", ko: "시그널 생성 중..." },
+                      ].map((step, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-2 text-[11px] font-mono text-zinc-600 animate-pulse"
+                          style={{ animationDelay: `${i * 0.5}s` }}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500/40" />
+                          {lang === "ko" ? step.ko : step.en}
                         </div>
-                      </div>
-                      <div className="flex justify-end"><div className="h-3 w-20 rounded bg-white/[0.06]" /></div>
-                      <div className="flex justify-end"><div className="h-3 w-12 rounded bg-white/[0.06]" /></div>
-                      <div className="flex justify-center"><div className="h-4 w-14 rounded bg-white/[0.04]" /></div>
-                      <div className="flex justify-end"><div className="h-3 w-8 rounded bg-white/[0.06]" /></div>
-                      <div className="flex justify-end"><div className="h-3 w-10 rounded bg-white/[0.06]" /></div>
-                      <div className="flex justify-center"><div className="h-5 w-16 rounded-md bg-white/[0.06]" /></div>
-                      <div className="flex justify-center"><div className="h-5 w-16 rounded-full bg-white/[0.06]" /></div>
-                      <div className="flex justify-end gap-2 items-center">
-                        <div className="h-1.5 w-16 rounded-full bg-white/[0.06]" />
-                        <div className="h-3 w-8 rounded bg-white/[0.04]" />
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                  <div className="md:hidden p-5 text-center">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="h-8 w-8 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
-                      <p className="text-sm text-zinc-400">{lang === "ko" ? "시그널 로딩 중..." : "Loading signals..."}</p>
-                    </div>
+                  </div>
+
+                  {/* Faded skeleton rows behind the overlay */}
+                  <div className="hidden md:block opacity-20 -mt-4">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="grid items-center px-6 py-4 animate-pulse" style={{ gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1fr 1fr 1fr 1.5fr 1.5fr" }}>
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-full bg-white/[0.06]" />
+                          <div className="space-y-1.5"><div className="h-3 w-16 rounded bg-white/[0.06]" /><div className="h-2 w-12 rounded bg-white/[0.04]" /></div>
+                        </div>
+                        <div className="flex justify-end"><div className="h-3 w-20 rounded bg-white/[0.06]" /></div>
+                        <div className="flex justify-end"><div className="h-3 w-12 rounded bg-white/[0.06]" /></div>
+                        <div className="flex justify-center"><div className="h-4 w-14 rounded bg-white/[0.04]" /></div>
+                        <div className="flex justify-end"><div className="h-3 w-8 rounded bg-white/[0.06]" /></div>
+                        <div className="flex justify-end"><div className="h-3 w-10 rounded bg-white/[0.06]" /></div>
+                        <div className="flex justify-center"><div className="h-5 w-16 rounded-md bg-white/[0.06]" /></div>
+                        <div className="flex justify-center"><div className="h-5 w-16 rounded-full bg-white/[0.06]" /></div>
+                        <div className="flex justify-end gap-2"><div className="h-1.5 w-16 rounded-full bg-white/[0.06]" /><div className="h-3 w-8 rounded bg-white/[0.04]" /></div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
