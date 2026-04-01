@@ -123,7 +123,7 @@ export function CommunityTabs({
   lang,
 }: CommunityTabsProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("all");
-  const [isKorean, setIsKorean] = useState(lang === "ko");
+  const isKorean = lang === "ko";
   const tabsRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -234,8 +234,6 @@ export function CommunityTabs({
     setActiveTab(tab);
   };
 
-  const hasKoreanTranslations = Object.keys(koreanNewsMap).length > 0;
-
   return (
     <section className="py-10">
       <Container className="flex flex-col gap-8">
@@ -268,23 +266,7 @@ export function CommunityTabs({
                 </button>
               ))}
 
-              {/* Korean translation toggle */}
-              {hasKoreanTranslations && (
-                <>
-                  <div className="w-px h-6 bg-white/[0.08] mx-1 flex-shrink-0" />
-                  <button
-                    onClick={() => setIsKorean((prev) => !prev)}
-                    className={`relative z-10 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
-                      isKorean
-                        ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
-                        : "text-zinc-400 hover:text-zinc-200"
-                    }`}
-                  >
-                    <span role="img" aria-label="Korean flag" className="text-base leading-none">&#127472;&#127479;</span>
-                    <span>{isKorean ? "한국어" : "Korean"}</span>
-                  </button>
-                </>
-              )}
+              {/* Korean follows route language automatically via globe switcher */}
             </div>
             {/* Right gradient fade indicator */}
             <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-zinc-950/90 to-transparent z-20" />

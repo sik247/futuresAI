@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import { User } from "@prisma/client";
 import { signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import React from "react";
 
 type TMeMenuSection = {};
@@ -14,6 +14,8 @@ const MeMenuSection = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement> & TMeMenuSection
 >(({ ...props }, ref) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const lang = pathname.split("/")[1] || "en";
   const signOutHandler = () => {
     signOut({ redirect: true });
     alert("로그아웃 되었습니다.");
@@ -32,7 +34,7 @@ const MeMenuSection = React.forwardRef<
         </Button>
         <Button
           variant={"secondary"}
-          onClick={() => router.push("/me/refund-withdraw")}
+          onClick={() => router.push(`/${lang}/me/refund-withdraw`)}
           className="w-full justify-between text-base font-semibold text-foreground bg-background md:hidden"
         >
           출금 및 환급 내역

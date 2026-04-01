@@ -7,8 +7,8 @@ type THearSelection = {};
 
 const HearSelection: React.FC<THearSelection> = ({}) => {
   const pathname = usePathname();
-  // /me/refund-withdraw면 /me만 받게
   const pathnameArr = pathname.split("/");
+  const lang = pathnameArr[1] === "ko" || pathnameArr[1] === "en" ? pathnameArr[1] : "en";
 
   function getBackgroundColor(isMePage: boolean) {
     return isMePage ? "bg-black" : "bg-background";
@@ -29,7 +29,7 @@ const HearSelection: React.FC<THearSelection> = ({}) => {
         홈
       </Link>
       <Link
-        href={"/me/refund-withdraw"}
+        href={`/${lang}/me/refund-withdraw`}
         className={` w-20 py-1 text-sm font-normal text-center rounded-md ${getBackgroundColor(pathnameArr[1] === "me")} ${getTextColor(
           pathnameArr[1] === "me"
         )}`}

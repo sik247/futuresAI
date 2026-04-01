@@ -11,6 +11,8 @@ type TNavigationMenuSection = {};
 
 const NavigationMenuSection: React.FC<TNavigationMenuSection> = ({}) => {
   const session = useSession();
+  const currentPath = usePathname();
+  const lang = currentPath.split("/")[1] || "en";
 
   type TMenu = {
     icon: React.ReactNode;
@@ -21,7 +23,7 @@ const NavigationMenuSection: React.FC<TNavigationMenuSection> = ({}) => {
     {
       icon: <DollarSign size={16} />,
       title: "페이백",
-      link: "/me/refund-withdraw",
+      link: `/${lang}/me/refund-withdraw`,
     },
     {
       icon: <Users size={16} />,

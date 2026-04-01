@@ -10,7 +10,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -35,6 +35,8 @@ const IntroSection = React.forwardRef<
   );
   const session = useSession();
   const router = useRouter();
+  const _pathname = usePathname();
+  const _lang = _pathname.split("/")[1] || "en";
 
   const sectionRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLDivElement>(null);
@@ -284,7 +286,7 @@ const IntroSection = React.forwardRef<
           className="w-8 h-8 text-zinc-400 hover:text-blue-400 cursor-pointer shrink-0 transition-colors duration-200"
           onClick={() => {
             if (session.data) {
-              router.push(`/me/refund-withdraw`);
+              router.push(`/${_lang}/me/refund-withdraw`);
             } else {
               router.push("/login");
             }

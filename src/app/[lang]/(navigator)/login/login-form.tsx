@@ -71,7 +71,7 @@ const LoginForm = React.forwardRef<
         });
       } else {
         revalidateAll("/me/refund-withdraw");
-        router.push("/me/refund-withdraw");
+        router.push(`/${lang || "en"}/me/refund-withdraw`);
       }
     } catch (error) {
       toast({

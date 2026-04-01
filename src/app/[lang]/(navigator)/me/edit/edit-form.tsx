@@ -18,7 +18,7 @@ import React, { MouseEvent, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { revalidateAll } from "@/lib/services/revalidate";
 import { updateUser } from "../profile/actions";
 import { SUPABASE_STORAGE_URL } from "@/lib/utils/get-image-url";
@@ -32,6 +32,8 @@ const EditForm = React.forwardRef<
   React.ComponentProps<"div"> & TEditForm
 >(({ user, ...props }, ref) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const lang = pathname.split("/")[1] || "en";
   const [file, setFile] = useState<File | null>(
     new File([], "filename", { type: "image/png" })
   );
@@ -49,7 +51,7 @@ const EditForm = React.forwardRef<
     if (response) {
       alert("수정이 완료되었습니다.");
       revalidateAll("/me/refund-withdraw");
-      router.push("/me/refund-withdraw");
+      router.push(`/${lang}/me/refund-withdraw`);
     } else {
       alert("수정이 실패하였습니다.");
     }
