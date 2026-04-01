@@ -7,6 +7,7 @@ export type Dictionary = {
   services: string;
   calculator: string;
   charts: string;
+  chat: string;
   sns: string;
   markets: string;
   whales: string;

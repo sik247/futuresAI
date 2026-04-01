@@ -18,6 +18,7 @@ import {
   NewspaperIcon,
   CalculatorIcon,
   WalletIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 
 import Logo from "@/components/logo";
@@ -41,6 +42,7 @@ const NAV_ITEMS = [
   { path: "dashboard", key: "dashboard" as const, icon: ChartBarIcon, group: 0 },
   { path: "charts", key: "charts" as const, icon: PresentationChartLineIcon, group: 1 },
   { path: "quant", key: "quant" as const, icon: BeakerIcon, group: 1 },
+  { path: "chat", key: "chat" as const, icon: SparklesIcon, group: 1 },
   { path: "markets", key: "markets" as const, icon: GlobeAltIcon, group: 1 },
   { path: "whales", key: "whales" as const, icon: CurrencyDollarIcon, group: 2 },
   { path: "sns", key: "sns" as const, icon: ChatBubbleLeftRightIcon, group: 2 },
