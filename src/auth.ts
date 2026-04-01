@@ -95,7 +95,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: "/en/login",
+    signIn: "/ko/login",
   },
   callbacks: {
     async signIn({ user, account }) {

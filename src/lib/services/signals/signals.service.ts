@@ -188,6 +188,7 @@ async function fetchCoinGeckoPrices() {
     `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true`,
     { next: { revalidate: 60 } }
   );
+  if (!res.ok) throw new Error(`CoinGecko ${res.status}`);
   const data = await res.json();
 
   const result: Record<string, { usd: number; usd_24h_change: number; usd_24h_vol: number }> = {};
