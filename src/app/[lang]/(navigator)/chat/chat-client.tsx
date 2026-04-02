@@ -92,22 +92,23 @@ function ChartBarIcon({ className }: { className?: string }) {
 /* -------------------------------------------------------------------------- */
 function TradingViewChart({ ticker }: { ticker: TickerInfo }) {
   const { symbol, exchange } = ticker;
-  const src = `https://s.tradingview.com/widgetembed/?frameElementId=tv_chart&symbol=${exchange}:${symbol}&interval=D&hidesidetoolbar=0&symboledit=1&saveimage=0&toolbarbg=1e1e2e&studies=[]&theme=dark&style=1&timezone=exchange&withdateranges=1&showpopupbutton=0&width=100%25&height=400`;
+  const src = `https://s.tradingview.com/widgetembed/?frameElementId=tv_chart&symbol=${exchange}:${symbol}&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=0a0a0f&studies=[]&theme=dark&style=1&timezone=exchange&withdateranges=1&showpopupbutton=0&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=[]&disabled_features=[]&locale=en&width=100%25&height=500`;
 
   return (
-    <div className="mt-3 rounded-xl overflow-hidden border border-white/[0.06] bg-zinc-900/60">
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/[0.06]">
+    <div className="mt-3 w-full rounded-xl overflow-hidden border border-white/[0.08] bg-zinc-900/80">
+      <div className="flex items-center gap-2 px-4 py-2 border-b border-white/[0.06]">
         <ChartBarIcon className="w-4 h-4 text-blue-400" />
-        <span className="text-xs font-mono text-zinc-300 font-semibold tracking-wide">
+        <span className="text-sm font-mono text-zinc-200 font-semibold">
           {exchange}:{symbol}
         </span>
-        <span className="ml-auto text-[10px] text-zinc-500 uppercase tracking-widest">
+        <span className="ml-auto text-[10px] text-zinc-600 uppercase tracking-widest">
           TradingView
         </span>
       </div>
       <iframe
         src={src}
-        style={{ width: "100%", height: 400 }}
+        className="w-full"
+        style={{ height: 500 }}
         frameBorder="0"
         allowFullScreen
         title={`${exchange}:${symbol} Chart`}
@@ -219,9 +220,13 @@ export default function ChatClient({ lang, hasAccess, userName }: Props) {
 
       const data = await res.json();
 
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
       const assistantMessage: Message = {
         role: "assistant",
-        content: data.message ?? data.content ?? data.reply ?? "",
+        content: data.response || data.message || data.content || "",
         ticker: data.ticker ?? undefined,
       };
 
@@ -260,7 +265,7 @@ export default function ChatClient({ lang, hasAccess, userName }: Props) {
   const isEmpty = messages.length === 0 && !loading;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] bg-zinc-950">
+    <div className="flex flex-col h-[calc(100vh-7.5rem)] mt-2 bg-zinc-950">
       {/* ---------------------------------------------------------------- */}
       {/*  Top bar — persona selector + new chat                           */}
       {/* ---------------------------------------------------------------- */}
@@ -309,7 +314,7 @@ export default function ChatClient({ lang, hasAccess, userName }: Props) {
       ) : (
         <>
           {/* Messages area */}
-          <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
+          <div className="flex-1 overflow-y-auto px-4 sm:px-8 lg:px-16 py-6 space-y-4 max-w-5xl mx-auto w-full">
             {/* Welcome state */}
             {isEmpty && (
               <div className="flex flex-col items-center justify-center h-full min-h-[300px] gap-4 text-center">
@@ -359,37 +364,36 @@ export default function ChatClient({ lang, hasAccess, userName }: Props) {
 
             {/* Message list */}
             {messages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={[
-                  "flex",
-                  msg.role === "user" ? "justify-end" : "justify-start",
-                ].join(" ")}
-              >
+              <React.Fragment key={idx}>
                 <div
                   className={[
-                    "max-w-[80%]",
-                    msg.role === "user" ? "order-2" : "order-1",
+                    "flex",
+                    msg.role === "user" ? "justify-end" : "justify-start",
                   ].join(" ")}
                 >
-                  {/* Bubble */}
                   <div
                     className={[
-                      "px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap",
-                      msg.role === "user"
-                        ? "bg-blue-600 text-white rounded-tr-sm"
-                        : "bg-zinc-800/50 text-zinc-100 rounded-tl-sm border border-white/[0.05]",
+                      msg.role === "user" ? "max-w-[75%]" : "max-w-[90%]",
                     ].join(" ")}
                   >
-                    {msg.content}
+                    <div
+                      className={[
+                        "px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap",
+                        msg.role === "user"
+                          ? "bg-blue-600 text-white rounded-tr-sm"
+                          : "bg-zinc-800/60 text-zinc-100 rounded-tl-sm border border-white/[0.06]",
+                      ].join(" ")}
+                    >
+                      {msg.content}
+                    </div>
                   </div>
-
-                  {/* TradingView chart if ticker present */}
-                  {msg.role === "assistant" && msg.ticker && (
-                    <TradingViewChart ticker={msg.ticker} />
-                  )}
                 </div>
-              </div>
+
+                {/* TradingView chart — full width, outside message bubble */}
+                {msg.role === "assistant" && msg.ticker && (
+                  <TradingViewChart ticker={msg.ticker} />
+                )}
+              </React.Fragment>
             ))}
 
             {/* Loading indicator */}
