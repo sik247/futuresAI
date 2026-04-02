@@ -126,7 +126,6 @@ function translateText(text: string, isKo: boolean): string {
 }
 
 const TABS = [
-  { key: "signals", labelKey: "quant_signals" as const },
   { key: "reports", labelKey: "quant_reports" as const },
   { key: "chart", labelKey: "quant_chartAnalysis" as const },
   { key: "tools", labelKey: "quant_tools" as const },
@@ -238,7 +237,7 @@ export default function QuantClient({
 }) {
   const [data, setData] = useState<MarketSignals>(initialData);
   const [loading, setLoading] = useState(initialData.signals.length === 0);
-  const [activeTab, setActiveTab] = useState<TabKey>("signals");
+  const [activeTab, setActiveTab] = useState<TabKey>("reports");
   const [chartLoaded, setChartLoaded] = useState(false);
   const [toolsLoaded, setToolsLoaded] = useState(false);
 
@@ -477,7 +476,8 @@ export default function QuantClient({
       {/*  TAB CONTENT                                                 */}
       {/* ============================================================ */}
       <div className="max-w-7xl mx-auto px-6 pt-10 pb-24 sm:pb-32">
-        {activeTab === "signals" && (
+        {/* Signals tab removed — Binance API geo-blocked on Vercel */}
+        {false && (
           <div>
             {/* -- Market Regime Bar (Bloomberg-style) ---------------------- */}
             <div
