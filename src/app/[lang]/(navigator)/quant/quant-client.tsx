@@ -350,6 +350,14 @@ export default function QuantClient({
 
   const { signals, fearGreed, btcTrend, marketSummary } = data;
 
+  // Auto-retry if signals are empty (API may have failed at build time)
+  useEffect(() => {
+    if (signals.length === 0 && !loading) {
+      const timer = setTimeout(() => refresh(), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [signals.length, loading, refresh]);
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       {/* ============================================================ */}
@@ -602,6 +610,16 @@ export default function QuantClient({
                           : "Fetching RSI, MACD, and price data for 10 coins from Binance"}
                       </p>
                     </div>
+                    {/* Retry button */}
+                    <button
+                      onClick={refresh}
+                      disabled={loading}
+                      className="mt-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-medium hover:bg-blue-500 transition-colors disabled:opacity-50"
+                    >
+                      {loading
+                        ? (lang === "ko" ? "새로고침 중..." : "Refreshing...")
+                        : (lang === "ko" ? "다시 시도" : "Retry")}
+                    </button>
                     {/* Analysis steps animation */}
                     <div className="flex flex-col gap-2 mt-2">
                       {[
