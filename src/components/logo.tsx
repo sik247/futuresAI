@@ -5,8 +5,8 @@ import React from "react";
 
 const Logo: React.FC = () => {
   return (
-    <Link href="/" className="flex items-center">
-      <div className="w-28 md:w-32 lg:w-36 h-auto">
+    <Link href="/" className="flex items-center flex-shrink-0">
+      <div className="w-24 md:w-28 lg:w-32 h-auto overflow-hidden">
         <Image
           src="/images/futuresai-logo.jpeg"
           alt="FuturesAI"

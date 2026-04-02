@@ -103,7 +103,7 @@ const Headers: React.FC<THeaders> = ({ lang, translations }) => {
                 )}
                 <Link href={`/${lang}/${path}`} className="group relative active:scale-[0.97] transition-transform duration-100">
                   <span
-                    className={`relative flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold tracking-wide uppercase rounded-full transition-all duration-300 ${
+                    className={`relative flex items-center gap-1 px-2 py-1.5 text-[10px] font-semibold tracking-wide uppercase rounded-full transition-all duration-300 ${
                       active
                         ? "text-white bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border border-blue-500/30 shadow-[0_0_12px_rgba(59,130,246,0.25)]"
                         : "text-zinc-400 border border-transparent hover:text-zinc-100 hover:bg-white/[0.05] hover:border-white/[0.06]"
