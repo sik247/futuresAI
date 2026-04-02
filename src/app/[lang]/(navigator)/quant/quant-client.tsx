@@ -827,6 +827,25 @@ export default function QuantClient({
               })}
             </div>
 
+            {/* -- Blog Preview (below signals) ----------------------------- */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-1 h-5 rounded-full bg-purple-500/70" />
+                  <h2 className="text-base font-semibold tracking-tight text-zinc-200">
+                    {lang === "ko" ? "퀀트 리서치" : "Quant Research"}
+                  </h2>
+                </div>
+                <button
+                  onClick={() => handleTabChange("reports")}
+                  className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                >
+                  {lang === "ko" ? "전체 보기 →" : "View All →"}
+                </button>
+              </div>
+              <QuantBlog lang={lang} limit={3} />
+            </div>
+
             {/* -- Disclaimer -------------------------------------------- */}
             <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6 text-center">
               <p className="text-[11px] text-zinc-600 leading-relaxed max-w-2xl mx-auto font-mono">

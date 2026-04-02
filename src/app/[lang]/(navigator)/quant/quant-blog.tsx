@@ -342,7 +342,7 @@ function BlogCard({ post, lang }: { post: QuantBlogPost; lang: string }) {
 /* ------------------------------------------------------------------ */
 /*  Main component                                                      */
 /* ------------------------------------------------------------------ */
-export default function QuantBlog({ lang }: { lang: string }) {
+export default function QuantBlog({ lang, limit }: { lang: string; limit?: number }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
 
@@ -378,9 +378,9 @@ export default function QuantBlog({ lang }: { lang: string }) {
   });
 
   return (
-    <section ref={sectionRef} className="max-w-7xl mx-auto px-6 pt-16 pb-24 sm:pb-32">
-      {/* Section header */}
-      <div className="blog-header flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+    <section ref={sectionRef} className={limit ? "" : "max-w-7xl mx-auto px-6 pt-16 pb-24 sm:pb-32"}>
+      {/* Section header — hidden when used as preview */}
+      <div className={`blog-header flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 ${limit ? "hidden" : ""}`}>
         <div>
           <p className="font-mono text-[11px] tracking-[0.3em] text-zinc-500 uppercase mb-2">
             {isKo ? "퀀트 리서치" : "Quant Research"}
@@ -400,7 +400,7 @@ export default function QuantBlog({ lang }: { lang: string }) {
         ref={cardsRef}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
       >
-        {QUANT_BLOG_POSTS.map((post) => (
+        {(limit ? QUANT_BLOG_POSTS.slice(0, limit) : QUANT_BLOG_POSTS).map((post) => (
           <BlogCard key={post.id} post={post} lang={lang} />
         ))}
       </div>
