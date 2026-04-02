@@ -589,8 +589,8 @@ export default function QuantClient({
               {/* Signal Rows */}
               {signals.length === 0 && (
                 <div className="relative">
-                  {/* Prominent analyzing overlay */}
-                  <div className="flex flex-col items-center justify-center py-16 gap-5">
+                  {/* Compact loading state */}
+                  <div className="flex flex-col items-center justify-center py-10 gap-4">
                     <div className="relative w-16 h-16">
                       <div className="absolute inset-0 rounded-full border-2 border-blue-500/20 animate-ping" />
                       <div className="absolute inset-1 rounded-full border-2 border-t-blue-500 border-r-blue-500/30 border-b-transparent border-l-transparent animate-spin" />
@@ -639,8 +639,8 @@ export default function QuantClient({
                     </div>
                   </div>
 
-                  {/* Faded skeleton rows behind the overlay */}
-                  <div className="hidden md:block opacity-20 -mt-4">
+                  {/* Faded skeleton rows — hidden to keep compact */}
+                  <div className="hidden">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <div key={i} className="grid items-center px-6 py-4 animate-pulse" style={{ gridTemplateColumns: "2fr 1.5fr 1fr 1fr 1fr 1fr 1fr 1.5fr 1.5fr" }}>
                         <div className="flex items-center gap-3">
