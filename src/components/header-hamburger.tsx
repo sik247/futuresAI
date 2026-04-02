@@ -16,7 +16,6 @@ import {
   CalculatorIcon,
   SparklesIcon,
   UserGroupIcon,
-  WalletIcon,
 } from "@heroicons/react/24/outline";
 import { useSession } from "next-auth/react";
 import { Dictionary } from "@/i18n";
@@ -30,7 +29,6 @@ interface HeaderHamburgerProps {
 }
 
 const MENU_ITEMS = [
-  { path: "portfolio", key: "portfolio" as const, icon: WalletIcon },
   { path: "dashboard", key: "dashboard" as const, icon: ChartBarIcon },
   { path: "charts", key: "charts" as const, icon: PresentationChartLineIcon },
   { path: "quant", key: "quant" as const, icon: BeakerIcon },

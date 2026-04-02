@@ -17,7 +17,6 @@ import {
   ChatBubbleLeftRightIcon,
   NewspaperIcon,
   CalculatorIcon,
-  WalletIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
 
@@ -38,7 +37,6 @@ const LanguageSwitcher = dynamic(
 type THeaders = { lang: string; translations: Dictionary };
 
 const NAV_ITEMS = [
-  { path: "portfolio", key: "portfolio" as const, icon: WalletIcon, group: 0 },
   { path: "dashboard", key: "dashboard" as const, icon: ChartBarIcon, group: 0 },
   { path: "charts", key: "charts" as const, icon: PresentationChartLineIcon, group: 1 },
   { path: "quant", key: "quant" as const, icon: BeakerIcon, group: 1 },

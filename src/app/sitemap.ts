@@ -22,7 +22,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: 'insights',    priority: 0.7, changeFrequency: 'daily' },
     { path: 'payback',     priority: 0.7, changeFrequency: 'weekly' },
     { path: 'exchanges',   priority: 0.6, changeFrequency: 'weekly' },
-    { path: 'portfolio',   priority: 0.7, changeFrequency: 'daily' },
     { path: 'how-to',      priority: 0.6, changeFrequency: 'weekly' },
     { path: 'live',        priority: 0.7, changeFrequency: 'daily' },
     { path: 'team',        priority: 0.5, changeFrequency: 'monthly' },
