@@ -28,12 +28,12 @@ const NavigationMenuSection: React.FC<TNavigationMenuSection> = ({}) => {
     {
       icon: <Users size={16} />,
       title: "커뮤니티",
-      link: "/me/profile",
+      link: `/${lang}/me/profile`,
     },
     {
       icon: <Coins size={16} />,
       title: "리워드",
-      link: "/me/reward",
+      link: `/${lang}/me/reward`,
     },
   ];
 

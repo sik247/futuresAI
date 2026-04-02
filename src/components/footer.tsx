@@ -40,7 +40,7 @@ const Footer: React.FC<TFooter> = ({ lang = "en", translations }) => {
   const RESOURCE_LINKS = [
     { href: "news", label: ko ? "크립토 뉴스" : "Crypto News" },
     { href: "charts", label: ko ? "실시간 차트" : "Live Charts" },
-    { href: "markets", label: ko ? "시장 데이터" : "Market Data" },
+    { href: "markets", label: ko ? "예측시장" : "Prediction Market" },
   ];
 
   const LEGAL_LINKS = [

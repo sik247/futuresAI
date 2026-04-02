@@ -42,7 +42,7 @@ const MeMenuSection = React.forwardRef<
         </Button>
         <Button
           variant={"secondary"}
-          onClick={() => router.push("/me/profile")}
+          onClick={() => router.push(`/${lang}/me/profile`)}
           className="w-full justify-between text-base font-semibold text-foreground bg-background md:hidden"
         >
           프로필 관리

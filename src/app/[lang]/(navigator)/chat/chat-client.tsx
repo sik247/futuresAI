@@ -5,17 +5,15 @@ import Image from "next/image";
 
 const PERSONA_AVATARS: Record<string, string> = {
   crypto: "/images/personas/crypto-analyst.png",
-  "us-stocks": "/images/personas/us-stocks-analyst.png",
 };
 const PERSONA_NAMES: Record<string, Record<string, string>> = {
   crypto: { en: "Alex Kim — Crypto Analyst", ko: "김알렉스 — 크립토 애널리스트" },
-  "us-stocks": { en: "Sarah Chen — Equity Analyst", ko: "첸사라 — 주식 애널리스트" },
 };
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                      */
 /* -------------------------------------------------------------------------- */
-type Persona = "crypto" | "us-stocks";
+type Persona = "crypto";
 
 interface TickerInfo {
   symbol: string;
@@ -285,8 +283,8 @@ export default function ChatClient({ lang, hasAccess, userName }: Props) {
   );
 
   const placeholder = ko
-    ? "크립토, 주식, 시장에 대해 물어보세요..."
-    : "Ask about crypto, stocks, markets...";
+    ? "크립토, 시장에 대해 물어보세요..."
+    : "Ask about crypto and markets...";
 
   const isEmpty = messages.length === 0 && !loading;
 
@@ -297,12 +295,6 @@ export default function ChatClient({ lang, hasAccess, userName }: Props) {
       desc: ko
         ? "실시간 암호화폐 분석 · 선물 포지션 · 온체인 데이터"
         : "Real-time crypto analysis, futures positions & on-chain data",
-    },
-    "us-stocks": {
-      tagline: ko ? "주식 애널리스트" : "Equity Analyst",
-      desc: ko
-        ? "미국 주식 시장 인사이트 · 섹터 분석 · 실적 데이터"
-        : "US stock market insights, sector analysis & earnings data",
     },
   };
 
@@ -348,7 +340,7 @@ export default function ChatClient({ lang, hasAccess, userName }: Props) {
 
             {/* Persona selector cards */}
             <div className="grid grid-cols-2 gap-3 w-full">
-              {(["crypto", "us-stocks"] as Persona[]).map((p) => {
+              {(["crypto"] as Persona[]).map((p) => {
                 const isSelected = persona === p;
                 return (
                   <button
