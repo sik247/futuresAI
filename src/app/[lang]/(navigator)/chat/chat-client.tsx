@@ -324,7 +324,7 @@ export default function ChatClient({ lang, hasAccess, userName }: Props) {
   /*  RENDER                                                                   */
   /* ======================================================================== */
   return (
-    <div className="flex flex-col h-[calc(100vh-7.5rem)] mt-2 bg-zinc-950">
+    <div className="flex flex-col h-[calc(100vh-8rem)] pt-24 sm:pt-28 bg-zinc-950">
       {!hasAccess ? (
         <AccessDenied ko={ko} />
       ) : isEmpty ? (
@@ -454,18 +454,24 @@ export default function ChatClient({ lang, hasAccess, userName }: Props) {
         /* ------------------------------------------------------------------ */
         <>
           {/* Top bar — active persona + new chat */}
-          <div className="shrink-0 flex items-center justify-between gap-3 px-4 py-2.5 border-b border-white/[0.06] bg-zinc-950/80 backdrop-blur-xl">
-            <div className="flex items-center gap-2.5">
+          <div className="shrink-0 flex items-center justify-between gap-3 px-4 py-2.5 border-b border-white/[0.06] bg-zinc-900/60 backdrop-blur-xl">
+            <div className="flex items-center gap-3">
               <Image
                 src={PERSONA_AVATARS[persona]}
                 alt={personaMeta[persona].tagline}
-                width={28}
-                height={28}
-                className="w-7 h-7 rounded-full object-cover ring-1 ring-white/10"
+                width={36}
+                height={36}
+                className="w-9 h-9 rounded-full object-cover ring-2 ring-blue-500/30"
               />
-              <span className="text-sm font-medium text-zinc-300">
-                {PERSONA_NAMES[persona]?.[ko ? "ko" : "en"]}
-              </span>
+              <div>
+                <span className="text-sm font-semibold text-white block">
+                  {PERSONA_NAMES[persona]?.[ko ? "ko" : "en"]}
+                </span>
+                <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  {ko ? "온라인" : "Online"}
+                </span>
+              </div>
             </div>
             <button
               onClick={handleNewChat}
@@ -506,9 +512,9 @@ export default function ChatClient({ lang, hasAccess, userName }: Props) {
                         <div className="text-sm text-zinc-100 leading-relaxed whitespace-pre-wrap pl-3 border-l border-white/[0.08]">
                           {msg.content}
                         </div>
-                        {/* TradingView chart — full width, below message */}
+                        {/* TradingView chart — full width */}
                         {msg.ticker && (
-                          <div className="mt-3 pl-3">
+                          <div className="mt-4 -ml-3">
                             <TradingViewChart ticker={msg.ticker} />
                           </div>
                         )}

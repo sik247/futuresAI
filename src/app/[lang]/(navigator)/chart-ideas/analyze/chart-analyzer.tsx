@@ -743,12 +743,12 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
       {analysis && (
         <div className="flex flex-col lg:flex-row gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-          {/* RIGHT PANEL: scrollable analysis */}
-          <div className="lg:w-full flex flex-col gap-4 lg:max-h-[85vh] lg:overflow-y-auto lg:pr-2 custom-scrollbar">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* RIGHT PANEL: compact analysis grid — minimize scrolling */}
+          <div className="lg:w-full flex flex-col gap-3 lg:max-h-[90vh] lg:overflow-y-auto lg:pr-2 custom-scrollbar">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {/* Live Context */}
           {analysis.liveContext && (
-            <Card className="md:col-span-2 p-6 bg-zinc-950/50 backdrop-blur-sm border-blue-500/20">
+            <Card className="md:col-span-2 lg:col-span-3 p-4 bg-zinc-950/50 backdrop-blur-sm border-blue-500/20">
               <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-4">
                 Live Market Data
               </h3>
@@ -811,7 +811,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
 
           {/* OCR Data */}
           {analysis.ocrData && (
-            <Card className="md:col-span-2 p-6 bg-zinc-950/50 backdrop-blur-sm border-white/10">
+            <Card className="md:col-span-2 lg:col-span-3 p-4 bg-zinc-950/50 backdrop-blur-sm border-white/10">
               <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
                 {translations.chartAnalysis_ocrData || "Chart Data (OCR)"}
               </h3>
@@ -846,7 +846,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
           )}
 
           {/* Summary + Trend */}
-          <Card className="md:col-span-2 p-6 bg-zinc-950/50 backdrop-blur-sm border-white/10">
+          <Card className="md:col-span-2 lg:col-span-3 p-4 bg-zinc-950/50 backdrop-blur-sm border-white/10">
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-bold text-foreground">{translations.chartAnalysis_summary || "Analysis Summary"}</h2>
@@ -1014,7 +1014,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
 
           {/* Quant Analysis */}
           {analysis.quantAnalysis && (
-            <Card className="md:col-span-2 p-6 bg-zinc-950/50 backdrop-blur-sm border-white/10">
+            <Card className="md:col-span-2 lg:col-span-3 p-4 bg-zinc-950/50 backdrop-blur-sm border-white/10">
               <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
                 {translations.chartAnalysis_quantAnalysis || "Quantitative Analysis"}
               </h3>
@@ -1120,7 +1120,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
           </Card>
 
           {/* Line Probabilities */}
-          <Card className="md:col-span-2 p-6 bg-zinc-950/50 backdrop-blur-sm border-white/10">
+          <Card className="md:col-span-2 lg:col-span-3 p-4 bg-zinc-950/50 backdrop-blur-sm border-white/10">
             <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
               {translations.chartAnalysis_hitProbability || "Hit Probability"}
             </h3>
