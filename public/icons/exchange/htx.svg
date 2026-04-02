@@ -1,1 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="8" fill="#2b6aff"/><text x="20" y="27" text-anchor="middle" font-family="Arial,sans-serif" font-weight="bold" font-size="16" fill="#fff">HTX</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <rect width="200" height="200" rx="40" fill="#1B65F5"/>
+  <path d="M55 60c0 0 10 30 10 50s-10 35-10 35h20c0 0 10-15 10-35s-10-50-10-50h-20z" fill="#fff"/>
+  <rect x="65" y="85" width="30" height="12" rx="2" fill="#fff"/>
+  <text x="132" y="118" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-weight="900" font-size="58" fill="#fff">TX</text>
+</svg>
