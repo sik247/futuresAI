@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 declare global {
   interface Window {
@@ -9,16 +9,34 @@ declare global {
 }
 
 export default function AdSenseUnit() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [hasAd, setHasAd] = useState(false);
+
   useEffect(() => {
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch {
       // adsbygoogle not loaded
     }
+
+    // Check if ad loaded after a delay — hide empty container
+    const timer = setTimeout(() => {
+      if (containerRef.current) {
+        const ins = containerRef.current.querySelector("ins");
+        if (ins && ins.getAttribute("data-ad-status") === "filled") {
+          setHasAd(true);
+        }
+      }
+    }, 2000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (
-    <div className="w-full my-6">
+    <div
+      ref={containerRef}
+      className={`w-full my-6 ${hasAd ? "" : "hidden"}`}
+    >
       <ins
         className="adsbygoogle"
         style={{ display: "block" }}

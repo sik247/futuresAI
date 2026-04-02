@@ -21,11 +21,6 @@ const CommunityIconsPathList = [
     alt: "Futures AI Official",
     href: "https://t.me/FuturesAIOfficial",
   },
-  {
-    item: "/icons/footer-icons/youtube.png",
-    alt: "YouTube",
-    href: "https://www.youtube.com/@TetherBase",
-  },
 ];
 
 const Footer: React.FC<TFooter> = ({ lang = "en", translations }) => {
