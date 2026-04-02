@@ -1,6 +1,16 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import Image from "next/image";
+
+const PERSONA_AVATARS: Record<string, string> = {
+  crypto: "/images/personas/crypto-analyst.png",
+  "us-stocks": "/images/personas/us-stocks-analyst.png",
+};
+const PERSONA_NAMES: Record<string, Record<string, string>> = {
+  crypto: { en: "Alex Kim — Crypto Analyst", ko: "김알렉스 — 크립토 애널리스트" },
+  "us-stocks": { en: "Sarah Chen — Equity Analyst", ko: "첸사라 — 주식 애널리스트" },
+};
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                      */
@@ -270,30 +280,31 @@ export default function ChatClient({ lang, hasAccess, userName }: Props) {
       {/*  Top bar — persona selector + new chat                           */}
       {/* ---------------------------------------------------------------- */}
       <div className="shrink-0 flex items-center justify-between gap-3 px-4 py-3 border-b border-white/[0.06] bg-zinc-950/80 backdrop-blur-xl">
-        {/* Persona pills */}
+        {/* Persona pills with avatars */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setPersona("crypto")}
-            className={[
-              "rounded-full px-4 py-2 text-sm font-medium transition-all duration-200",
-              persona === "crypto"
-                ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"
-                : "bg-zinc-800/60 text-zinc-400 hover:bg-zinc-700/60 hover:text-zinc-300",
-            ].join(" ")}
-          >
-            {ko ? "크립토" : "Crypto"}
-          </button>
-          <button
-            onClick={() => setPersona("us-stocks")}
-            className={[
-              "rounded-full px-4 py-2 text-sm font-medium transition-all duration-200",
-              persona === "us-stocks"
-                ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
-                : "bg-zinc-800/60 text-zinc-400 hover:bg-zinc-700/60 hover:text-zinc-300",
-            ].join(" ")}
-          >
-            {ko ? "미국 주식" : "US Stocks"}
-          </button>
+          {(["crypto", "us-stocks"] as Persona[]).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPersona(p)}
+              className={[
+                "flex items-center gap-2 rounded-full pl-1 pr-4 py-1 text-sm font-medium transition-all duration-200",
+                persona === p
+                  ? p === "crypto"
+                    ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"
+                    : "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+                  : "bg-zinc-800/60 text-zinc-400 hover:bg-zinc-700/60 hover:text-zinc-300",
+              ].join(" ")}
+            >
+              <Image
+                src={PERSONA_AVATARS[p]}
+                alt={p}
+                width={28}
+                height={28}
+                className="w-7 h-7 rounded-full object-cover"
+              />
+              {p === "crypto" ? (ko ? "크립토" : "Crypto") : (ko ? "미국 주식" : "US Stocks")}
+            </button>
+          ))}
         </div>
 
         {/* New chat button */}
@@ -373,18 +384,35 @@ export default function ChatClient({ lang, hasAccess, userName }: Props) {
                 >
                   <div
                     className={[
-                      msg.role === "user" ? "max-w-[75%]" : "max-w-[90%]",
+                      "flex gap-3",
+                      msg.role === "user" ? "max-w-[75%] flex-row-reverse" : "max-w-[90%]",
                     ].join(" ")}
                   >
-                    <div
-                      className={[
-                        "px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap",
-                        msg.role === "user"
-                          ? "bg-blue-600 text-white rounded-tr-sm"
-                          : "bg-zinc-800/60 text-zinc-100 rounded-tl-sm border border-white/[0.06]",
-                      ].join(" ")}
-                    >
-                      {msg.content}
+                    {msg.role === "assistant" && (
+                      <Image
+                        src={PERSONA_AVATARS[persona]}
+                        alt="AI"
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 rounded-full object-cover shrink-0 mt-1"
+                      />
+                    )}
+                    <div>
+                      {msg.role === "assistant" && (
+                        <p className="text-[10px] text-zinc-500 font-mono mb-1">
+                          {PERSONA_NAMES[persona]?.[ko ? "ko" : "en"]}
+                        </p>
+                      )}
+                      <div
+                        className={[
+                          "px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap",
+                          msg.role === "user"
+                            ? "bg-blue-600 text-white rounded-tr-sm"
+                            : "bg-zinc-800/60 text-zinc-100 rounded-tl-sm border border-white/[0.06]",
+                        ].join(" ")}
+                      >
+                        {msg.content}
+                      </div>
                     </div>
                   </div>
                 </div>

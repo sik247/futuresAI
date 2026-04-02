@@ -2,12 +2,47 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { buildCryptoContext, buildUSStockContext, extractTicker } from "@/lib/services/chat/chat-context.service";
+import { buildCryptoContext, buildUSStockContext } from "@/lib/services/chat/chat-context.service";
 
 const PERSONA_PROMPTS: Record<string, string> = {
-  "crypto": `You are an elite crypto quant analyst at FuturesAI. Provide data-driven insights using the real-time market data provided below. Reference specific prices, percentages, and levels. Keep responses to 50-100 words unless the user asks for depth. Be direct and actionable. If you reference a specific asset, include its ticker symbol.`,
-  "us-stocks": `You are a Wall Street quantitative analyst at FuturesAI. Provide concise, data-driven insights on US stocks using the real-time data provided below. Reference specific prices, P/E ratios, earnings dates, and macro factors. Keep responses to 50-100 words unless the user asks for depth. Be direct and actionable. If you reference a specific stock, include its ticker symbol.`,
+  "crypto": `You are an elite crypto quantitative analyst at FuturesAI. You have deep expertise in blockchain technology, DeFi protocols, and crypto derivatives markets.
+
+RULES:
+- Always reference specific prices, percentages, and levels from the provided market data
+- Keep responses to 50-100 words unless the user explicitly asks for depth
+- Be direct, actionable, and data-driven
+- When mentioning a specific asset, always include its ticker symbol (BTC, ETH, SOL, etc.)
+- Include risk warnings when giving trade ideas
+- Never give financial advice — frame as analysis and observations`,
+
+  "us-stocks": `You are a senior Wall Street equity research analyst at FuturesAI. You specialize in fundamental and technical analysis of US equities.
+
+RULES:
+- Reference specific prices, P/E ratios, earnings dates, and macro factors from provided data
+- Keep responses to 50-100 words unless the user explicitly asks for depth
+- Be direct, actionable, and data-driven
+- When mentioning a specific stock, always include its ticker symbol (AAPL, TSLA, etc.)
+- Consider Fed policy, sector rotation, and macro trends
+- Never give financial advice — frame as analysis and observations`,
 };
+
+function extractTickerFromResponse(
+  response: string,
+  persona: string
+): { symbol: string; exchange: string } | null {
+  const cryptoTickers = ["BTC", "ETH", "SOL", "XRP", "BNB", "DOGE", "ADA", "AVAX", "DOT", "LINK"];
+  const stockTickers = ["AAPL", "GOOGL", "AMZN", "MSFT", "TSLA", "NVDA", "META", "NFLX", "SPY", "QQQ"];
+
+  const tickers = persona === "crypto" ? cryptoTickers : stockTickers;
+  const exchange = persona === "crypto" ? "BINANCE" : "NASDAQ";
+
+  for (const t of tickers) {
+    if (new RegExp(`\\b${t}\\b`, "i").test(response)) {
+      return { symbol: persona === "crypto" ? t + "USDT" : t, exchange };
+    }
+  }
+  return null;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -52,9 +87,6 @@ export async function POST(req: NextRequest) {
       context = await buildUSStockContext(message);
     }
 
-    // Detect ticker for chart rendering
-    const tickerInfo = extractTicker(message, persona);
-
     // Get recent conversation history (last 10 messages)
     const history = await prisma.chatMessage.findMany({
       where: { sessionId },
@@ -70,7 +102,7 @@ export async function POST(req: NextRequest) {
     const systemPrompt = PERSONA_PROMPTS[persona] || PERSONA_PROMPTS["crypto"];
     const langNote =
       lang === "ko"
-        ? "\n\nIMPORTANT: Respond in Korean (한국어). Keep technical terms in English."
+        ? "\n\nIMPORTANT: 한국어로 답변하세요. 금융 전문 용어를 사용하고 존댓말로 작성하세요. 예: 시장 전망, 저항선, 지지선, 매수/매도, 변동성, 수익률, 시가총액. 기술적 분석 용어는 영어로 유지하세요 (RSI, MACD, EMA 등)."
         : "";
 
     const fullPrompt = `${systemPrompt}${langNote}
@@ -94,6 +126,9 @@ Respond concisely (50-100 words unless asked for more). Be specific with numbers
     const result = await model.generateContent(fullPrompt);
     const response = result.response.text();
 
+    // Detect ticker from AI response to avoid false positives from user message
+    const tickerInfo = extractTickerFromResponse(response, persona);
+
     // Save assistant message
     await prisma.chatMessage.create({
       data: {
@@ -101,14 +136,14 @@ Respond concisely (50-100 words unless asked for more). Be specific with numbers
         role: "assistant",
         content: response,
         persona,
-        ticker: tickerInfo ? `${tickerInfo.exchange}:${tickerInfo.ticker}` : null,
+        ticker: tickerInfo ? `${tickerInfo.exchange}:${tickerInfo.symbol}` : null,
         userId: user.id,
       },
     });
 
     return NextResponse.json({
       response,
-      ticker: tickerInfo ? { symbol: tickerInfo.ticker, exchange: tickerInfo.exchange } : null,
+      ticker: tickerInfo ? { symbol: tickerInfo.symbol, exchange: tickerInfo.exchange } : null,
     });
   } catch (error) {
     console.error("[Chat API]", error);

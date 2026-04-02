@@ -16,9 +16,11 @@ export function extractTicker(message: string, persona: string): { ticker: strin
     for (const [key, val] of Object.entries(cryptoMap)) {
       if (lower.includes(key)) return { ticker: val + "USDT", exchange: "BINANCE" };
     }
-    // Match $SYMBOL or SYMBOL/USDT patterns
-    const match = message.match(/\$?([A-Z]{2,6})(?:USDT|\/USDT)?/i);
-    if (match) return { ticker: match[1].toUpperCase() + "USDT", exchange: "BINANCE" };
+    // Only match explicit $SYMBOL or SYMBOL/USDT or SYMBOLUSDT patterns
+    const explicitMatch = message.match(/\$([A-Z]{2,6})/);
+    if (explicitMatch) return { ticker: explicitMatch[1].toUpperCase() + "USDT", exchange: "BINANCE" };
+    const pairMatch = message.match(/\b([A-Z]{2,6})(?:\/USDT|USDT)\b/);
+    if (pairMatch) return { ticker: pairMatch[1].toUpperCase() + "USDT", exchange: "BINANCE" };
   }
 
   if (persona === "us-stocks") {
