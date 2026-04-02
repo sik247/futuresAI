@@ -324,7 +324,7 @@ export default function ChatClient({ lang, hasAccess, userName }: Props) {
   /*  RENDER                                                                   */
   /* ======================================================================== */
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] pt-24 sm:pt-28 bg-zinc-950">
+    <div className="fixed inset-0 top-[92px] flex flex-col bg-zinc-950 z-10">
       {!hasAccess ? (
         <AccessDenied ko={ko} />
       ) : isEmpty ? (
