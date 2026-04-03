@@ -267,20 +267,20 @@ export default function QuantClient({
           ease: "power2.out",
         });
       }
-
-      if (cardsRef.current) {
-        gsap.from(cardsRef.current.children, {
-          opacity: 0,
-          y: 40,
-          stagger: 0.15,
-          duration: 0.7,
-          delay: 0.5,
-          ease: "power2.out",
-        });
-      }
     });
     return () => ctx.revert();
   }, []);
+
+  /* -- Animate signal cards when data loads ------------------------- */
+  useEffect(() => {
+    if (cardsRef.current && data.signals.length > 0) {
+      gsap.fromTo(
+        cardsRef.current.children,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, stagger: 0.1, duration: 0.5, ease: "power2.out" }
+      );
+    }
+  }, [data.signals.length]);
 
   /* -- GSAP tab indicator ------------------------------------------- */
   const moveIndicator = useCallback((tabKey: string) => {

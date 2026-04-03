@@ -1,21 +1,22 @@
 import { Metadata } from "next";
 import MarketsClient from "./markets-client";
+import { fetchMarketSignals } from "@/lib/services/signals/signals.service";
 
 export const metadata: Metadata = {
-  title: "Crypto Prediction Markets - Live Polymarket Data",
+  title: "Crypto Markets - Prediction Markets & Quant Signals",
   description:
-    "Live prediction markets from Polymarket. Track real-time probabilities, trading volume, and trends across crypto and global events.",
+    "Live prediction markets from Polymarket and real-time quant signals (RSI, MACD) for top cryptocurrencies.",
   keywords: [
     "crypto prediction markets",
     "Polymarket",
-    "crypto predictions",
-    "market probabilities",
+    "RSI MACD signals",
+    "crypto trading signals",
     "bitcoin price prediction",
   ],
   openGraph: {
-    title: "Crypto Prediction Markets - Live Polymarket Data | Futures AI",
+    title: "Crypto Markets - Predictions & Quant Signals | Futures AI",
     description:
-      "Track real-time probabilities, trading volume, and trends across crypto and global prediction markets.",
+      "Toggle between live Polymarket predictions and real-time quant analysis for crypto markets.",
     type: "website",
   },
 };
@@ -63,11 +64,34 @@ async function getCryptoEvents() {
   }
 }
 
+async function getSignals() {
+  try {
+    return await fetchMarketSignals();
+  } catch {
+    return {
+      signals: [],
+      fearGreed: { value: 50, classification: "Neutral" },
+      btcTrend: "above_sma" as const,
+      marketSummary: "",
+      updatedAt: new Date().toISOString(),
+    };
+  }
+}
+
 export default async function MarketsPage({
   params: { lang },
 }: {
   params: { lang: string };
 }) {
-  const cryptoEvents = await getCryptoEvents();
-  return <MarketsClient events={cryptoEvents} lang={lang} />;
+  const [cryptoEvents, signalsData] = await Promise.all([
+    getCryptoEvents(),
+    getSignals(),
+  ]);
+  return (
+    <MarketsClient
+      events={cryptoEvents}
+      signals={signalsData}
+      lang={lang}
+    />
+  );
 }

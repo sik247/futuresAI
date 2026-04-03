@@ -222,19 +222,19 @@ function TradeSetupPanel({
       </div>
 
       {/* R:R + Levels */}
-      <div className="px-4 py-3 border-t border-white/[0.04] flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="px-4 py-3 border-t border-white/[0.04] flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-2 mr-auto">
           <span className="text-[10px] font-mono text-zinc-500">R:R</span>
           <span className="text-xs font-mono font-bold text-purple-400">{setup.riskReward}</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           {supportLevels.slice(0, 2).map((l, i) => (
-            <span key={`s${i}`} className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500/70 border border-emerald-500/15">
+            <span key={`s${i}`} className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500/70 border border-emerald-500/15 whitespace-nowrap">
               S{i + 1}: {fmt(l)}
             </span>
           ))}
           {resistanceLevels.slice(0, 1).map((l, i) => (
-            <span key={`r${i}`} className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-red-500/10 text-red-500/70 border border-red-500/15">
+            <span key={`r${i}`} className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-red-500/10 text-red-500/70 border border-red-500/15 whitespace-nowrap">
               R1: {fmt(l)}
             </span>
           ))}
