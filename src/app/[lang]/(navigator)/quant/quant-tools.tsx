@@ -445,6 +445,177 @@ function LiquidationCalc({ lang }: { lang: string }) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Calculator 4: DCA (Dollar Cost Average) Calculator                  */
+/* ------------------------------------------------------------------ */
+function DcaCalc({ lang }: { lang: string }) {
+  const ko = lang === "ko";
+  const [investment, setInvestment] = useState("100");
+  const [frequency, setFrequency] = useState("weekly");
+  const [months, setMonths] = useState("12");
+  const [currentPrice, setCurrentPrice] = useState("67000");
+  const [expectedChange, setExpectedChange] = useState("50");
+
+  const inv = parseFloat(investment) || 0;
+  const m = parseInt(months) || 0;
+  const price = parseFloat(currentPrice) || 0;
+  const change = parseFloat(expectedChange) || 0;
+
+  const multiplier = frequency === "daily" ? 30 : frequency === "weekly" ? 4.33 : frequency === "biweekly" ? 2.17 : 1;
+  const totalBuys = Math.round(m * multiplier);
+  const totalInvested = inv * totalBuys;
+  const targetPrice = price * (1 + change / 100);
+  const avgPrice = price * (1 + change / 200); // simplified avg
+  const totalCoins = totalInvested / avgPrice;
+  const portfolioValue = totalCoins * targetPrice;
+  const profit = portfolioValue - totalInvested;
+  const roi = totalInvested > 0 ? (profit / totalInvested) * 100 : 0;
+
+  return (
+    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 shadow-lg shadow-black/20">
+      <SectionTitle accentColor="bg-cyan-500/70">
+        {ko ? "DCA 계산기" : "DCA Calculator"}
+      </SectionTitle>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-5">
+        <InputField label={ko ? "투자 금액 ($)" : "Amount per buy ($)"} value={investment} onChange={setInvestment} min={1} step={10} />
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] text-zinc-500 font-mono uppercase tracking-[0.15em]">{ko ? "주기" : "Frequency"}</label>
+          <select value={frequency} onChange={(e) => setFrequency(e.target.value)}
+            className="w-full bg-zinc-900/50 border border-white/[0.08] rounded-lg px-4 py-2.5 text-sm font-mono text-white focus:border-blue-500/50 outline-none transition-colors">
+            <option value="daily">{ko ? "매일" : "Daily"}</option>
+            <option value="weekly">{ko ? "매주" : "Weekly"}</option>
+            <option value="biweekly">{ko ? "격주" : "Bi-weekly"}</option>
+            <option value="monthly">{ko ? "매월" : "Monthly"}</option>
+          </select>
+        </div>
+        <InputField label={ko ? "기간 (개월)" : "Duration (months)"} value={months} onChange={setMonths} min={1} max={120} />
+        <InputField label={ko ? "현재 가격 ($)" : "Current Price ($)"} value={currentPrice} onChange={setCurrentPrice} min={0} step={100} />
+        <InputField label={ko ? "예상 변동 (%)" : "Expected Change (%)"} value={expectedChange} onChange={setExpectedChange} min={-99} max={1000} />
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <StatCard label={ko ? "총 매수 횟수" : "Total Buys"} value={`${totalBuys}`} />
+        <StatCard label={ko ? "총 투자금" : "Total Invested"} value={`$${fmt(totalInvested, 0)}`} />
+        <StatCard label={ko ? "평균 매입가" : "Avg Buy Price"} value={`$${fmt(avgPrice, 0)}`} />
+        <StatCard label={ko ? "포트폴리오 가치" : "Portfolio Value"} value={`$${fmt(portfolioValue, 0)}`} valueClass={profit >= 0 ? "text-emerald-400" : "text-red-400"} />
+        <StatCard label={ko ? "수익" : "Profit"} value={`${profit >= 0 ? "+" : ""}$${fmt(profit, 0)}`} valueClass={profit >= 0 ? "text-emerald-400" : "text-red-400"} />
+        <StatCard label="ROI" value={`${roi >= 0 ? "+" : ""}${fmt(roi, 1)}%`} valueClass={roi >= 0 ? "text-emerald-400" : "text-red-400"} />
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Calculator 5: PnL Calculator                                        */
+/* ------------------------------------------------------------------ */
+function PnlCalc({ lang }: { lang: string }) {
+  const ko = lang === "ko";
+  const [entryPrice, setEntryPrice] = useState("67000");
+  const [exitPrice, setExitPrice] = useState("70000");
+  const [positionSize, setPositionSize] = useState("1000");
+  const [leverage, setLeverage] = useState("10");
+  const [direction, setDirection] = useState<Direction>("LONG");
+  const [feeRate, setFeeRate] = useState("0.06");
+
+  const entry = parseFloat(entryPrice) || 0;
+  const exit = parseFloat(exitPrice) || 0;
+  const size = parseFloat(positionSize) || 0;
+  const lev = parseFloat(leverage) || 1;
+  const fee = parseFloat(feeRate) || 0;
+
+  const notional = size * lev;
+  const priceDiff = direction === "LONG" ? exit - entry : entry - exit;
+  const pctChange = entry > 0 ? (priceDiff / entry) * 100 : 0;
+  const grossPnl = notional * (pctChange / 100);
+  const totalFees = notional * (fee / 100) * 2; // entry + exit
+  const netPnl = grossPnl - totalFees;
+  const roe = size > 0 ? (netPnl / size) * 100 : 0;
+
+  return (
+    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 shadow-lg shadow-black/20">
+      <SectionTitle accentColor="bg-emerald-500/70">
+        {ko ? "손익 계산기" : "PnL Calculator"}
+      </SectionTitle>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-5">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] text-zinc-500 font-mono uppercase tracking-[0.15em]">{ko ? "방향" : "Direction"}</label>
+          <div className="flex gap-2">
+            <button onClick={() => setDirection("LONG")}
+              className={`flex-1 py-2.5 rounded-lg text-xs font-mono font-bold transition-all ${direction === "LONG" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-zinc-900/50 text-zinc-500 border border-white/[0.08]"}`}>LONG</button>
+            <button onClick={() => setDirection("SHORT")}
+              className={`flex-1 py-2.5 rounded-lg text-xs font-mono font-bold transition-all ${direction === "SHORT" ? "bg-red-500/20 text-red-400 border border-red-500/30" : "bg-zinc-900/50 text-zinc-500 border border-white/[0.08]"}`}>SHORT</button>
+          </div>
+        </div>
+        <InputField label={ko ? "진입가 ($)" : "Entry Price ($)"} value={entryPrice} onChange={setEntryPrice} min={0} />
+        <InputField label={ko ? "청산가 ($)" : "Exit Price ($)"} value={exitPrice} onChange={setExitPrice} min={0} />
+        <InputField label={ko ? "증거금 ($)" : "Margin ($)"} value={positionSize} onChange={setPositionSize} min={0} />
+        <InputField label={ko ? "레버리지" : "Leverage"} value={leverage} onChange={setLeverage} min={1} max={125} />
+        <InputField label={ko ? "수수료 (%)" : "Fee Rate (%)"} value={feeRate} onChange={setFeeRate} min={0} max={1} step={0.01} />
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <StatCard label={ko ? "포지션 크기" : "Notional"} value={`$${fmt(notional, 0)}`} />
+        <StatCard label={ko ? "가격 변동" : "Price Change"} value={`${pctChange >= 0 ? "+" : ""}${fmt(pctChange, 2)}%`} valueClass={pctChange >= 0 ? "text-emerald-400" : "text-red-400"} />
+        <StatCard label={ko ? "총 수수료" : "Total Fees"} value={`$${fmt(totalFees, 2)}`} valueClass="text-amber-400" />
+        <StatCard label={ko ? "순 손익" : "Net PnL"} value={`${netPnl >= 0 ? "+" : ""}$${fmt(netPnl, 2)}`} valueClass={netPnl >= 0 ? "text-emerald-400" : "text-red-400"} />
+        <StatCard label="ROE" value={`${roe >= 0 ? "+" : ""}${fmt(roe, 1)}%`} valueClass={roe >= 0 ? "text-emerald-400" : "text-red-400"} />
+        <StatCard label={ko ? "손익비" : "Result"} value={netPnl >= 0 ? (ko ? "수익" : "Profit") : (ko ? "손실" : "Loss")} valueClass={netPnl >= 0 ? "text-emerald-400" : "text-red-400"} />
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Tool 6: Margin & Leverage Quick Reference                           */
+/* ------------------------------------------------------------------ */
+function MarginReference({ lang }: { lang: string }) {
+  const ko = lang === "ko";
+  const leverages = [1, 2, 3, 5, 10, 20, 25, 50, 75, 100, 125];
+
+  return (
+    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 shadow-lg shadow-black/20">
+      <SectionTitle accentColor="bg-rose-500/70">
+        {ko ? "레버리지 & 마진 참고표" : "Leverage & Margin Reference"}
+      </SectionTitle>
+      <p className="text-xs text-zinc-500 mb-4">
+        {ko ? "레버리지별 필요 마진, 1% 가격 변동 시 손익, 청산까지 거리를 한눈에 확인하세요." : "Quick reference for margin requirements, PnL per 1% move, and distance to liquidation."}
+      </p>
+      <div className="overflow-x-auto">
+        <table className="w-full text-[11px] font-mono">
+          <thead>
+            <tr className="border-b border-white/[0.06] text-zinc-500 uppercase tracking-wider">
+              <th className="text-left py-2 pr-4">{ko ? "레버리지" : "Leverage"}</th>
+              <th className="text-right py-2 px-3">{ko ? "마진 %" : "Margin %"}</th>
+              <th className="text-right py-2 px-3">{ko ? "1% 이동 시 ROE" : "ROE per 1%"}</th>
+              <th className="text-right py-2 px-3">{ko ? "청산 거리" : "Liq Distance"}</th>
+              <th className="text-right py-2 pl-3">{ko ? "위험도" : "Risk"}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {leverages.map((lev) => {
+              const margin = 100 / lev;
+              const roePer1 = lev;
+              const liqDist = (100 / lev) * 0.9; // ~90% of margin
+              const risk = lev <= 3 ? "low" : lev <= 10 ? "medium" : lev <= 25 ? "high" : "extreme";
+              const riskColor = risk === "low" ? "text-emerald-400" : risk === "medium" ? "text-yellow-400" : risk === "high" ? "text-amber-400" : "text-red-400";
+              const riskLabel = ko
+                ? (risk === "low" ? "낮음" : risk === "medium" ? "보통" : risk === "high" ? "높음" : "극고")
+                : (risk === "low" ? "Low" : risk === "medium" ? "Med" : risk === "high" ? "High" : "Extreme");
+              return (
+                <tr key={lev} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
+                  <td className="py-2 pr-4 text-white font-bold">{lev}x</td>
+                  <td className="py-2 px-3 text-right text-zinc-300">{fmt(margin, 1)}%</td>
+                  <td className="py-2 px-3 text-right text-blue-400">{lev}%</td>
+                  <td className="py-2 px-3 text-right text-zinc-300">~{fmt(liqDist, 1)}%</td>
+                  <td className={`py-2 pl-3 text-right font-semibold ${riskColor}`}>{riskLabel}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Main export                                                         */
 /* ------------------------------------------------------------------ */
 export default function QuantTools({ lang }: { lang: string }) {
@@ -452,7 +623,10 @@ export default function QuantTools({ lang }: { lang: string }) {
     <div className="flex flex-col gap-6">
       <PositionSizeCalc lang={lang} />
       <RiskRewardCalc lang={lang} />
+      <PnlCalc lang={lang} />
       <LiquidationCalc lang={lang} />
+      <DcaCalc lang={lang} />
+      <MarginReference lang={lang} />
     </div>
   );
 }

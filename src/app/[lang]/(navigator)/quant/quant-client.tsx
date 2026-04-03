@@ -126,6 +126,7 @@ function translateText(text: string, isKo: boolean): string {
 }
 
 const TABS = [
+  { key: "signals", labelKey: "quant_signals" as const },
   { key: "reports", labelKey: "quant_reports" as const },
   { key: "chart", labelKey: "quant_chartAnalysis" as const },
   { key: "tools", labelKey: "quant_tools" as const },
@@ -237,7 +238,7 @@ export default function QuantClient({
 }) {
   const [data, setData] = useState<MarketSignals>(initialData);
   const [loading, setLoading] = useState(initialData.signals.length === 0);
-  const [activeTab, setActiveTab] = useState<TabKey>("reports");
+  const [activeTab, setActiveTab] = useState<TabKey>("signals");
   const [chartLoaded, setChartLoaded] = useState(false);
   const [toolsLoaded, setToolsLoaded] = useState(false);
 
@@ -302,7 +303,7 @@ export default function QuantClient({
   }, [activeTab, moveIndicator]);
 
   useEffect(() => {
-    const timeout = setTimeout(() => moveIndicator("signals"), 100);
+    const timeout = setTimeout(() => moveIndicator(activeTab), 100);
     return () => clearTimeout(timeout);
   }, [moveIndicator]);
 
@@ -476,7 +477,7 @@ export default function QuantClient({
       {/*  TAB CONTENT                                                 */}
       {/* ============================================================ */}
       <div className="max-w-7xl mx-auto px-6 pt-10 pb-24 sm:pb-32">
-        {activeTab === "reports" && (
+        {activeTab === "signals" && (
           <div>
             {/* -- Market Regime Bar ---------------------------------------- */}
             <div
@@ -805,25 +806,18 @@ export default function QuantClient({
               </div>
             )}
 
-            {/* -- Blog Preview (below signals) ----------------------------- */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-5">
-                <div className="flex items-center gap-3">
-                  <div className="w-1 h-5 rounded-full bg-purple-500/70" />
-                  <h2 className="text-base font-semibold tracking-tight text-zinc-200">
-                    {lang === "ko" ? "퀀트 리서치" : "Quant Research"}
-                  </h2>
-                </div>
-              </div>
-              <QuantBlog lang={lang} limit={3} />
-            </div>
-
             {/* -- Disclaimer -------------------------------------------- */}
             <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6 text-center">
               <p className="text-[11px] text-zinc-600 leading-relaxed max-w-2xl mx-auto font-mono">
                 {t.quant_disclaimer}
               </p>
             </div>
+          </div>
+        )}
+
+        {activeTab === "reports" && (
+          <div>
+            <QuantBlog lang={lang} />
           </div>
         )}
 

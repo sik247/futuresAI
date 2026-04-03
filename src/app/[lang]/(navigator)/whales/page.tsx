@@ -123,6 +123,140 @@ const INSTITUTIONAL_FUNDS = [
 ];
 
 /* ------------------------------------------------------------------ */
+/*  Key Figures (crypto influencers & leaders)                        */
+/* ------------------------------------------------------------------ */
+
+const KEY_FIGURES: {
+  name: string;
+  role: string;
+  image: string;
+  link: string;
+  stance: "Bullish" | "Bearish" | "Neutral" | "";
+  knownHoldings: string[];
+}[] = [
+  {
+    name: "Michael Saylor",
+    role: "MicroStrategy CEO",
+    image: "https://pbs.twimg.com/profile_images/1886424944498462720/us6F-ID6_400x400.jpg",
+    link: "https://x.com/saylor",
+    stance: "Bullish",
+    knownHoldings: ["BTC"],
+  },
+  {
+    name: "Vitalik Buterin",
+    role: "Ethereum Co-founder",
+    image: "https://pbs.twimg.com/profile_images/1880726684498948096/bZMJ1Fzp_400x400.jpg",
+    link: "https://x.com/VitalikButerin",
+    stance: "Bullish",
+    knownHoldings: ["ETH"],
+  },
+  {
+    name: "CZ (Changpeng Zhao)",
+    role: "Binance Founder",
+    image: "https://pbs.twimg.com/profile_images/1913291289194729472/FOkQ22RN_400x400.jpg",
+    link: "https://x.com/caboringz",
+    stance: "Bullish",
+    knownHoldings: ["BNB", "BTC"],
+  },
+  {
+    name: "Arthur Hayes",
+    role: "BitMEX Co-founder",
+    image: "https://pbs.twimg.com/profile_images/1582559272582332416/aFa5MWSZ_400x400.jpg",
+    link: "https://x.com/CryptoHayes",
+    stance: "Bullish",
+    knownHoldings: ["BTC", "ETH", "SOL"],
+  },
+  {
+    name: "Justin Sun",
+    role: "TRON Founder",
+    image: "https://pbs.twimg.com/profile_images/1856397498844184576/VN6GktaD_400x400.jpg",
+    link: "https://x.com/justinsuntron",
+    stance: "Bullish",
+    knownHoldings: ["TRX", "ETH", "BTC"],
+  },
+  {
+    name: "Cathie Wood",
+    role: "ARK Invest CEO",
+    image: "https://pbs.twimg.com/profile_images/1262780288738140163/6L0bFvMT_400x400.jpg",
+    link: "https://x.com/CathieDWood",
+    stance: "Bullish",
+    knownHoldings: ["BTC", "ETH", "COIN"],
+  },
+  {
+    name: "Brian Armstrong",
+    role: "Coinbase CEO",
+    image: "https://pbs.twimg.com/profile_images/1843041540864880641/HB7CnrES_400x400.jpg",
+    link: "https://x.com/brian_armstrong",
+    stance: "Bullish",
+    knownHoldings: ["BTC", "ETH"],
+  },
+  {
+    name: "Elon Musk",
+    role: "Tesla / X CEO",
+    image: "https://pbs.twimg.com/profile_images/1893803697185910784/Na5lOWi5_400x400.jpg",
+    link: "https://x.com/elonmusk",
+    stance: "Neutral",
+    knownHoldings: ["BTC", "DOGE"],
+  },
+  {
+    name: "Do Kwon",
+    role: "Terraform Labs",
+    image: "https://pbs.twimg.com/profile_images/1523907721577091073/P96hgCwz_400x400.jpg",
+    link: "https://x.com/staboringz",
+    stance: "",
+    knownHoldings: ["BTC"],
+  },
+  {
+    name: "Kiyoung Ju",
+    role: "CryptoQuant CEO",
+    image: "https://pbs.twimg.com/profile_images/1766637498114875393/5pLKVwFT_400x400.jpg",
+    link: "https://x.com/ki_young_ju",
+    stance: "Neutral",
+    knownHoldings: ["BTC"],
+  },
+  {
+    name: "Willy Woo",
+    role: "On-chain Analyst",
+    image: "https://pbs.twimg.com/profile_images/1433831901587918855/MZLblrJk_400x400.jpg",
+    link: "https://x.com/woonomic",
+    stance: "Bullish",
+    knownHoldings: ["BTC"],
+  },
+  {
+    name: "Gareth Soloway",
+    role: "Chief Market Strategist",
+    image: "https://pbs.twimg.com/profile_images/1587826305901236224/xVVS8Ib5_400x400.jpg",
+    link: "https://x.com/GarethSoloway",
+    stance: "Bearish",
+    knownHoldings: ["BTC", "GOLD"],
+  },
+  {
+    name: "Anthony Pompliano",
+    role: "Pomp Investments",
+    image: "https://pbs.twimg.com/profile_images/1692638281386860544/A0vlhGwi_400x400.jpg",
+    link: "https://x.com/APompliano",
+    stance: "Bullish",
+    knownHoldings: ["BTC"],
+  },
+  {
+    name: "Raoul Pal",
+    role: "Real Vision CEO",
+    image: "https://pbs.twimg.com/profile_images/1862975076212731904/TocVDkxu_400x400.jpg",
+    link: "https://x.com/RaoulGMI",
+    stance: "Bullish",
+    knownHoldings: ["SOL", "ETH", "BTC"],
+  },
+  {
+    name: "Benjamin Cowen",
+    role: "Crypto Analyst",
+    image: "https://pbs.twimg.com/profile_images/1640044413609582594/HbM8pdQ0_400x400.jpg",
+    link: "https://x.com/intaboringzcrypto",
+    stance: "Neutral",
+    knownHoldings: ["BTC", "ETH"],
+  },
+];
+
+/* ------------------------------------------------------------------ */
 /*  Etherscan helpers (server-side, free tier, revalidate: 300)       */
 /* ------------------------------------------------------------------ */
 
@@ -689,6 +823,72 @@ export default async function WhalesPage() {
               ))}
             </div>
           )}
+        </Container>
+      </section>
+
+      {/* ---- Divider ---- */}
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+      {/* ---- Key Figures ---- */}
+      <section className="py-16 sm:py-20">
+        <Container>
+          <div data-whale-heading className="mb-10">
+            <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-zinc-600 mb-3">
+              Crypto Influencers & Leaders
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+              Key Figures
+            </h2>
+            <p className="text-sm text-zinc-500 mt-2 max-w-md">
+              Notable crypto traders, analysts, and industry leaders — track their known positions and market calls.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {KEY_FIGURES.map((figure) => (
+              <a
+                key={figure.name}
+                href={figure.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex flex-col items-center rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.12] transition-all duration-200 p-4"
+              >
+                <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mb-3 border-2 border-white/[0.08] group-hover:border-white/[0.20] transition-colors">
+                  <img
+                    src={figure.image}
+                    alt={figure.name}
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
+                  />
+                </div>
+                <h3 className="text-[13px] font-semibold text-white text-center leading-tight">
+                  {figure.name}
+                </h3>
+                <p className="text-[10px] text-zinc-500 text-center mt-0.5 font-mono">
+                  {figure.role}
+                </p>
+                {figure.stance && (
+                  <span className={`mt-2 px-2 py-0.5 text-[9px] font-mono font-bold rounded-full border ${
+                    figure.stance === "Bullish"
+                      ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/20"
+                      : figure.stance === "Bearish"
+                      ? "bg-red-500/15 text-red-400 border-red-500/20"
+                      : "bg-zinc-500/15 text-zinc-400 border-zinc-500/20"
+                  }`}>
+                    {figure.stance}
+                  </span>
+                )}
+                {figure.knownHoldings.length > 0 && (
+                  <div className="flex flex-wrap justify-center gap-1 mt-2">
+                    {figure.knownHoldings.map((h) => (
+                      <span key={h} className="text-[9px] font-mono text-zinc-500 bg-white/[0.04] px-1.5 py-0.5 rounded">
+                        {h}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </a>
+            ))}
+          </div>
         </Container>
       </section>
 
