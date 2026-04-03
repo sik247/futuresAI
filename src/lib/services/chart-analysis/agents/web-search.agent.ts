@@ -1,4 +1,4 @@
-import FirecrawlApp from "@mendable/firecrawl-js";
+import { search, SafeSearchType } from "duck-duck-scrape";
 
 export type WebSearchResult = {
   query: string;
@@ -46,12 +46,6 @@ function extractKeyEvents(snippets: string[]): string[] {
 }
 
 export async function runWebSearchAgent(pair: string): Promise<WebSearchResult[]> {
-  const apiKey = process.env.FIRECRAWL_API_KEY;
-  if (!apiKey) {
-    throw new Error("FIRECRAWL_API_KEY is not configured");
-  }
-
-  const firecrawl = new FirecrawlApp({ apiKey });
   const cleanPair = pair.replace(/usdt$/i, "").replace(/usd$/i, "");
 
   const queries = [
@@ -63,24 +57,15 @@ export async function runWebSearchAgent(pair: string): Promise<WebSearchResult[]
 
   for (const query of queries) {
     try {
-      const response = await firecrawl.search(query, { limit: 5 });
+      const response = await search(query, {
+        safeSearch: SafeSearchType.OFF,
+      });
 
-      const data = response as Record<string, unknown>;
-      const webItems = (data?.web || []) as { title?: string; url?: string; description?: string }[];
-      const newsItems = (data?.news || []) as { title?: string; url?: string; snippet?: string }[];
-
-      const webResults = [
-        ...newsItems.map((item) => ({
-          title: item.title || "",
-          url: item.url || "",
-          snippet: item.snippet || "",
-        })),
-        ...webItems.map((item) => ({
-          title: item.title || "",
-          url: item.url || "",
-          snippet: item.description || "",
-        })),
-      ].slice(0, 5);
+      const webResults = (response.results || []).slice(0, 5).map((item) => ({
+        title: item.title || "",
+        url: item.url || "",
+        snippet: item.description || "",
+      }));
 
       const snippets = webResults.map((r) => r.snippet);
 
@@ -91,7 +76,7 @@ export async function runWebSearchAgent(pair: string): Promise<WebSearchResult[]
         keyEvents: extractKeyEvents(snippets),
       });
     } catch (err) {
-      console.error(`Firecrawl search error for "${query}":`, err);
+      console.error(`DuckDuckGo search error for "${query}":`, err);
     }
   }
 

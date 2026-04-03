@@ -89,7 +89,7 @@ export function PriceTicker() {
 
       {/* Telegram channel CTA */}
       <a
-        href="https://t.me/moneyboutique_ms"
+        href="https://t.me/FuturesAIOfficial"
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center gap-1.5 px-3 h-full bg-[#2AABEE]/10 border-l border-[#2AABEE]/20 hover:bg-[#2AABEE]/20 transition-colors shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2AABEE]/50"
