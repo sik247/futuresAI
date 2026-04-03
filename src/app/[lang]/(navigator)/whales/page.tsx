@@ -137,7 +137,7 @@ const KEY_FIGURES: {
   {
     name: "Michael Saylor",
     role: "MicroStrategy CEO",
-    image: "https://pbs.twimg.com/profile_images/1886424944498462720/us6F-ID6_400x400.jpg",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Michael_Saylor_2022.png/800px-Michael_Saylor_2022.png",
     link: "https://x.com/saylor",
     stance: "Bullish",
     knownHoldings: ["BTC"],
@@ -145,7 +145,7 @@ const KEY_FIGURES: {
   {
     name: "Vitalik Buterin",
     role: "Ethereum Co-founder",
-    image: "https://pbs.twimg.com/profile_images/1880726684498948096/bZMJ1Fzp_400x400.jpg",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Vitalik_Buterin_TechCrunch_London_2015_%28cropped%29.jpg/800px-Vitalik_Buterin_TechCrunch_London_2015_%28cropped%29.jpg",
     link: "https://x.com/VitalikButerin",
     stance: "Bullish",
     knownHoldings: ["ETH"],
@@ -153,15 +153,15 @@ const KEY_FIGURES: {
   {
     name: "CZ (Changpeng Zhao)",
     role: "Binance Founder",
-    image: "https://pbs.twimg.com/profile_images/1913291289194729472/FOkQ22RN_400x400.jpg",
-    link: "https://x.com/caboringz",
+    image: "https://upload.wikimedia.org/wikipedia/commons/e/e1/Changpeng_Zhao_in_2022.jpg",
+    link: "https://x.com/cz_binance",
     stance: "Bullish",
     knownHoldings: ["BNB", "BTC"],
   },
   {
     name: "Arthur Hayes",
     role: "BitMEX Co-founder",
-    image: "https://pbs.twimg.com/profile_images/1582559272582332416/aFa5MWSZ_400x400.jpg",
+    image: "https://cryptoslate.com/wp-content/uploads/2019/05/person-arthur-hayes-01.jpg",
     link: "https://x.com/CryptoHayes",
     stance: "Bullish",
     knownHoldings: ["BTC", "ETH", "SOL"],
@@ -169,7 +169,7 @@ const KEY_FIGURES: {
   {
     name: "Justin Sun",
     role: "TRON Founder",
-    image: "https://pbs.twimg.com/profile_images/1856397498844184576/VN6GktaD_400x400.jpg",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg/800px-Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg",
     link: "https://x.com/justinsuntron",
     stance: "Bullish",
     knownHoldings: ["TRX", "ETH", "BTC"],
@@ -177,7 +177,7 @@ const KEY_FIGURES: {
   {
     name: "Cathie Wood",
     role: "ARK Invest CEO",
-    image: "https://pbs.twimg.com/profile_images/1262780288738140163/6L0bFvMT_400x400.jpg",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Cathie_Wood_ARK_Invest_Photo.jpg/800px-Cathie_Wood_ARK_Invest_Photo.jpg",
     link: "https://x.com/CathieDWood",
     stance: "Bullish",
     knownHoldings: ["BTC", "ETH", "COIN"],
@@ -185,7 +185,7 @@ const KEY_FIGURES: {
   {
     name: "Brian Armstrong",
     role: "Coinbase CEO",
-    image: "https://pbs.twimg.com/profile_images/1843041540864880641/HB7CnrES_400x400.jpg",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Brian_Armstrong_-_TechCrunch_Disrupt_2018_01.jpg/800px-Brian_Armstrong_-_TechCrunch_Disrupt_2018_01.jpg",
     link: "https://x.com/brian_armstrong",
     stance: "Bullish",
     knownHoldings: ["BTC", "ETH"],
@@ -193,7 +193,7 @@ const KEY_FIGURES: {
   {
     name: "Elon Musk",
     role: "Tesla / X CEO",
-    image: "https://pbs.twimg.com/profile_images/1893803697185910784/Na5lOWi5_400x400.jpg",
+    image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Elon_Musk_%2854816836217%29_%28cropped_2%29_%28b%29.jpg/800px-Elon_Musk_%2854816836217%29_%28cropped_2%29_%28b%29.jpg",
     link: "https://x.com/elonmusk",
     stance: "Neutral",
     knownHoldings: ["BTC", "DOGE"],
@@ -201,15 +201,15 @@ const KEY_FIGURES: {
   {
     name: "Do Kwon",
     role: "Terraform Labs",
-    image: "https://pbs.twimg.com/profile_images/1523907721577091073/P96hgCwz_400x400.jpg",
-    link: "https://x.com/staboringz",
+    image: "https://upload.wikimedia.org/wikipedia/commons/2/29/Do_Kwon.png",
+    link: "https://x.com/stablekwon",
     stance: "",
     knownHoldings: ["BTC"],
   },
   {
     name: "Kiyoung Ju",
     role: "CryptoQuant CEO",
-    image: "https://pbs.twimg.com/profile_images/1766637498114875393/5pLKVwFT_400x400.jpg",
+    image: "https://cdn.theorg.com/6c3b6406-673d-408e-9a0c-2f423f45a88c_medium.jpg",
     link: "https://x.com/ki_young_ju",
     stance: "Neutral",
     knownHoldings: ["BTC"],
@@ -217,7 +217,7 @@ const KEY_FIGURES: {
   {
     name: "Willy Woo",
     role: "On-chain Analyst",
-    image: "https://pbs.twimg.com/profile_images/1433831901587918855/MZLblrJk_400x400.jpg",
+    image: "https://cryptoslate.com/wp-content/uploads/2019/05/person-willy-woo.jpg",
     link: "https://x.com/woonomic",
     stance: "Bullish",
     knownHoldings: ["BTC"],
@@ -225,7 +225,7 @@ const KEY_FIGURES: {
   {
     name: "Gareth Soloway",
     role: "Chief Market Strategist",
-    image: "https://pbs.twimg.com/profile_images/1587826305901236224/xVVS8Ib5_400x400.jpg",
+    image: "https://verifiedinvesting.com/cdn/shop/files/vi-2025-pro-photo-gareth-16x9.jpg?v=1749581417&width=1920",
     link: "https://x.com/GarethSoloway",
     stance: "Bearish",
     knownHoldings: ["BTC", "GOLD"],
@@ -233,7 +233,7 @@ const KEY_FIGURES: {
   {
     name: "Anthony Pompliano",
     role: "Pomp Investments",
-    image: "https://pbs.twimg.com/profile_images/1692638281386860544/A0vlhGwi_400x400.jpg",
+    image: "https://cryptoslate.com/wp-content/uploads/2019/05/person-anthony-pompliano-03.jpg",
     link: "https://x.com/APompliano",
     stance: "Bullish",
     knownHoldings: ["BTC"],
@@ -241,7 +241,7 @@ const KEY_FIGURES: {
   {
     name: "Raoul Pal",
     role: "Real Vision CEO",
-    image: "https://pbs.twimg.com/profile_images/1862975076212731904/TocVDkxu_400x400.jpg",
+    image: "https://media.realvision.com/wp/20230929154944/Raoul-Pal-3.png",
     link: "https://x.com/RaoulGMI",
     stance: "Bullish",
     knownHoldings: ["SOL", "ETH", "BTC"],
@@ -249,8 +249,8 @@ const KEY_FIGURES: {
   {
     name: "Benjamin Cowen",
     role: "Crypto Analyst",
-    image: "https://pbs.twimg.com/profile_images/1640044413609582594/HbM8pdQ0_400x400.jpg",
-    link: "https://x.com/intaboringzcrypto",
+    image: "https://benjamincowen.com/images/benjamin-portrait.jpg",
+    link: "https://x.com/intocryptoverse",
     stance: "Neutral",
     knownHoldings: ["BTC", "ETH"],
   },
