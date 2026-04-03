@@ -131,6 +131,8 @@ const KEY_FIGURES: {
   role: string;
   image: string;
   link: string;
+  arkhamUrl: string;
+  walletAddress: string;
   stance: "Bullish" | "Bearish" | "Neutral" | "";
   knownHoldings: string[];
 }[] = [
@@ -139,6 +141,8 @@ const KEY_FIGURES: {
     role: "MicroStrategy CEO",
     image: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Michael_Saylor_2022.png/800px-Michael_Saylor_2022.png",
     link: "https://x.com/saylor",
+    arkhamUrl: "https://platform.arkhamintelligence.com/explorer/entity/microstrategy",
+    walletAddress: "",
     stance: "Bullish",
     knownHoldings: ["BTC"],
   },
@@ -147,6 +151,8 @@ const KEY_FIGURES: {
     role: "Ethereum Co-founder",
     image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Vitalik_Buterin_TechCrunch_London_2015_%28cropped%29.jpg/800px-Vitalik_Buterin_TechCrunch_London_2015_%28cropped%29.jpg",
     link: "https://x.com/VitalikButerin",
+    arkhamUrl: "https://platform.arkhamintelligence.com/explorer/entity/vitalik-buterin",
+    walletAddress: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
     stance: "Bullish",
     knownHoldings: ["ETH"],
   },
@@ -155,6 +161,8 @@ const KEY_FIGURES: {
     role: "Binance Founder",
     image: "https://upload.wikimedia.org/wikipedia/commons/e/e1/Changpeng_Zhao_in_2022.jpg",
     link: "https://x.com/cz_binance",
+    arkhamUrl: "https://platform.arkhamintelligence.com/explorer/entity/cz",
+    walletAddress: "",
     stance: "Bullish",
     knownHoldings: ["BNB", "BTC"],
   },
@@ -163,6 +171,8 @@ const KEY_FIGURES: {
     role: "BitMEX Co-founder",
     image: "https://cryptoslate.com/wp-content/uploads/2019/05/person-arthur-hayes-01.jpg",
     link: "https://x.com/CryptoHayes",
+    arkhamUrl: "https://platform.arkhamintelligence.com/explorer/entity/arthur-hayes",
+    walletAddress: "",
     stance: "Bullish",
     knownHoldings: ["BTC", "ETH", "SOL"],
   },
@@ -171,6 +181,8 @@ const KEY_FIGURES: {
     role: "TRON Founder",
     image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg/800px-Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg",
     link: "https://x.com/justinsuntron",
+    arkhamUrl: "https://platform.arkhamintelligence.com/explorer/entity/justin-sun",
+    walletAddress: "0x176F3DAb24a159341c0509bB36B833E7fdd0a132",
     stance: "Bullish",
     knownHoldings: ["TRX", "ETH", "BTC"],
   },
@@ -179,6 +191,8 @@ const KEY_FIGURES: {
     role: "ARK Invest CEO",
     image: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Cathie_Wood_ARK_Invest_Photo.jpg/800px-Cathie_Wood_ARK_Invest_Photo.jpg",
     link: "https://x.com/CathieDWood",
+    arkhamUrl: "",
+    walletAddress: "",
     stance: "Bullish",
     knownHoldings: ["BTC", "ETH", "COIN"],
   },
@@ -187,6 +201,8 @@ const KEY_FIGURES: {
     role: "Coinbase CEO",
     image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Brian_Armstrong_-_TechCrunch_Disrupt_2018_01.jpg/800px-Brian_Armstrong_-_TechCrunch_Disrupt_2018_01.jpg",
     link: "https://x.com/brian_armstrong",
+    arkhamUrl: "",
+    walletAddress: "",
     stance: "Bullish",
     knownHoldings: ["BTC", "ETH"],
   },
@@ -195,6 +211,8 @@ const KEY_FIGURES: {
     role: "Tesla / X CEO",
     image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Elon_Musk_%2854816836217%29_%28cropped_2%29_%28b%29.jpg/800px-Elon_Musk_%2854816836217%29_%28cropped_2%29_%28b%29.jpg",
     link: "https://x.com/elonmusk",
+    arkhamUrl: "",
+    walletAddress: "",
     stance: "Neutral",
     knownHoldings: ["BTC", "DOGE"],
   },
@@ -203,6 +221,8 @@ const KEY_FIGURES: {
     role: "Terraform Labs",
     image: "https://upload.wikimedia.org/wikipedia/commons/2/29/Do_Kwon.png",
     link: "https://x.com/stablekwon",
+    arkhamUrl: "https://platform.arkhamintelligence.com/explorer/entity/do-kwon",
+    walletAddress: "",
     stance: "",
     knownHoldings: ["BTC"],
   },
@@ -211,6 +231,8 @@ const KEY_FIGURES: {
     role: "CryptoQuant CEO",
     image: "https://cdn.theorg.com/6c3b6406-673d-408e-9a0c-2f423f45a88c_medium.jpg",
     link: "https://x.com/ki_young_ju",
+    arkhamUrl: "",
+    walletAddress: "",
     stance: "Neutral",
     knownHoldings: ["BTC"],
   },
@@ -219,6 +241,8 @@ const KEY_FIGURES: {
     role: "On-chain Analyst",
     image: "https://cryptoslate.com/wp-content/uploads/2019/05/person-willy-woo.jpg",
     link: "https://x.com/woonomic",
+    arkhamUrl: "",
+    walletAddress: "",
     stance: "Bullish",
     knownHoldings: ["BTC"],
   },
@@ -227,6 +251,8 @@ const KEY_FIGURES: {
     role: "Chief Market Strategist",
     image: "https://verifiedinvesting.com/cdn/shop/files/vi-2025-pro-photo-gareth-16x9.jpg?v=1749581417&width=1920",
     link: "https://x.com/GarethSoloway",
+    arkhamUrl: "",
+    walletAddress: "",
     stance: "Bearish",
     knownHoldings: ["BTC", "GOLD"],
   },
@@ -235,6 +261,8 @@ const KEY_FIGURES: {
     role: "Pomp Investments",
     image: "https://cryptoslate.com/wp-content/uploads/2019/05/person-anthony-pompliano-03.jpg",
     link: "https://x.com/APompliano",
+    arkhamUrl: "",
+    walletAddress: "",
     stance: "Bullish",
     knownHoldings: ["BTC"],
   },
@@ -243,6 +271,8 @@ const KEY_FIGURES: {
     role: "Real Vision CEO",
     image: "https://media.realvision.com/wp/20230929154944/Raoul-Pal-3.png",
     link: "https://x.com/RaoulGMI",
+    arkhamUrl: "",
+    walletAddress: "",
     stance: "Bullish",
     knownHoldings: ["SOL", "ETH", "BTC"],
   },
@@ -251,6 +281,8 @@ const KEY_FIGURES: {
     role: "Crypto Analyst",
     image: "https://benjamincowen.com/images/benjamin-portrait.jpg",
     link: "https://x.com/intocryptoverse",
+    arkhamUrl: "",
+    walletAddress: "",
     stance: "Neutral",
     knownHoldings: ["BTC", "ETH"],
   },
@@ -846,26 +878,25 @@ export default async function WhalesPage() {
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {KEY_FIGURES.map((figure) => (
-              <a
+              <div
                 key={figure.name}
-                href={figure.link}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="group flex flex-col items-center rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.12] transition-all duration-200 p-4"
               >
-                <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mb-3 border-2 border-white/[0.08] group-hover:border-white/[0.20] transition-colors">
-                  <img
-                    src={figure.image}
-                    alt={figure.name}
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
-                  />
-                </div>
-                <h3 className="text-[13px] font-semibold text-white text-center leading-tight">
-                  {figure.name}
-                </h3>
-                <p className="text-[10px] text-zinc-500 text-center mt-0.5 font-mono">
-                  {figure.role}
-                </p>
+                <a href={figure.link} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
+                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mb-3 border-2 border-white/[0.08] group-hover:border-white/[0.20] transition-colors">
+                    <img
+                      src={figure.image}
+                      alt={figure.name}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
+                    />
+                  </div>
+                  <h3 className="text-[13px] font-semibold text-white text-center leading-tight">
+                    {figure.name}
+                  </h3>
+                  <p className="text-[10px] text-zinc-500 text-center mt-0.5 font-mono">
+                    {figure.role}
+                  </p>
+                </a>
                 {figure.stance && (
                   <span className={`mt-2 px-2 py-0.5 text-[9px] font-mono font-bold rounded-full border ${
                     figure.stance === "Bullish"
@@ -886,7 +917,31 @@ export default async function WhalesPage() {
                     ))}
                   </div>
                 )}
-              </a>
+                {/* Wallet + Arkham links */}
+                <div className="flex flex-wrap justify-center gap-1.5 mt-2">
+                  {figure.walletAddress && (
+                    <a
+                      href={`https://etherscan.io/address/${figure.walletAddress}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[8px] font-mono text-blue-400/70 hover:text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded transition-colors"
+                      title={figure.walletAddress}
+                    >
+                      {figure.walletAddress.slice(0, 6)}...{figure.walletAddress.slice(-4)}
+                    </a>
+                  )}
+                  {figure.arkhamUrl && (
+                    <a
+                      href={figure.arkhamUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[8px] font-mono text-purple-400/70 hover:text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded transition-colors"
+                    >
+                      Arkham
+                    </a>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
         </Container>
