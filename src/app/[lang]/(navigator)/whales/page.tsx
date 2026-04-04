@@ -3,7 +3,8 @@ import { Metadata } from "next";
 import WhalesAnimations from "./whales-animations";
 import WhaleActivityFeed from "./whale-activity-feed";
 import KeyFiguresGrid from "./key-figures";
-import { fetchAllHLWhales } from "@/lib/services/whales/hyperliquid.service";
+import WhaleTabs from "./whale-tabs";
+import { fetchAllHLWhales, fetchAllHLTrades } from "@/lib/services/whales/hyperliquid.service";
 
 export const metadata: Metadata = {
   title: "Crypto Whale and Entity Tracker - On-Chain Intelligence",
@@ -141,17 +142,17 @@ type KeyFigure = {
 
 const KEY_FIGURES: KeyFigure[] = [
   // ── Founders & CEOs ──
-  { name: "Michael Saylor", role: "MicroStrategy CEO", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Michael_Saylor_2022.png/800px-Michael_Saylor_2022.png", link: "https://x.com/saylor", arkhamUrl: "https://platform.arkhamintelligence.com/explorer/entity/microstrategy", walletAddress: "", stance: "Bullish", knownHoldings: ["BTC"], category: "founder" },
-  { name: "Vitalik Buterin", role: "Ethereum Co-founder", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Vitalik_Buterin_TechCrunch_London_2015_%28cropped%29.jpg/800px-Vitalik_Buterin_TechCrunch_London_2015_%28cropped%29.jpg", link: "https://x.com/VitalikButerin", arkhamUrl: "https://platform.arkhamintelligence.com/explorer/entity/vitalik-buterin", walletAddress: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", stance: "Bullish", knownHoldings: ["ETH"], category: "founder" },
+  { name: "Michael Saylor", role: "MicroStrategy CEO", image: "https://upload.wikimedia.org/wikipedia/commons/f/f4/Michael_Saylor_2022.png", link: "https://x.com/saylor", arkhamUrl: "https://platform.arkhamintelligence.com/explorer/entity/microstrategy", walletAddress: "", stance: "Bullish", knownHoldings: ["BTC"], category: "founder" },
+  { name: "Vitalik Buterin", role: "Ethereum Co-founder", image: "https://upload.wikimedia.org/wikipedia/commons/1/1c/Vitalik_Buterin_TechCrunch_London_2015_%28cropped%29.jpg", link: "https://x.com/VitalikButerin", arkhamUrl: "https://platform.arkhamintelligence.com/explorer/entity/vitalik-buterin", walletAddress: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", stance: "Bullish", knownHoldings: ["ETH"], category: "founder" },
   { name: "CZ (Changpeng Zhao)", role: "Binance Founder", image: "https://upload.wikimedia.org/wikipedia/commons/e/e1/Changpeng_Zhao_in_2022.jpg", link: "https://x.com/cz_binance", arkhamUrl: "https://platform.arkhamintelligence.com/explorer/entity/cz", walletAddress: "", stance: "Bullish", knownHoldings: ["BNB", "BTC"], category: "founder" },
-  { name: "Justin Sun", role: "TRON Founder", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg/800px-Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg", link: "https://x.com/justinsuntron", arkhamUrl: "https://platform.arkhamintelligence.com/explorer/entity/justin-sun", walletAddress: "0x176F3DAb24a159341c0509bB36B833E7fdd0a132", stance: "Bullish", knownHoldings: ["TRX", "ETH", "BTC"], category: "founder" },
-  { name: "Brian Armstrong", role: "Coinbase CEO", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Brian_Armstrong_-_TechCrunch_Disrupt_2018_01.jpg/800px-Brian_Armstrong_-_TechCrunch_Disrupt_2018_01.jpg", link: "https://x.com/brian_armstrong", arkhamUrl: "", walletAddress: "", stance: "Bullish", knownHoldings: ["BTC", "ETH"], category: "founder" },
+  { name: "Justin Sun", role: "TRON Founder", image: "https://upload.wikimedia.org/wikipedia/commons/5/52/Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg", link: "https://x.com/justinsuntron", arkhamUrl: "https://platform.arkhamintelligence.com/explorer/entity/justin-sun", walletAddress: "0x176F3DAb24a159341c0509bB36B833E7fdd0a132", stance: "Bullish", knownHoldings: ["TRX", "ETH", "BTC"], category: "founder" },
+  { name: "Brian Armstrong", role: "Coinbase CEO", image: "https://upload.wikimedia.org/wikipedia/commons/9/91/Brian_Armstrong_-_TechCrunch_Disrupt_2018_01.jpg", link: "https://x.com/brian_armstrong", arkhamUrl: "", walletAddress: "", stance: "Bullish", knownHoldings: ["BTC", "ETH"], category: "founder" },
   { name: "Do Kwon", role: "Terraform Labs", image: "https://upload.wikimedia.org/wikipedia/commons/2/29/Do_Kwon.png", link: "https://x.com/stablekwon", arkhamUrl: "https://platform.arkhamintelligence.com/explorer/entity/do-kwon", walletAddress: "", stance: "", knownHoldings: ["BTC"], category: "founder" },
   // ── Traders ──
   { name: "Arthur Hayes", role: "BitMEX Co-founder", image: "https://cryptoslate.com/wp-content/uploads/2019/05/person-arthur-hayes-01.jpg", link: "https://x.com/CryptoHayes", arkhamUrl: "https://platform.arkhamintelligence.com/explorer/entity/arthur-hayes", walletAddress: "", stance: "Bullish", knownHoldings: ["BTC", "ETH", "SOL"], category: "trader" },
-  { name: "Elon Musk", role: "Tesla / X CEO", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Elon_Musk_%2854816836217%29_%28cropped_2%29_%28b%29.jpg/800px-Elon_Musk_%2854816836217%29_%28cropped_2%29_%28b%29.jpg", link: "https://x.com/elonmusk", arkhamUrl: "", walletAddress: "", stance: "Neutral", knownHoldings: ["BTC", "DOGE"], category: "investor" },
+  { name: "Elon Musk", role: "Tesla / X CEO", image: "https://upload.wikimedia.org/wikipedia/commons/0/0e/Elon_Musk_%2854816836217%29_%28cropped_2%29_%28b%29.jpg", link: "https://x.com/elonmusk", arkhamUrl: "", walletAddress: "", stance: "Neutral", knownHoldings: ["BTC", "DOGE"], category: "investor" },
   // ── Investors ──
-  { name: "Cathie Wood", role: "ARK Invest CEO", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Cathie_Wood_ARK_Invest_Photo.jpg/800px-Cathie_Wood_ARK_Invest_Photo.jpg", link: "https://x.com/CathieDWood", arkhamUrl: "", walletAddress: "", stance: "Bullish", knownHoldings: ["BTC", "ETH", "COIN"], category: "investor" },
+  { name: "Cathie Wood", role: "ARK Invest CEO", image: "https://upload.wikimedia.org/wikipedia/commons/4/44/Cathie_Wood_ARK_Invest_Photo.jpg", link: "https://x.com/CathieDWood", arkhamUrl: "", walletAddress: "", stance: "Bullish", knownHoldings: ["BTC", "ETH", "COIN"], category: "investor" },
   { name: "Anthony Pompliano", role: "Pomp Investments", image: "https://cryptoslate.com/wp-content/uploads/2019/05/person-anthony-pompliano-03.jpg", link: "https://x.com/APompliano", arkhamUrl: "", walletAddress: "", stance: "Bullish", knownHoldings: ["BTC"], category: "investor" },
   { name: "Raoul Pal", role: "Real Vision CEO", image: "https://media.realvision.com/wp/20230929154944/Raoul-Pal-3.png", link: "https://x.com/RaoulGMI", arkhamUrl: "", walletAddress: "", stance: "Bullish", knownHoldings: ["SOL", "ETH", "BTC"], category: "investor" },
   // ── Analysts ──
@@ -322,10 +323,11 @@ export default async function WhalesPage({
     recentTokenTxs: TokenTxEntry[];
   };
 
-  // Fetch ETH price and Hyperliquid data in parallel
-  const [ethPrice, hlWhales] = await Promise.all([
+  // Fetch ETH price, Hyperliquid positions, and trades in parallel
+  const [ethPrice, hlWhales, hlTrades] = await Promise.all([
     fetchEthPrice(),
     fetchAllHLWhales(),
+    fetchAllHLTrades(),
   ]);
 
   // Fetch all wallet data sequentially to respect free-tier rate limits
@@ -449,9 +451,12 @@ export default async function WhalesPage({
         </Container>
       </section>
 
-      {/* ---- Divider ---- */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-
+      {/* ---- Tab Navigation ---- */}
+      <section className="py-10">
+        <Container>
+          <WhaleTabs
+            lang={lang}
+            walletsContent={<>
       {/* ---- Entity Cards ---- */}
       <section className="py-16 sm:py-20">
         <Container>
@@ -623,10 +628,16 @@ export default async function WhalesPage({
           <WhaleActivityFeed />
         </Container>
       </section>
-
-      {/* ---- Divider ---- */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-
+            </>}
+            figuresContent={<>
+      {/* ---- Key Figures ---- */}
+      <section className="py-8">
+        <Container>
+          <KeyFiguresGrid figures={KEY_FIGURES} lang={lang} />
+        </Container>
+      </section>
+            </>}
+            megaWhalesContent={<>
       {/* ---- Hyperliquid Whale Positions ---- */}
       <section className="py-16 sm:py-20">
         <Container>
@@ -735,118 +746,43 @@ export default async function WhalesPage({
         </Container>
       </section>
 
-      {/* ---- Divider ---- */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-
-      {/* ---- Key Figures ---- */}
-      <section className="py-16 sm:py-20">
-        <Container>
-          <div data-whale-heading className="mb-10">
-            <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-zinc-600 mb-3">
-              Crypto Influencers & Leaders
-            </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-              Key Figures
-            </h2>
-            <p className="text-sm text-zinc-500 mt-2 max-w-md">
-              Notable crypto traders, analysts, and industry leaders — track their known positions and market calls.
-            </p>
-          </div>
-
-          <KeyFiguresGrid figures={KEY_FIGURES} lang={lang} />
-        </Container>
-      </section>
-
-      {/* ---- Divider ---- */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-
-      {/* ---- Institutional Funds ---- */}
-      <section className="py-16 sm:py-20">
-        <Container>
-          <div data-whale-heading className="mb-10">
-            <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-zinc-600 mb-3">
-              TradFi Meets DeFi
-            </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-              Institutional Funds
-            </h2>
-            <p className="text-sm text-zinc-500 mt-2 max-w-md">
-              Major institutional crypto holders and their on-chain strategies.
-            </p>
-          </div>
-
-          <div
-            data-whale-grid
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-          >
-            {INSTITUTIONAL_FUNDS.map((fund) => (
-              <div
-                key={fund.name}
-                data-whale-card
-                className="rounded-xl backdrop-blur-md bg-white/[0.03] border border-white/[0.06] p-5 transition-all duration-300 hover:bg-white/[0.04] hover:border-white/[0.1] flex flex-col"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-white/[0.05] border border-white/[0.08] flex items-center justify-center text-lg font-bold text-white flex-shrink-0">
-                    {fund.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-white">
-                      {fund.name}
-                    </h3>
-                    <span className="text-[10px] font-mono text-zinc-600">
-                      {fund.ticker}
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-xs text-zinc-500 mb-4 leading-relaxed">
-                  {fund.description}
-                </p>
-
-                <ul className="space-y-1.5 flex-1">
-                  {fund.bullets.map((b, i) => (
-                    <li
-                      key={i}
-                      className="flex items-start gap-2 text-xs text-zinc-500"
-                    >
-                      <span className="text-zinc-700 mt-0.5 flex-shrink-0 font-mono text-[10px]">
-                        --
-                      </span>
-                      {b}
-                    </li>
-                  ))}
-                </ul>
-
-                {fund.arkhamUrl ? (
-                  <a
-                    href={fund.arkhamUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-5 inline-flex items-center justify-center gap-2 text-xs font-mono text-zinc-400 hover:text-white transition-colors px-4 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.1]"
-                  >
-                    Track on Arkham
-                    <svg
-                      className="w-3 h-3"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 17L17 7M17 7H7M17 7v10"
-                      />
-                    </svg>
-                  </a>
-                ) : (
-                  <div className="mt-5 text-center text-[10px] font-mono text-zinc-700 px-4 py-2.5 rounded-lg bg-white/[0.02] border border-white/[0.04]">
-                    No on-chain tracking available
-                  </div>
-                )}
+      {/* ---- Recent Whale Trades ---- */}
+      {hlTrades.length > 0 && (
+        <section className="py-8">
+          <Container>
+            <div className="mb-6">
+              <h3 className="text-lg font-bold text-white mb-1">Recent Trades</h3>
+              <p className="text-xs text-zinc-500">Latest fills from tracked Hyperliquid whales</p>
+            </div>
+            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+              <div className="hidden sm:grid grid-cols-6 gap-0 px-4 py-2 border-b border-white/[0.06] text-[9px] font-mono text-zinc-600 uppercase tracking-wider">
+                <div>Whale</div>
+                <div>Coin</div>
+                <div>Side</div>
+                <div className="text-right">Size</div>
+                <div className="text-right">PnL</div>
+                <div className="text-right">Time</div>
               </div>
-            ))}
-          </div>
+              {hlTrades.slice(0, 30).map((t, i) => {
+                const timeStr = new Date(t.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+                const dateStr = new Date(t.time).toLocaleDateString([], { month: "short", day: "numeric" });
+                return (
+                  <div key={i} className="grid grid-cols-3 sm:grid-cols-6 gap-0 px-4 py-2.5 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors text-[11px] font-mono">
+                    <div className="text-zinc-300 truncate">{t.whale}</div>
+                    <div className="text-white font-semibold">{t.coin}</div>
+                    <div><span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${t.side === "BUY" ? "bg-emerald-500/15 text-emerald-400" : "bg-red-500/15 text-red-400"}`}>{t.side}</span></div>
+                    <div className="text-right text-zinc-300">${t.notional >= 1_000_000 ? `${(t.notional / 1_000_000).toFixed(1)}M` : t.notional >= 1000 ? `${(t.notional / 1000).toFixed(0)}K` : t.notional.toFixed(0)}</div>
+                    <div className={`text-right ${t.closedPnl >= 0 ? "text-emerald-400" : "text-red-400"}`}>{t.closedPnl !== 0 ? `${t.closedPnl >= 0 ? "+" : ""}$${Math.abs(t.closedPnl) >= 1000 ? `${(t.closedPnl / 1000).toFixed(1)}K` : t.closedPnl.toFixed(0)}` : "—"}</div>
+                    <div className="text-right text-zinc-600">{dateStr} {timeStr}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </Container>
+        </section>
+      )}
+            </>}
+          />
         </Container>
       </section>
 

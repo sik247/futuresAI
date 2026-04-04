@@ -82,3 +82,68 @@ export async function fetchAllHLWhales(): Promise<HLWalletData[]> {
     .filter((r): r is PromiseFulfilledResult<HLWalletData | null> => r.status === "fulfilled" && r.value !== null)
     .map(r => r.value!);
 }
+
+/* ── Recent fills (trades) for a whale ─────────────────────────────── */
+
+export interface HLFill {
+  coin: string;
+  side: "B" | "A"; // B = buy, A = sell
+  px: string;
+  sz: string;
+  time: number;
+  closedPnl: string;
+  fee: string;
+}
+
+export interface HLWhaleTrade {
+  whale: string;
+  coin: string;
+  side: "BUY" | "SELL";
+  price: number;
+  size: number;
+  notional: number;
+  closedPnl: number;
+  time: number;
+}
+
+async function fetchHLFills(address: string): Promise<HLFill[]> {
+  try {
+    const res = await fetch(HL_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "userFills", user: address }),
+      next: { revalidate: 300 },
+    } as any);
+    if (!res.ok) return [];
+    const fills: HLFill[] = await res.json();
+    return fills.slice(0, 50); // last 50 fills
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchAllHLTrades(): Promise<HLWhaleTrade[]> {
+  const results = await Promise.allSettled(
+    HL_WHALES.map(async (w) => {
+      const fills = await fetchHLFills(w.address);
+      return fills.map((f) => ({
+        whale: w.name,
+        coin: f.coin,
+        side: (f.side === "B" ? "BUY" : "SELL") as "BUY" | "SELL",
+        price: parseFloat(f.px),
+        size: parseFloat(f.sz),
+        notional: parseFloat(f.px) * parseFloat(f.sz),
+        closedPnl: parseFloat(f.closedPnl || "0"),
+        time: f.time,
+      }));
+    })
+  );
+
+  const allTrades: HLWhaleTrade[] = [];
+  for (const r of results) {
+    if (r.status === "fulfilled") allTrades.push(...r.value);
+  }
+
+  // Sort by time descending, take top 100
+  return allTrades.sort((a, b) => b.time - a.time).slice(0, 100);
+}
