@@ -25,13 +25,28 @@ const TAB_CONFIG: { key: Tab; label: string; labelKo: string }[] = [
   { key: "analyst", label: "Analysts", labelKo: "애널리스트" },
 ];
 
-function truncAddr(addr: string) {
-  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+type WalletData = {
+  ethBalance: number;
+  ethUsd: number;
+  tokens: { symbol: string; name: string; balance: number; usdValue: number }[];
+};
+
+function fmtUsd(v: number) {
+  if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1)}M`;
+  if (v >= 1_000) return `$${(v / 1_000).toFixed(0)}K`;
+  return `$${v.toFixed(0)}`;
+}
+
+function fmtBal(v: number) {
+  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(2)}M`;
+  if (v >= 1_000) return `${(v / 1_000).toFixed(1)}K`;
+  if (v >= 1) return v.toFixed(2);
+  return v.toFixed(4);
 }
 
 /* ─── Flip Card ──────────────────────────────────────────── */
 
-function FigureCard({ figure, isKo }: { figure: KeyFigure; isKo: boolean }) {
+function FigureCard({ figure, isKo, walletInfo }: { figure: KeyFigure; isKo: boolean; walletInfo?: WalletData }) {
   const [flipped, setFlipped] = useState(false);
   const hasWallet = !!(figure.walletAddress || figure.arkhamUrl);
 
@@ -111,33 +126,57 @@ function FigureCard({ figure, isKo }: { figure: KeyFigure; isKo: boolean }) {
           </div>
 
           {figure.walletAddress ? (
-            <div className="space-y-2 flex-1">
-              <div className="rounded-lg bg-white/[0.04] border border-white/[0.06] p-2.5">
-                <p className="text-[8px] text-zinc-600 font-mono uppercase mb-1">ETH Address</p>
-                <p className="text-[10px] font-mono text-blue-400 break-all leading-relaxed">
-                  {figure.walletAddress}
-                </p>
+            <div className="space-y-2 flex-1 overflow-y-auto">
+              {/* Address */}
+              <div className="rounded-lg bg-white/[0.04] border border-white/[0.06] p-2">
+                <p className="text-[8px] text-zinc-600 font-mono uppercase mb-0.5">Address</p>
+                <p className="text-[9px] font-mono text-blue-400 truncate">{figure.walletAddress}</p>
               </div>
-              <div className="rounded-lg bg-white/[0.04] border border-white/[0.06] p-2.5">
-                <p className="text-[8px] text-zinc-600 font-mono uppercase mb-1">{isKo ? "알려진 보유" : "Known Holdings"}</p>
-                <div className="flex flex-wrap gap-1">
-                  {figure.knownHoldings.map((h) => (
-                    <span key={h} className="text-[9px] font-mono font-bold text-white bg-white/[0.08] px-2 py-0.5 rounded">
-                      {h}
-                    </span>
-                  ))}
+
+              {/* Real wallet data */}
+              {walletInfo && walletInfo.ethBalance > 0 && (
+                <div className="rounded-lg bg-white/[0.04] border border-white/[0.06] p-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[8px] text-zinc-600 font-mono uppercase">ETH</span>
+                    <span className="text-[9px] font-mono text-emerald-400">{fmtUsd(walletInfo.ethUsd)}</span>
+                  </div>
+                  <p className="text-[10px] font-mono text-white">{fmtBal(walletInfo.ethBalance)} ETH</p>
                 </div>
-              </div>
+              )}
+
+              {walletInfo && walletInfo.tokens.length > 0 && (
+                <div className="rounded-lg bg-white/[0.04] border border-white/[0.06] p-2">
+                  <p className="text-[8px] text-zinc-600 font-mono uppercase mb-1">{isKo ? "토큰 보유" : "Token Holdings"}</p>
+                  <div className="space-y-1">
+                    {walletInfo.tokens.slice(0, 5).map((t) => (
+                      <div key={t.symbol} className="flex items-center justify-between">
+                        <span className="text-[9px] font-mono text-zinc-300">{t.symbol}</span>
+                        <div className="text-right">
+                          <span className="text-[9px] font-mono text-white">{fmtBal(t.balance)}</span>
+                          {t.usdValue > 0 && <span className="text-[8px] font-mono text-zinc-500 ml-1">({fmtUsd(t.usdValue)})</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {!walletInfo && (
+                <div className="rounded-lg bg-white/[0.04] border border-white/[0.06] p-2">
+                  <p className="text-[8px] text-zinc-600 font-mono uppercase mb-1">{isKo ? "알려진 보유" : "Known Holdings"}</p>
+                  <div className="flex flex-wrap gap-1">
+                    {figure.knownHoldings.map((h) => (
+                      <span key={h} className="text-[9px] font-mono font-bold text-white bg-white/[0.08] px-2 py-0.5 rounded">{h}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {figure.arkhamUrl && (
-                <a
-                  href={figure.arkhamUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex items-center justify-center gap-1.5 text-[10px] font-mono text-purple-400 bg-purple-500/10 border border-purple-500/20 rounded-lg py-2 hover:bg-purple-500/20 transition-colors"
-                >
+                <a href={figure.arkhamUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
+                  className="flex items-center justify-center gap-1.5 text-[10px] font-mono text-purple-400 bg-purple-500/10 border border-purple-500/20 rounded-lg py-1.5 hover:bg-purple-500/20 transition-colors">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  {isKo ? "Arkham에서 추적" : "Track on Arkham"}
+                  {isKo ? "Arkham 추적" : "Arkham"}
                 </a>
               )}
             </div>
@@ -198,9 +237,11 @@ function FigureCard({ figure, isKo }: { figure: KeyFigure; isKo: boolean }) {
 
 export default function KeyFiguresGrid({
   figures,
+  walletData,
   lang,
 }: {
   figures: KeyFigure[];
+  walletData?: Record<string, WalletData>;
   lang: string;
 }) {
   const isKo = lang === "ko";
@@ -247,7 +288,7 @@ export default function KeyFiguresGrid({
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {filtered.map((figure) => (
-          <FigureCard key={figure.name} figure={figure} isKo={isKo} />
+          <FigureCard key={figure.name} figure={figure} isKo={isKo} walletInfo={figure.walletAddress ? walletData?.[figure.walletAddress] : undefined} />
         ))}
       </div>
 

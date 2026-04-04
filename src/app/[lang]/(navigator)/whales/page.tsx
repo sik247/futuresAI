@@ -362,6 +362,24 @@ export default async function WhalesPage({
 
   const totalPortfolioUsd = walletsData.reduce((sum, w) => sum + w.balanceUsd, 0);
 
+  // Fetch on-chain data for Key Figures with wallet addresses
+  const figureWalletData: Record<string, { ethBalance: number; ethUsd: number; tokens: { symbol: string; name: string; balance: number; usdValue: number }[] }> = {};
+  const figuresWithWallets = KEY_FIGURES.filter((f) => f.walletAddress);
+  for (const fig of figuresWithWallets) {
+    const addrData = await fetchAddressData(fig.walletAddress);
+    figureWalletData[fig.walletAddress] = {
+      ethBalance: addrData.balance,
+      ethUsd: addrData.balance * ethPrice,
+      tokens: addrData.tokens.map((t: any) => ({
+        symbol: t.tokenSymbol,
+        name: t.tokenName,
+        balance: t.balance,
+        usdValue: t.usdValue,
+      })),
+    };
+    await delayMs(500);
+  }
+
   return (
     <div className="min-h-screen bg-zinc-950">
       <WhalesAnimations />
@@ -466,22 +484,9 @@ export default async function WhalesPage({
           <WhaleTabs
             lang={lang}
             trackerContent={<>
-      {/* ---- Entity Cards ---- */}
-      <section className="py-16 sm:py-20">
-        <Container>
-          <div data-whale-heading className="mb-10">
-            <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-zinc-600 mb-3">
-              Ethereum Mainnet
-            </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-              Tracked Entities
-            </h2>
-            <p className="text-sm text-zinc-500 mt-2 max-w-md">
-              On-chain monitored wallets with live ETH balances and recent token activity.
-            </p>
-          </div>
 
-          <div
+          {/* Old entity cards removed — wallet data now shown in Key Figures flip cards */}
+          {false && <div
             data-whale-grid
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
@@ -612,12 +617,7 @@ export default async function WhalesPage({
                 </div>
               );
             })}
-          </div>
-        </Container>
-      </section>
-
-      {/* ---- Divider ---- */}
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+          </div>}
 
       {/* ---- Activity Feed ---- */}
       <section className="py-16 sm:py-20">
@@ -788,7 +788,7 @@ export default async function WhalesPage({
             figuresContent={<>
       <section className="py-8">
         <Container>
-          <KeyFiguresGrid figures={KEY_FIGURES} lang={lang} />
+          <KeyFiguresGrid figures={KEY_FIGURES} walletData={figureWalletData} lang={lang} />
         </Container>
       </section>
             </>}
