@@ -2,27 +2,25 @@
 
 import { useState } from "react";
 
-type WhaleTab = "wallets" | "figures" | "megawhales";
+type WhaleTab = "tracker" | "figures";
 
 export default function WhaleTabs({
-  walletsContent,
+  trackerContent,
   figuresContent,
-  megaWhalesContent,
   lang,
 }: {
-  walletsContent: React.ReactNode;
+  trackerContent: React.ReactNode;
   figuresContent: React.ReactNode;
-  megaWhalesContent: React.ReactNode;
   lang: string;
 }) {
   const isKo = lang === "ko";
-  const [tab, setTab] = useState<WhaleTab>("wallets");
+  const [tab, setTab] = useState<WhaleTab>("tracker");
 
   const tabs: { key: WhaleTab; label: string; labelKo: string; icon: React.ReactNode }[] = [
     {
-      key: "wallets",
-      label: "Wallets",
-      labelKo: "지갑 추적",
+      key: "tracker",
+      label: "Whale Tracker",
+      labelKo: "고래 추적",
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M21 12V7H5a2 2 0 010-4h14v4" strokeLinecap="round" strokeLinejoin="round" />
@@ -43,21 +41,10 @@ export default function WhaleTabs({
         </svg>
       ),
     },
-    {
-      key: "megawhales",
-      label: "Mega Whales",
-      labelKo: "메가 고래",
-      icon: (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ),
-    },
   ];
 
   return (
     <div>
-      {/* Tab bar */}
       <div className="flex items-center gap-2 mb-8">
         {tabs.map((t) => {
           const active = tab === t.key;
@@ -78,10 +65,8 @@ export default function WhaleTabs({
         })}
       </div>
 
-      {/* Tab content */}
-      {tab === "wallets" && walletsContent}
+      {tab === "tracker" && trackerContent}
       {tab === "figures" && figuresContent}
-      {tab === "megawhales" && megaWhalesContent}
     </div>
   );
 }

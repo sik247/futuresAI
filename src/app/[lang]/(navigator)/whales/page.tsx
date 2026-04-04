@@ -160,6 +160,15 @@ const KEY_FIGURES: KeyFigure[] = [
   { name: "Willy Woo", role: "On-chain Analyst", image: "https://cryptoslate.com/wp-content/uploads/2019/05/person-willy-woo.jpg", link: "https://x.com/woonomic", arkhamUrl: "", walletAddress: "", stance: "Bullish", knownHoldings: ["BTC"], category: "analyst" },
   { name: "Gareth Soloway", role: "Chief Market Strategist", image: "https://verifiedinvesting.com/cdn/shop/files/vi-2025-pro-photo-gareth-16x9.jpg?v=1749581417&width=1920", link: "https://x.com/GarethSoloway", arkhamUrl: "", walletAddress: "", stance: "Bearish", knownHoldings: ["BTC", "GOLD"], category: "analyst" },
   { name: "Benjamin Cowen", role: "Crypto Analyst", image: "https://benjamincowen.com/images/benjamin-portrait.jpg", link: "https://x.com/intocryptoverse", arkhamUrl: "", walletAddress: "", stance: "Neutral", knownHoldings: ["BTC", "ETH"], category: "analyst" },
+  // ── Additional Figures ──
+  { name: "Sam Bankman-Fried", role: "FTX (Convicted)", image: "https://upload.wikimedia.org/wikipedia/commons/6/6a/Sam_Bankman-Fried.jpg", link: "https://en.wikipedia.org/wiki/Sam_Bankman-Fried", arkhamUrl: "https://platform.arkhamintelligence.com/explorer/entity/ftx", walletAddress: "", stance: "", knownHoldings: ["FTT"], category: "founder" },
+  { name: "Richard Heart", role: "PulseChain Founder", image: "https://upload.wikimedia.org/wikipedia/commons/e/e1/Richard_Heart.jpg", link: "https://x.com/RichardHeartWin", arkhamUrl: "", walletAddress: "0x075e72a5eDf65F0A5f44699c7654C1a76941Ddc8", stance: "Bullish", knownHoldings: ["HEX", "PLS"], category: "founder" },
+  { name: "Andre Cronje", role: "Fantom / yearn.finance", image: "https://upload.wikimedia.org/wikipedia/commons/1/1f/Andre_Cronje.png", link: "https://x.com/AndreCronjeTech", arkhamUrl: "", walletAddress: "", stance: "Bullish", knownHoldings: ["FTM", "YFI"], category: "founder" },
+  { name: "Lark Davis", role: "The Crypto Lark", image: "https://cryptoslate.com/wp-content/uploads/2021/12/person-lark-davis.jpg", link: "https://x.com/TheCryptoLark", arkhamUrl: "", walletAddress: "", stance: "Bullish", knownHoldings: ["BTC", "DOT", "SOL"], category: "analyst" },
+  { name: "Peter Schiff", role: "Gold Bug / BTC Critic", image: "https://upload.wikimedia.org/wikipedia/commons/5/54/Peter_Schiff_by_Gage_Skidmore.jpg", link: "https://x.com/PeterSchiff", arkhamUrl: "", walletAddress: "", stance: "Bearish", knownHoldings: ["GOLD"], category: "analyst" },
+  { name: "Mark Cuban", role: "Investor / Mavericks Owner", image: "https://upload.wikimedia.org/wikipedia/commons/0/0e/Mark_Cuban_2020_%28cropped%29.jpg", link: "https://x.com/mcuban", arkhamUrl: "", walletAddress: "", stance: "Bullish", knownHoldings: ["BTC", "ETH", "MATIC"], category: "investor" },
+  { name: "Tim Draper", role: "Draper Associates", image: "https://upload.wikimedia.org/wikipedia/commons/5/55/Tim_Draper_2019.jpg", link: "https://x.com/TimDraper", arkhamUrl: "", walletAddress: "", stance: "Bullish", knownHoldings: ["BTC"], category: "investor" },
+  { name: "Andrej Jikh", role: "YouTube / Investor", image: "https://cryptoslate.com/wp-content/uploads/2022/01/person-andrej-jikh.jpg", link: "https://x.com/AndrejJikh", arkhamUrl: "", walletAddress: "", stance: "Bullish", knownHoldings: ["BTC", "ETH", "SOL"], category: "analyst" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -456,7 +465,7 @@ export default async function WhalesPage({
         <Container>
           <WhaleTabs
             lang={lang}
-            walletsContent={<>
+            trackerContent={<>
       {/* ---- Entity Cards ---- */}
       <section className="py-16 sm:py-20">
         <Container>
@@ -476,7 +485,7 @@ export default async function WhalesPage({
             data-whale-grid
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
-            {walletsData.map((wallet) => {
+            {walletsData.filter((w) => w.balance > 0 || w.recentTokenTxs.length > 0).map((wallet) => {
               const colors = getColors(wallet.type);
               return (
                 <div
@@ -628,16 +637,10 @@ export default async function WhalesPage({
           <WhaleActivityFeed />
         </Container>
       </section>
-            </>}
-            figuresContent={<>
-      {/* ---- Key Figures ---- */}
-      <section className="py-8">
-        <Container>
-          <KeyFiguresGrid figures={KEY_FIGURES} lang={lang} />
-        </Container>
-      </section>
-            </>}
-            megaWhalesContent={<>
+
+      {/* ---- Divider ---- */}
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
       {/* ---- Hyperliquid Whale Positions ---- */}
       <section className="py-16 sm:py-20">
         <Container>
@@ -781,6 +784,13 @@ export default async function WhalesPage({
           </Container>
         </section>
       )}
+            </>}
+            figuresContent={<>
+      <section className="py-8">
+        <Container>
+          <KeyFiguresGrid figures={KEY_FIGURES} lang={lang} />
+        </Container>
+      </section>
             </>}
           />
         </Container>
