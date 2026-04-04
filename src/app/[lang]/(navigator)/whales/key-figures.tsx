@@ -67,11 +67,17 @@ function FigureCard({ figure, isKo, walletInfo }: { figure: KeyFigure; isKo: boo
             : "border-white/[0.06] hover:border-white/[0.12]"
         } hover:bg-white/[0.05] transition-all duration-200`}>
           <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mb-3 border-2 border-white/[0.08]">
-            <img
-              src={figure.image}
-              alt={figure.name}
-              className="w-full h-full object-cover"
-            />
+            {figure.image ? (
+              <img
+                src={figure.image}
+                alt={figure.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                {figure.name.split(" ").map(w => w[0]).join("").slice(0, 2)}
+              </div>
+            )}
             {hasWallet && (
               <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-purple-500 border-2 border-[#0d0e14] flex items-center justify-center">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
@@ -172,42 +178,13 @@ function FigureCard({ figure, isKo, walletInfo }: { figure: KeyFigure; isKo: boo
                 </div>
               )}
 
-              {figure.arkhamUrl && (
-                <a href={figure.arkhamUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
-                  className="flex items-center justify-center gap-1.5 text-[10px] font-mono text-purple-400 bg-purple-500/10 border border-purple-500/20 rounded-lg py-1.5 hover:bg-purple-500/20 transition-colors">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  {isKo ? "Arkham 추적" : "Arkham"}
-                </a>
-              )}
-            </div>
-          ) : figure.arkhamUrl ? (
-            <div className="space-y-2 flex-1">
-              <div className="rounded-lg bg-white/[0.04] border border-white/[0.06] p-2.5">
-                <p className="text-[8px] text-zinc-600 font-mono uppercase mb-1">{isKo ? "추적 상태" : "Tracking"}</p>
-                <p className="text-[10px] text-zinc-400">
-                  {isKo ? "Arkham Intelligence에서 추적 가능" : "Tracked via Arkham Intelligence"}
-                </p>
-              </div>
-              <div className="rounded-lg bg-white/[0.04] border border-white/[0.06] p-2.5">
-                <p className="text-[8px] text-zinc-600 font-mono uppercase mb-1">{isKo ? "알려진 보유" : "Known Holdings"}</p>
-                <div className="flex flex-wrap gap-1">
-                  {figure.knownHoldings.map((h) => (
-                    <span key={h} className="text-[9px] font-mono font-bold text-white bg-white/[0.08] px-2 py-0.5 rounded">
-                      {h}
-                    </span>
-                  ))}
+              {walletInfo && (walletInfo.ethUsd > 0 || walletInfo.tokens.length > 0) && (
+                <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-1.5 text-center">
+                  <span className="text-[9px] font-mono text-emerald-400 font-bold">
+                    {isKo ? "실시간 데이터" : "Live Data"}
+                  </span>
                 </div>
-              </div>
-              <a
-                href={figure.arkhamUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center justify-center gap-1.5 text-[10px] font-mono text-purple-400 bg-purple-500/10 border border-purple-500/20 rounded-lg py-2 hover:bg-purple-500/20 transition-colors"
-              >
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                {isKo ? "Arkham에서 보기" : "View on Arkham"}
-              </a>
+              )}
             </div>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center">
