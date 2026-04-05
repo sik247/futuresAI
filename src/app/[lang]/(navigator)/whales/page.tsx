@@ -52,7 +52,7 @@ const KEY_FIGURES: KeyFigure[] = [
   { name: "Vitalik Buterin", role: "Ethereum Co-founder", image: "https://upload.wikimedia.org/wikipedia/commons/1/1c/Vitalik_Buterin_TechCrunch_London_2015_%28cropped%29.jpg", walletAddress: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045", stance: "Bullish", knownHoldings: ["ETH"], category: "founder" },
   { name: "Justin Sun", role: "TRON Founder", image: "https://upload.wikimedia.org/wikipedia/commons/5/52/Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg", walletAddress: "0x176F3DAb24a159341c0509bB36B833E7fdd0a132", stance: "Bullish", knownHoldings: ["TRX", "ETH", "BTC"], category: "founder" },
   { name: "Michael Saylor", role: "MicroStrategy CEO", image: "https://upload.wikimedia.org/wikipedia/commons/f/f4/Michael_Saylor_2022.png", walletAddress: "", stance: "Bullish", knownHoldings: ["BTC"], category: "founder" },
-  { name: "CZ (Changpeng Zhao)", role: "Binance Founder", image: "https://upload.wikimedia.org/wikipedia/commons/e/e1/Changpeng_Zhao_in_2022.jpg", walletAddress: "0x8894E0a0c962CB723c1ef41B4F31334e14d5d68d", stance: "Bullish", knownHoldings: ["BNB", "BTC"], category: "founder" },
+  { name: "CZ (Changpeng Zhao)", role: "Binance Founder", image: "https://upload.wikimedia.org/wikipedia/commons/e/e1/Changpeng_Zhao_in_2022.jpg", walletAddress: "0xF977814e90dA44bFA03b6295A0616a897441aceC", stance: "Bullish", knownHoldings: ["BNB", "BTC"], category: "founder" },
   { name: "Brian Armstrong", role: "Coinbase CEO", image: "https://upload.wikimedia.org/wikipedia/commons/9/91/Brian_Armstrong_-_TechCrunch_Disrupt_2018_01.jpg", walletAddress: "0x5b76f5B8fc9D700624F78208132f91AD4e61a1f0", stance: "Bullish", knownHoldings: ["BTC", "ETH"], category: "founder" },
   { name: "Do Kwon", role: "Terraform Labs", image: "https://upload.wikimedia.org/wikipedia/commons/2/29/Do_Kwon.png", walletAddress: "", stance: "", knownHoldings: ["BTC"], category: "founder" },
   // ── Traders ──
@@ -99,18 +99,19 @@ async function fetchAddressData(address: string): Promise<{ balance: number; tok
     const data = await res.json();
     const balance = data?.ETH?.balance ?? 0;
     const tokens = (data?.tokens || [])
-      .filter((t: any) => t.tokenInfo?.price)
       .map((t: any) => {
-        const decimals = Number(t.tokenInfo.decimals || 18);
+        const decimals = Number(t.tokenInfo?.decimals || 18);
         const rawBalance = Number(t.balance) / Math.pow(10, decimals);
+        const rate = t.tokenInfo?.price?.rate || 0;
         return {
-          symbol: t.tokenInfo.symbol || "???",
+          symbol: t.tokenInfo?.symbol || "???",
           balance: rawBalance,
-          usdValue: rawBalance * (t.tokenInfo.price?.rate || 0),
+          usdValue: rawBalance * rate,
         };
       })
+      .filter((t: any) => t.balance > 0 && t.symbol !== "???")
       .sort((a: any, b: any) => b.usdValue - a.usdValue)
-      .slice(0, 8);
+      .slice(0, 10);
     return { balance, tokens };
   } catch {
     return { balance: 0, tokens: [] };
