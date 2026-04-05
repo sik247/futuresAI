@@ -76,15 +76,11 @@ const KEY_FIGURES: KeyFigure[] = [
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 
-function delayMs(ms: number) {
-  return new Promise((r) => setTimeout(r, ms));
-}
-
 async function fetchEthPrice(): Promise<number> {
   try {
     const res = await fetch(
       "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd",
-      { next: { revalidate: 120 } }
+      { next: { revalidate: 120 }, signal: AbortSignal.timeout(5000) }
     );
     const data = await res.json();
     return data?.ethereum?.usd ?? 0;
@@ -97,8 +93,9 @@ async function fetchAddressData(address: string): Promise<{ balance: number; tok
   try {
     const res = await fetch(
       `https://api.ethplorer.io/getAddressInfo/${address}?apiKey=freekey`,
-      { next: { revalidate: 300 } }
+      { next: { revalidate: 300 }, signal: AbortSignal.timeout(5000) }
     );
+    if (!res.ok) return { balance: 0, tokens: [] };
     const data = await res.json();
     const balance = data?.ETH?.balance ?? 0;
     const tokens = (data?.tokens || [])
@@ -113,7 +110,7 @@ async function fetchAddressData(address: string): Promise<{ balance: number; tok
         };
       })
       .sort((a: any, b: any) => b.usdValue - a.usdValue)
-      .slice(0, 5);
+      .slice(0, 8);
     return { balance, tokens };
   } catch {
     return { balance: 0, tokens: [] };
@@ -123,6 +120,8 @@ async function fetchAddressData(address: string): Promise<{ balance: number; tok
 /* ------------------------------------------------------------------ */
 /*  Page component                                                     */
 /* ------------------------------------------------------------------ */
+
+export const revalidate = 300;
 
 export default async function WhalesPage({
   params: { lang },
@@ -136,18 +135,21 @@ export default async function WhalesPage({
     fetchAllHLTrades(),
   ]);
 
-  // Fetch on-chain data for figures with wallet addresses
+  // Fetch on-chain data for figures with wallet addresses (parallel)
   const figuresWithWallets = KEY_FIGURES.filter((f) => f.walletAddress);
   const walletDataMap: Record<string, { ethBalance: number; ethUsd: number; tokens: { symbol: string; balance: number; usdValue: number }[] }> = {};
 
-  for (const fig of figuresWithWallets) {
-    const addrData = await fetchAddressData(fig.walletAddress);
-    walletDataMap[fig.walletAddress] = {
+  const walletResults = await Promise.allSettled(
+    figuresWithWallets.map((fig) => fetchAddressData(fig.walletAddress))
+  );
+  for (let i = 0; i < figuresWithWallets.length; i++) {
+    const result = walletResults[i];
+    const addrData = result.status === "fulfilled" ? result.value : { balance: 0, tokens: [] };
+    walletDataMap[figuresWithWallets[i].walletAddress] = {
       ethBalance: addrData.balance,
       ethUsd: addrData.balance * ethPrice,
       tokens: addrData.tokens,
     };
-    await delayMs(400);
   }
 
   // Merge figures with wallet data

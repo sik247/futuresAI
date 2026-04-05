@@ -347,8 +347,8 @@ function RecentTradesTable({ trades }: { trades: HLTrade[] }) {
         <span className="text-[9px] font-mono text-zinc-700">{displayTrades.length} fills</span>
       </div>
       {/* Column headers */}
-      <div className="grid grid-cols-[70px_60px_50px_70px_70px_60px_55px] gap-1 px-3 py-1.5 border-b border-white/[0.04] shrink-0">
-        {["Whale", "Coin", "Side", "Price", "Notional", "PnL", "Time"].map((h) => (
+      <div className="grid grid-cols-[1fr_60px_42px_60px_50px_50px] gap-1 px-3 py-1.5 border-b border-white/[0.04] shrink-0">
+        {["Whale", "Coin", "Side", "Size", "PnL", "Time"].map((h) => (
           <span key={h} className="text-[8px] font-mono uppercase tracking-[0.1em] text-zinc-700">{h}</span>
         ))}
       </div>
@@ -362,7 +362,7 @@ function RecentTradesTable({ trades }: { trades: HLTrade[] }) {
           displayTrades.map((t, i) => (
             <div
               key={i}
-              className="grid grid-cols-[70px_60px_50px_70px_70px_60px_55px] gap-1 px-3 py-1.5 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
+              className="grid grid-cols-[1fr_60px_42px_60px_50px_50px] gap-1 px-3 py-1 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
             >
               <span className="text-[9px] font-mono text-zinc-400 truncate">{t.whale}</span>
               <span className="text-[9px] font-mono text-white font-semibold truncate">{t.coin}</span>
@@ -372,9 +372,6 @@ function RecentTradesTable({ trades }: { trades: HLTrade[] }) {
                 }`}
               >
                 {t.side}
-              </span>
-              <span className="text-[9px] font-mono text-zinc-400 tabular-nums">
-                ${t.price >= 1000 ? t.price.toLocaleString(undefined, { maximumFractionDigits: 0 }) : t.price.toFixed(2)}
               </span>
               <span className="text-[9px] font-mono text-zinc-300 tabular-nums">{fmtUsd(t.notional)}</span>
               <span
