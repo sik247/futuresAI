@@ -54,7 +54,7 @@ const KEY_FIGURES: KeyFigure[] = [
   { name: "Michael Saylor", role: "MicroStrategy CEO", image: "https://upload.wikimedia.org/wikipedia/commons/f/f4/Michael_Saylor_2022.png", walletAddress: "", stance: "Bullish", knownHoldings: ["BTC"], category: "founder" },
   { name: "CZ (Changpeng Zhao)", role: "Binance Founder", image: "https://upload.wikimedia.org/wikipedia/commons/e/e1/Changpeng_Zhao_in_2022.jpg", walletAddress: "0xF977814e90dA44bFA03b6295A0616a897441aceC", stance: "Bullish", knownHoldings: ["BNB", "BTC"], category: "founder" },
   { name: "Brian Armstrong", role: "Coinbase CEO", image: "https://upload.wikimedia.org/wikipedia/commons/9/91/Brian_Armstrong_-_TechCrunch_Disrupt_2018_01.jpg", walletAddress: "0x5b76f5B8fc9D700624F78208132f91AD4e61a1f0", stance: "Bullish", knownHoldings: ["BTC", "ETH"], category: "founder" },
-  { name: "Do Kwon", role: "Terraform Labs", image: "https://upload.wikimedia.org/wikipedia/commons/2/29/Do_Kwon.png", walletAddress: "", stance: "", knownHoldings: ["BTC"], category: "founder" },
+  { name: "Do Kwon", role: "Terraform Labs", image: "https://upload.wikimedia.org/wikipedia/commons/2/29/Do_Kwon.png", walletAddress: "0xbec5e1ad5422e52821735b59b39dc03810aae682", stance: "", knownHoldings: ["BTC"], category: "founder" },
   // ── Traders ──
   { name: "Arthur Hayes", role: "BitMEX Co-founder", image: "https://cryptoslate.com/wp-content/uploads/2019/05/person-arthur-hayes-01.jpg", walletAddress: "0x94845333028B1204Fbe14E1278Fd4Adde46B22ce", stance: "Bullish", knownHoldings: ["BTC", "ETH", "SOL"], category: "trader" },
   { name: "WLFI Treasury", role: "World Liberty Financial", image: "", walletAddress: "0x5be9a4959308A0D0c7bC0870E319314d8D957dBB", stance: "Bullish", knownHoldings: ["ETH", "WBTC"], category: "founder" },
@@ -67,7 +67,7 @@ const KEY_FIGURES: KeyFigure[] = [
   { name: "Raoul Pal", role: "Real Vision CEO", image: "https://media.realvision.com/wp/20230929154944/Raoul-Pal-3.png", walletAddress: "", stance: "Bullish", knownHoldings: ["SOL", "ETH", "BTC"], category: "investor" },
   // ── Analysts ──
   { name: "Kiyoung Ju", role: "CryptoQuant CEO", image: "https://cdn.theorg.com/6c3b6406-673d-408e-9a0c-2f423f45a88c_medium.jpg", walletAddress: "", stance: "Neutral", knownHoldings: ["BTC"], category: "analyst" },
-  { name: "Willy Woo", role: "On-chain Analyst", image: "https://cryptoslate.com/wp-content/uploads/2019/05/person-willy-woo.jpg", walletAddress: "", stance: "Bullish", knownHoldings: ["BTC"], category: "analyst" },
+  { name: "Willy Woo", role: "On-chain Analyst", image: "https://cryptoslate.com/wp-content/uploads/2019/05/person-willy-woo.jpg", walletAddress: "0x000f16ca1e73a0b6b10e1ed4cc5F8232336c1482", stance: "Bullish", knownHoldings: ["BTC", "ETH"], category: "analyst" },
   { name: "Gareth Soloway", role: "Chief Market Strategist", image: "https://verifiedinvesting.com/cdn/shop/files/vi-2025-pro-photo-gareth-16x9.jpg?v=1749581417&width=1920", walletAddress: "", stance: "Bearish", knownHoldings: ["BTC", "GOLD"], category: "analyst" },
   { name: "Benjamin Cowen", role: "Crypto Analyst", image: "https://benjamincowen.com/images/benjamin-portrait.jpg", walletAddress: "", stance: "Neutral", knownHoldings: ["BTC", "ETH"], category: "analyst" },
 ];
