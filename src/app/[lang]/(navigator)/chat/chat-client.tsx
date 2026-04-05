@@ -20,11 +20,26 @@ interface TickerInfo {
   exchange: string;
 }
 
+interface NewsArticle {
+  title: string;
+  url: string;
+  source: string;
+}
+
+interface InternalLink {
+  label: string;
+  path: string;
+  type: string;
+}
+
 interface Message {
   role: "user" | "assistant";
   content: string;
   ticker?: TickerInfo;
   timestamp?: number;
+  news?: NewsArticle[];
+  followUps?: string[];
+  internalLinks?: InternalLink[];
 }
 
 interface Props {
@@ -185,6 +200,9 @@ export default function ChatClient({ lang, userName }: Props) {
         content: data.response || data.message || data.content || "",
         ticker: data.ticker ?? undefined,
         timestamp: Date.now(),
+        news: data.news ?? undefined,
+        followUps: data.followUps ?? undefined,
+        internalLinks: data.internalLinks ?? undefined,
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch {
@@ -386,19 +404,117 @@ export default function ChatClient({ lang, userName }: Props) {
                         height={24}
                         className="w-6 h-6 rounded-full object-cover ring-1 ring-white/10 shrink-0 mt-0.5"
                       />
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 space-y-2.5">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-[9px] font-semibold text-zinc-500 uppercase tracking-wide">
                             {ko ? "김알렉스" : "Alex Kim"}
                           </span>
                           <span className="text-[8px] text-zinc-700 tabular-nums">{fmtTime(msg.timestamp)}</span>
                         </div>
+
+                        {/* Sources bar (if news exists) */}
+                        {msg.news && msg.news.length > 0 && (
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[8px] text-zinc-600 uppercase tracking-wider">{ko ? "출처" : "Sources"}</span>
+                            {msg.news.map((n, ni) => (
+                              <a
+                                key={ni}
+                                href={n.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.06] transition-colors cursor-pointer"
+                              >
+                                <span className="w-3.5 h-3.5 rounded-sm bg-blue-500/20 flex items-center justify-center text-[7px] font-bold text-blue-400 shrink-0">{ni + 1}</span>
+                                <span className="text-[9px] text-zinc-400 truncate max-w-[100px]">{n.source}</span>
+                              </a>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Main AI response */}
                         <div className="text-[12px] text-zinc-200 leading-relaxed whitespace-pre-wrap pl-2.5 border-l-2 border-white/[0.06]">
                           {msg.content}
                         </div>
+
+                        {/* TradingView chart */}
                         {msg.ticker && (
-                          <div className="mt-2">
+                          <div className="mt-1">
                             <TradingViewChart ticker={msg.ticker} />
+                          </div>
+                        )}
+
+                        {/* Internal page links */}
+                        {msg.internalLinks && msg.internalLinks.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {msg.internalLinks.map((link, li) => (
+                              <a
+                                key={li}
+                                href={link.path}
+                                className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/[0.03] border border-white/[0.06] hover:border-blue-500/30 hover:bg-blue-500/[0.05] transition-all text-[10px] text-zinc-400 hover:text-blue-400 cursor-pointer"
+                              >
+                                {link.type === "chart" && (
+                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+                                )}
+                                {link.type === "whale" && (
+                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                )}
+                                {link.type === "signal" && (
+                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" /></svg>
+                                )}
+                                {(link.type === "news" || link.type === "market") && (
+                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5" /></svg>
+                                )}
+                                {link.label}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Related news articles */}
+                        {msg.news && msg.news.length > 0 && (
+                          <div className="pt-2 border-t border-white/[0.04]">
+                            <span className="text-[9px] text-zinc-600 uppercase tracking-wider block mb-1.5">{ko ? "관련 뉴스" : "Related News"}</span>
+                            <div className="space-y-1">
+                              {msg.news.slice(0, 3).map((n, ni) => (
+                                <a
+                                  key={ni}
+                                  href={n.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-start gap-2 px-2.5 py-1.5 rounded-md bg-white/[0.02] border border-white/[0.04] hover:border-white/[0.10] hover:bg-white/[0.04] transition-all cursor-pointer group"
+                                >
+                                  <span className="w-4 h-4 rounded-sm bg-blue-500/15 flex items-center justify-center text-[8px] font-bold text-blue-400 shrink-0 mt-0.5">{ni + 1}</span>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-[11px] text-zinc-300 group-hover:text-white leading-snug line-clamp-1 transition-colors">{n.title}</p>
+                                    <p className="text-[9px] text-zinc-600 mt-0.5">{n.source}</p>
+                                  </div>
+                                  <svg className="w-3 h-3 text-zinc-700 group-hover:text-zinc-400 shrink-0 mt-0.5 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                  </svg>
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Follow-up questions */}
+                        {msg.followUps && msg.followUps.length > 0 && idx === messages.length - 1 && (
+                          <div className="pt-2">
+                            <span className="text-[9px] text-zinc-600 uppercase tracking-wider block mb-1.5">{ko ? "관련 질문" : "Follow up"}</span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {msg.followUps.map((q, qi) => (
+                                <button
+                                  key={qi}
+                                  onClick={() => {
+                                    setInput(q);
+                                    inputRef.current?.focus();
+                                  }}
+                                  className="text-[10px] px-2.5 py-1.5 rounded-md bg-white/[0.02] text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-200 border border-white/[0.06] hover:border-white/[0.12] transition-all cursor-pointer text-left"
+                                >
+                                  {q}
+                                </button>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>

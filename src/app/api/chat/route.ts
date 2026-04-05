@@ -76,8 +76,13 @@ export async function POST(req: NextRequest) {
 
     // Fetch context based on persona
     let context = "";
+    let newsArticles: { title: string; url: string; source: string }[] = [];
+    let detectedSymbol: string | null = null;
     if (persona === "crypto") {
-      context = await buildCryptoContext(message);
+      const result = await buildCryptoContext(message);
+      context = result.context;
+      newsArticles = result.newsArticles;
+      detectedSymbol = result.detectedSymbol;
     }
 
     // Get recent conversation history (last 10 messages)
@@ -108,7 +113,9 @@ ${historyText}
 
 User: ${message}
 
-Respond concisely (50-100 words unless asked for more). Be specific with numbers.`;
+Respond concisely (80-150 words unless asked for more). Be specific with numbers.
+
+IMPORTANT: After your analysis, add a line "---FOLLOWUPS---" followed by exactly 3 short follow-up questions the user might want to ask next (one per line). These should be relevant to the conversation and encourage deeper analysis. Keep each under 40 characters.`;
 
     // Call Gemini
     const apiKey = process.env.GEMINI_API_KEY;
@@ -119,15 +126,47 @@ Respond concisely (50-100 words unless asked for more). Be specific with numbers
     const result = await model.generateContent(fullPrompt);
     const response = result.response.text();
 
-    // Detect ticker from AI response to avoid false positives from user message
-    const tickerInfo = extractTickerFromResponse(response, persona);
+    // Parse follow-up questions from response
+    let mainResponse = response;
+    let followUps: string[] = [];
+    if (response.includes("---FOLLOWUPS---")) {
+      const [main, followUpSection] = response.split("---FOLLOWUPS---");
+      mainResponse = main.trim();
+      followUps = followUpSection
+        .trim()
+        .split("\n")
+        .map((q: string) => q.replace(/^[-•*\d.)\s]+/, "").trim())
+        .filter((q: string) => q.length > 0)
+        .slice(0, 3);
+    }
+
+    // Detect ticker from AI response
+    const tickerInfo = extractTickerFromResponse(mainResponse, persona);
+
+    // Build internal page links based on detected symbol and query content
+    const internalLinks: { label: string; path: string; type: string }[] = [];
+    const lowerMsg = message.toLowerCase();
+    if (detectedSymbol || tickerInfo) {
+      internalLinks.push({ label: lang === "ko" ? "실시간 차트 보기" : "View Live Chart", path: `/${lang}/charts`, type: "chart" });
+    }
+    if (lowerMsg.includes("whale") || lowerMsg.includes("고래") || lowerMsg.includes("on-chain") || lowerMsg.includes("온체인")) {
+      internalLinks.push({ label: lang === "ko" ? "고래 트래커" : "Whale Tracker", path: `/${lang}/whales`, type: "whale" });
+    }
+    if (lowerMsg.includes("fear") || lowerMsg.includes("greed") || lowerMsg.includes("공포") || lowerMsg.includes("탐욕") || lowerMsg.includes("sentiment") || lowerMsg.includes("심리")) {
+      internalLinks.push({ label: lang === "ko" ? "시장 데이터" : "Market Data", path: `/${lang}/charts`, type: "market" });
+    }
+    if (lowerMsg.includes("signal") || lowerMsg.includes("시그널") || lowerMsg.includes("rsi") || lowerMsg.includes("macd")) {
+      internalLinks.push({ label: lang === "ko" ? "퀀트 시그널" : "Quant Signals", path: `/${lang}/quant`, type: "signal" });
+    }
+    // Always add news link
+    internalLinks.push({ label: lang === "ko" ? "최신 뉴스" : "Latest News", path: `/${lang}/news`, type: "news" });
 
     // Save assistant message
     await prisma.chatMessage.create({
       data: {
         sessionId,
         role: "assistant",
-        content: response,
+        content: mainResponse,
         persona,
         ticker: tickerInfo ? `${tickerInfo.exchange}:${tickerInfo.symbol}` : null,
         userId: user.id,
@@ -135,8 +174,11 @@ Respond concisely (50-100 words unless asked for more). Be specific with numbers
     });
 
     return NextResponse.json({
-      response,
+      response: mainResponse,
       ticker: tickerInfo ? { symbol: tickerInfo.symbol, exchange: tickerInfo.exchange } : null,
+      news: newsArticles,
+      followUps,
+      internalLinks,
     });
   } catch (error) {
     console.error("[Chat API]", error);

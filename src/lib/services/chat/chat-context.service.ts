@@ -103,7 +103,7 @@ async function fetchBinanceKlines(symbol: string): Promise<string | null> {
   }
 }
 
-export async function buildCryptoContext(query: string): Promise<string> {
+export async function buildCryptoContext(query: string): Promise<{ context: string; newsArticles: { title: string; url: string; source: string }[]; detectedSymbol: string | null }> {
   const parts: string[] = [];
 
   const ticker = extractTicker(query, "crypto");
@@ -152,15 +152,26 @@ export async function buildCryptoContext(query: string): Promise<string> {
     } catch {}
   }
 
+  let newsArticles: { title: string; url: string; source: string }[] = [];
   if (newsRes.status === "fulfilled" && newsRes.value.ok) {
     try {
       const newsData = await newsRes.value.json();
-      const headlines = (newsData.results || []).slice(0, 3).map((n: { title: string }) => n.title).join(" | ");
+      const results = (newsData.results || []).slice(0, 5);
+      newsArticles = results.map((n: any) => ({
+        title: n.title,
+        url: n.url,
+        source: n.source?.title || "CryptoPanic",
+      }));
+      const headlines = results.slice(0, 3).map((n: any) => n.title).join(" | ");
       if (headlines) parts.push(`NEWS: ${headlines}`);
     } catch {}
   }
 
-  return parts.join("\n\n") || "No real-time data available.";
+  return {
+    context: parts.join("\n\n") || "No real-time data available.",
+    newsArticles,
+    detectedSymbol: baseSymbol,
+  };
 }
 
 export async function buildUSStockContext(query: string): Promise<string> {
