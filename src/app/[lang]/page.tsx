@@ -7,5 +7,5 @@ export default function LangRoot({
 }: {
   params: { lang: string };
 }) {
-  permanentRedirect(`/${lang}/sns`);
+  permanentRedirect(`/${lang}/home`);
 }

@@ -6,7 +6,7 @@ import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "./ui/
 import Link from "next/link";
 import {
   Bars3Icon,
-  ChartBarIcon,
+  HomeIcon,
   PresentationChartLineIcon,
   BeakerIcon,
   GlobeAltIcon,
@@ -29,7 +29,7 @@ interface HeaderHamburgerProps {
 }
 
 const MENU_ITEMS = [
-  { path: "dashboard", key: "dashboard" as const, icon: ChartBarIcon },
+  { path: "home", key: "home" as const, icon: HomeIcon },
   { path: "charts", key: "charts" as const, icon: PresentationChartLineIcon },
   { path: "quant", key: "quant" as const, icon: BeakerIcon },
   { path: "markets", key: "markets" as const, icon: GlobeAltIcon },

@@ -9,7 +9,7 @@ import {
   UserIcon,
   SunIcon,
   MoonIcon,
-  ChartBarIcon,
+  HomeIcon,
   PresentationChartLineIcon,
   BeakerIcon,
   GlobeAltIcon,
@@ -38,7 +38,7 @@ const LanguageSwitcher = dynamic(
 type THeaders = { lang: string; translations: Dictionary };
 
 const NAV_ITEMS = [
-  { path: "dashboard", key: "dashboard" as const, icon: ChartBarIcon, group: 0 },
+  { path: "home", key: "home" as const, icon: HomeIcon, group: 0 },
   { path: "charts", key: "charts" as const, icon: PresentationChartLineIcon, group: 1 },
   { path: "quant", key: "quant" as const, icon: BeakerIcon, group: 1 },
   { path: "chat", key: "chat" as const, icon: SparklesIcon, group: 1 },
