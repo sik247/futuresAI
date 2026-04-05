@@ -3,21 +3,26 @@ import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { buildCryptoContext, buildUSStockContext } from "@/lib/services/chat/chat-context.service";
+import { checkDailyLimit } from "@/lib/services/usage.service";
 
 const PERSONA_PROMPTS: Record<string, string> = {
   "crypto": `You are an elite crypto quantitative analyst at FuturesAI. You have deep expertise in blockchain technology, DeFi protocols, and crypto derivatives markets.
 
 CRITICAL RULES:
 - ALWAYS use the REAL-TIME MARKET DATA provided below for current prices. NEVER guess prices.
-- Support and resistance levels MUST be within 15% of the current price. For example, if ETH is at $2,000, support levels should be between $1,700-$2,000, NOT $1,500 or $1,420.
-- Entry, Stop Loss, and Take Profit levels must be realistic and close to current price (within 5-10% for SL, 10-20% for TP).
-- Always reference specific prices, percentages, and levels from the provided market data
-- Keep responses to 50-100 words unless the user explicitly asks for depth
-- Be direct, actionable, and data-driven
+- When both Binance (USDT) and Upbit (KRW) data is available, ALWAYS mention BOTH prices and the Kimchi Premium. This is critical for Korean users.
+- Support and resistance levels MUST be within 15% of the current price.
+- Entry, Stop Loss, and Take Profit levels must be realistic (SL within 5-10%, TP within 10-20%).
+- Always reference specific prices, percentages, RSI, and MA levels from the provided market data.
+- When TECHNICALS data is provided, use RSI and MA values to support your analysis. Mention overbought (>70) or oversold (<30) conditions.
+- Structure your response clearly with sections: Price Overview (both exchanges), Technical Analysis, and Recommendation.
+- Keep responses to 80-150 words. Use bullet points for key levels.
+- Be direct, actionable, and data-driven.
 - When mentioning a specific asset, always include its ticker symbol (BTC, ETH, SOL, etc.)
-- Include risk warnings when giving trade ideas
-- Never give financial advice — frame as analysis and observations
-- You are a CRYPTO-ONLY analyst. Do NOT analyze stocks, forex, or traditional markets. If asked about stocks, politely redirect to crypto.`,
+- Include risk warnings when giving trade ideas.
+- Never give financial advice — frame as analysis and observations.
+- You are a CRYPTO-ONLY analyst. Do NOT analyze stocks, forex, or traditional markets.
+- Format numbers professionally: use commas for thousands, 2 decimal places for USD, whole numbers for KRW.`,
 };
 
 function extractTickerFromResponse(
@@ -48,24 +53,20 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-    // Check access: admin always allowed, others need chatEnabled
-    if (user.role !== "ADMIN" && !user.chatEnabled) {
-      return NextResponse.json({ error: "Chat access required. Contact admin." }, { status: 403 });
-    }
-
     const { message, persona, sessionId, lang } = await req.json();
     if (!message || !persona || !sessionId) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    // Rate limit: 50 messages/day
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const msgCount = await prisma.chatMessage.count({
-      where: { userId: user.id, role: "user", createdAt: { gte: today } },
-    });
-    if (user.role !== "ADMIN" && msgCount >= 50) {
-      return NextResponse.json({ error: "Daily message limit reached (50/day)" }, { status: 429 });
+    // Daily chat limit (free: 10/day, premium: 30/day, admin: unlimited)
+    if (user.role !== "ADMIN") {
+      const { allowed, used, limit } = await checkDailyLimit(user.id, user.isPremium, "chat");
+      if (!allowed) {
+        return NextResponse.json(
+          { error: "Daily message limit reached", used, limit },
+          { status: 429 }
+        );
+      }
     }
 
     // Save user message

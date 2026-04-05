@@ -40,38 +40,125 @@ export function extractTicker(message: string, persona: string): { ticker: strin
   return null;
 }
 
+// Upbit ticker mapping (KRW pairs)
+const UPBIT_TICKER_MAP: Record<string, string> = {
+  BTC: "KRW-BTC", ETH: "KRW-ETH", SOL: "KRW-SOL", XRP: "KRW-XRP",
+  DOGE: "KRW-DOGE", ADA: "KRW-ADA", AVAX: "KRW-AVAX", DOT: "KRW-DOT",
+  LINK: "KRW-LINK", BNB: "KRW-BNB",
+};
+
+async function fetchUpbitPrice(symbol: string): Promise<{ price: number; change: number; volume: number; high: number; low: number } | null> {
+  const upbitTicker = UPBIT_TICKER_MAP[symbol];
+  if (!upbitTicker) return null;
+  try {
+    const res = await fetch(`https://api.upbit.com/v1/ticker?markets=${upbitTicker}`, {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) return null;
+    const [data] = await res.json();
+    return {
+      price: data.trade_price,
+      change: data.signed_change_rate * 100,
+      volume: data.acc_trade_price_24h,
+      high: data.high_price,
+      low: data.low_price,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function fetchBinanceKlines(symbol: string): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `https://api.binance.com/api/v3/klines?symbol=${symbol}USDT&interval=4h&limit=20`,
+      { signal: AbortSignal.timeout(3000) }
+    );
+    if (!res.ok) return null;
+    const klines = await res.json();
+    const closes = klines.map((k: any[]) => parseFloat(k[4]));
+    if (closes.length < 14) return null;
+
+    // Simple RSI calculation
+    let gains = 0, losses = 0;
+    for (let i = 1; i < 14; i++) {
+      const diff = closes[i] - closes[i - 1];
+      if (diff > 0) gains += diff; else losses -= diff;
+    }
+    const avgGain = gains / 14;
+    const avgLoss = losses / 14;
+    const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+    const rsi = 100 - (100 / (1 + rs));
+
+    // Simple MA
+    const ma7 = closes.slice(-7).reduce((a: number, b: number) => a + b, 0) / 7;
+    const ma20 = closes.slice(-20).reduce((a: number, b: number) => a + b, 0) / Math.min(closes.length, 20);
+    const currentPrice = closes[closes.length - 1];
+    const trend = currentPrice > ma7 && ma7 > ma20 ? "UPTREND" : currentPrice < ma7 && ma7 < ma20 ? "DOWNTREND" : "SIDEWAYS";
+
+    return `RSI(14,4h): ${rsi.toFixed(1)} | MA7: $${ma7.toLocaleString(undefined, { maximumFractionDigits: 2 })} | MA20: $${ma20.toLocaleString(undefined, { maximumFractionDigits: 2 })} | Trend: ${trend}`;
+  } catch {
+    return null;
+  }
+}
+
 export async function buildCryptoContext(query: string): Promise<string> {
   const parts: string[] = [];
 
-  // Try to get specific price
   const ticker = extractTicker(query, "crypto");
+  const baseSymbol = ticker ? ticker.ticker.replace("USDT", "") : null;
+
   if (ticker) {
-    try {
-      const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${ticker.ticker}`);
-      if (res.ok) {
-        const data = await res.json();
-        parts.push(`PRICE DATA: ${ticker.ticker} = $${parseFloat(data.lastPrice).toLocaleString()} | 24h: ${parseFloat(data.priceChangePercent) >= 0 ? "+" : ""}${parseFloat(data.priceChangePercent).toFixed(2)}% | Vol: $${(parseFloat(data.quoteVolume) / 1e6).toFixed(1)}M | High: $${parseFloat(data.highPrice).toLocaleString()} | Low: $${parseFloat(data.lowPrice).toLocaleString()}`);
+    // Fetch Binance, Upbit, and technical data in parallel
+    const [binanceRes, upbitData, technicals] = await Promise.allSettled([
+      fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${ticker.ticker}`, { signal: AbortSignal.timeout(3000) }),
+      baseSymbol ? fetchUpbitPrice(baseSymbol) : Promise.resolve(null),
+      baseSymbol ? fetchBinanceKlines(baseSymbol) : Promise.resolve(null),
+    ]);
+
+    // Binance price
+    if (binanceRes.status === "fulfilled" && binanceRes.value.ok) {
+      const data = await binanceRes.value.json();
+      const price = parseFloat(data.lastPrice);
+      const pct = parseFloat(data.priceChangePercent);
+      parts.push(`BINANCE ${ticker.ticker}: $${price.toLocaleString()} | 24h: ${pct >= 0 ? "+" : ""}${pct.toFixed(2)}% | Vol: $${(parseFloat(data.quoteVolume) / 1e6).toFixed(1)}M | High: $${parseFloat(data.highPrice).toLocaleString()} | Low: $${parseFloat(data.lowPrice).toLocaleString()}`);
+
+      // Upbit price with kimchi premium
+      const upbit = upbitData.status === "fulfilled" ? upbitData.value : null;
+      if (upbit && price > 0) {
+        const krwRate = upbit.price / price;
+        const premium = ((krwRate / 1370) - 1) * 100; // approx kimchi premium vs ~1370 KRW/USD
+        parts.push(`UPBIT ${baseSymbol}/KRW: ₩${upbit.price.toLocaleString()} | 24h: ${upbit.change >= 0 ? "+" : ""}${upbit.change.toFixed(2)}% | Vol: ₩${(upbit.volume / 1e8).toFixed(1)}억 | Kimchi Premium: ${premium >= 0 ? "+" : ""}${premium.toFixed(1)}%`);
       }
+    }
+
+    // Technicals
+    const tech = technicals.status === "fulfilled" ? technicals.value : null;
+    if (tech) parts.push(`TECHNICALS: ${tech}`);
+  }
+
+  // Fear & Greed + news in parallel
+  const [fngRes, newsRes] = await Promise.allSettled([
+    fetch("https://api.alternative.me/fng/?limit=1", { signal: AbortSignal.timeout(3000) }),
+    fetch("https://cryptopanic.com/api/free/v1/posts/?auth_token=free&public=true&kind=news&filter=hot", { signal: AbortSignal.timeout(3000) }),
+  ]);
+
+  if (fngRes.status === "fulfilled" && fngRes.value.ok) {
+    try {
+      const fngData = await fngRes.value.json();
+      const fg = fngData?.data?.[0];
+      if (fg) parts.push(`FEAR & GREED: ${fg.value} (${fg.value_classification})`);
     } catch {}
   }
 
-  // Fear & Greed
-  try {
-    const fng = await fetch("https://api.alternative.me/fng/?limit=1");
-    const fngData = await fng.json();
-    const fg = fngData?.data?.[0];
-    if (fg) parts.push(`FEAR & GREED: ${fg.value} (${fg.value_classification})`);
-  } catch {}
-
-  // Recent news headlines
-  try {
-    const newsRes = await fetch("https://cryptopanic.com/api/free/v1/posts/?auth_token=free&public=true&kind=news&filter=hot");
-    if (newsRes.ok) {
-      const newsData = await newsRes.json();
+  if (newsRes.status === "fulfilled" && newsRes.value.ok) {
+    try {
+      const newsData = await newsRes.value.json();
       const headlines = (newsData.results || []).slice(0, 3).map((n: { title: string }) => n.title).join(" | ");
       if (headlines) parts.push(`NEWS: ${headlines}`);
-    }
-  } catch {}
+    } catch {}
+  }
 
   return parts.join("\n\n") || "No real-time data available.";
 }

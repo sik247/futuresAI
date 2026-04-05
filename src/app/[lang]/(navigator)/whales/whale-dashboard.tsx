@@ -155,25 +155,25 @@ function FigureRow({ figure }: { figure: Figure }) {
   return (
     <div className={`border-b border-white/[0.04] ${tracked ? "" : "opacity-50"}`}>
       <button
-        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-white/[0.03] transition-colors text-left cursor-pointer"
+        className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors text-left cursor-pointer"
         onClick={() => tracked && setExpanded((e) => !e)}
         disabled={!tracked}
       >
         <div className="relative shrink-0">
-          <Avatar image={figure.image} name={figure.name} size={28} />
+          <Avatar image={figure.image} name={figure.name} size={34} />
           {tracked && (
             <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-[#0d0e14]" />
           )}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-[11px] font-semibold text-white truncate leading-tight">
+            <span className="text-xs font-semibold text-white truncate leading-tight">
               {figure.name}
             </span>
             <StanceBadge stance={figure.stance} />
           </div>
           <div className="flex items-center gap-1 mt-0.5">
-            <span className="text-[9px] font-mono text-zinc-500 truncate">{figure.role}</span>
+            <span className="text-[10px] font-mono text-zinc-500 truncate">{figure.role}</span>
           </div>
         </div>
         {hasData && figure.walletData && (
@@ -396,6 +396,68 @@ function RecentTradesTable({ trades }: { trades: HLTrade[] }) {
 /*  Main Dashboard                                                     */
 /* ------------------------------------------------------------------ */
 
+/* ------------------------------------------------------------------ */
+/*  Whale Alerts Banner                                                */
+/* ------------------------------------------------------------------ */
+
+function WhaleAlerts({ hlWhales }: { hlWhales: HLWhale[] }) {
+  const alerts: { type: "danger" | "warning" | "info"; message: string; whale: string }[] = [];
+
+  for (const whale of hlWhales) {
+    for (const pos of whale.positions) {
+      if (pos.unrealizedPnl < -10000) {
+        alerts.push({ type: "danger", message: `${pos.coin} ${pos.direction} losing ${fmtUsd(Math.abs(pos.unrealizedPnl))}`, whale: whale.name });
+      }
+      if (pos.unrealizedPnl > 50000) {
+        alerts.push({ type: "info", message: `${pos.coin} ${pos.direction} up ${fmtUsd(pos.unrealizedPnl)}`, whale: whale.name });
+      }
+      if (pos.leverage >= 20) {
+        alerts.push({ type: "warning", message: `${pos.coin} ${pos.direction} at ${pos.leverage}x leverage`, whale: whale.name });
+      }
+      if (Math.abs(pos.roe) > 15) {
+        alerts.push({
+          type: pos.roe > 0 ? "info" : "danger",
+          message: `${pos.coin} ROE ${pos.roe > 0 ? "up" : "down"} ${Math.abs(pos.roe).toFixed(1)}%`,
+          whale: whale.name,
+        });
+      }
+    }
+  }
+
+  if (alerts.length === 0) return null;
+  const topAlerts = alerts.slice(0, 5);
+
+  return (
+    <div className="border-b border-white/[0.06] bg-zinc-900/40">
+      <div className="flex items-center gap-2 px-4 py-1.5">
+        <div className="flex items-center gap-1.5 shrink-0">
+          <svg className="w-3.5 h-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-amber-400/80">Alerts</span>
+        </div>
+        <div className="flex-1 overflow-x-auto flex gap-3">
+          {topAlerts.map((alert, i) => (
+            <span key={i} className={`text-[10px] font-mono shrink-0 flex items-center gap-1.5 ${
+              alert.type === "danger" ? "text-red-400" : alert.type === "warning" ? "text-amber-400" : "text-emerald-400"
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                alert.type === "danger" ? "bg-red-400" : alert.type === "warning" ? "bg-amber-400" : "bg-emerald-400"
+              }`} />
+              <span className="text-zinc-500">{alert.whale}:</span>
+              {alert.message}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Main Dashboard                                                     */
+/* ------------------------------------------------------------------ */
+
 export default function WhaleDashboard({
   ethPrice,
   figures,
@@ -403,11 +465,22 @@ export default function WhaleDashboard({
   hlTrades,
 }: WhaleDashboardProps) {
   const [mobileTab, setMobileTab] = useState<"figures" | "positions" | "trades">("positions");
+  const [showOthers, setShowOthers] = useState(false);
+
+  // Figures with actual on-chain data
+  const figuresWithData = figures.filter(
+    (f) => f.walletAddress && f.walletData &&
+    (f.walletData.ethBalance > 0 || f.walletData.tokens.length > 0)
+  );
+  // Tracked but no data currently
+  const trackedNoData = figures.filter(
+    (f) => f.walletAddress && (!f.walletData ||
+    (f.walletData.ethBalance === 0 && f.walletData.tokens.length === 0))
+  );
+  // Notable figures without wallets
+  const notableFigures = figures.filter((f) => !f.walletAddress && f.stance);
 
   const trackedFigures = figures.filter((f) => f.walletAddress);
-  const untrackedFigures = figures.filter((f) => !f.walletAddress);
-  const sortedFigures = [...trackedFigures, ...untrackedFigures];
-
   const totalPortfolio = trackedFigures.reduce(
     (sum, f) => sum + (f.walletData?.ethUsd ?? 0),
     0
@@ -417,7 +490,7 @@ export default function WhaleDashboard({
   return (
     <div className="bg-zinc-950 font-mono">
       {/* Stat Bar */}
-      <div className="flex items-center gap-3 px-4 py-2.5 bg-zinc-900/80 border-b border-white/[0.06] text-[11px] font-mono overflow-x-auto shrink-0">
+      <div className="flex items-center gap-3 px-4 py-3 bg-zinc-900/80 border-b border-white/[0.06] text-xs font-mono overflow-x-auto shrink-0">
         <span className="text-zinc-500 shrink-0">ETH</span>
         <span className="text-white font-bold tabular-nums shrink-0">
           ${ethPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -459,22 +532,61 @@ export default function WhaleDashboard({
       </div>
 
       {/* Main grid — desktop */}
-      <div className="hidden lg:grid h-[calc(100vh-108px)]" style={{ gridTemplateColumns: "280px 1fr" }}>
+      <div className="hidden lg:grid h-[calc(100vh-108px)]" style={{ gridTemplateColumns: "320px 1fr" }}>
         {/* Left sidebar */}
         <div className="border-r border-white/[0.06] flex flex-col overflow-hidden">
-          <div className="px-3 py-2 border-b border-white/[0.06] shrink-0 flex items-center justify-between">
+          <div className="px-4 py-2.5 border-b border-white/[0.06] shrink-0 flex items-center justify-between">
             <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold">Key Figures</span>
-            <span className="text-[9px] font-mono bg-white/[0.06] text-zinc-400 px-1.5 py-0.5 rounded-full tabular-nums">{sortedFigures.length}</span>
+            <span className="text-[9px] font-mono bg-white/[0.06] text-zinc-400 px-1.5 py-0.5 rounded-full tabular-nums">{figuresWithData.length}</span>
           </div>
           <div className="flex-1 overflow-y-auto">
-            {sortedFigures.map((fig) => (
+            {/* Figures with live on-chain data */}
+            {figuresWithData.map((fig) => (
               <FigureRow key={fig.name} figure={fig} />
             ))}
+
+            {/* Collapsible section for others */}
+            {(trackedNoData.length > 0 || notableFigures.length > 0) && (
+              <>
+                <button
+                  onClick={() => setShowOthers((o) => !o)}
+                  className="w-full flex items-center justify-between px-4 py-2 bg-white/[0.02] border-y border-white/[0.04] hover:bg-white/[0.04] transition-colors cursor-pointer"
+                >
+                  <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-zinc-600">
+                    Other Figures
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] font-mono text-zinc-700">
+                      {trackedNoData.length + notableFigures.length}
+                    </span>
+                    <svg
+                      className={`w-3 h-3 text-zinc-600 transition-transform ${showOthers ? "rotate-180" : ""}`}
+                      fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </button>
+                {showOthers && (
+                  <>
+                    {trackedNoData.map((fig) => (
+                      <FigureRow key={fig.name} figure={fig} />
+                    ))}
+                    {notableFigures.map((fig) => (
+                      <FigureRow key={fig.name} figure={fig} />
+                    ))}
+                  </>
+                )}
+              </>
+            )}
           </div>
         </div>
 
         {/* Right panel */}
         <div className="flex flex-col overflow-hidden">
+          {/* Alert Banner */}
+          <WhaleAlerts hlWhales={hlWhales} />
+
           {/* Top: HL Positions (2x2 grid, ~55vh) */}
           <div
             className="border-b border-white/[0.06] overflow-hidden"
@@ -522,9 +634,9 @@ export default function WhaleDashboard({
       <div className="lg:hidden" style={{ height: "calc(100vh - 108px)", overflow: "hidden" }}>
         {mobileTab === "figures" && (
           <div className="h-full overflow-y-auto">
-            {/* Horizontal strip of tracked figures */}
+            {/* Horizontal strip of figures with data */}
             <div className="flex gap-3 p-3 overflow-x-auto border-b border-white/[0.06]">
-              {trackedFigures.map((fig) => (
+              {figuresWithData.map((fig) => (
                 <div key={fig.name} className="flex flex-col items-center gap-1 shrink-0">
                   <Avatar image={fig.image} name={fig.name} size={36} />
                   <span className="text-[8px] font-mono text-zinc-400 text-center max-w-[48px] truncate">
@@ -535,9 +647,25 @@ export default function WhaleDashboard({
             </div>
             {/* Full list */}
             <div>
-              {sortedFigures.map((fig) => (
+              {figuresWithData.map((fig) => (
                 <FigureRow key={fig.name} figure={fig} />
               ))}
+              {(trackedNoData.length > 0 || notableFigures.length > 0) && (
+                <>
+                  <button
+                    onClick={() => setShowOthers((o) => !o)}
+                    className="w-full flex items-center justify-between px-4 py-2 bg-white/[0.02] border-y border-white/[0.04] cursor-pointer"
+                  >
+                    <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-zinc-600">Others ({trackedNoData.length + notableFigures.length})</span>
+                    <svg className={`w-3 h-3 text-zinc-600 transition-transform ${showOthers ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {showOthers && [...trackedNoData, ...notableFigures].map((fig) => (
+                    <FigureRow key={fig.name} figure={fig} />
+                  ))}
+                </>
+              )}
             </div>
           </div>
         )}

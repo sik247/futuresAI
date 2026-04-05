@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import gsap from "gsap";
+import { useState, useCallback } from "react";
 
 /* ──────────────────────────── Types ──────────────────────────── */
 
@@ -62,49 +61,6 @@ function pctColor(n: number | null): string {
 /* ────────────────────── Market Correlations ───────────────────── */
 
 export function MarketCorrelations({ data }: { data: GlobalMarketData | null }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const countersAnimated = useRef(false);
-
-  useEffect(() => {
-    if (!data || countersAnimated.current || !containerRef.current) return;
-    countersAnimated.current = true;
-
-    const ctx = gsap.context(() => {
-      // Stagger card entrance
-      gsap.from(containerRef.current!.children, {
-        opacity: 0,
-        y: 20,
-        stagger: 0.1,
-        duration: 0.5,
-        ease: "power3.out",
-      });
-
-      // Animate counter values
-      const counters = containerRef.current!.querySelectorAll("[data-counter]");
-      counters.forEach((el) => {
-        const target = parseFloat(el.getAttribute("data-counter") || "0");
-        const suffix = el.getAttribute("data-suffix") || "";
-        const prefix = el.getAttribute("data-prefix") || "";
-        const decimals = parseInt(el.getAttribute("data-decimals") || "2", 10);
-        const obj = { val: 0 };
-
-        gsap.to(obj, {
-          val: target,
-          duration: 1.5,
-          ease: "power2.out",
-          onUpdate: () => {
-            el.textContent = `${prefix}${obj.val.toLocaleString("en-US", {
-              minimumFractionDigits: decimals,
-              maximumFractionDigits: decimals,
-            })}${suffix}`;
-          },
-        });
-      });
-    });
-
-    return () => ctx.revert();
-  }, [data]);
-
   if (!data) return null;
 
   const stats = [
@@ -146,26 +102,17 @@ export function MarketCorrelations({ data }: { data: GlobalMarketData | null }) 
   ];
 
   return (
-    <div
-      ref={containerRef}
-      className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"
-    >
+    <div className="grid grid-cols-5 divide-x divide-white/[0.04]">
       {stats.map((s) => (
-        <div
-          key={s.label}
-          className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 flex flex-col gap-2 hover:bg-white/[0.04] hover:border-white/[0.1] transition-all duration-200"
-        >
-          <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">
-            {s.label}
-          </span>
-          <span
-            className="text-xl font-mono font-semibold text-zinc-100 tabular-nums"
-            data-counter={s.value}
-            data-prefix={s.prefix}
-            data-suffix={s.suffix}
-            data-decimals={s.decimals}
-          >
-            {s.prefix}0{s.suffix}
+        <div key={s.label} className="px-3 py-2.5 flex flex-col gap-1">
+          <span className="text-[8px] font-mono uppercase tracking-widest text-zinc-600">{s.label}</span>
+          <span className="text-sm font-mono font-semibold text-zinc-100 tabular-nums">
+            {s.prefix}
+            {s.value.toLocaleString("en-US", {
+              minimumFractionDigits: s.decimals,
+              maximumFractionDigits: s.decimals,
+            })}
+            {s.suffix}
           </span>
         </div>
       ))}
@@ -176,27 +123,8 @@ export function MarketCorrelations({ data }: { data: GlobalMarketData | null }) 
 /* ────────────────────── Top Coins Table ───────────────────────── */
 
 export function TopCoinsTable({ coins }: { coins: CoinData[] }) {
-  const tableRef = useRef<HTMLTableSectionElement>(null);
-  const hasAnimated = useRef(false);
   const [sortKey, setSortKey] = useState<SortKey>("market_cap_rank");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
-
-  useEffect(() => {
-    if (hasAnimated.current || !tableRef.current) return;
-    hasAnimated.current = true;
-
-    const ctx = gsap.context(() => {
-      gsap.from(tableRef.current!.children, {
-        opacity: 0,
-        x: -16,
-        stagger: 0.06,
-        duration: 0.4,
-        ease: "power3.out",
-      });
-    });
-
-    return () => ctx.revert();
-  }, []);
 
   const handleSort = useCallback(
     (key: SortKey) => {
@@ -219,7 +147,7 @@ export function TopCoinsTable({ coins }: { coins: CoinData[] }) {
   });
 
   const headerClass =
-    "px-4 py-3 text-[10px] font-mono uppercase tracking-widest text-zinc-500 cursor-pointer hover:text-zinc-300 transition-colors select-none whitespace-nowrap";
+    "px-3 py-2 text-[10px] font-mono uppercase tracking-widest text-zinc-500 cursor-pointer hover:text-zinc-300 transition-colors select-none whitespace-nowrap";
 
   const sortIndicator = (key: SortKey) => {
     if (sortKey !== key) return "";
@@ -227,109 +155,107 @@ export function TopCoinsTable({ coins }: { coins: CoinData[] }) {
   };
 
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-md overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[800px]">
-          <thead>
-            <tr className="border-b border-white/[0.06]">
-              <th
-                className={`${headerClass} text-left`}
-                onClick={() => handleSort("market_cap_rank")}
-              >
-                #{sortIndicator("market_cap_rank")}
-              </th>
-              <th className={`${headerClass} text-left`}>Name</th>
-              <th
-                className={`${headerClass} text-right`}
-                onClick={() => handleSort("current_price")}
-              >
-                Price{sortIndicator("current_price")}
-              </th>
-              <th
-                className={`${headerClass} text-right`}
-                onClick={() => handleSort("price_change_percentage_24h")}
-              >
-                24h %{sortIndicator("price_change_percentage_24h")}
-              </th>
-              <th
-                className={`${headerClass} text-right`}
-                onClick={() =>
-                  handleSort("price_change_percentage_7d_in_currency")
-                }
-              >
-                7d %{sortIndicator("price_change_percentage_7d_in_currency")}
-              </th>
-              <th
-                className={`${headerClass} text-right`}
-                onClick={() => handleSort("market_cap")}
-              >
-                Market Cap{sortIndicator("market_cap")}
-              </th>
-              <th
-                className={`${headerClass} text-right`}
-                onClick={() => handleSort("total_volume")}
-              >
-                Volume{sortIndicator("total_volume")}
-              </th>
-            </tr>
-          </thead>
-          <tbody ref={tableRef}>
-            {sorted.map((coin) => (
-              <tr
-                key={coin.id}
-                className="border-b border-white/[0.03] hover:bg-white/[0.03] transition-colors"
-              >
-                <td className="px-4 py-3 font-mono text-sm text-zinc-500">
-                  {coin.market_cap_rank}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={coin.image}
-                      alt={coin.name}
-                      width={24}
-                      height={24}
-                      className="rounded-full"
-                    />
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-zinc-200">
-                        {coin.name}
-                      </span>
-                      <span className="text-xs font-mono text-zinc-500 uppercase">
-                        {coin.symbol}
-                      </span>
-                    </div>
+    <div className="overflow-x-auto h-full">
+      <table className="w-full min-w-[700px]">
+        <thead className="sticky top-0 bg-zinc-950">
+          <tr className="border-b border-white/[0.06]">
+            <th
+              className={`${headerClass} text-left`}
+              onClick={() => handleSort("market_cap_rank")}
+            >
+              #{sortIndicator("market_cap_rank")}
+            </th>
+            <th className={`${headerClass} text-left`}>Name</th>
+            <th
+              className={`${headerClass} text-right`}
+              onClick={() => handleSort("current_price")}
+            >
+              Price{sortIndicator("current_price")}
+            </th>
+            <th
+              className={`${headerClass} text-right`}
+              onClick={() => handleSort("price_change_percentage_24h")}
+            >
+              24h %{sortIndicator("price_change_percentage_24h")}
+            </th>
+            <th
+              className={`${headerClass} text-right`}
+              onClick={() =>
+                handleSort("price_change_percentage_7d_in_currency")
+              }
+            >
+              7d %{sortIndicator("price_change_percentage_7d_in_currency")}
+            </th>
+            <th
+              className={`${headerClass} text-right`}
+              onClick={() => handleSort("market_cap")}
+            >
+              Market Cap{sortIndicator("market_cap")}
+            </th>
+            <th
+              className={`${headerClass} text-right`}
+              onClick={() => handleSort("total_volume")}
+            >
+              Volume{sortIndicator("total_volume")}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.map((coin) => (
+            <tr
+              key={coin.id}
+              className="border-b border-white/[0.03] hover:bg-white/[0.03] transition-colors"
+            >
+              <td className="px-3 py-1.5 font-mono text-[11px] text-zinc-500">
+                {coin.market_cap_rank}
+              </td>
+              <td className="px-3 py-1.5">
+                <div className="flex items-center gap-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={coin.image}
+                    alt={coin.name}
+                    width={20}
+                    height={20}
+                    className="rounded-full shrink-0"
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-medium text-zinc-200">
+                      {coin.name}
+                    </span>
+                    <span className="text-[9px] font-mono text-zinc-500 uppercase">
+                      {coin.symbol}
+                    </span>
                   </div>
-                </td>
-                <td className="px-4 py-3 text-right font-mono text-sm text-zinc-200">
-                  {formatPrice(coin.current_price)}
-                </td>
-                <td
-                  className={`px-4 py-3 text-right font-mono text-sm ${pctColor(
-                    coin.price_change_percentage_24h
-                  )}`}
-                >
-                  {formatPct(coin.price_change_percentage_24h)}
-                </td>
-                <td
-                  className={`px-4 py-3 text-right font-mono text-sm ${pctColor(
-                    coin.price_change_percentage_7d_in_currency
-                  )}`}
-                >
-                  {formatPct(coin.price_change_percentage_7d_in_currency)}
-                </td>
-                <td className="px-4 py-3 text-right font-mono text-sm text-zinc-300">
-                  {formatCompact(coin.market_cap)}
-                </td>
-                <td className="px-4 py-3 text-right font-mono text-sm text-zinc-400">
-                  {formatCompact(coin.total_volume)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                </div>
+              </td>
+              <td className="px-3 py-1.5 text-right font-mono text-[11px] text-zinc-200">
+                {formatPrice(coin.current_price)}
+              </td>
+              <td
+                className={`px-3 py-1.5 text-right font-mono text-[11px] ${pctColor(
+                  coin.price_change_percentage_24h
+                )}`}
+              >
+                {formatPct(coin.price_change_percentage_24h)}
+              </td>
+              <td
+                className={`px-3 py-1.5 text-right font-mono text-[11px] ${pctColor(
+                  coin.price_change_percentage_7d_in_currency
+                )}`}
+              >
+                {formatPct(coin.price_change_percentage_7d_in_currency)}
+              </td>
+              <td className="px-3 py-1.5 text-right font-mono text-[11px] text-zinc-300">
+                {formatCompact(coin.market_cap)}
+              </td>
+              <td className="px-3 py-1.5 text-right font-mono text-[11px] text-zinc-400">
+                {formatCompact(coin.total_volume)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

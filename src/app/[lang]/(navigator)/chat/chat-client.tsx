@@ -24,11 +24,11 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   ticker?: TickerInfo;
+  timestamp?: number;
 }
 
 interface Props {
   lang: string;
-  hasAccess: boolean;
   userName: string;
 }
 
@@ -37,77 +37,16 @@ interface Props {
 /* -------------------------------------------------------------------------- */
 function SendIcon({ className }: { className?: string }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
       <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
-    </svg>
-  );
-}
-
-function LockClosedIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-    >
-      <path
-        fillRule="evenodd"
-        d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z"
-        clipRule="evenodd"
-      />
-    </svg>
-  );
-}
-
-function PlusIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-    >
-      <path
-        fillRule="evenodd"
-        d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z"
-        clipRule="evenodd"
-      />
     </svg>
   );
 }
 
 function ChartBarIcon({ className }: { className?: string }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
       <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75zM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 01-1.875-1.875V8.625zM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 013 19.875v-6.75z" />
-    </svg>
-  );
-}
-
-function CheckIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-    >
-      <path
-        fillRule="evenodd"
-        d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z"
-        clipRule="evenodd"
-      />
     </svg>
   );
 }
@@ -117,23 +56,23 @@ function CheckIcon({ className }: { className?: string }) {
 /* -------------------------------------------------------------------------- */
 function TradingViewChart({ ticker }: { ticker: TickerInfo }) {
   const { symbol, exchange } = ticker;
-  const src = `https://s.tradingview.com/widgetembed/?frameElementId=tv_chart&symbol=${exchange}:${symbol}&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=0a0a0f&studies=[]&theme=dark&style=1&timezone=exchange&withdateranges=1&showpopupbutton=0&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=[]&disabled_features=[]&locale=en&width=100%25&height=500`;
+  const src = `https://s.tradingview.com/widgetembed/?frameElementId=tv_chart&symbol=${exchange}:${symbol}&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=0a0a0f&studies=[]&theme=dark&style=1&timezone=exchange&withdateranges=1&showpopupbutton=0&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=[]&disabled_features=[]&locale=en&width=100%25&height=400`;
 
   return (
-    <div className="mt-3 w-full rounded-xl overflow-hidden border border-white/[0.08] bg-zinc-900/80">
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-white/[0.06]">
-        <ChartBarIcon className="w-4 h-4 text-blue-400" />
-        <span className="text-sm font-mono text-zinc-200 font-semibold">
+    <div className="mt-2 w-full rounded-lg overflow-hidden border border-white/[0.06] bg-zinc-900/60">
+      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-white/[0.06]">
+        <ChartBarIcon className="w-3.5 h-3.5 text-blue-400" />
+        <span className="text-[10px] font-mono text-zinc-300 font-semibold">
           {exchange}:{symbol}
         </span>
-        <span className="ml-auto text-[10px] text-zinc-600 uppercase tracking-widest">
+        <span className="ml-auto text-[8px] text-zinc-600 uppercase tracking-widest font-mono">
           TradingView
         </span>
       </div>
       <iframe
         src={src}
         className="w-full"
-        style={{ height: 500 }}
+        style={{ height: 400 }}
         frameBorder="0"
         allowFullScreen
         title={`${exchange}:${symbol} Chart`}
@@ -147,67 +86,47 @@ function TradingViewChart({ ticker }: { ticker: TickerInfo }) {
 /* -------------------------------------------------------------------------- */
 function LoadingDots() {
   return (
-    <div className="flex items-center gap-1.5 px-4 py-3">
-      <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
-      <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
-      <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce" />
+    <div className="flex items-center gap-1 px-3 py-2">
+      <span className="w-1 h-1 bg-zinc-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+      <span className="w-1 h-1 bg-zinc-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+      <span className="w-1 h-1 bg-zinc-500 rounded-full animate-bounce" />
     </div>
   );
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Access Denied Card                                                         */
+/*  Format timestamp                                                           */
 /* -------------------------------------------------------------------------- */
-function AccessDenied({ ko }: { ko: boolean }) {
-  return (
-    <div className="flex-1 flex items-center justify-center px-4">
-      <div className="max-w-sm w-full bg-zinc-900/60 border border-white/[0.08] rounded-2xl p-8 text-center space-y-4">
-        <div className="flex justify-center">
-          <div className="w-14 h-14 rounded-full bg-zinc-800 flex items-center justify-center">
-            <LockClosedIcon className="w-7 h-7 text-zinc-400" />
-          </div>
-        </div>
-        <h2 className="text-lg font-semibold text-white">
-          {ko ? "접근 제한" : "Access Restricted"}
-        </h2>
-        <p className="text-sm text-zinc-400 leading-relaxed">
-          {ko
-            ? "AI 채팅은 승인된 회원에게만 제공됩니다. 관리자에게 문의하여 액세스를 요청하세요."
-            : "AI Chat is available for approved members only. Contact admin for access."}
-        </p>
-        <div className="pt-2">
-          <a
-            href="https://t.me/futuresai_official"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300 transition-colors"
-          >
-            {ko ? "텔레그램으로 문의하기" : "Contact via Telegram"}
-          </a>
-        </div>
-      </div>
-    </div>
-  );
+function fmtTime(ts?: number) {
+  if (!ts) return "";
+  const d = new Date(ts);
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
 /* -------------------------------------------------------------------------- */
 /*  Main Chat Client Component                                                 */
 /* -------------------------------------------------------------------------- */
-export default function ChatClient({ lang, hasAccess, userName }: Props) {
+export default function ChatClient({ lang, userName }: Props) {
   const ko = lang === "ko";
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [persona, setPersona] = useState<Persona>("crypto");
+  const [persona] = useState<Persona>("crypto");
   const [sessionId, setSessionId] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [sessions, setSessions] = useState<{ sessionId: string; content: string; createdAt: string }[]>([]);
+  const [showSidebar, setShowSidebar] = useState(true);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  /* Generate sessionId on mount */
+  /* Generate sessionId on mount + fetch sessions */
   useEffect(() => {
     setSessionId(crypto.randomUUID());
+    fetch("/api/chat")
+      .then((r) => r.json())
+      .then((d) => d.sessions && setSessions(d.sessions))
+      .catch(() => {});
   }, []);
 
   /* Scroll to bottom on new messages */
@@ -222,11 +141,32 @@ export default function ChatClient({ lang, hasAccess, userName }: Props) {
     inputRef.current?.focus();
   }, []);
 
+  const loadSession = useCallback(async (sid: string) => {
+    try {
+      const res = await fetch(`/api/chat?sessionId=${sid}`);
+      const data = await res.json();
+      if (data.messages) {
+        setSessionId(sid);
+        setMessages(
+          data.messages.map((m: any) => ({
+            role: m.role,
+            content: m.content,
+            ticker: m.ticker ? (() => {
+              const [exchange, symbol] = m.ticker.split(":");
+              return { exchange, symbol };
+            })() : undefined,
+            timestamp: new Date(m.createdAt).getTime(),
+          }))
+        );
+      }
+    } catch {}
+  }, []);
+
   const handleSend = useCallback(async () => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
 
-    const userMessage: Message = { role: "user", content: trimmed };
+    const userMessage: Message = { role: "user", content: trimmed, timestamp: Date.now() };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
@@ -235,36 +175,22 @@ export default function ChatClient({ lang, hasAccess, userName }: Props) {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: trimmed,
-          persona,
-          sessionId,
-          lang,
-        }),
+        body: JSON.stringify({ message: trimmed, persona, sessionId, lang }),
       });
-
       const data = await res.json();
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
+      if (data.error) throw new Error(data.error);
 
       const assistantMessage: Message = {
         role: "assistant",
         content: data.response || data.message || data.content || "",
         ticker: data.ticker ?? undefined,
+        timestamp: Date.now(),
       };
-
       setMessages((prev) => [...prev, assistantMessage]);
     } catch {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: ko
-            ? "오류가 발생했습니다. 다시 시도해 주세요."
-            : "An error occurred. Please try again.",
-        },
+        { role: "assistant", content: ko ? "오류가 발생했습니다. 다시 시도해 주세요." : "An error occurred. Please try again.", timestamp: Date.now() },
       ]);
     } finally {
       setLoading(false);
@@ -282,231 +208,196 @@ export default function ChatClient({ lang, hasAccess, userName }: Props) {
     [handleSend]
   );
 
-  const placeholder = ko
-    ? "크립토, 시장에 대해 물어보세요..."
-    : "Ask about crypto and markets...";
-
+  const placeholder = ko ? "크립토, 시장에 대해 물어보세요..." : "Ask about crypto and markets...";
   const isEmpty = messages.length === 0 && !loading;
 
-  /* Persona metadata */
-  const personaMeta: Record<Persona, { tagline: string; desc: string }> = {
-    crypto: {
-      tagline: ko ? "크립토 애널리스트" : "Crypto Analyst",
-      desc: ko
-        ? "실시간 암호화폐 분석 · 선물 포지션 · 온체인 데이터"
-        : "Real-time crypto analysis, futures positions & on-chain data",
-    },
-  };
-
   const suggestedPrompts = ko
-    ? [
-        "비트코인 현재 추세 분석해줘",
-        "이더리움 지지/저항 레벨",
-        "오늘 공포탐욕지수 얼마야?",
-        "솔라나 선물 포지션 추천",
-      ]
-    : [
-        "Analyze Bitcoin trend",
-        "ETH support/resistance levels",
-        "Today's Fear & Greed Index?",
-        "SOL futures position idea",
-      ];
+    ? ["BTC 추세 분석", "ETH 지지/저항", "공포탐욕지수", "SOL 포지션"]
+    : ["BTC trend analysis", "ETH S/R levels", "Fear & Greed?", "SOL position"];
 
   /* ======================================================================== */
   /*  RENDER                                                                   */
   /* ======================================================================== */
   return (
-    <div className="fixed inset-0 top-[92px] flex flex-col bg-zinc-950 z-10">
-      {!hasAccess ? (
-        <AccessDenied ko={ko} />
-      ) : isEmpty ? (
-        /* ------------------------------------------------------------------ */
-        /*  INITIAL STATE — Perplexity-style centered layout                   */
-        /* ------------------------------------------------------------------ */
-        <div className="flex-1 flex flex-col items-center justify-center px-4 pb-8 overflow-y-auto">
-          <div className="w-full max-w-2xl flex flex-col items-center gap-8">
-
-            {/* Greeting */}
-            <div className="text-center space-y-2">
-              <h1 className="text-2xl sm:text-3xl font-semibold text-zinc-100 tracking-tight">
-                {ko ? "무엇을 분석할까요?" : "What would you like to analyze?"}
-              </h1>
-              <p className="text-sm text-zinc-500">
-                {ko
-                  ? "아래 애널리스트를 선택하고 질문을 입력하세요"
-                  : "Select an analyst below, then ask your question"}
-              </p>
-            </div>
-
-            {/* Persona selector cards */}
-            <div className="grid grid-cols-2 gap-3 w-full">
-              {(["crypto"] as Persona[]).map((p) => {
-                const isSelected = persona === p;
-                return (
-                  <button
-                    key={p}
-                    onClick={() => setPersona(p)}
-                    className={[
-                      "relative flex flex-col gap-3 p-4 rounded-2xl text-left",
-                      "border transition-all duration-200",
-                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50",
-                      isSelected
-                        ? "border-blue-500/40 bg-blue-500/[0.06] shadow-[0_0_0_1px_rgba(59,130,246,0.15)]"
-                        : "border-white/[0.06] bg-zinc-900/40 hover:border-white/[0.12] hover:bg-zinc-900/60",
-                    ].join(" ")}
-                  >
-                    {/* Selected checkmark */}
-                    {isSelected && (
-                      <span className="absolute top-3 right-3 flex items-center justify-center w-5 h-5 rounded-full bg-blue-500/20 border border-blue-500/30">
-                        <CheckIcon className="w-3 h-3 text-blue-400" />
-                      </span>
-                    )}
-
-                    {/* Avatar */}
-                    <div className="flex items-center gap-3">
-                      <Image
-                        src={PERSONA_AVATARS[p]}
-                        alt={personaMeta[p].tagline}
-                        width={44}
-                        height={44}
-                        className="w-11 h-11 rounded-full object-cover ring-1 ring-white/10"
-                      />
-                      <div>
-                        <p className="text-sm font-semibold text-zinc-100 leading-tight">
-                          {p === "crypto" ? (ko ? "김알렉스" : "Alex Kim") : (ko ? "첸사라" : "Sarah Chen")}
-                        </p>
-                        <p className="text-xs text-zinc-500 mt-0.5">
-                          {personaMeta[p].tagline}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-xs text-zinc-400 leading-relaxed">
-                      {personaMeta[p].desc}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Centered input */}
-            <div className="w-full">
-              <div className="relative flex items-end gap-3 bg-zinc-900/60 border border-white/[0.08] rounded-2xl px-4 py-3 focus-within:border-white/[0.16] focus-within:bg-zinc-900/80 transition-all duration-200">
-                <textarea
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => {
-                    setInput(e.target.value);
-                    e.target.style.height = "auto";
-                    e.target.style.height = `${Math.min(e.target.scrollHeight, 160)}px`;
-                  }}
-                  onKeyDown={handleKeyDown}
-                  placeholder={placeholder}
-                  disabled={loading}
-                  rows={1}
-                  className="flex-1 resize-none bg-transparent text-sm text-white placeholder-zinc-500 focus:outline-none leading-relaxed min-h-[28px] max-h-[160px] overflow-y-auto disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={loading || !input.trim()}
-                  aria-label={ko ? "전송" : "Send"}
-                  className={[
-                    "shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200",
-                    loading || !input.trim()
-                      ? "text-zinc-600 cursor-not-allowed"
-                      : "bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-500/25 active:scale-95",
-                  ].join(" ")}
-                >
-                  <SendIcon className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Suggested prompt pills */}
-            <div className="flex flex-wrap gap-2 justify-center">
-              {suggestedPrompts.map((prompt) => (
-                <button
-                  key={prompt}
-                  onClick={() => {
-                    setInput(prompt);
-                    inputRef.current?.focus();
-                  }}
-                  className="text-xs px-3 py-1.5 rounded-full bg-zinc-900/40 text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-300 border border-white/[0.06] hover:border-white/[0.10] transition-all duration-200"
-                >
-                  {prompt}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      ) : (
-        /* ------------------------------------------------------------------ */
-        /*  CHAT MODE — messages + fixed bottom input                          */
-        /* ------------------------------------------------------------------ */
-        <>
-          {/* Top bar — active persona + new chat */}
-          <div className="shrink-0 flex items-center justify-between gap-3 px-4 py-2.5 border-b border-white/[0.06] bg-zinc-900/60 backdrop-blur-xl">
-            <div className="flex items-center gap-3">
-              <Image
-                src={PERSONA_AVATARS[persona]}
-                alt={personaMeta[persona].tagline}
-                width={36}
-                height={36}
-                className="w-9 h-9 rounded-full object-cover ring-2 ring-blue-500/30"
-              />
-              <div>
-                <span className="text-sm font-semibold text-white block">
-                  {PERSONA_NAMES[persona]?.[ko ? "ko" : "en"]}
-                </span>
-                <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  {ko ? "온라인" : "Online"}
-                </span>
-              </div>
-            </div>
+    <div className="fixed inset-0 top-[64px] flex bg-zinc-950 font-mono z-10">
+      {/* ── Left Sidebar: Session History ── */}
+      {showSidebar && (
+        <div className="hidden lg:flex w-[260px] border-r border-white/[0.06] flex-col overflow-hidden shrink-0">
+          {/* Sidebar header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06] shrink-0">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold">Sessions</span>
             <button
               onClick={handleNewChat}
-              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-all duration-200 border border-white/[0.06]"
+              className="text-[10px] font-mono text-blue-400 hover:text-blue-300 transition-colors cursor-pointer px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20"
             >
-              <PlusIcon className="w-3.5 h-3.5" />
-              {ko ? "새 채팅" : "New Chat"}
+              + New
             </button>
           </div>
 
-          {/* Messages scroll area */}
-          <div className="flex-1 overflow-y-auto py-6">
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 w-full space-y-6">
+          {/* Session list */}
+          <div className="flex-1 overflow-y-auto">
+            {sessions.length === 0 ? (
+              <div className="text-center py-8 text-[10px] text-zinc-700 font-mono">
+                {ko ? "대화 기록이 없습니다" : "No chat history"}
+              </div>
+            ) : (
+              sessions.map((s) => (
+                <button
+                  key={s.sessionId}
+                  onClick={() => loadSession(s.sessionId)}
+                  className={`w-full text-left px-4 py-2.5 border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors cursor-pointer ${
+                    s.sessionId === sessionId ? "bg-white/[0.04] border-l-2 border-l-blue-500" : ""
+                  }`}
+                >
+                  <p className="text-[11px] text-zinc-300 truncate leading-tight">{s.content}</p>
+                  <p className="text-[9px] text-zinc-600 mt-1 tabular-nums">
+                    {new Date(s.createdAt).toLocaleDateString()}
+                  </p>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
 
+      {/* ── Main Chat Area ── */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Bar */}
+        <div className="flex items-center gap-3 px-4 py-2.5 bg-zinc-900/80 border-b border-white/[0.06] shrink-0">
+          {/* Toggle sidebar */}
+          <button
+            onClick={() => setShowSidebar((s) => !s)}
+            className="hidden lg:flex items-center justify-center w-7 h-7 rounded hover:bg-white/[0.06] transition-colors cursor-pointer"
+          >
+            <svg className="w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+
+          {/* Persona info */}
+          <Image
+            src={PERSONA_AVATARS[persona]}
+            alt="AI"
+            width={28}
+            height={28}
+            className="w-7 h-7 rounded-full object-cover ring-1 ring-white/10 shrink-0"
+          />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-white">
+                {PERSONA_NAMES[persona]?.[ko ? "ko" : "en"]}
+              </span>
+              <span className="relative flex items-center gap-1">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                </span>
+                <span className="text-[9px] text-emerald-400 uppercase tracking-[0.1em]">Online</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Session controls */}
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-[9px] font-mono text-zinc-600 tabular-nums hidden sm:block">
+              {messages.length > 0 ? `${messages.length} msgs` : ""}
+            </span>
+            <button
+              onClick={handleNewChat}
+              className="text-[10px] font-mono text-zinc-500 hover:text-white transition-colors cursor-pointer px-2 py-1 rounded border border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.04]"
+            >
+              {ko ? "새 채팅" : "New Chat"}
+            </button>
+          </div>
+        </div>
+
+        {/* Messages Area */}
+        <div className="flex-1 overflow-y-auto">
+          {isEmpty ? (
+            /* ── Empty State ── */
+            <div className="flex flex-col items-center justify-center h-full px-4">
+              <div className="w-full max-w-lg flex flex-col items-center gap-6">
+                {/* Persona card */}
+                <div className="flex items-center gap-3 bg-white/[0.02] border border-white/[0.06] rounded-lg px-4 py-3 w-full">
+                  <Image
+                    src={PERSONA_AVATARS[persona]}
+                    alt="AI"
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 rounded-full object-cover ring-2 ring-blue-500/20 shrink-0"
+                  />
+                  <div>
+                    <p className="text-sm font-semibold text-zinc-100">
+                      {ko ? "김알렉스" : "Alex Kim"}
+                    </p>
+                    <p className="text-[10px] text-zinc-500 mt-0.5">
+                      {ko
+                        ? "실시간 암호화폐 분석 · 선물 포지션 · 온체인 데이터"
+                        : "Real-time crypto analysis, futures positions & on-chain data"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Greeting */}
+                <div className="text-center space-y-1">
+                  <h2 className="text-lg font-semibold text-zinc-200">
+                    {ko ? "무엇을 분석할까요?" : "What would you like to analyze?"}
+                  </h2>
+                  <p className="text-[11px] text-zinc-600">
+                    {ko ? "실시간 데이터 기반 · AI 분석" : "Real-time data · AI-powered analysis"}
+                  </p>
+                </div>
+
+                {/* Suggested prompts */}
+                <div className="grid grid-cols-2 gap-2 w-full">
+                  {suggestedPrompts.map((prompt) => (
+                    <button
+                      key={prompt}
+                      onClick={() => {
+                        setInput(prompt);
+                        inputRef.current?.focus();
+                      }}
+                      className="text-[11px] px-3 py-2.5 rounded-lg bg-white/[0.02] text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-200 border border-white/[0.06] hover:border-white/[0.12] transition-all duration-200 text-left cursor-pointer"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* ── Messages ── */
+            <div className="max-w-3xl mx-auto px-4 py-4 w-full space-y-3">
               {messages.map((msg, idx) => (
                 <React.Fragment key={idx}>
                   {msg.role === "user" ? (
-                    /* User message — right-aligned bubble */
-                    <div className="flex justify-end">
-                      <div className="max-w-[75%] px-4 py-3 rounded-2xl rounded-tr-sm bg-blue-600 text-white text-sm leading-relaxed whitespace-pre-wrap">
+                    <div className="flex justify-end gap-2 items-end">
+                      <span className="text-[8px] text-zinc-700 tabular-nums shrink-0">{fmtTime(msg.timestamp)}</span>
+                      <div className="max-w-[75%] px-3 py-2 rounded-lg rounded-br-sm bg-blue-600/90 text-white text-[12px] leading-relaxed whitespace-pre-wrap">
                         {msg.content}
                       </div>
                     </div>
                   ) : (
-                    /* Assistant message — avatar + left-aligned text */
-                    <div className="flex gap-3 items-start">
+                    <div className="flex gap-2.5 items-start">
                       <Image
                         src={PERSONA_AVATARS[persona]}
                         alt="AI"
-                        width={32}
-                        height={32}
-                        className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10 shrink-0 mt-0.5"
+                        width={24}
+                        height={24}
+                        className="w-6 h-6 rounded-full object-cover ring-1 ring-white/10 shrink-0 mt-0.5"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-[11px] font-medium text-zinc-500 mb-1.5 tracking-wide">
-                          {PERSONA_NAMES[persona]?.[ko ? "ko" : "en"]}
-                        </p>
-                        <div className="text-sm text-zinc-100 leading-relaxed whitespace-pre-wrap pl-3 border-l border-white/[0.08]">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[9px] font-semibold text-zinc-500 uppercase tracking-wide">
+                            {ko ? "김알렉스" : "Alex Kim"}
+                          </span>
+                          <span className="text-[8px] text-zinc-700 tabular-nums">{fmtTime(msg.timestamp)}</span>
+                        </div>
+                        <div className="text-[12px] text-zinc-200 leading-relaxed whitespace-pre-wrap pl-2.5 border-l-2 border-white/[0.06]">
                           {msg.content}
                         </div>
-                        {/* TradingView chart — full width */}
                         {msg.ticker && (
-                          <div className="mt-4 -ml-3">
+                          <div className="mt-2">
                             <TradingViewChart ticker={msg.ticker} />
                           </div>
                         )}
@@ -516,72 +407,71 @@ export default function ChatClient({ lang, hasAccess, userName }: Props) {
                 </React.Fragment>
               ))}
 
-              {/* Loading indicator */}
               {loading && (
-                <div className="flex gap-3 items-start">
+                <div className="flex gap-2.5 items-start">
                   <Image
                     src={PERSONA_AVATARS[persona]}
                     alt="AI"
-                    width={32}
-                    height={32}
-                    className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10 shrink-0 mt-0.5"
+                    width={24}
+                    height={24}
+                    className="w-6 h-6 rounded-full object-cover ring-1 ring-white/10 shrink-0 mt-0.5"
                   />
-                  <div className="flex-1">
-                    <p className="text-[11px] font-medium text-zinc-500 mb-1.5 tracking-wide">
-                      {PERSONA_NAMES[persona]?.[ko ? "ko" : "en"]}
-                    </p>
-                    <div className="pl-3 border-l border-white/[0.08]">
+                  <div>
+                    <span className="text-[9px] font-semibold text-zinc-500 uppercase tracking-wide block mb-1">
+                      {ko ? "김알렉스" : "Alex Kim"}
+                    </span>
+                    <div className="pl-2.5 border-l-2 border-white/[0.06]">
                       <LoadingDots />
                     </div>
                   </div>
                 </div>
               )}
-
               <div ref={messagesEndRef} />
             </div>
-          </div>
+          )}
+        </div>
 
-          {/* Fixed bottom input bar */}
-          <div className="shrink-0 border-t border-white/[0.06] bg-zinc-950/90 backdrop-blur-xl px-4 py-3">
-            <div className="max-w-3xl mx-auto w-full">
-              <div className="relative flex items-end gap-3 bg-zinc-900/60 border border-white/[0.08] rounded-2xl px-4 py-3 focus-within:border-white/[0.16] focus-within:bg-zinc-900/80 transition-all duration-200">
-                <textarea
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => {
-                    setInput(e.target.value);
-                    e.target.style.height = "auto";
-                    e.target.style.height = `${Math.min(e.target.scrollHeight, 160)}px`;
-                  }}
-                  onKeyDown={handleKeyDown}
-                  placeholder={placeholder}
-                  disabled={loading}
-                  rows={1}
-                  className="flex-1 resize-none bg-transparent text-sm text-white placeholder-zinc-500 focus:outline-none leading-relaxed min-h-[28px] max-h-[160px] overflow-y-auto disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={loading || !input.trim()}
-                  aria-label={ko ? "전송" : "Send"}
-                  className={[
-                    "shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200",
-                    loading || !input.trim()
-                      ? "text-zinc-600 cursor-not-allowed"
-                      : "bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-500/25 active:scale-95",
-                  ].join(" ")}
-                >
-                  <SendIcon className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              <p className="text-center text-[10px] text-zinc-600 mt-2">
-                {ko
-                  ? "Enter로 전송 · Shift+Enter로 줄바꿈"
-                  : "Enter to send · Shift+Enter for new line"}
+        {/* Bottom Input Bar */}
+        <div className="shrink-0 border-t border-white/[0.06] bg-zinc-900/60 px-4 py-3">
+          <div className="max-w-3xl mx-auto w-full">
+            <div className="relative flex items-end gap-2 bg-zinc-950/80 border border-white/[0.08] rounded-lg px-3 py-2.5 focus-within:border-white/[0.16] focus-within:bg-zinc-950 transition-all duration-200">
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => {
+                  setInput(e.target.value);
+                  e.target.style.height = "auto";
+                  e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+                }}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                disabled={loading}
+                rows={1}
+                className="flex-1 resize-none bg-transparent text-[12px] text-white placeholder-zinc-600 focus:outline-none leading-relaxed min-h-[24px] max-h-[120px] overflow-y-auto disabled:opacity-50 disabled:cursor-not-allowed font-mono"
+              />
+              <button
+                onClick={handleSend}
+                disabled={loading || !input.trim()}
+                aria-label={ko ? "전송" : "Send"}
+                className={[
+                  "shrink-0 w-7 h-7 rounded-md flex items-center justify-center transition-all duration-200 cursor-pointer",
+                  loading || !input.trim()
+                    ? "text-zinc-700 cursor-not-allowed"
+                    : "bg-blue-600 text-white hover:bg-blue-500 active:scale-95",
+                ].join(" ")}
+              >
+                <SendIcon className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="flex items-center justify-between mt-1.5">
+              <p className="text-[9px] text-zinc-700">
+                {ko ? "Enter 전송 · Shift+Enter 줄바꿈" : "Enter to send · Shift+Enter for newline"}
               </p>
+              <p className="text-[9px] text-zinc-700">Gemini 2.5 Pro</p>
             </div>
           </div>
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 }
