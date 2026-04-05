@@ -77,11 +77,13 @@ export async function POST(req: NextRequest) {
     // Fetch context based on persona
     let context = "";
     let newsArticles: { title: string; url: string; source: string }[] = [];
+    let tweets: { author: string; text: string; url: string }[] = [];
     let detectedSymbol: string | null = null;
     if (persona === "crypto") {
       const result = await buildCryptoContext(message);
       context = result.context;
       newsArticles = result.newsArticles;
+      tweets = result.tweets;
       detectedSymbol = result.detectedSymbol;
     }
 
@@ -177,6 +179,7 @@ IMPORTANT: After your analysis, add a line "---FOLLOWUPS---" followed by exactly
       response: mainResponse,
       ticker: tickerInfo ? { symbol: tickerInfo.symbol, exchange: tickerInfo.exchange } : null,
       news: newsArticles,
+      tweets,
       followUps,
       internalLinks,
     });

@@ -26,6 +26,12 @@ interface NewsArticle {
   source: string;
 }
 
+interface TweetItem {
+  author: string;
+  text: string;
+  url: string;
+}
+
 interface InternalLink {
   label: string;
   path: string;
@@ -38,6 +44,7 @@ interface Message {
   ticker?: TickerInfo;
   timestamp?: number;
   news?: NewsArticle[];
+  tweets?: TweetItem[];
   followUps?: string[];
   internalLinks?: InternalLink[];
 }
@@ -201,6 +208,7 @@ export default function ChatClient({ lang, userName }: Props) {
         ticker: data.ticker ?? undefined,
         timestamp: Date.now(),
         news: data.news ?? undefined,
+        tweets: data.tweets ?? undefined,
         followUps: data.followUps ?? undefined,
         internalLinks: data.internalLinks ?? undefined,
       };
@@ -470,12 +478,36 @@ export default function ChatClient({ lang, userName }: Props) {
                           </div>
                         )}
 
+                        {/* Analyst tweets */}
+                        {msg.tweets && msg.tweets.length > 0 && (
+                          <div className="pt-2 border-t border-white/[0.04]">
+                            <span className="text-[9px] text-zinc-600 uppercase tracking-wider block mb-1.5">{ko ? "애널리스트 트윗" : "Analyst Tweets"}</span>
+                            <div className="space-y-1">
+                              {msg.tweets.slice(0, 3).map((t, ti) => (
+                                <a
+                                  key={ti}
+                                  href={t.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-start gap-2 px-2.5 py-1.5 rounded-md bg-white/[0.02] border border-white/[0.04] hover:border-white/[0.10] hover:bg-white/[0.04] transition-all cursor-pointer group"
+                                >
+                                  <span className="w-4 h-4 rounded-full bg-sky-500/15 flex items-center justify-center text-[8px] font-bold text-sky-400 shrink-0 mt-0.5">X</span>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-[9px] text-sky-400 font-semibold">@{t.author}</p>
+                                    <p className="text-[10px] text-zinc-400 group-hover:text-zinc-300 leading-snug line-clamp-2 transition-colors">{t.text}</p>
+                                  </div>
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
                         {/* Related news articles */}
                         {msg.news && msg.news.length > 0 && (
                           <div className="pt-2 border-t border-white/[0.04]">
                             <span className="text-[9px] text-zinc-600 uppercase tracking-wider block mb-1.5">{ko ? "관련 뉴스" : "Related News"}</span>
                             <div className="space-y-1">
-                              {msg.news.slice(0, 3).map((n, ni) => (
+                              {msg.news.slice(0, 5).map((n, ni) => (
                                 <a
                                   key={ni}
                                   href={n.url}
