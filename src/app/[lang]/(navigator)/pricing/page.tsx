@@ -89,45 +89,8 @@ export default function PricingPage({
           </p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-          {/* Free Tier */}
-          <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6 lg:p-8 flex flex-col">
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 bg-white/[0.04] px-2 py-0.5 rounded">
-                  Free
-                </span>
-              </div>
-              <div className="flex items-baseline gap-1 mt-3">
-                <span className="text-3xl font-bold text-white">$0</span>
-                <span className="text-sm text-zinc-600">/ {ko ? "월" : "month"}</span>
-              </div>
-              <p className="text-[11px] text-zinc-600 mt-2">
-                {ko ? "기본 기능으로 시작하세요" : "Get started with core features"}
-              </p>
-            </div>
-
-            <div className="flex-1 border-t border-white/[0.06] pt-5 space-y-0.5">
-              <Feature included>{ko ? "AI 채팅 10회/일" : "10 AI chat messages/day"}</Feature>
-              <Feature included>{ko ? "차트 분석 3회/일" : "3 chart analyses/day"}</Feature>
-              <Feature included>{ko ? "고래 트래커 (기본)" : "Whale tracker (basic)"}</Feature>
-              <Feature included>{ko ? "차트 & 시장 데이터" : "Charts & market data"}</Feature>
-              <Feature included>{ko ? "뉴스 피드" : "News feed"}</Feature>
-              <Feature included>{ko ? "커뮤니티 포스트" : "Community posts"}</Feature>
-              <Feature included={false}>{ko ? "실시간 고래 알림" : "Real-time whale alerts"}</Feature>
-              <Feature included={false}>{ko ? "업비트 + 김치 프리미엄" : "Upbit + Kimchi Premium"}</Feature>
-              <Feature included={false}>{ko ? "고급 기술 지표" : "Advanced technical indicators"}</Feature>
-              <Feature included={false}>{ko ? "텔레그램 프리미엄 알림" : "Telegram premium alerts"}</Feature>
-            </div>
-
-            <div className="mt-6 pt-5 border-t border-white/[0.06]">
-              <span className="block w-full text-center py-2.5 rounded-lg border border-white/[0.08] text-[11px] font-mono text-zinc-500 uppercase tracking-[0.15em]">
-                {ko ? "현재 플랜" : "Current Plan"}
-              </span>
-            </div>
-          </div>
-
+        {/* Pricing Card */}
+        <div className="max-w-lg mx-auto">
           {/* Premium Tier */}
           <div className="rounded-xl border border-blue-500/30 bg-blue-500/[0.03] p-6 lg:p-8 flex flex-col relative overflow-hidden">
             {/* Glow effect */}
