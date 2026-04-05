@@ -18,6 +18,7 @@ import {
   NewspaperIcon,
   CalculatorIcon,
   SparklesIcon,
+  TagIcon,
 } from "@heroicons/react/24/outline";
 
 import Logo from "@/components/logo";
@@ -46,6 +47,7 @@ const NAV_ITEMS = [
   { path: "sns", key: "sns" as const, icon: ChatBubbleLeftRightIcon, group: 2 },
   { path: "news", key: "news" as const, icon: NewspaperIcon, group: 2 },
   { path: "payback", key: "payback" as const, icon: CalculatorIcon, group: 3 },
+  { path: "pricing", key: "pricing" as const, icon: TagIcon, group: 3 },
 ] as const;
 
 const Headers: React.FC<THeaders> = ({ lang, translations }) => {

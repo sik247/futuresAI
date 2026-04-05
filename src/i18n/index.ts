@@ -12,6 +12,7 @@ export type Dictionary = {
   markets: string;
   whales: string;
   payback: string;
+  pricing: string;
   live: string;
   team: string;
   login: string;
