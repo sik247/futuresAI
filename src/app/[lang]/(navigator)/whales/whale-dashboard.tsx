@@ -155,7 +155,7 @@ function FigureRow({ figure }: { figure: Figure }) {
   return (
     <div className={`border-b border-white/[0.04] ${tracked ? "" : "opacity-50"}`}>
       <button
-        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-white/[0.03] transition-colors text-left"
+        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-white/[0.03] transition-colors text-left cursor-pointer"
         onClick={() => tracked && setExpanded((e) => !e)}
         disabled={!tracked}
       >
@@ -268,7 +268,7 @@ function FigureRow({ figure }: { figure: Figure }) {
 function HLWhaleCard({ whale }: { whale: HLWhale }) {
   const topPositions = whale.positions.slice(0, 5);
   return (
-    <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-3 flex flex-col overflow-hidden">
+    <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-3 flex flex-col overflow-hidden cursor-default transition-colors duration-200 hover:border-white/[0.10]">
       {/* Header */}
       <div className="flex items-start justify-between mb-2">
         <div>
@@ -364,8 +364,8 @@ function RecentTradesTable({ trades }: { trades: HLTrade[] }) {
               key={i}
               className="grid grid-cols-[1fr_60px_42px_60px_50px_50px] gap-1 px-3 py-1 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
             >
-              <span className="text-[9px] font-mono text-zinc-400 truncate">{t.whale}</span>
-              <span className="text-[9px] font-mono text-white font-semibold truncate">{t.coin}</span>
+              <span className="text-[9px] font-mono text-zinc-400 truncate tabular-nums">{t.whale}</span>
+              <span className="text-[9px] font-mono text-white font-semibold truncate tabular-nums">{t.coin}</span>
               <span
                 className={`text-[8px] font-mono font-bold ${
                   t.side === "BUY" ? "text-emerald-400" : "text-red-400"
@@ -417,7 +417,7 @@ export default function WhaleDashboard({
   return (
     <div className="bg-zinc-950 font-mono">
       {/* Stat Bar */}
-      <div className="flex items-center gap-4 px-4 py-2.5 bg-zinc-900/80 border-b border-white/[0.06] text-[11px] font-mono overflow-x-auto shrink-0">
+      <div className="flex items-center gap-3 px-4 py-2.5 bg-zinc-900/80 border-b border-white/[0.06] text-[11px] font-mono overflow-x-auto shrink-0">
         <span className="text-zinc-500 shrink-0">ETH</span>
         <span className="text-white font-bold tabular-nums shrink-0">
           ${ethPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -447,7 +447,7 @@ export default function WhaleDashboard({
           <button
             key={tab}
             onClick={() => setMobileTab(tab)}
-            className={`flex-1 py-2 text-[10px] font-mono uppercase tracking-[0.1em] transition-colors ${
+            className={`flex-1 py-2 text-[10px] font-mono uppercase tracking-[0.1em] transition-colors cursor-pointer ${
               mobileTab === tab
                 ? "text-white border-b-2 border-emerald-500"
                 : "text-zinc-600 hover:text-zinc-400"
@@ -462,8 +462,9 @@ export default function WhaleDashboard({
       <div className="hidden lg:grid h-[calc(100vh-108px)]" style={{ gridTemplateColumns: "280px 1fr" }}>
         {/* Left sidebar */}
         <div className="border-r border-white/[0.06] flex flex-col overflow-hidden">
-          <div className="px-3 py-2 border-b border-white/[0.06] shrink-0">
-            <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-zinc-600">Key Figures</span>
+          <div className="px-3 py-2 border-b border-white/[0.06] shrink-0 flex items-center justify-between">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold">Key Figures</span>
+            <span className="text-[9px] font-mono bg-white/[0.06] text-zinc-400 px-1.5 py-0.5 rounded-full tabular-nums">{sortedFigures.length}</span>
           </div>
           <div className="flex-1 overflow-y-auto">
             {sortedFigures.map((fig) => (

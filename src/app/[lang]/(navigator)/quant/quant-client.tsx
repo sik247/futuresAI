@@ -489,7 +489,7 @@ export default function QuantClient({
                 <div className="p-5">
                   <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-[0.15em] mb-2">{t.quant_fearGreed}</p>
                   <div className="flex items-baseline gap-2">
-                    <AnimatedCounter value={fearGreed.value} decimals={0} className="text-2xl font-mono font-bold" />
+                    <AnimatedCounter value={fearGreed.value} decimals={0} className="text-2xl font-mono font-bold tabular-nums" />
                     <span className={`text-[11px] font-mono font-semibold ${fearGreed.value <= 25 ? "text-red-400" : fearGreed.value <= 45 ? "text-orange-400" : fearGreed.value <= 55 ? "text-yellow-400" : fearGreed.value <= 75 ? "text-lime-400" : "text-emerald-400"}`}>
                       {fearGreed.classification}
                     </span>
@@ -515,11 +515,11 @@ export default function QuantClient({
                 <div className="p-5">
                   <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-[0.15em] mb-2">{lang === "ko" ? "시그널 비율" : "Signal Ratio"}</p>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-emerald-400 text-lg font-mono font-bold">{signals.filter(s => s.signal === "Strong Buy" || s.signal === "Buy").length}</span>
+                    <span className="text-emerald-400 text-lg font-mono font-bold tabular-nums">{signals.filter(s => s.signal === "Strong Buy" || s.signal === "Buy").length}</span>
                     <span className="text-zinc-600 text-sm font-mono">/</span>
-                    <span className="text-zinc-400 text-lg font-mono font-bold">{signals.filter(s => s.signal === "Neutral").length}</span>
+                    <span className="text-zinc-400 text-lg font-mono font-bold tabular-nums">{signals.filter(s => s.signal === "Neutral").length}</span>
                     <span className="text-zinc-600 text-sm font-mono">/</span>
-                    <span className="text-red-400 text-lg font-mono font-bold">{signals.filter(s => s.signal === "Strong Sell" || s.signal === "Sell").length}</span>
+                    <span className="text-red-400 text-lg font-mono font-bold tabular-nums">{signals.filter(s => s.signal === "Strong Sell" || s.signal === "Sell").length}</span>
                   </div>
                   <p className="text-xs text-zinc-600 font-mono mt-1">{lang === "ko" ? "매수 / 중립 / 매도" : "Buy / Neutral / Sell"}</p>
                 </div>
@@ -527,8 +527,8 @@ export default function QuantClient({
                 {/* BTC Price */}
                 <div className="p-5">
                   <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-[0.15em] mb-2">BTC/USDT</p>
-                  <AnimatedCounter value={signals[0]?.price || 0} prefix="$" decimals={0} className="text-lg font-mono font-bold text-white" />
-                  <span className={`text-[11px] font-mono font-semibold ml-2 ${(signals[0]?.change24h || 0) >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                  <AnimatedCounter value={signals[0]?.price || 0} prefix="$" decimals={0} className="text-lg font-mono font-bold text-white tabular-nums" />
+                  <span className={`text-[11px] font-mono font-semibold ml-2 tabular-nums ${(signals[0]?.change24h || 0) >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                     {(signals[0]?.change24h || 0) >= 0 ? "+" : ""}{(signals[0]?.change24h || 0).toFixed(2)}%
                   </span>
                 </div>
@@ -538,7 +538,7 @@ export default function QuantClient({
                   <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-[0.15em] mb-2">{t.quant_autoRefresh}</p>
                   <span className="text-lg font-mono font-bold text-zinc-400 tabular-nums">{countdownDisplay}</span>
                   <button onClick={handleRefresh} disabled={loading}
-                    className="mt-1 inline-flex items-center gap-1.5 text-xs font-mono text-blue-400 hover:text-blue-300 transition-colors duration-200 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded">
+                    className="mt-1 inline-flex items-center gap-1.5 text-xs font-mono text-blue-400 hover:text-blue-300 transition-colors duration-200 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded cursor-pointer">
                     {loading ? (
                       <>
                         <span className="h-3 w-3 rounded-full border border-blue-400/40 border-t-blue-400 animate-spin" />
@@ -639,7 +639,7 @@ export default function QuantClient({
                   return (
                     <div
                       key={s.symbol}
-                      className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl overflow-hidden hover:border-white/[0.12] hover:bg-white/[0.05] hover:-translate-y-0.5 transition-all duration-300 cursor-default"
+                      className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl overflow-hidden hover:border-white/[0.12] hover:bg-white/[0.05] hover:-translate-y-0.5 transition-all duration-200 cursor-default"
                     >
                       {/* Top accent line based on signal */}
                       <div className={`absolute top-0 left-0 right-0 h-[2px] ${
