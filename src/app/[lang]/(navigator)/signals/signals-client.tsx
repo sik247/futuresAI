@@ -303,7 +303,7 @@ export default function SignalsClient({
       {/*  HERO                                                        */}
       {/* ============================================================ */}
       <section ref={heroRef} className="pt-16 pb-20 px-6 max-w-7xl mx-auto">
-        <p className="font-mono text-xs tracking-[0.3em] text-zinc-500 uppercase mb-3 flex items-center gap-2">
+        <p className="font-mono text-sm tracking-[0.3em] text-zinc-500 uppercase mb-3 flex items-center gap-2">
           <span className="relative flex h-2 w-2">
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
           </span>
@@ -329,7 +329,7 @@ export default function SignalsClient({
         >
           {/* Fear & Greed */}
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.05]">
-            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-3">
+            <p className="text-xs text-zinc-500 font-mono uppercase tracking-[0.2em] mb-3">
               Fear &amp; Greed Index
             </p>
             <div className="flex items-end gap-3">
@@ -350,14 +350,14 @@ export default function SignalsClient({
               />
             </div>
             <div className="flex justify-between mt-1">
-              <span className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">Extreme Fear</span>
-              <span className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">Extreme Greed</span>
+              <span className="text-[11px] text-zinc-600 font-mono uppercase tracking-wider">Extreme Fear</span>
+              <span className="text-[11px] text-zinc-600 font-mono uppercase tracking-wider">Extreme Greed</span>
             </div>
           </div>
 
           {/* BTC Trend */}
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.05]">
-            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-3">
+            <p className="text-xs text-zinc-500 font-mono uppercase tracking-[0.2em] mb-3">
               BTC 7-Day SMA Trend
             </p>
             <p className="text-2xl font-mono font-bold">
@@ -371,7 +371,7 @@ export default function SignalsClient({
 
           {/* Summary */}
           <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.05]">
-            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-[0.2em] mb-3">
+            <p className="text-xs text-zinc-500 font-mono uppercase tracking-[0.2em] mb-3">
               Market Summary
             </p>
             <p className="text-sm text-zinc-300 leading-relaxed">
@@ -387,16 +387,16 @@ export default function SignalsClient({
       <section className="px-6 max-w-7xl mx-auto mb-6 flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight">Asset Signals</h2>
         <div className="flex items-center gap-3">
-          <span className="text-[10px] font-mono text-zinc-600 hidden sm:inline">
+          <span className="text-xs font-mono text-zinc-600 hidden sm:inline">
             Last updated: {new Date(data.updatedAt).toLocaleTimeString()}
           </span>
-          <span className="text-[10px] font-mono text-zinc-600">
+          <span className="text-xs font-mono text-zinc-600">
             {countdownDisplay}
           </span>
           <button
             onClick={handleRefresh}
             disabled={loading}
-            className="px-4 py-2 text-xs font-mono font-medium rounded-xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-200 disabled:opacity-40"
+            className="px-4 py-2 text-sm font-mono font-medium rounded-xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-200 disabled:opacity-40"
           >
             {loading ? "Refreshing..." : "Refresh"}
           </button>
@@ -434,14 +434,14 @@ export default function SignalsClient({
                   })()}
                   <div>
                     <h3 className="text-lg font-semibold leading-tight">{s.coin}</h3>
-                    <p className="text-[11px] text-zinc-500 font-mono">{s.symbol}</p>
+                    <p className="text-xs text-zinc-500 font-mono">{s.symbol}</p>
                   </div>
                 </div>
                 {(() => {
                   const signalStyle = SIGNAL_COLORS[s.signal] ?? { bg: "", glow: "" };
                   return (
                     <span
-                      className={`px-3.5 py-1.5 text-[11px] font-mono font-bold rounded-full border ${signalStyle.bg} ${signalStyle.glow}`}
+                      className={`px-3.5 py-1.5 text-xs font-mono font-bold rounded-full border ${signalStyle.bg} ${signalStyle.glow}`}
                     >
                       {s.signal}
                     </span>
@@ -471,10 +471,10 @@ export default function SignalsClient({
                 </div>
                 {s.volume24h > 0 && (
                   <div className="text-right">
-                    <p className="text-[9px] text-zinc-600 font-mono uppercase tracking-wider">
+                    <p className="text-[11px] text-zinc-600 font-mono uppercase tracking-wider">
                       24h Vol
                     </p>
-                    <p className="text-xs text-zinc-400 font-mono">
+                    <p className="text-sm text-zinc-400 font-mono">
                       {formatVolume(s.volume24h)}
                     </p>
                   </div>
@@ -484,14 +484,14 @@ export default function SignalsClient({
               {/* Confidence bar */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">
+                  <span className="text-xs text-zinc-500 font-mono uppercase tracking-wider">
                     Confidence
                   </span>
                   <AnimatedCounter
                     value={s.confidence}
                     suffix="%"
                     decimals={0}
-                    className="text-[11px] font-mono font-semibold text-zinc-400"
+                    className="text-xs font-mono font-semibold text-zinc-400"
                   />
                 </div>
                 <div className="h-2 rounded-full bg-white/[0.06] overflow-hidden">
@@ -509,7 +509,7 @@ export default function SignalsClient({
                 {s.reasons.slice(0, 3).map((r, i) => (
                   <span
                     key={i}
-                    className="inline-flex items-center gap-1.5 text-[11px] text-zinc-400 px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/[0.06]"
+                    className="inline-flex items-center gap-1.5 text-xs text-zinc-400 px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/[0.06]"
                   >
                     <span className="h-1 w-1 rounded-full bg-zinc-600 flex-shrink-0" />
                     {r}
@@ -551,20 +551,20 @@ export default function SignalsClient({
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-lg font-semibold">{st.title}</span>
                     <span
-                      className={`px-2.5 py-0.5 text-[10px] font-mono font-semibold rounded-full border ${
+                      className={`px-2.5 py-0.5 text-xs font-mono font-semibold rounded-full border ${
                         DIFFICULTY_COLORS[st.difficulty] ?? ""
                       }`}
                     >
                       {st.difficulty}
                     </span>
                     <span
-                      className={`px-2.5 py-0.5 text-[10px] font-mono font-semibold rounded-full border ${
+                      className={`px-2.5 py-0.5 text-xs font-mono font-semibold rounded-full border ${
                         RISK_COLORS[st.riskLevel] ?? ""
                       }`}
                     >
                       {st.riskLevel} Risk
                     </span>
-                    <span className="text-xs text-zinc-500 font-mono">
+                    <span className="text-sm text-zinc-500 font-mono">
                       {st.timeframe}
                     </span>
                   </div>
@@ -597,14 +597,14 @@ export default function SignalsClient({
                           key={i}
                           className="flex items-start gap-3 text-sm text-zinc-300"
                         >
-                          <span className="font-mono text-xs text-zinc-600 mt-0.5 flex-shrink-0">
+                          <span className="font-mono text-sm text-zinc-600 mt-0.5 flex-shrink-0">
                             {String(i + 1).padStart(2, "0")}
                           </span>
                           {step}
                         </li>
                       ))}
                     </ol>
-                    <p className="text-xs text-zinc-500 italic">
+                    <p className="text-sm text-zinc-500 italic">
                       Best for: {st.bestFor}
                     </p>
                   </div>
@@ -620,7 +620,7 @@ export default function SignalsClient({
       {/* ============================================================ */}
       <section className="px-6 max-w-7xl mx-auto pb-24 sm:pb-32">
         <div className="rounded-2xl border border-white/[0.04] bg-white/[0.015] p-6 text-center">
-          <p className="text-[11px] text-zinc-600 leading-relaxed max-w-2xl mx-auto font-mono">
+          <p className="text-xs text-zinc-600 leading-relaxed max-w-2xl mx-auto font-mono">
             Signals are generated from publicly available market data and
             simple technical indicators. This is not financial advice. Always
             do your own research before making investment decisions.

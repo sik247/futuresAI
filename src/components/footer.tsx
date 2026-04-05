@@ -8,11 +8,13 @@ type TFooter = {
   translations: any;
 };
 
-const PoweredByIconsPathList = [
-  { item: "/icons/footer-icons/trading-view.png", alt: "TradingView" },
-  { item: "/icons/footer-icons/bingX.webp", alt: "BingX" },
-  { item: "/icons/footer-icons/bitget.svg", alt: "Bitget" },
-  { item: "/icons/footer-icons/bybit-logo.png", alt: "Bybit" },
+const PartnerExchanges = [
+  { item: "/icons/exchange/bitget.svg", alt: "Bitget" },
+  { item: "/icons/exchange/bybit.svg", alt: "Bybit" },
+  { item: "/icons/exchange/bingx.svg", alt: "BingX" },
+  { item: "/icons/exchange/gate.svg", alt: "Gate.io" },
+  { item: "/icons/exchange/htx.svg", alt: "HTX" },
+  { item: "/icons/exchange/okx.svg", alt: "OKX" },
 ];
 
 const CommunityIconsPathList = [
@@ -36,6 +38,8 @@ const Footer: React.FC<TFooter> = ({ lang = "en", translations }) => {
     { href: "news", label: ko ? "크립토 뉴스" : "Crypto News" },
     { href: "charts", label: ko ? "실시간 차트" : "Live Charts" },
     { href: "markets", label: ko ? "예측시장" : "Prediction Market" },
+    { href: "quant?tab=reports", label: ko ? "블로그" : "Blog" },
+    { href: "quant?tab=chart", label: ko ? "마켓 리서치" : "Market Research" },
   ];
 
   const LEGAL_LINKS = [
@@ -118,17 +122,17 @@ const Footer: React.FC<TFooter> = ({ lang = "en", translations }) => {
           </div>
         </div>
 
-        {/* Partners */}
+        {/* Partner Exchanges */}
         <div className="mt-14 pt-8 border-t border-zinc-800/40">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
             <span className="text-xs font-semibold uppercase tracking-widest text-zinc-600 shrink-0">
-              {ko ? "파트너" : "Powered By"}
+              {ko ? "파트너 거래소" : "Partner Exchanges"}
             </span>
-            <ul className="flex flex-wrap gap-8 items-center">
-              {PoweredByIconsPathList.map((path, idx) => (
-                <li key={idx}>
-                  <Image src={path.item} alt={path.alt} width={36} height={36}
-                    className="grayscale opacity-30 hover:grayscale-0 hover:opacity-100 hover:scale-110 transition-all duration-500" />
+            <ul className="flex flex-wrap gap-6 items-center">
+              {PartnerExchanges.map((ex, idx) => (
+                <li key={idx} className="group">
+                  <Image src={ex.item} alt={ex.alt} width={28} height={28}
+                    className="grayscale opacity-30 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500" />
                 </li>
               ))}
             </ul>
