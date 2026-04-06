@@ -169,7 +169,7 @@ function StatBar({
   const btcDom = globalData?.data?.market_cap_percentage?.btc ?? null;
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900/80 border-b border-white/[0.06] text-[11px] font-mono overflow-x-auto shrink-0 whitespace-nowrap">
+    <div className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900/80 border-b border-white/[0.06] text-xs font-mono overflow-x-auto shrink-0 whitespace-nowrap">
       {/* BTC */}
       <span className="text-zinc-500">BTC</span>
       {btcPrice !== null ? (
@@ -739,7 +739,7 @@ export default function HomeDashboard({
   const [mobileTab, setMobileTab] = useState<"market" | "whales" | "news" | "research" | "predictions">("market");
 
   return (
-    <div className="bg-zinc-950 font-mono flex flex-col" style={{ height: "calc(100vh - 140px)" }}>
+    <div className="bg-zinc-950 font-mono flex flex-col pt-[92px]" style={{ height: "100vh" }}>
       {/* Stat Bar */}
       <StatBar
         btcData={btcData}
@@ -767,29 +767,20 @@ export default function HomeDashboard({
 
       {/* ── Desktop: Two-row layout ─────────────────────────────── */}
       <div className="hidden lg:flex flex-col flex-1 overflow-hidden min-h-0">
-        {/* Top row (60%) — coin table + whale positions */}
-        <div
-          className="flex border-b border-white/[0.06] overflow-hidden shrink-0"
-          style={{ height: "60%" }}
-        >
-          {/* Left: Top Movers (55%) */}
-          <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "55%" }}>
-            <TopMoversTable coins={topCoins} />
+        {/* Top row (50%) — Predictions + Whales + Signals */}
+        <div className="flex border-b border-white/[0.06] overflow-hidden shrink-0" style={{ height: "50%" }}>
+          {/* Predictions (40%) — main focus */}
+          <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "40%" }}>
+            <PredictionCards events={polymarketEvents} lang={lang} />
           </div>
-          {/* Right: Whale Positions (45%) */}
-          <div className="flex flex-col overflow-hidden flex-1">
+          {/* Whale Positions (35%) */}
+          <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "35%" }}>
             <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
-              <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">
-                Whale Positions
-              </span>
-              <span className="text-[9px] font-mono text-zinc-700">
-                {hlWhales.reduce((s, w) => s + (w.positions?.length ?? 0), 0)} open
-              </span>
+              <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-zinc-500">Whale Positions</span>
+              <Link href={`/${lang}/whales`} className="text-[10px] font-mono text-blue-400 hover:text-blue-300 transition-colors">All →</Link>
             </div>
             {hlWhales.length === 0 ? (
-              <div className="flex items-center justify-center flex-1 text-[10px] font-mono text-zinc-700">
-                No active positions
-              </div>
+              <div className="flex items-center justify-center flex-1 text-[11px] font-mono text-zinc-700">No active positions</div>
             ) : (
               <div className="grid grid-cols-2 gap-2 p-2 flex-1 overflow-y-auto content-start">
                 {hlWhales.map((whale) => (
@@ -798,25 +789,21 @@ export default function HomeDashboard({
               </div>
             )}
           </div>
-        </div>
-
-        {/* Bottom row (40%) — 4 columns: Signals | Feed | Research | Predictions */}
-        <div className="flex flex-1 overflow-hidden min-h-0">
-          {/* Quant Signals (20%) */}
-          <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "20%" }}>
+          {/* Quant Signals (25%) */}
+          <div className="overflow-hidden flex flex-col flex-1">
             <SignalsWidget signals={signals} lang={lang} />
           </div>
-          {/* Content Feed (30%) */}
-          <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "30%" }}>
+        </div>
+
+        {/* Bottom row (50%) — News (bigger) + Research (bigger) */}
+        <div className="flex flex-1 overflow-hidden min-h-0">
+          {/* Content Feed — News + YouTube (55%) */}
+          <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "55%" }}>
             <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
           </div>
-          {/* Blog Research (25%) */}
-          <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "25%" }}>
+          {/* Market Research (45%) */}
+          <div className="overflow-hidden flex flex-col flex-1">
             <BlogCards posts={blogPosts} lang={lang} />
-          </div>
-          {/* Predictions (25%) */}
-          <div className="overflow-hidden flex flex-col" style={{ width: "25%" }}>
-            <PredictionCards events={polymarketEvents} lang={lang} />
           </div>
         </div>
       </div>

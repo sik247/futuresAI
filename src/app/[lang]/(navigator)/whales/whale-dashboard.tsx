@@ -557,7 +557,7 @@ export default function WhaleDashboard({
 
   /* ── Desktop Layout ─────────────────────────────── */
   return (
-    <div className="bg-zinc-950 font-mono">
+    <div className="bg-zinc-950 font-mono pt-[92px]">
       {/* Stat Bar */}
       <div className="flex items-center gap-3 px-4 py-3 bg-zinc-900/80 border-b border-white/[0.06] text-xs font-mono overflow-x-auto shrink-0">
         <span className="text-zinc-500 shrink-0">ETH</span>
@@ -607,7 +607,7 @@ export default function WhaleDashboard({
       </div>
 
       {/* Main grid — desktop */}
-      <div className="hidden lg:grid h-[calc(100vh-140px)]" style={{ gridTemplateColumns: "260px 1fr" }}>
+      <div className="hidden lg:grid h-[calc(100vh-92px-48px)]" style={{ gridTemplateColumns: "260px 1fr" }}>
         {/* Left sidebar */}
         <div className="border-r border-white/[0.06] flex flex-col overflow-hidden">
           <div className="px-3 py-2 border-b border-white/[0.06] shrink-0 flex items-center justify-between">
