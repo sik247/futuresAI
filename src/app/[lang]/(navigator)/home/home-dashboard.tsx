@@ -971,35 +971,84 @@ export default function HomeDashboard({
         })}
       </div>
 
-      {/* Widget Grid */}
-      <div className="flex-1 overflow-auto p-3">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 auto-rows-[minmax(250px,1fr)]">
+      {/* ── Desktop: Fixed panel layout (bigger, cleaner) ──── */}
+      <div className="hidden lg:flex flex-col flex-1 overflow-hidden min-h-0">
+        {/* Top row — Predictions + Feed + Signals */}
+        <div className="flex border-b border-white/[0.06] overflow-hidden" style={{ flex: "1 1 0" }}>
+          {/* Predictions (35%) */}
           {widgets.predictions && (
-            <WidgetCard title={ko ? "예측 시장" : "Predictions"} onClose={() => toggleWidget("predictions")}>
-              <PredictionCards events={polymarketEvents} lang={lang} />
-            </WidgetCard>
+            <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "35%" }}>
+              <WidgetCard title={ko ? "예측 시장" : "Predictions"} onClose={() => toggleWidget("predictions")}>
+                <PredictionCards events={polymarketEvents} lang={lang} />
+              </WidgetCard>
+            </div>
           )}
+          {/* News Feed (40%) */}
           {widgets.feed && (
-            <WidgetCard title={ko ? "뉴스 피드" : "Feed"} onClose={() => toggleWidget("feed")}>
-              <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
-            </WidgetCard>
+            <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "40%" }}>
+              <WidgetCard title={ko ? "뉴스 피드" : "Feed"} onClose={() => toggleWidget("feed")}>
+                <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
+              </WidgetCard>
+            </div>
           )}
+          {/* Quant Signals (25%) */}
           {widgets.signals && (
-            <WidgetCard title={ko ? "퀀트 시그널" : "Quant Signals"} onClose={() => toggleWidget("signals")}>
-              <SignalsWidget signals={signals} lang={lang} />
-            </WidgetCard>
-          )}
-          {widgets.chat && (
-            <WidgetCard title={ko ? "AI 채팅" : "AI Chat"} onClose={() => toggleWidget("chat")}>
-              <ChatWidget lang={lang} />
-            </WidgetCard>
-          )}
-          {widgets.research && (
-            <WidgetCard title={ko ? "마켓 리서치" : "Market Research"} onClose={() => toggleWidget("research")}>
-              <BlogCards posts={blogPosts} lang={lang} />
-            </WidgetCard>
+            <div className="overflow-hidden flex flex-col flex-1">
+              <WidgetCard title={ko ? "퀀트 시그널" : "Signals"} onClose={() => toggleWidget("signals")}>
+                <SignalsWidget signals={signals} lang={lang} />
+              </WidgetCard>
+            </div>
           )}
         </div>
+
+        {/* Bottom row — AI Chat + Research */}
+        <div className="flex overflow-hidden" style={{ flex: "1 1 0" }}>
+          {/* AI Chat (40%) */}
+          {widgets.chat && (
+            <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "40%" }}>
+              <WidgetCard title={ko ? "AI 채팅" : "AI Chat"} onClose={() => toggleWidget("chat")}>
+                <ChatWidget lang={lang} />
+              </WidgetCard>
+            </div>
+          )}
+          {/* Market Research (60%) */}
+          {widgets.research && (
+            <div className="overflow-hidden flex flex-col flex-1">
+              <WidgetCard title={ko ? "마켓 리서치" : "Market Research"} onClose={() => toggleWidget("research")}>
+                <BlogCards posts={blogPosts} lang={lang} />
+              </WidgetCard>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Mobile: scrollable widgets ──── */}
+      <div className="lg:hidden flex-1 overflow-auto p-3 space-y-3">
+        {widgets.predictions && (
+          <WidgetCard title={ko ? "예측 시장" : "Predictions"} onClose={() => toggleWidget("predictions")}>
+            <PredictionCards events={polymarketEvents} lang={lang} />
+          </WidgetCard>
+        )}
+        {widgets.feed && (
+          <WidgetCard title={ko ? "뉴스 피드" : "Feed"} onClose={() => toggleWidget("feed")}>
+            <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
+          </WidgetCard>
+        )}
+        {widgets.signals && (
+          <WidgetCard title={ko ? "퀀트 시그널" : "Signals"} onClose={() => toggleWidget("signals")}>
+            <SignalsWidget signals={signals} lang={lang} />
+          </WidgetCard>
+        )}
+        {widgets.chat && (
+          <WidgetCard title={ko ? "AI 채팅" : "AI Chat"} onClose={() => toggleWidget("chat")}>
+            <ChatWidget lang={lang} />
+          </WidgetCard>
+        )}
+        {widgets.research && (
+          <WidgetCard title={ko ? "마켓 리서치" : "Market Research"} onClose={() => toggleWidget("research")}>
+            <BlogCards posts={blogPosts} lang={lang} />
+          </WidgetCard>
+        )}
       </div>
     </div>
   );
