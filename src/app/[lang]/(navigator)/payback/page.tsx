@@ -167,6 +167,155 @@ export default async function PaybackPage({
         </Container>
       </section>
 
+      {/* Existing Account KYC Guide */}
+      <section className="relative border-b border-white/5">
+        <Container className="py-16 md:py-20">
+          <div data-anim="section-heading">
+            <p className="text-amber-400 text-sm font-medium tracking-wider uppercase mb-3">
+              {ko ? "기존 계정 안내" : "Existing Account?"}
+            </p>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+              {ko ? "기존 계정이 있는 경우" : "Already Have an Exchange Account?"}
+            </h2>
+            <p className="text-zinc-500 mb-8 max-w-xl">
+              {ko
+                ? "이미 거래소 계정이 있으시다면, KYC 변경을 통해 페이백 프로그램에 참여할 수 있습니다."
+                : "If you already have an exchange account, you can join our payback program through a KYC change process."}
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.03] p-6 md:p-8 max-w-2xl">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  {ko ? "KYC 변경 가이드" : "KYC Change Guide"}
+                </h3>
+                <ol className="space-y-2 text-sm text-zinc-400">
+                  <li className="flex items-start gap-2">
+                    <span className="text-amber-400 font-mono font-bold shrink-0">1.</span>
+                    {ko
+                      ? "아래 거래소의 '가입하기' 버튼을 통해 새 계정을 생성합니다."
+                      : "Create a new account through the 'Join Now' button below."}
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-amber-400 font-mono font-bold shrink-0">2.</span>
+                    {ko
+                      ? "거래소 고객센터에 KYC 변경 요청을 합니다."
+                      : "Contact the exchange support to request a KYC transfer."}
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-amber-400 font-mono font-bold shrink-0">3.</span>
+                    {ko
+                      ? "KYC 승인 후 기존 자산과 거래 기록이 이전됩니다."
+                      : "After KYC approval, your assets and trading history will be transferred."}
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-amber-400 font-mono font-bold shrink-0">4.</span>
+                    {ko
+                      ? "Futures AI에 계정을 등록하면 페이백을 받을 수 있습니다."
+                      : "Register your account with Futures AI to start receiving payback."}
+                  </li>
+                </ol>
+                <a
+                  href="https://t.me/futuresai_official"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 mt-4 text-sm text-amber-400 hover:text-amber-300 transition-colors"
+                >
+                  {ko ? "텔레그램으로 문의하기" : "Contact us on Telegram"}
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 14 14" stroke="currentColor" strokeWidth="2">
+                    <path d="M1 7h12M8 2l5 5-5 5" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* Exchange Comparison Table (wedombit-style) */}
+      <section className="relative border-b border-white/5">
+        <Container className="py-16 md:py-20">
+          <div data-anim="section-heading">
+            <p className="text-cyan-400 text-sm font-medium tracking-wider uppercase mb-3">
+              {ko ? "거래소 비교" : "Exchange Comparison"}
+            </p>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-8">
+              {ko ? "수수료 & 페이백 비교표" : "Fee & Payback Comparison"}
+            </h2>
+          </div>
+
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[700px]">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="px-5 py-3.5 text-left text-xs font-mono uppercase tracking-wider text-zinc-500">{ko ? "거래소" : "Exchange"}</th>
+                    <th className="px-4 py-3.5 text-left text-xs font-mono uppercase tracking-wider text-zinc-500">{ko ? "유형" : "Type"}</th>
+                    <th className="px-4 py-3.5 text-center text-xs font-mono uppercase tracking-wider text-zinc-500">{ko ? "페이백" : "Payback"}</th>
+                    <th className="px-4 py-3.5 text-right text-xs font-mono uppercase tracking-wider text-zinc-500">{ko ? "지정가" : "Limit"}</th>
+                    <th className="px-4 py-3.5 text-right text-xs font-mono uppercase tracking-wider text-zinc-500">{ko ? "시장가" : "Market"}</th>
+                    <th className="px-4 py-3.5 text-left text-xs font-mono uppercase tracking-wider text-zinc-500">{ko ? "특징" : "Tags"}</th>
+                    <th className="px-5 py-3.5 text-right text-xs font-mono uppercase tracking-wider text-zinc-500"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {EXCHANGES.map((ex) => (
+                    <tr key={ex.name} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
+                      <td className="px-5 py-3">
+                        <div className="flex items-center gap-3">
+                          <Image src={ex.logo} alt={ex.name} width={28} height={28} className="rounded-lg" />
+                          <span className="font-semibold text-white text-sm">{ex.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs font-mono text-zinc-500 bg-white/[0.04] px-2 py-0.5 rounded">CEX</span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={`text-sm font-bold font-mono ${
+                          ex.paybackRate >= 50 ? "text-emerald-400" : ex.paybackRate >= 30 ? "text-blue-400" : "text-zinc-300"
+                        }`}>
+                          {ex.paybackRate}%
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono text-sm text-zinc-400">{ex.makerFee}%</td>
+                      <td className="px-4 py-3 text-right font-mono text-sm text-zinc-400">{ex.takerFee}%</td>
+                      <td className="px-4 py-3">
+                        <span className="text-[10px] font-mono text-zinc-500 bg-white/[0.04] px-2 py-0.5 rounded">
+                          {ex.name === "Bitget" ? (ko ? "카피트레이딩" : "Copy Trading") :
+                           ex.name === "Bybit" ? (ko ? "높은 유동성" : "High Liquidity") :
+                           ex.name === "BingX" ? (ko ? "카피트레이딩" : "Copy Trading") :
+                           ex.name === "Gate.io" ? (ko ? "최고 페이백" : "Highest Payback") :
+                           ex.name === "HTX" ? (ko ? "글로벌" : "Global") :
+                           ko ? "DEX 통합" : "DEX Aggregator"}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-right">
+                        <div className="flex items-center gap-2 justify-end">
+                          <a
+                            href={ex.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-500 transition-colors cursor-pointer"
+                          >
+                            {ko ? "가입" : "Join Now"}
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </Container>
+      </section>
+
       {/* User Payback Request Section */}
       {session && (
         <section className="relative border-b border-white/5">

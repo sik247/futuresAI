@@ -6,74 +6,202 @@ export const dynamic = "force-dynamic";
 const TELEGRAM_API = "https://api.telegram.org/bot";
 const PREMIUM_PRICE_USD = 99;
 
-// Your USDT wallet address for receiving payments
-const PAYMENT_WALLET = process.env.PREMIUM_USDT_WALLET || "0xYOUR_WALLET_ADDRESS_HERE";
-const PAYMENT_NETWORK = process.env.PREMIUM_USDT_NETWORK || "ERC-20"; // or "TRC-20"
+// USDT TRC-20 wallet for receiving payments
+const PAYMENT_WALLET = process.env.PREMIUM_USDT_WALLET || "TW7qfQgXLaW3HD4NP1PCorYiU5iaSGjyEG";
+const PAYMENT_NETWORK = "TRC-20";
+
+// Admin Telegram user ID (only this user can run admin commands)
+const ADMIN_USER_ID = process.env.TELEGRAM_ADMIN_USER_ID || "";
 
 function getBotToken(): string {
   return process.env.TELEGRAM_BOT_TOKEN || "";
 }
 
-async function sendMessage(chatId: number | string, text: string, replyMarkup?: any) {
+function isAdmin(userId: number): boolean {
+  return ADMIN_USER_ID !== "" && String(userId) === ADMIN_USER_ID;
+}
+
+async function sendMessage(chatId: number | string, text: string) {
   await fetch(`${TELEGRAM_API}${getBotToken()}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text,
-      parse_mode: "HTML",
-      ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
-    }),
+    body: JSON.stringify({ chat_id: chatId, text, parse_mode: "HTML" }),
   });
 }
 
-/**
- * Verify USDT transfer on Ethereum via Etherscan
- * Checks if TX is a USDT transfer to our wallet with correct amount
- */
-async function verifyUsdtTx(txHash: string): Promise<{ valid: boolean; amount: number; from: string }> {
+/* ── TRC-20 USDT Verification via TronGrid ─────────────────────────── */
+
+async function verifyTrc20Tx(txId: string): Promise<{ valid: boolean; amount: number; from: string }> {
   try {
-    const etherscanKey = process.env.ETHERSCAN_API_KEY || "";
-    const url = `https://api.etherscan.io/api?module=proxy&action=eth_getTransactionReceipt&txhash=${txHash}&apikey=${etherscanKey}`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    // TronGrid transaction info endpoint
+    const url = `https://api.trongrid.io/v1/transactions/${txId}/events`;
+    const headers: Record<string, string> = { Accept: "application/json" };
+    const tronKey = process.env.TRONGRID_API_KEY;
+    if (tronKey) headers["TRON-PRO-API-KEY"] = tronKey;
+
+    const res = await fetch(url, { headers, signal: AbortSignal.timeout(10000) });
+    if (!res.ok) return { valid: false, amount: 0, from: "" };
     const data = await res.json();
 
-    if (!data.result || !data.result.logs) {
+    if (!data.data || !Array.isArray(data.data)) {
       return { valid: false, amount: 0, from: "" };
     }
 
-    // USDT contract: 0xdAC17F958D2ee523a2206206994597C13D831ec7
-    const usdtContract = "0xdac17f958d2ee523a2206206994597c13d831ec7";
-    // Transfer event topic
-    const transferTopic = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+    // USDT TRC-20 contract
+    const usdtContract = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t";
 
-    for (const log of data.result.logs) {
+    for (const event of data.data) {
       if (
-        log.address?.toLowerCase() === usdtContract &&
-        log.topics?.[0] === transferTopic
+        event.contract_address === usdtContract &&
+        event.event_name === "Transfer"
       ) {
-        // Decode: topics[2] = to address, data = amount
-        const to = "0x" + (log.topics[2] || "").slice(26).toLowerCase();
-        const amount = parseInt(log.data, 16) / 1e6; // USDT has 6 decimals
-        const from = "0x" + (log.topics[1] || "").slice(26).toLowerCase();
+        const to = event.result?.to || event.result?._to || "";
+        const from = event.result?.from || event.result?._from || "";
+        const rawAmount = event.result?.value || event.result?._value || "0";
+        const amount = parseFloat(rawAmount) / 1e6; // USDT has 6 decimals
 
-        if (to === PAYMENT_WALLET.toLowerCase() && amount >= PREMIUM_PRICE_USD * 0.95) {
+        // Convert addresses to base58 for comparison
+        if (to === PAYMENT_WALLET && amount >= PREMIUM_PRICE_USD * 0.95) {
           return { valid: true, amount, from };
         }
       }
     }
 
+    // Fallback: check transaction detail directly
+    const txUrl = `https://api.trongrid.io/wallet/gettransactioninfobyid`;
+    const txRes = await fetch(txUrl, {
+      method: "POST",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ value: txId }),
+      signal: AbortSignal.timeout(10000),
+    });
+    if (txRes.ok) {
+      const txData = await txRes.json();
+      // Check contract result for successful execution
+      if (txData.receipt?.result === "SUCCESS") {
+        // Transaction succeeded, but we couldn't parse the transfer event
+        // Return partial result so admin can manually verify
+        return { valid: false, amount: 0, from: "TX_FOUND_BUT_PARSE_FAILED" };
+      }
+    }
+
     return { valid: false, amount: 0, from: "" };
   } catch (error) {
-    console.error("[TX Verify]", error);
+    console.error("[TRC-20 Verify]", error);
     return { valid: false, amount: 0, from: "" };
   }
 }
 
-/**
- * Telegram Webhook Handler
- * Processes bot commands and TX verification
- */
+/* ── Admin Commands ──────────────────────────────────────────────────── */
+
+async function handleAdminCommand(chatId: number, text: string): Promise<boolean> {
+  // /premium_add <email>
+  if (text.startsWith("/premium_add ")) {
+    const email = text.replace("/premium_add ", "").trim();
+    try {
+      const user = await prisma.user.findUnique({ where: { email } });
+      if (!user) {
+        await sendMessage(chatId, `❌ User not found: ${email}`);
+        return true;
+      }
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { isPremium: true, chatEnabled: true },
+      });
+      await sendMessage(chatId, `✅ Premium activated for <b>${user.name || email}</b>\nEmail: ${email}`);
+    } catch (e) {
+      await sendMessage(chatId, `❌ Error: ${String(e)}`);
+    }
+    return true;
+  }
+
+  // /premium_remove <email>
+  if (text.startsWith("/premium_remove ")) {
+    const email = text.replace("/premium_remove ", "").trim();
+    try {
+      const user = await prisma.user.findUnique({ where: { email } });
+      if (!user) {
+        await sendMessage(chatId, `❌ User not found: ${email}`);
+        return true;
+      }
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { isPremium: false },
+      });
+      await sendMessage(chatId, `✅ Premium removed for <b>${user.name || email}</b>`);
+    } catch (e) {
+      await sendMessage(chatId, `❌ Error: ${String(e)}`);
+    }
+    return true;
+  }
+
+  // /premium_list
+  if (text === "/premium_list") {
+    try {
+      const premiumUsers = await prisma.user.findMany({
+        where: { isPremium: true },
+        select: { name: true, email: true, createdAt: true },
+        take: 50,
+      });
+      if (premiumUsers.length === 0) {
+        await sendMessage(chatId, "No premium users.");
+        return true;
+      }
+      const list = premiumUsers
+        .map((u, i) => `${i + 1}. ${u.name || "?"} — ${u.email}`)
+        .join("\n");
+      await sendMessage(chatId, `<b>Premium Users (${premiumUsers.length}):</b>\n\n${list}`);
+    } catch (e) {
+      await sendMessage(chatId, `❌ Error: ${String(e)}`);
+    }
+    return true;
+  }
+
+  // /user_info <email>
+  if (text.startsWith("/user_info ")) {
+    const email = text.replace("/user_info ", "").trim();
+    try {
+      const user = await prisma.user.findUnique({
+        where: { email },
+        select: { name: true, email: true, isPremium: true, chatEnabled: true, role: true, credits: true, createdAt: true },
+      });
+      if (!user) {
+        await sendMessage(chatId, `❌ User not found: ${email}`);
+        return true;
+      }
+      await sendMessage(chatId, `<b>User Info</b>\n\nName: ${user.name || "?"}\nEmail: ${user.email}\nRole: ${user.role}\nPremium: ${user.isPremium ? "✅" : "❌"}\nChat: ${user.chatEnabled ? "✅" : "❌"}\nCredits: ${user.credits}\nJoined: ${new Date(user.createdAt).toLocaleDateString()}`);
+    } catch (e) {
+      await sendMessage(chatId, `❌ Error: ${String(e)}`);
+    }
+    return true;
+  }
+
+  // /stats
+  if (text === "/stats") {
+    try {
+      const [totalUsers, premiumCount, chatCount] = await Promise.all([
+        prisma.user.count(),
+        prisma.user.count({ where: { isPremium: true } }),
+        prisma.chatMessage.count(),
+      ]);
+      await sendMessage(chatId, `<b>📊 Platform Stats</b>\n\nTotal Users: ${totalUsers}\nPremium: ${premiumCount}\nChat Messages: ${chatCount}`);
+    } catch (e) {
+      await sendMessage(chatId, `❌ Error: ${String(e)}`);
+    }
+    return true;
+  }
+
+  // /admin_help
+  if (text === "/admin_help") {
+    await sendMessage(chatId, `<b>🔧 Admin Commands</b>\n\n/premium_add &lt;email&gt; — Activate premium\n/premium_remove &lt;email&gt; — Deactivate premium\n/premium_list — List all premium users\n/user_info &lt;email&gt; — Show user details\n/stats — Platform statistics`);
+    return true;
+  }
+
+  return false;
+}
+
+/* ── Main Webhook Handler ────────────────────────────────────────────── */
+
 export async function POST(req: NextRequest) {
   try {
     const update = await req.json();
@@ -81,15 +209,28 @@ export async function POST(req: NextRequest) {
     if (!message || !message.text) return NextResponse.json({ ok: true });
 
     const chatId = message.chat.id;
+    const userId = message.from?.id || 0;
     const text = message.text.trim();
-    const username = message.from?.username || "";
+    const isGroup = message.chat.type === "group" || message.chat.type === "supergroup";
 
-    // /start - Welcome message
+    // In groups, only respond to commands (ignore regular messages)
+    if (isGroup && !text.startsWith("/")) {
+      return NextResponse.json({ ok: true });
+    }
+
+    // Admin commands (any chat, only for admin user)
+    if (isAdmin(userId) && text.startsWith("/premium_") || text === "/stats" || text === "/admin_help" || text.startsWith("/user_info ")) {
+      if (isAdmin(userId)) {
+        const handled = await handleAdminCommand(chatId, text);
+        if (handled) return NextResponse.json({ ok: true });
+      }
+    }
+
+    // /start
     if (text === "/start" || text === "/start premium") {
-      await sendMessage(chatId, `
-<b>🚀 FuturesAI Premium</b>
+      await sendMessage(chatId, `<b>FuturesAI Premium</b>
 
-Welcome! Get full access to:
+Full access to all features:
 • 30 AI chat messages/day
 • 10 chart analyses/day
 • Real-time whale alerts
@@ -97,153 +238,78 @@ Welcome! Get full access to:
 • Advanced indicators (RSI, MA)
 • Telegram premium alerts
 
-<b>💰 Price: $${PREMIUM_PRICE_USD} USDT/month</b>
+<b>Price: $${PREMIUM_PRICE_USD} USDT/month</b>
 
-To subscribe, send <b>$${PREMIUM_PRICE_USD} USDT</b> to:
-
+Send <b>$${PREMIUM_PRICE_USD} USDT (TRC-20)</b> to:
 <code>${PAYMENT_WALLET}</code>
-Network: <b>${PAYMENT_NETWORK}</b>
 
-After sending, paste your <b>TX hash</b> here and I'll verify it automatically.
+After sending, paste your <b>TX hash</b> here.
 
-<i>Need help? Type /help</i>
-      `.trim());
+Type /help for more info.`);
       return NextResponse.json({ ok: true });
     }
 
     // /help
     if (text === "/help") {
-      await sendMessage(chatId, `
-<b>📋 Commands:</b>
+      const adminHelp = isAdmin(userId) ? "\n\n<b>Admin:</b> /admin_help" : "";
+      await sendMessage(chatId, `<b>Commands:</b>
 
-/start - Subscribe to Premium
-/status - Check your premium status
-/verify &lt;tx_hash&gt; - Verify payment
+/start — Subscribe to Premium
+/status — Check premium status
+/verify &lt;tx_hash&gt; — Verify payment
 
 <b>How to subscribe:</b>
-1. Send $${PREMIUM_PRICE_USD} USDT to the wallet address
-2. Copy the transaction hash
-3. Send it here or use /verify &lt;hash&gt;
-
-<b>Contact:</b> @futuresai_official
-      `.trim());
+1. Send $${PREMIUM_PRICE_USD} USDT (TRC-20) to wallet
+2. Copy the transaction hash (starts with TX ID)
+3. Paste it here or use /verify${adminHelp}`);
       return NextResponse.json({ ok: true });
     }
 
-    // /status - Check premium status
+    // /status
     if (text === "/status") {
-      // Try to find user by looking up telegram chat ID in recent messages
-      await sendMessage(chatId, `
-<b>📊 Account Status</b>
-
-To check your premium status, please visit:
-https://www.futuresai.io
-
-Or contact @futuresai_official for support.
-      `.trim());
+      await sendMessage(chatId, `Visit https://www.futuresai.io to check your premium status.\nOr send your email here to look up your account.`);
       return NextResponse.json({ ok: true });
     }
 
-    // /verify <tx_hash> or direct TX hash
-    const txHash = text.startsWith("/verify ")
-      ? text.replace("/verify ", "").trim()
-      : text.startsWith("0x") && text.length === 66
-      ? text
-      : null;
+    // TX hash detection — Tron TX hashes are 64-char hex
+    const txInput = text.startsWith("/verify ") ? text.replace("/verify ", "").trim() : text;
+    const isTronTx = /^[a-fA-F0-9]{64}$/.test(txInput);
 
-    if (txHash && txHash.startsWith("0x") && txHash.length === 66) {
-      await sendMessage(chatId, "🔍 Verifying transaction... Please wait.");
+    if (isTronTx) {
+      await sendMessage(chatId, "Verifying TRC-20 transaction...");
 
-      const result = await verifyUsdtTx(txHash);
+      const result = await verifyTrc20Tx(txInput);
 
       if (result.valid) {
-        // Try to activate premium
-        try {
-          const activateRes = await fetch(
-            `${process.env.NEXT_PUBLIC_URL || "https://www.futuresai.io"}/api/premium/activate`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${process.env.CRON_SECRET}`,
-              },
-              body: JSON.stringify({
-                telegramChatId: chatId.toString(),
-                txHash,
-                months: 1,
-              }),
-            }
-          );
-          const activateData = await activateRes.json();
-
-          if (activateData.ok) {
-            await sendMessage(chatId, `
-<b>✅ Payment Verified!</b>
-
-Amount: <b>$${result.amount.toFixed(2)} USDT</b>
-TX: <code>${txHash.slice(0, 10)}...${txHash.slice(-8)}</code>
-
-<b>🎉 Premium activated!</b>
-Your account now has full access to all features.
-
-Thank you for subscribing to FuturesAI Premium!
-            `.trim());
-          } else {
-            await sendMessage(chatId, `
-<b>✅ Payment Verified!</b>
-
-Amount: <b>$${result.amount.toFixed(2)} USDT</b>
-
-⚠️ Could not auto-activate. Please share your <b>FuturesAI email</b> so we can link your account.
-
-Or contact @futuresai_official for manual activation.
-            `.trim());
-          }
-        } catch {
-          await sendMessage(chatId, `
-<b>✅ Payment Verified: $${result.amount.toFixed(2)} USDT</b>
-
-⚠️ Auto-activation error. Please contact @futuresai_official with your TX hash for manual activation.
-          `.trim());
-        }
+        await sendMessage(chatId, `<b>✅ Payment Verified!</b>\n\nAmount: <b>$${result.amount.toFixed(2)} USDT</b>\nTX: <code>${txInput.slice(0, 12)}...${txInput.slice(-8)}</code>\n\nPlease send your <b>FuturesAI account email</b> to activate premium.`);
+      } else if (result.from === "TX_FOUND_BUT_PARSE_FAILED") {
+        await sendMessage(chatId, `Transaction found but could not auto-verify the USDT amount.\n\nPlease contact @futuresai_official with your TX hash for manual verification.`);
       } else {
-        await sendMessage(chatId, `
-<b>❌ Verification Failed</b>
-
-Could not verify payment. Please check:
-• TX hash is correct
-• USDT was sent to: <code>${PAYMENT_WALLET}</code>
-• Amount is at least $${PREMIUM_PRICE_USD} USDT
-• Transaction is confirmed (wait a few minutes)
-
-Try again or contact @futuresai_official
-        `.trim());
+        await sendMessage(chatId, `<b>❌ Verification Failed</b>\n\nPlease check:\n• TX hash is correct (64 hex characters)\n• USDT TRC-20 was sent to: <code>${PAYMENT_WALLET}</code>\n• Amount is at least $${PREMIUM_PRICE_USD}\n• Transaction is confirmed\n\nOr contact @futuresai_official`);
       }
       return NextResponse.json({ ok: true });
     }
 
-    // Unknown command
-    if (text.startsWith("/")) {
-      await sendMessage(chatId, "Unknown command. Type /help for available commands.");
-    } else {
-      // If user sends email, try to link account
-      const emailMatch = text.match(/[\w.-]+@[\w.-]+\.\w+/);
-      if (emailMatch) {
-        const email = emailMatch[0];
+    // Email detection — try to link account
+    const emailMatch = text.match(/[\w.-]+@[\w.-]+\.\w+/);
+    if (emailMatch) {
+      const email = emailMatch[0];
+      try {
         const user = await prisma.user.findUnique({ where: { email } });
         if (user) {
-          await sendMessage(chatId, `
-<b>📧 Account Found!</b>
-
-Email: ${email}
-Premium: ${user.isPremium ? "✅ Active" : "❌ Not active"}
-
-${!user.isPremium ? `To activate premium, send $${PREMIUM_PRICE_USD} USDT to:\n<code>${PAYMENT_WALLET}</code>\n\nThen paste your TX hash here.` : "Your premium is already active! Enjoy all features."}
-          `.trim());
+          await sendMessage(chatId, `<b>Account Found</b>\n\nName: ${user.name || "?"}\nEmail: ${email}\nPremium: ${user.isPremium ? "✅ Active" : "❌ Not active"}\n\n${!user.isPremium ? `Send $${PREMIUM_PRICE_USD} USDT (TRC-20) to:\n<code>${PAYMENT_WALLET}</code>\n\nThen paste your TX hash here.` : "Your premium is active!"}`);
         } else {
-          await sendMessage(chatId, `No account found for ${email}. Please sign up at https://www.futuresai.io first.`);
+          await sendMessage(chatId, `No account for ${email}. Sign up at https://www.futuresai.io first.`);
         }
+      } catch {
+        await sendMessage(chatId, "Error looking up account. Try again.");
       }
+      return NextResponse.json({ ok: true });
+    }
+
+    // In DM, show help for unknown input
+    if (!isGroup && text.startsWith("/")) {
+      await sendMessage(chatId, "Unknown command. Type /help");
     }
 
     return NextResponse.json({ ok: true });
