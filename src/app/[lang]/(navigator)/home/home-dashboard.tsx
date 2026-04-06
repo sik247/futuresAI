@@ -483,10 +483,10 @@ function ContentFeed({ news, youtubeItems, lang }: { news: CryptoNewsItem[]; you
                     </div>
                   </div>
                   <div className="p-2">
-                    <p className="text-[13px] text-zinc-300 group-hover:text-white leading-snug line-clamp-2 transition-colors">{yt.title}</p>
+                    <p className="text-[14px] text-zinc-300 group-hover:text-white leading-snug line-clamp-2 transition-colors">{yt.title}</p>
                     <div className="flex items-center gap-1.5 mt-1">
-                      <span className="text-[11px] text-zinc-600">{yt.channelName}</span>
-                      <span className="text-[11px] text-zinc-700">{timeAgo(new Date(yt.publishedAt))}</span>
+                      <span className="text-[12px] text-zinc-600">{yt.channelName}</span>
+                      <span className="text-[12px] text-zinc-700">{timeAgo(new Date(yt.publishedAt))}</span>
                     </div>
                   </div>
                 </a>
@@ -512,8 +512,8 @@ function ContentFeed({ news, youtubeItems, lang }: { news: CryptoNewsItem[]; you
                   </div>
                 )}
                 <div className="p-2">
-                  <span className="text-[11px] font-mono text-zinc-600">{timeAgo(n.publishedAt)}</span>
-                  <p className="text-[13px] text-zinc-300 group-hover:text-white leading-snug line-clamp-2 transition-colors mt-0.5">{n.title}</p>
+                  <span className="text-[12px] font-mono text-zinc-600">{timeAgo(n.publishedAt)}</span>
+                  <p className="text-[14px] text-zinc-300 group-hover:text-white leading-snug line-clamp-2 transition-colors mt-0.5">{n.title}</p>
                   {n.categories && n.categories.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1">
                       {n.categories.slice(0, 2).map((cat) => (
@@ -576,7 +576,7 @@ function BlogCards({ posts, lang }: { posts: BlogPost[]; lang: string }) {
                   </span>
                   <span className="text-[11px] font-mono text-zinc-600">RSI {post.rsi}</span>
                 </div>
-                <p className="text-[13px] text-zinc-300 group-hover:text-white leading-snug line-clamp-2 transition-colors">
+                <p className="text-[14px] text-zinc-300 group-hover:text-white leading-snug line-clamp-2 transition-colors">
                   {lang === "ko" ? post.titleKo : post.title}
                 </p>
               </div>
@@ -622,8 +622,8 @@ function SignalsWidget({ signals, lang }: { signals: SignalsData; lang: string }
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1">
-                      <span className="text-[12px] font-mono font-bold text-white">{s.symbol}</span>
-                      <span className="text-[11px] font-mono text-zinc-600 truncate">{s.name}</span>
+                      <span className="text-[13px] font-mono font-bold text-white">{s.symbol}</span>
+                      <span className="text-[12px] font-mono text-zinc-600 truncate">{s.name}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-[12px] font-mono text-zinc-300 tabular-nums">${fmtPrice(s.price)}</span>
@@ -708,9 +708,9 @@ function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: st
             <div key={event.id} className="rounded-lg border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all p-3">
               {/* Header: title + volume */}
               <div className="flex items-start justify-between gap-2 mb-2.5">
-                <h3 className="text-[14px] font-semibold text-zinc-100 leading-snug flex-1">{event.title}</h3>
+                <h3 className="text-[15px] font-semibold text-zinc-100 leading-snug flex-1">{event.title}</h3>
                 {event.totalVol > 0 && (
-                  <span className="text-[11px] font-mono text-zinc-600 bg-white/[0.04] px-1.5 py-0.5 rounded shrink-0 tabular-nums">
+                  <span className="text-[12px] font-mono text-zinc-600 bg-white/[0.04] px-1.5 py-0.5 rounded shrink-0 tabular-nums">
                     {fmtUsd(event.totalVol)} vol
                   </span>
                 )}
@@ -720,9 +720,9 @@ function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: st
               <div className="space-y-1.5">
                 {event.outcomes.map((o, i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <span className="text-[12px] text-zinc-400 flex-1 truncate">{o.label}</span>
-                    <span className="text-[13px] font-mono font-bold text-zinc-200 tabular-nums w-12 text-right">{o.pct.toFixed(0)}%</span>
-                    <span className={`text-[11px] font-mono tabular-nums w-14 text-right ${
+                    <span className="text-[13px] text-zinc-400 flex-1 truncate">{o.label}</span>
+                    <span className="text-[14px] font-mono font-bold text-zinc-200 tabular-nums w-12 text-right">{o.pct.toFixed(0)}%</span>
+                    <span className={`text-[12px] font-mono tabular-nums w-14 text-right ${
                       o.change > 0 ? "text-emerald-400" : o.change < 0 ? "text-red-400" : "text-zinc-600"
                     }`}>
                       {o.change > 0 ? "↑" : o.change < 0 ? "↓" : "—"} {Math.abs(o.change).toFixed(1)}%
@@ -832,7 +832,7 @@ export default function HomeDashboard({
   fearGreed,
   globalData,
   topCoins: _topCoins,
-  hlWhales: _hlWhales,
+  hlWhales,
   news,
   youtubeItems,
   signals,
@@ -850,73 +850,114 @@ export default function HomeDashboard({
         globalData={globalData}
       />
 
-      {/* Desktop layout - fixed panels, zero gaps */}
+      {/* Desktop layout - 3-column fixed panels, zero white space */}
       <div className="hidden lg:flex flex-col flex-1 overflow-hidden">
-        {/* Top row 55% */}
-        <div className="flex border-b border-white/[0.06]" style={{ flex: "55 0 0" }}>
-          {/* Predictions 45% */}
-          <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "45%" }}>
-            <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-              <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">Prediction Markets</span>
-              <Link href={`/${lang}/markets`} className="text-[11px] text-blue-400">All →</Link>
+
+        {/* Top row - 50% height */}
+        <div className="flex border-b border-white/[0.06]" style={{ flex: "1 0 0", minHeight: 0 }}>
+
+          {/* PREDICTIONS - 40% */}
+          <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "40%" }}>
+            <div className="px-4 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+              <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
+                {ko ? "예측 시장" : "Prediction Markets"}
+              </span>
+              <Link href={`/${lang}/markets`} className="text-[12px] text-blue-400 hover:text-blue-300">All →</Link>
             </div>
             <div className="flex-1 overflow-y-auto">
               <PredictionCards events={polymarketEvents} lang={lang} />
             </div>
           </div>
-          {/* Feed 55% */}
-          <div className="flex flex-col overflow-hidden flex-1">
-            <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-              <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">Feed</span>
-              <Link href={`/${lang}/sns`} className="text-[11px] text-blue-400">All →</Link>
-            </div>
-            <div className="flex-1 overflow-y-auto">
-              <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
-            </div>
-          </div>
-        </div>
 
-        {/* Bottom row 45% */}
-        <div className="flex flex-1 overflow-hidden">
-          {/* AI Chat 35% */}
-          <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "35%" }}>
-            <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-              <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">{ko ? "AI 채팅" : "AI Chat"}</span>
-              <Link href={`/${lang}/chat`} className="text-[11px] text-blue-400">{ko ? "전체 →" : "Full →"}</Link>
+          {/* WHALE POSITIONS - 30% */}
+          <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "30%" }}>
+            <div className="px-4 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+              <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
+                {ko ? "웨일 포지션" : "Whale Positions"}
+              </span>
+              <Link href={`/${lang}/whales`} className="text-[12px] text-blue-400 hover:text-blue-300">All →</Link>
             </div>
-            <div className="flex-1 overflow-hidden">
-              <ChatWidget lang={lang} />
+            <div className="flex-1 overflow-y-auto p-2">
+              {hlWhales.length === 0 ? (
+                <div className="flex items-center justify-center h-full text-[12px] font-mono text-zinc-700">No whale data</div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {hlWhales.slice(0, 6).map((whale) => (
+                    <HLWhaleCard key={whale.address} whale={whale} />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-          {/* Signals 30% */}
-          <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "30%" }}>
-            <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-              <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">{ko ? "시그널" : "Signals"}</span>
-              <Link href={`/${lang}/quant`} className="text-[11px] text-blue-400">All →</Link>
+
+          {/* QUANT SIGNALS - 30% */}
+          <div className="flex flex-col overflow-hidden flex-1">
+            <div className="px-4 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+              <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
+                {ko ? "퀀트 시그널" : "Quant Signals"}
+              </span>
+              <Link href={`/${lang}/quant`} className="text-[12px] text-blue-400 hover:text-blue-300">All →</Link>
             </div>
             <div className="flex-1 overflow-y-auto">
               <SignalsWidget signals={signals} lang={lang} />
             </div>
           </div>
-          {/* Research 35% */}
-          <div className="flex flex-col overflow-hidden flex-1">
-            <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-              <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">{ko ? "리서치" : "Research"}</span>
-              <Link href={`/${lang}/quant`} className="text-[11px] text-blue-400">All →</Link>
+        </div>
+
+        {/* Bottom row - 50% height */}
+        <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
+
+          {/* NEWS FEED - 35% */}
+          <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "35%" }}>
+            <div className="px-4 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+              <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
+                {ko ? "뉴스 피드" : "News Feed"}
+              </span>
+              <Link href={`/${lang}/news`} className="text-[12px] text-blue-400 hover:text-blue-300">All →</Link>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
+            </div>
+          </div>
+
+          {/* MARKET RESEARCH - 40% */}
+          <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "40%" }}>
+            <div className="px-4 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+              <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
+                {ko ? "마켓 리서치" : "Market Research"}
+              </span>
+              <Link href={`/${lang}/quant`} className="text-[12px] text-blue-400 hover:text-blue-300">All →</Link>
             </div>
             <div className="flex-1 overflow-y-auto">
               <BlogCards posts={blogPosts} lang={lang} />
             </div>
           </div>
+
+          {/* AI CHAT - 25% */}
+          <div className="flex flex-col overflow-hidden flex-1">
+            <div className="px-4 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+              <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
+                {ko ? "AI 채팅" : "AI Chat"}
+              </span>
+              <Link href={`/${lang}/chat`} className="text-[12px] text-blue-400 hover:text-blue-300">
+                {ko ? "전체 →" : "Full →"}
+              </Link>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <ChatWidget lang={lang} />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Mobile: scrollable */}
+      {/* Mobile: simple scrollable stack */}
       <div className="lg:hidden flex-1 overflow-auto p-3 space-y-4">
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
           <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
-            <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">Prediction Markets</span>
-            <Link href={`/${lang}/markets`} className="text-[11px] text-blue-400">All →</Link>
+            <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
+              {ko ? "예측 시장" : "Prediction Markets"}
+            </span>
+            <Link href={`/${lang}/markets`} className="text-[12px] text-blue-400">All →</Link>
           </div>
           <div className="max-h-96 overflow-y-auto">
             <PredictionCards events={polymarketEvents} lang={lang} />
@@ -924,26 +965,25 @@ export default function HomeDashboard({
         </div>
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
           <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
-            <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">Feed</span>
-            <Link href={`/${lang}/sns`} className="text-[11px] text-blue-400">All →</Link>
+            <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
+              {ko ? "웨일 포지션" : "Whale Positions"}
+            </span>
+            <Link href={`/${lang}/whales`} className="text-[12px] text-blue-400">All →</Link>
           </div>
-          <div className="max-h-96 overflow-y-auto">
-            <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
-          </div>
-        </div>
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
-            <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">{ko ? "AI 채팅" : "AI Chat"}</span>
-            <Link href={`/${lang}/chat`} className="text-[11px] text-blue-400">{ko ? "전체 →" : "Full →"}</Link>
-          </div>
-          <div className="h-80 overflow-hidden">
-            <ChatWidget lang={lang} />
+          <div className="max-h-96 overflow-y-auto p-2">
+            <div className="grid grid-cols-2 gap-2">
+              {hlWhales.slice(0, 6).map((whale) => (
+                <HLWhaleCard key={whale.address} whale={whale} />
+              ))}
+            </div>
           </div>
         </div>
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
           <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
-            <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">{ko ? "시그널" : "Signals"}</span>
-            <Link href={`/${lang}/quant`} className="text-[11px] text-blue-400">All →</Link>
+            <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
+              {ko ? "퀀트 시그널" : "Quant Signals"}
+            </span>
+            <Link href={`/${lang}/quant`} className="text-[12px] text-blue-400">All →</Link>
           </div>
           <div className="max-h-96 overflow-y-auto">
             <SignalsWidget signals={signals} lang={lang} />
@@ -951,11 +991,35 @@ export default function HomeDashboard({
         </div>
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
           <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
-            <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">{ko ? "리서치" : "Research"}</span>
-            <Link href={`/${lang}/quant`} className="text-[11px] text-blue-400">All →</Link>
+            <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
+              {ko ? "뉴스 피드" : "News Feed"}
+            </span>
+            <Link href={`/${lang}/news`} className="text-[12px] text-blue-400">All →</Link>
+          </div>
+          <div className="max-h-96 overflow-y-auto">
+            <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
+          </div>
+        </div>
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
+            <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
+              {ko ? "마켓 리서치" : "Market Research"}
+            </span>
+            <Link href={`/${lang}/quant`} className="text-[12px] text-blue-400">All →</Link>
           </div>
           <div className="max-h-96 overflow-y-auto">
             <BlogCards posts={blogPosts} lang={lang} />
+          </div>
+        </div>
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
+            <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
+              {ko ? "AI 채팅" : "AI Chat"}
+            </span>
+            <Link href={`/${lang}/chat`} className="text-[12px] text-blue-400">{ko ? "전체 →" : "Full →"}</Link>
+          </div>
+          <div className="h-80 overflow-hidden">
+            <ChatWidget lang={lang} />
           </div>
         </div>
       </div>
