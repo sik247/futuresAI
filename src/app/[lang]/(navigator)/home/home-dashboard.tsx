@@ -40,6 +40,32 @@ type GlobalMarket = {
   };
 };
 
+type BlogPost = {
+  slug: string;
+  title: string;
+  titleKo: string;
+  coin: string;
+  symbol: string;
+  direction: "LONG" | "SHORT" | "NEUTRAL";
+  chartImage: string;
+  price: number;
+  rsi: number;
+  publishedAt: string;
+};
+
+type PolymarketEvent = {
+  id: string;
+  title: string;
+  image: string;
+  volume: number;
+  markets: {
+    question: string;
+    outcomePrices: string[];
+    outcomes: string[];
+    volume: number;
+  }[];
+};
+
 type SortKey = "rank" | "price" | "pct1h" | "pct24h" | "pct7d" | "marketCap";
 
 export type HomeDashboardProps = {
@@ -51,6 +77,8 @@ export type HomeDashboardProps = {
   topCoins: CoinMarket[];
   hlWhales: HLWalletData[];
   news: CryptoNewsItem[];
+  polymarketEvents: PolymarketEvent[];
+  blogPosts: BlogPost[];
 };
 
 /* ------------------------------------------------------------------ */
@@ -71,13 +99,6 @@ function fmtPrice(v: number) {
   return v.toFixed(6);
 }
 
-function fmtNum(v: number) {
-  if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(2)}M`;
-  if (v >= 1_000) return `${(v / 1_000).toFixed(1)}K`;
-  if (v >= 1) return v.toFixed(2);
-  return v.toFixed(4);
-}
-
 function pctColor(v: number | null) {
   if (v === null) return "text-zinc-600";
   return v >= 0 ? "text-emerald-400" : "text-red-400";
@@ -88,7 +109,7 @@ function pctFmt(v: number | null) {
   return `${v >= 0 ? "+" : ""}${v.toFixed(2)}%`;
 }
 
-function timeAgo(date: Date) {
+function timeAgo(date: Date | string) {
   const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
   if (seconds < 0) return "just now";
   if (seconds < 60) return `${seconds}s`;
@@ -330,7 +351,7 @@ function TopMoversTable({ coins }: { coins: CoinMarket[] }) {
 /* ------------------------------------------------------------------ */
 
 function HLWhaleCard({ whale }: { whale: HLWalletData }) {
-  const topPositions = whale.positions.slice(0, 4);
+  const topPositions = (whale.positions ?? []).slice(0, 4);
   return (
     <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-2.5 flex flex-col overflow-hidden cursor-default transition-colors duration-200 hover:border-white/[0.10]">
       {/* Header */}
@@ -386,52 +407,59 @@ function HLWhaleCard({ whale }: { whale: HLWalletData }) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  News Feed                                                          */
+/*  News Cards                                                         */
 /* ------------------------------------------------------------------ */
 
-function NewsFeed({ news }: { news: CryptoNewsItem[] }) {
+function NewsCards({ news, lang }: { news: CryptoNewsItem[]; lang: string }) {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
-        <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">Live News</span>
-        <span className="text-[9px] font-mono text-zinc-700">{news.length} stories</span>
+        <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">Latest News</span>
+        <Link href={`/${lang}/news`} className="text-[9px] font-mono text-blue-400 hover:text-blue-300 transition-colors">
+          All →
+        </Link>
       </div>
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto p-2 grid grid-cols-2 gap-2 auto-rows-min">
         {news.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-[10px] font-mono text-zinc-700">
+          <div className="col-span-2 flex items-center justify-center py-6 text-[10px] font-mono text-zinc-700">
             No news available
           </div>
         ) : (
-          news.map((item, i) => (
+          news.slice(0, 6).map((item, i) => (
             <a
               key={item.id ?? i}
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-start gap-2 px-3 py-2 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors cursor-pointer group"
+              className="group rounded-lg border border-white/[0.06] bg-white/[0.02] overflow-hidden hover:border-white/[0.12] hover:bg-white/[0.04] transition-all cursor-pointer"
             >
-              {/* Time */}
-              <span className="text-[9px] font-mono text-zinc-600 shrink-0 w-7 tabular-nums pt-0.5">
-                {timeAgo(item.publishedAt)}
-              </span>
-              {/* Source badge */}
-              <span className="text-[8px] font-mono bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1 py-0.5 rounded shrink-0 max-w-[64px] truncate">
-                {item.source}
-              </span>
-              {/* Title */}
-              <span className="text-[10px] font-mono text-zinc-300 group-hover:text-white transition-colors leading-snug flex-1 line-clamp-2 min-w-0">
-                {item.title}
-              </span>
-              {/* Link icon */}
-              <svg
-                className="w-3 h-3 text-zinc-700 group-hover:text-zinc-400 transition-colors shrink-0 mt-0.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
+              {/* Image */}
+              {item.imageUrl ? (
+                <div className="h-20 bg-zinc-900 overflow-hidden">
+                  <img
+                    src={item.imageUrl}
+                    alt=""
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+              ) : (
+                <div className="h-20 bg-gradient-to-br from-blue-950/40 to-zinc-900 flex items-center justify-center">
+                  <span className="text-xl font-bold text-white/[0.06]">{item.source[0]}</span>
+                </div>
+              )}
+              <div className="p-2">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className="text-[8px] font-mono bg-blue-500/10 text-blue-400 px-1 py-0.5 rounded truncate max-w-[64px]">
+                    {item.source}
+                  </span>
+                  <span className="text-[8px] font-mono text-zinc-600 shrink-0">
+                    {timeAgo(item.publishedAt)}
+                  </span>
+                </div>
+                <p className="text-[10px] text-zinc-300 group-hover:text-white leading-snug line-clamp-2 transition-colors">
+                  {item.title}
+                </p>
+              </div>
             </a>
           ))
         )}
@@ -441,125 +469,135 @@ function NewsFeed({ news }: { news: CryptoNewsItem[] }) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Quick Actions                                                      */
+/*  Blog Research Cards                                                */
 /* ------------------------------------------------------------------ */
 
-const QUICK_ACTIONS = [
-  {
-    title: "AI Quant Chat",
-    description: "Ask AI about any crypto",
-    path: "chat",
-    icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-      </svg>
-    ),
-    gradient: "from-purple-500/10 to-blue-500/5",
-    hoverGradient: "hover:from-purple-500/20 hover:to-blue-500/10",
-    glow: "hover:shadow-[0_0_20px_rgba(139,92,246,0.12)]",
-    iconColor: "text-purple-400",
-    borderHover: "hover:border-purple-500/30",
-  },
-  {
-    title: "Charts Terminal",
-    description: "Bloomberg-style charting",
-    path: "charts",
-    icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-      </svg>
-    ),
-    gradient: "from-cyan-500/10 to-teal-500/5",
-    hoverGradient: "hover:from-cyan-500/20 hover:to-teal-500/10",
-    glow: "hover:shadow-[0_0_20px_rgba(6,182,212,0.12)]",
-    iconColor: "text-cyan-400",
-    borderHover: "hover:border-cyan-500/30",
-  },
-  {
-    title: "Whale Tracker",
-    description: "Track whale positions",
-    path: "whales",
-    icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-    gradient: "from-emerald-500/10 to-green-500/5",
-    hoverGradient: "hover:from-emerald-500/20 hover:to-green-500/10",
-    glow: "hover:shadow-[0_0_20px_rgba(16,185,129,0.12)]",
-    iconColor: "text-emerald-400",
-    borderHover: "hover:border-emerald-500/30",
-  },
-  {
-    title: "Social Hub",
-    description: "News, X, YouTube feeds",
-    path: "sns",
-    icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-      </svg>
-    ),
-    gradient: "from-blue-500/10 to-indigo-500/5",
-    hoverGradient: "hover:from-blue-500/20 hover:to-indigo-500/10",
-    glow: "hover:shadow-[0_0_20px_rgba(59,130,246,0.12)]",
-    iconColor: "text-blue-400",
-    borderHover: "hover:border-blue-500/30",
-  },
-  {
-    title: "Quant Signals",
-    description: "RSI, MACD, AI signals",
-    path: "quant",
-    icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
-      </svg>
-    ),
-    gradient: "from-amber-500/10 to-orange-500/5",
-    hoverGradient: "hover:from-amber-500/20 hover:to-orange-500/10",
-    glow: "hover:shadow-[0_0_20px_rgba(245,158,11,0.12)]",
-    iconColor: "text-amber-400",
-    borderHover: "hover:border-amber-500/30",
-  },
-  {
-    title: "Premium",
-    description: "Unlock full access",
-    path: "pricing",
-    icon: (
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
-      </svg>
-    ),
-    gradient: "from-rose-500/10 to-pink-500/5",
-    hoverGradient: "hover:from-rose-500/20 hover:to-pink-500/10",
-    glow: "hover:shadow-[0_0_20px_rgba(244,63,94,0.12)]",
-    iconColor: "text-rose-400",
-    borderHover: "hover:border-rose-500/30",
-  },
-];
-
-function QuickActions({ lang }: { lang: string }) {
+function BlogCards({ posts, lang }: { posts: BlogPost[]; lang: string }) {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
-        <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">Quick Access</span>
+        <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">Market Research</span>
+        <Link href={`/${lang}/quant`} className="text-[9px] font-mono text-blue-400 hover:text-blue-300 transition-colors">
+          All →
+        </Link>
       </div>
-      <div className="flex-1 overflow-hidden p-2">
-        <div className="grid grid-cols-2 gap-2 h-full">
-          {QUICK_ACTIONS.map((action) => (
+      <div className="flex-1 overflow-y-auto p-2 space-y-2">
+        {posts.length === 0 ? (
+          <div className="flex items-center justify-center py-6 text-[10px] font-mono text-zinc-700">
+            No research posts
+          </div>
+        ) : (
+          posts.slice(0, 5).map((post) => (
             <Link
-              key={action.path}
-              href={`/${lang}/${action.path}`}
-              className={`group flex flex-col justify-between p-3 rounded-lg border border-white/[0.06] bg-gradient-to-br ${action.gradient} ${action.hoverGradient} ${action.glow} ${action.borderHover} transition-all duration-200 cursor-pointer`}
+              key={post.slug}
+              href={`/${lang}/quant/blog/${post.slug}`}
+              className="group flex gap-2.5 p-2 rounded-lg border border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12] hover:bg-white/[0.04] transition-all cursor-pointer"
             >
-              <div className={`${action.iconColor} mb-2`}>{action.icon}</div>
-              <div>
-                <div className="text-[10px] font-mono font-semibold text-white">{action.title}</div>
-                <div className="text-[9px] font-mono text-zinc-500 mt-0.5">{action.description}</div>
+              {/* Chart thumbnail */}
+              <div className="w-16 h-12 rounded bg-zinc-900 overflow-hidden shrink-0">
+                <img
+                  src={post.chartImage}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
+                  <span className="text-[8px] font-mono font-bold text-white bg-white/[0.08] px-1 py-0.5 rounded">
+                    {post.symbol}
+                  </span>
+                  <span
+                    className={`text-[8px] font-mono font-bold px-1 py-0.5 rounded ${
+                      post.direction === "LONG"
+                        ? "bg-emerald-500/15 text-emerald-400"
+                        : post.direction === "SHORT"
+                        ? "bg-red-500/15 text-red-400"
+                        : "bg-zinc-500/15 text-zinc-400"
+                    }`}
+                  >
+                    {post.direction}
+                  </span>
+                  <span className="text-[8px] font-mono text-zinc-600">RSI {post.rsi}</span>
+                </div>
+                <p className="text-[10px] text-zinc-300 group-hover:text-white leading-snug line-clamp-2 transition-colors">
+                  {lang === "ko" ? post.titleKo : post.title}
+                </p>
               </div>
             </Link>
-          ))}
-        </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Prediction Cards (Polymarket)                                      */
+/* ------------------------------------------------------------------ */
+
+function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: string }) {
+  // Filter to interesting predictions (not 0%/100% or near-certain)
+  const interesting = events
+    .filter((e) => {
+      if (!e.markets || e.markets.length === 0) return false;
+      const m = e.markets[0];
+      if (!m.outcomePrices || m.outcomePrices.length < 2) return false;
+      const yesPrice = parseFloat(m.outcomePrices[0] || "0");
+      const noPrice = parseFloat(m.outcomePrices[1] || "0");
+      return yesPrice > 0.05 && yesPrice < 0.95 && noPrice > 0.05 && noPrice < 0.95;
+    })
+    .slice(0, 8);
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
+        <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">Predictions</span>
+        <Link href={`/${lang}/markets`} className="text-[9px] font-mono text-blue-400 hover:text-blue-300 transition-colors">
+          All →
+        </Link>
+      </div>
+      <div className="flex-1 overflow-y-auto">
+        {interesting.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-[10px] font-mono text-zinc-700">
+            No active predictions
+          </div>
+        ) : (
+          interesting.map((event) => {
+            const m = event.markets[0];
+            const yesPrice = parseFloat(m.outcomePrices[0] || "0");
+            return (
+              <div
+                key={event.id}
+                className="flex items-center gap-2 px-3 py-2 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
+              >
+                {event.image && (
+                  <img
+                    src={event.image}
+                    alt=""
+                    className="w-6 h-6 rounded-full shrink-0 object-cover"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-zinc-300 truncate">{event.title}</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-[9px] font-mono text-emerald-400 tabular-nums">
+                    Yes {(yesPrice * 100).toFixed(0)}%
+                  </span>
+                  <div className="w-16 h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-emerald-500"
+                      style={{ width: `${yesPrice * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-[9px] font-mono text-red-400 tabular-nums">
+                    No {((1 - yesPrice) * 100).toFixed(0)}%
+                  </span>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );
@@ -578,8 +616,10 @@ export default function HomeDashboard({
   topCoins,
   hlWhales,
   news,
+  polymarketEvents,
+  blogPosts,
 }: HomeDashboardProps) {
-  const [mobileTab, setMobileTab] = useState<"market" | "whales" | "news">("market");
+  const [mobileTab, setMobileTab] = useState<"market" | "whales" | "news" | "research" | "predictions">("market");
 
   return (
     <div className="bg-zinc-950 font-mono flex flex-col" style={{ height: "calc(100vh - 64px)" }}>
@@ -592,12 +632,12 @@ export default function HomeDashboard({
       />
 
       {/* Mobile tab bar */}
-      <div className="flex lg:hidden border-b border-white/[0.06] bg-zinc-900/60 shrink-0">
-        {(["market", "whales", "news"] as const).map((tab) => (
+      <div className="flex lg:hidden border-b border-white/[0.06] bg-zinc-900/60 shrink-0 overflow-x-auto">
+        {(["market", "whales", "news", "research", "predictions"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setMobileTab(tab)}
-            className={`flex-1 py-2 text-[10px] font-mono uppercase tracking-[0.1em] transition-colors cursor-pointer ${
+            className={`flex-shrink-0 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.1em] transition-colors cursor-pointer ${
               mobileTab === tab
                 ? "text-white border-b-2 border-emerald-500"
                 : "text-zinc-600 hover:text-zinc-400"
@@ -610,7 +650,7 @@ export default function HomeDashboard({
 
       {/* ── Desktop: Two-row layout ─────────────────────────────── */}
       <div className="hidden lg:flex flex-col flex-1 overflow-hidden min-h-0">
-        {/* Top row (60%) */}
+        {/* Top row (60%) — coin table + whale positions */}
         <div
           className="flex border-b border-white/[0.06] overflow-hidden shrink-0"
           style={{ height: "60%" }}
@@ -626,7 +666,7 @@ export default function HomeDashboard({
                 Whale Positions
               </span>
               <span className="text-[9px] font-mono text-zinc-700">
-                {hlWhales.reduce((s, w) => s + w.positions.length, 0)} open
+                {hlWhales.reduce((s, w) => s + (w.positions?.length ?? 0), 0)} open
               </span>
             </div>
             {hlWhales.length === 0 ? (
@@ -643,15 +683,19 @@ export default function HomeDashboard({
           </div>
         </div>
 
-        {/* Bottom row (40%) */}
+        {/* Bottom row (40%) — 3 equal columns: News | Research | Predictions */}
         <div className="flex flex-1 overflow-hidden min-h-0">
-          {/* Left: News Feed (55%) */}
-          <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "55%" }}>
-            <NewsFeed news={news} />
+          {/* News Cards (1/3) */}
+          <div className="border-r border-white/[0.06] overflow-hidden flex flex-col flex-1">
+            <NewsCards news={news} lang={lang} />
           </div>
-          {/* Right: Quick Actions (45%) */}
+          {/* Blog Research Cards (1/3) */}
+          <div className="border-r border-white/[0.06] overflow-hidden flex flex-col flex-1">
+            <BlogCards posts={blogPosts} lang={lang} />
+          </div>
+          {/* Prediction Cards (1/3) */}
           <div className="overflow-hidden flex flex-col flex-1">
-            <QuickActions lang={lang} />
+            <PredictionCards events={polymarketEvents} lang={lang} />
           </div>
         </div>
       </div>
@@ -670,7 +714,7 @@ export default function HomeDashboard({
                 Whale Positions
               </span>
               <span className="text-[9px] font-mono text-zinc-700">
-                {hlWhales.reduce((s, w) => s + w.positions.length, 0)} open
+                {hlWhales.reduce((s, w) => s + (w.positions?.length ?? 0), 0)} open
               </span>
             </div>
             {hlWhales.length === 0 ? (
@@ -688,7 +732,17 @@ export default function HomeDashboard({
         )}
         {mobileTab === "news" && (
           <div className="h-full overflow-hidden flex flex-col">
-            <NewsFeed news={news} />
+            <NewsCards news={news} lang={lang} />
+          </div>
+        )}
+        {mobileTab === "research" && (
+          <div className="h-full overflow-hidden flex flex-col">
+            <BlogCards posts={blogPosts} lang={lang} />
+          </div>
+        )}
+        {mobileTab === "predictions" && (
+          <div className="h-full overflow-hidden flex flex-col">
+            <PredictionCards events={polymarketEvents} lang={lang} />
           </div>
         )}
       </div>
