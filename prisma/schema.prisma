@@ -41,6 +41,7 @@ model User {
   chatEnabled      Boolean           @default(false)
   isPremium        Boolean           @default(false)
   blogArticles     BlogArticle[]
+  payments         Payment[]
 }
 
 model Account {
@@ -457,4 +458,28 @@ model ChatMessage {
 
   @@index([sessionId])
   @@index([userId])
+}
+
+enum PaymentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
+model Payment {
+  id         String        @id @default(cuid())
+  userId     String
+  user       User          @relation(fields: [userId], references: [id])
+  amount     Float         @default(99)
+  txid       String        @unique
+  network    String        @default("TRC20")
+  status     PaymentStatus @default(PENDING)
+  verifiedAt DateTime?     @db.Timestamptz()
+  adminNote  String?
+  createdAt  DateTime      @default(now()) @db.Timestamptz()
+  updatedAt  DateTime      @updatedAt @db.Timestamptz()
+
+  @@index([userId])
+  @@index([status])
 }

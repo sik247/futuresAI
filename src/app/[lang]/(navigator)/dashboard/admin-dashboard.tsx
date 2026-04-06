@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getPendingRequests, getAllRequests, approveRequest, rejectRequest, getPendingAccountLinks, approveAccountLink, rejectAccountLink } from "./actions";
+import { getPendingRequests, getAllRequests, approveRequest, rejectRequest, getPendingAccountLinks, approveAccountLink, rejectAccountLink, getAllPayments, approvePayment, rejectPayment } from "./actions";
 
 interface ExchangeData {
   exchange: string;
@@ -48,6 +48,18 @@ interface ChartAnalysisRequest {
   createdAt: string;
   chargedAt: string | null;
   user: { name: string; email: string; nickname: string };
+}
+
+interface PremiumPayment {
+  id: string;
+  txid: string;
+  amount: number;
+  network: string;
+  status: "PENDING" | "VERIFIED" | "REJECTED" | "EXPIRED";
+  verifiedAt: string | null;
+  adminNote: string | null;
+  createdAt: string;
+  user: { id: string; name: string; email: string; nickname: string } | null;
 }
 
 /* ------------------------------------------------------------------ */
@@ -125,6 +137,8 @@ export default function AdminDashboard() {
   const [pendingAccounts, setPendingAccounts] = useState<any[]>([]);
   const [userPaybacks, setUserPaybacks] = useState<any[]>([]);
   const [paybackSummary, setPaybackSummary] = useState<any>(null);
+  const [premiumPayments, setPremiumPayments] = useState<PremiumPayment[]>([]);
+  const [paymentFilter, setPaymentFilter] = useState<"ALL" | "PENDING" | "VERIFIED" | "REJECTED">("ALL");
 
   const fetchUserPaybacks = useCallback(async () => {
     try {
@@ -134,6 +148,13 @@ export default function AdminDashboard() {
         setUserPaybacks(data.accounts || []);
         setPaybackSummary(data.summary || null);
       }
+    } catch { /* keep previous */ }
+  }, []);
+
+  const fetchPremiumPayments = useCallback(async () => {
+    try {
+      const data = await getAllPayments();
+      setPremiumPayments(data as unknown as PremiumPayment[]);
     } catch { /* keep previous */ }
   }, []);
 
@@ -178,7 +199,8 @@ export default function AdminDashboard() {
     fetchChartAnalyses();
     fetchPendingAccounts();
     fetchUserPaybacks();
-  }, [fetchData, fetchRequests, fetchChartAnalyses, fetchPendingAccounts, fetchUserPaybacks]);
+    fetchPremiumPayments();
+  }, [fetchData, fetchRequests, fetchChartAnalyses, fetchPendingAccounts, fetchUserPaybacks, fetchPremiumPayments]);
 
   async function handleApprove(id: string) {
     setActionLoading(id);
@@ -206,6 +228,22 @@ export default function AdminDashboard() {
       });
       if (res.ok) await fetchChartAnalyses();
     } catch { /* ignore */ }
+    setActionLoading(null);
+  }
+
+  async function handleApprovePayment(id: string) {
+    setActionLoading(id);
+    const result = await approvePayment(id);
+    if (result.success) await fetchPremiumPayments();
+    setActionLoading(null);
+  }
+
+  async function handleRejectPayment(id: string) {
+    const note = prompt("Rejection reason:");
+    if (!note) return;
+    setActionLoading(id);
+    const result = await rejectPayment(id, note);
+    if (result.success) await fetchPremiumPayments();
     setActionLoading(null);
   }
 
@@ -244,6 +282,12 @@ export default function AdminDashboard() {
     ? chartAnalyses
     : chartAnalyses.filter((a) => a.status === chartFilter);
 
+  const filteredPayments = paymentFilter === "ALL"
+    ? premiumPayments
+    : premiumPayments.filter((p) => p.status === paymentFilter);
+
+  const pendingPaymentsCount = premiumPayments.filter((p) => p.status === "PENDING").length;
+
   const pendingCount = requests.filter((r) => r.status === "PENDING").length;
   const pendingAmount = requests.filter((r) => r.status === "PENDING").reduce((s, r) => s + r.amount, 0);
   const paidTotal = requests.filter((r) => r.status === "SUCCESS").reduce((s, r) => s + r.amount, 0);
@@ -267,7 +311,7 @@ export default function AdminDashboard() {
               {testLoading ? "Creating..." : "Test Payback"}
             </button>
             <button
-              onClick={() => { fetchData(); fetchRequests(); fetchChartAnalyses(); fetchPendingAccounts(); fetchUserPaybacks(); }}
+              onClick={() => { fetchData(); fetchRequests(); fetchChartAnalyses(); fetchPendingAccounts(); fetchUserPaybacks(); fetchPremiumPayments(); }}
               disabled={loading}
               className="px-4 py-2 rounded-xl border border-white/[0.06] bg-white/[0.03] text-sm font-medium text-zinc-300 hover:border-white/[0.12] hover:bg-white/[0.05] transition-all disabled:opacity-50"
             >
@@ -277,7 +321,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Overview Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-10">
           <StatCard
             label="Total Payback Owed"
             value={`$${data?.summary.grandTotal.toFixed(2) || "0.00"}`}
@@ -294,6 +338,12 @@ export default function AdminDashboard() {
             label="Total Paid Out"
             value={`$${paidTotal.toFixed(2)}`}
             sub={`${requests.filter(r => r.status === "SUCCESS").length} withdrawals`}
+          />
+          <StatCard
+            label="Premium Payments"
+            value={String(premiumPayments.length)}
+            sub={pendingPaymentsCount > 0 ? `${pendingPaymentsCount} pending review` : "All reviewed"}
+            accent={pendingPaymentsCount > 0}
           />
           <StatCard
             label="Chart Analyses"
@@ -705,6 +755,111 @@ export default function AdminDashboard() {
                             </div>
                           ) : a.chargedAt ? (
                             <span className="text-xs text-emerald-500">Charged {new Date(a.chargedAt).toLocaleDateString()}</span>
+                          ) : (
+                            <span className="text-xs text-zinc-600">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ============================================================ */}
+        {/*  PREMIUM PAYMENTS                                            */}
+        {/* ============================================================ */}
+        <div className="mb-10">
+          <SectionHeader
+            title="Premium Payments"
+            subtitle="USDT TRC20 payment submissions"
+            color={pendingPaymentsCount > 0 ? "bg-blue-500/70" : "bg-indigo-500/70"}
+            badge={pendingPaymentsCount > 0 ? `${pendingPaymentsCount} pending` : `${premiumPayments.length} total`}
+          >
+            <div className="flex gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+              {(["ALL", "PENDING", "VERIFIED", "REJECTED"] as const).map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setPaymentFilter(f)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    paymentFilter === f
+                      ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
+                      : "text-zinc-500 hover:text-zinc-300"
+                  }`}
+                >
+                  {f === "ALL" ? "All" : f === "PENDING" ? "Pending" : f === "VERIFIED" ? "Verified" : "Rejected"}
+                </button>
+              ))}
+            </div>
+          </SectionHeader>
+
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] overflow-hidden">
+            {filteredPayments.length === 0 ? (
+              <div className="flex items-center justify-center py-16 text-zinc-600 text-sm">
+                No premium payments found
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/[0.06]">
+                      {["User", "TXID", "Amount", "Status", "Date", "Actions"].map((h) => (
+                        <th key={h} className="px-5 py-3 text-left text-[10px] font-mono text-zinc-500 uppercase tracking-wider">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredPayments.map((p) => (
+                      <tr key={p.id} className={`border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors ${p.status === "PENDING" ? "bg-blue-500/[0.02]" : ""}`}>
+                        <td className="px-5 py-4">
+                          <p className="font-medium text-white text-sm">{p.user?.name || "Unknown"}</p>
+                          <p className="text-[11px] text-zinc-500">{p.user?.email}</p>
+                        </td>
+                        <td className="px-5 py-4">
+                          <a
+                            href={`https://tronscan.org/#/transaction/${p.txid}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-mono text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                            title={p.txid}
+                          >
+                            {p.txid.slice(0, 12)}...{p.txid.slice(-8)}
+                          </a>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className="font-mono font-semibold text-emerald-400">${p.amount.toFixed(2)}</span>
+                          <span className="text-[10px] text-zinc-600 ml-1">{p.network}</span>
+                        </td>
+                        <td className="px-5 py-4"><StatusBadge status={p.status} /></td>
+                        <td className="px-5 py-4 text-zinc-500 text-xs">
+                          {new Date(p.createdAt).toLocaleDateString()}
+                          {p.verifiedAt && (
+                            <p className="text-emerald-500 text-[10px]">Verified {new Date(p.verifiedAt).toLocaleDateString()}</p>
+                          )}
+                          {p.adminNote && (
+                            <p className="text-red-400/70 text-[10px] max-w-[150px] truncate" title={p.adminNote}>{p.adminNote}</p>
+                          )}
+                        </td>
+                        <td className="px-5 py-4">
+                          {p.status === "PENDING" ? (
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleApprovePayment(p.id)}
+                                disabled={actionLoading === p.id}
+                                className="px-3 py-1.5 rounded-lg bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 text-xs font-medium hover:bg-emerald-600/30 transition-colors disabled:opacity-50"
+                              >
+                                {actionLoading === p.id ? "..." : "Approve"}
+                              </button>
+                              <button
+                                onClick={() => handleRejectPayment(p.id)}
+                                disabled={actionLoading === p.id}
+                                className="px-3 py-1.5 rounded-lg bg-red-600/20 border border-red-500/30 text-red-400 text-xs font-medium hover:bg-red-600/30 transition-colors disabled:opacity-50"
+                              >
+                                Reject
+                              </button>
+                            </div>
                           ) : (
                             <span className="text-xs text-zinc-600">—</span>
                           )}

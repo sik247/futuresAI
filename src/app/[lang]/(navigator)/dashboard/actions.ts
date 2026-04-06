@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import { paybackRequestService } from "@/lib/services/payback/payback-request.service";
 import prisma from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 async function verifyAdmin() {
   const session = await auth();
@@ -92,4 +93,68 @@ export async function rejectAccountLink(id: string) {
     data: { status: "INACTIVE" },
   });
   return { success: true };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Premium Payment Actions                                             */
+/* ------------------------------------------------------------------ */
+
+export async function getPendingPayments() {
+  await verifyAdmin();
+  return prisma.payment.findMany({
+    where: { status: "PENDING" },
+    include: {
+      user: { select: { id: true, name: true, email: true, nickname: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function getAllPayments() {
+  await verifyAdmin();
+  return prisma.payment.findMany({
+    include: {
+      user: { select: { id: true, name: true, email: true, nickname: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function approvePayment(id: string) {
+  await verifyAdmin();
+  try {
+    const payment = await prisma.payment.findUnique({ where: { id } });
+    if (!payment) return { success: false, error: "Payment not found" };
+
+    await prisma.$transaction([
+      prisma.payment.update({
+        where: { id },
+        data: { status: "VERIFIED", verifiedAt: new Date() },
+      }),
+      prisma.user.update({
+        where: { id: payment.userId },
+        data: { isPremium: true, chatEnabled: true },
+      }),
+    ]);
+    revalidatePath("/[lang]/(navigator)/dashboard", "page");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to approve payment:", error);
+    return { success: false, error: "Failed to approve payment" };
+  }
+}
+
+export async function rejectPayment(id: string, note: string) {
+  await verifyAdmin();
+  try {
+    await prisma.payment.update({
+      where: { id },
+      data: { status: "REJECTED", adminNote: note },
+    });
+    revalidatePath("/[lang]/(navigator)/dashboard", "page");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to reject payment:", error);
+    return { success: false, error: "Failed to reject payment" };
+  }
 }

@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import PaymentSection from "./payment-section";
 
 export const metadata: Metadata = {
   title: "Pricing - FuturesAI",
@@ -51,6 +52,7 @@ export default function PricingPage({
   params: { lang: string };
 }) {
   const ko = lang === "ko";
+  const walletAddress = process.env.PAYMENT_WALLET_ADDRESS ?? "";
 
   return (
     <div className="bg-zinc-950 font-mono min-h-screen">
@@ -128,15 +130,9 @@ export default function PricingPage({
             </div>
 
             <div className="mt-6 pt-5 border-t border-blue-500/10 relative">
-              <a
-                href="https://t.me/FuturesAIAdminbot?start=premium"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full text-center py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-mono uppercase tracking-[0.15em] transition-colors duration-200 cursor-pointer shadow-lg shadow-blue-500/20"
-              >
-                {ko ? "텔레그램으로 구독하기" : "Subscribe via Telegram"}
-              </a>
-              <p className="text-center text-[9px] text-zinc-600 mt-2">
+              {/* Payment section (client component handles auth state) */}
+              <PaymentSection walletAddress={walletAddress} ko={ko} />
+              <p className="text-center text-[9px] text-zinc-600 mt-3">
                 {ko ? "USDT 결제 · 즉시 활성화 · 언제든 취소" : "USDT payment · Instant activation · Cancel anytime"}
               </p>
             </div>
@@ -155,8 +151,8 @@ export default function PricingPage({
               </p>
               <p className="text-[11px] text-zinc-500 leading-relaxed">
                 {ko
-                  ? "텔레그램으로 연락 주시면 USDT 지갑 주소를 안내해 드립니다. 결제 확인 후 즉시 프리미엄이 활성화됩니다."
-                  : "Contact us on Telegram and we'll provide a USDT wallet address. Premium activates immediately after payment confirmation."}
+                  ? "위 주소로 99 USDT (TRC20)를 전송한 후 거래 ID를 제출해 주세요. 자동으로 확인됩니다."
+                  : "Send 99 USDT (TRC20) to the address above, then submit your transaction ID. It auto-verifies instantly."}
               </p>
             </div>
             <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4">
