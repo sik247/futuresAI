@@ -77,4 +77,15 @@ export const EXCHANGES: ExchangeInfo[] = [
     features: ["Global Exchange", "Staking Rewards"],
     referralLink: "https://www.htx.com.gt/invite/en-us/1h?invite_code=miqkc223",
   },
+  {
+    id: "edgex",
+    name: "EdgeX",
+    logo: "/icons/exchange/edgex.png",
+    makerFee: 0.009,
+    takerFee: 0.025,
+    paybackRate: 0.30,
+    color: "#7c3aed",
+    features: ["DEX", "Hyperliquid Alternative"],
+    referralLink: "https://pro.edgex.exchange/en-US/referral/FUTURESAI",
+  },
 ];

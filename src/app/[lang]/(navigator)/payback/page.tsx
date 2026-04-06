@@ -20,6 +20,7 @@ const EXCHANGES = [
   { name: "Gate.io", paybackRate: 75, makerFee: 0.02, takerFee: 0.05, link: "https://www.gate.com/share/FuturesAI", logo: "/icons/exchange/gate.png" },
   { name: "HTX", paybackRate: 54, makerFee: 0.02, takerFee: 0.05, link: "https://www.htx.com.gt/invite/en-us/1h?invite_code=miqkc223", logo: "/icons/exchange/htx.png" },
   { name: "OKX", paybackRate: 20, makerFee: 0.02, takerFee: 0.05, link: "https://www.okx.com/join/futuresai", logo: "/icons/exchange/okx.png" },
+  { name: "EdgeX", paybackRate: 30, makerFee: 0.009, takerFee: 0.025, link: "https://pro.edgex.exchange/en-US/referral/FUTURESAI", logo: "/icons/exchange/edgex.png" },
 ];
 
 export default async function PaybackPage({
@@ -274,7 +275,7 @@ export default async function PaybackPage({
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-xs font-mono text-zinc-500 bg-white/[0.04] px-2 py-0.5 rounded">CEX</span>
+                        <span className={`text-xs font-mono px-2 py-0.5 rounded ${ex.name === "EdgeX" ? "text-purple-400 bg-purple-500/10" : "text-zinc-500 bg-white/[0.04]"}`}>{ex.name === "EdgeX" ? "DEX" : "CEX"}</span>
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span className={`text-sm font-bold font-mono ${
@@ -292,6 +293,7 @@ export default async function PaybackPage({
                            ex.name === "BingX" ? (ko ? "카피트레이딩" : "Copy Trading") :
                            ex.name === "Gate.io" ? (ko ? "최고 페이백" : "Highest Payback") :
                            ex.name === "HTX" ? (ko ? "글로벌" : "Global") :
+                           ex.name === "EdgeX" ? (ko ? "탈중앙 DEX" : "Decentralized DEX") :
                            ko ? "DEX 통합" : "DEX Aggregator"}
                         </span>
                       </td>
