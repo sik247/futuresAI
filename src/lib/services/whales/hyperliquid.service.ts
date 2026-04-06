@@ -29,12 +29,58 @@ export interface HLWalletData {
   }[];
 }
 
-const HL_WHALES = [
+// Static whale list — well-known tracked wallets
+const HL_WHALES_STATIC = [
   { name: "Mega Whale", address: "0xfc667adba8d4837586078f4fdcdc29804337ca06" },
   { name: "Crocodile Whale", address: "0x5b5d51203a0f9079f8aeb098a6523a13f298c060" },
   { name: "Machi Big Brother", address: "0x020ca66c30bec2c4fe3861a94e4db4a498a35872" },
   { name: "BTC 40x Shorter", address: "0xec326a384ae965647d87e1f85db46d2efa15ae82" },
+  { name: "HyperLion", address: "0x30aabe810c91cb667be3590fb33359104fa5be8e" },
 ];
+
+// Cache for dynamic leaderboard wallets
+let leaderboardCache: { name: string; address: string }[] = [];
+let leaderboardLastFetch = 0;
+const LEADERBOARD_TTL = 10 * 60 * 1000; // 10 min
+
+async function fetchHLLeaderboard(): Promise<{ name: string; address: string }[]> {
+  if (Date.now() - leaderboardLastFetch < LEADERBOARD_TTL && leaderboardCache.length > 0) {
+    return leaderboardCache;
+  }
+  try {
+    // HL leaderboard API — get top PnL traders
+    const res = await fetch(HL_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "leaderboard", timeWindow: "day" }),
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const rows = data?.leaderboardRows || [];
+    // Top 10 by account value, skip known wallets
+    const known = new Set(HL_WHALES_STATIC.map((w) => w.address.toLowerCase()));
+    const top = rows
+      .filter((r: any) => !known.has((r.ethAddress || "").toLowerCase()) && parseFloat(r.accountValue || "0") > 100000)
+      .sort((a: any, b: any) => parseFloat(b.accountValue || "0") - parseFloat(a.accountValue || "0"))
+      .slice(0, 8)
+      .map((r: any, i: number) => ({
+        name: r.displayName || `Top Trader #${i + 1}`,
+        address: r.ethAddress,
+      }));
+    leaderboardCache = top;
+    leaderboardLastFetch = Date.now();
+    return top;
+  } catch {
+    return leaderboardCache; // return stale cache on error
+  }
+}
+
+// Combined whale list: static + dynamic leaderboard
+async function getHL_WHALES(): Promise<{ name: string; address: string }[]> {
+  const dynamic = await fetchHLLeaderboard();
+  return [...HL_WHALES_STATIC, ...dynamic];
+}
 
 // Minimum account value to display (filter out empty/tiny wallets)
 const MIN_ACCOUNT_VALUE = 1000;
@@ -132,13 +178,15 @@ export async function fetchHLWalletData(address: string, name: string): Promise<
 }
 
 export async function fetchAllHLWhales(): Promise<HLWalletData[]> {
+  const whales = await getHL_WHALES();
   const results = await Promise.allSettled(
-    HL_WHALES.map(w => fetchHLWalletData(w.address, w.name))
+    whales.map(w => fetchHLWalletData(w.address, w.name))
   );
   return results
     .filter((r): r is PromiseFulfilledResult<HLWalletData | null> => r.status === "fulfilled" && r.value !== null)
     .map(r => r.value!)
-    .filter(w => w.accountValue >= MIN_ACCOUNT_VALUE); // Only show major wallets
+    .filter(w => w.accountValue >= MIN_ACCOUNT_VALUE)
+    .sort((a, b) => b.accountValue - a.accountValue); // Largest accounts first
 }
 
 /* ── Recent fills (trades) for a whale ─────────────────────────────── */
@@ -181,8 +229,9 @@ async function fetchHLFills(address: string): Promise<HLFill[]> {
 }
 
 export async function fetchAllHLTrades(): Promise<HLWhaleTrade[]> {
+  const whales = await getHL_WHALES();
   const results = await Promise.allSettled(
-    HL_WHALES.map(async (w) => {
+    whales.map(async (w) => {
       const fills = await fetchHLFills(w.address);
       return fills.map((f) => ({
         whale: w.name,
@@ -204,4 +253,70 @@ export async function fetchAllHLTrades(): Promise<HLWhaleTrade[]> {
 
   // Sort by time descending, take top 100
   return allTrades.sort((a, b) => b.time - a.time).slice(0, 100);
+}
+
+/* ── Movement Detection — significant whale activity ──────────────── */
+
+export interface WhaleMovement {
+  whale: string;
+  type: "NEW_POSITION" | "LARGE_TRADE" | "POSITION_CLOSED" | "LIQUIDATION_RISK";
+  coin: string;
+  direction: "LONG" | "SHORT";
+  notional: number;
+  details: string;
+  timestamp: number;
+}
+
+const LARGE_TRADE_THRESHOLD = 50000; // $50K+ notional = significant
+const LIQUIDATION_RISK_THRESHOLD = 0.15; // within 15% of liquidation price
+
+export async function detectWhaleMovements(): Promise<WhaleMovement[]> {
+  const movements: WhaleMovement[] = [];
+  const whales = await getHL_WHALES();
+
+  const [walletsResult, tradesResult] = await Promise.allSettled([
+    fetchAllHLWhales(),
+    fetchAllHLTrades(),
+  ]);
+
+  const wallets = walletsResult.status === "fulfilled" ? walletsResult.value : [];
+  const trades = tradesResult.status === "fulfilled" ? tradesResult.value : [];
+
+  // 1. Large trades in the last 30 minutes
+  const thirtyMinAgo = Date.now() - 30 * 60 * 1000;
+  for (const trade of trades) {
+    if (trade.time > thirtyMinAgo && trade.notional >= LARGE_TRADE_THRESHOLD) {
+      movements.push({
+        whale: trade.whale,
+        type: "LARGE_TRADE",
+        coin: trade.coin,
+        direction: trade.side === "BUY" ? "LONG" : "SHORT",
+        notional: trade.notional,
+        details: `${trade.side} ${trade.coin} $${(trade.notional / 1000).toFixed(1)}K at $${trade.price.toLocaleString()}`,
+        timestamp: trade.time,
+      });
+    }
+  }
+
+  // 2. Positions near liquidation
+  for (const wallet of wallets) {
+    for (const pos of wallet.positions) {
+      if (pos.liquidationPrice && pos.liquidationPrice > 0) {
+        const distanceToLiq = Math.abs(pos.entryPrice - pos.liquidationPrice) / pos.entryPrice;
+        if (distanceToLiq < LIQUIDATION_RISK_THRESHOLD && pos.marginUsed > 10000) {
+          movements.push({
+            whale: wallet.name,
+            type: "LIQUIDATION_RISK",
+            coin: pos.coin,
+            direction: pos.direction,
+            notional: pos.size * pos.entryPrice,
+            details: `${pos.direction} ${pos.coin} at ${pos.leverage}x — liq price $${pos.liquidationPrice.toLocaleString()} (${(distanceToLiq * 100).toFixed(1)}% away)`,
+            timestamp: Date.now(),
+          });
+        }
+      }
+    }
+  }
+
+  return movements.sort((a, b) => b.timestamp - a.timestamp);
 }
