@@ -5,6 +5,7 @@ import { fetchYouTubeFeeds } from "@/lib/services/social/youtube-feed.service";
 import { fetchAllHLWhales } from "@/lib/services/whales/hyperliquid.service";
 import { fetchMarketSignals } from "@/lib/services/signals/signals.service";
 import { QUANT_BLOG_POSTS } from "@/lib/data/quant-blog-posts";
+import { translateBatch } from "@/lib/services/social/korean-translator.service";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -106,6 +107,42 @@ export default async function HomePage({
       ? polymarketR.value
       : [];
 
+  // Translate news to Korean if needed
+  const isKo = lang === "ko";
+  let translatedNews = news.slice(0, 12);
+  if (isKo && translatedNews.length > 0) {
+    try {
+      const titles = translatedNews.map((n: any) => n.title);
+      const bodies = translatedNews.map((n: any) => (n.body || "").slice(0, 150));
+      const [trTitles, trBodies] = await Promise.all([
+        translateBatch(titles, "en", "ko"),
+        translateBatch(bodies, "en", "ko"),
+      ]);
+      translatedNews = translatedNews.map((n: any, i: number) => ({
+        ...n,
+        title: trTitles[i]?.translated || n.title,
+        body: trBodies[i]?.translated || n.body,
+      }));
+    } catch {
+      // Translation failed — show English fallback
+    }
+  }
+
+  // Translate prediction titles to Korean if needed
+  let translatedPoly = Array.isArray(polymarketEvents) ? polymarketEvents : [];
+  if (isKo && translatedPoly.length > 0) {
+    try {
+      const polyTitles = translatedPoly.slice(0, 15).map((e: any) => e.title || "");
+      const trPolyTitles = await translateBatch(polyTitles, "en", "ko");
+      translatedPoly = translatedPoly.map((e: any, i: number) => ({
+        ...e,
+        title: i < 15 && trPolyTitles[i]?.translated ? trPolyTitles[i].translated : e.title,
+      }));
+    } catch {
+      // Translation failed — show English fallback
+    }
+  }
+
   // Latest 10 blog posts (most recent first)
   const blogPosts = [...QUANT_BLOG_POSTS].reverse().slice(0, 10);
 
@@ -118,10 +155,10 @@ export default async function HomePage({
       globalData={globalData}
       topCoins={JSON.parse(JSON.stringify(topCoins))}
       hlWhales={JSON.parse(JSON.stringify(hlWhales.slice(0, 8)))}
-      news={JSON.parse(JSON.stringify(news.slice(0, 12)))}
+      news={JSON.parse(JSON.stringify(translatedNews))}
       youtubeItems={JSON.parse(JSON.stringify(youtubeItems.slice(0, 6).map((y: any) => ({ ...y, publishedAt: y.publishedAt.toISOString() }))))}
       signals={JSON.parse(JSON.stringify(signals))}
-      polymarketEvents={JSON.parse(JSON.stringify(polymarketEvents))}
+      polymarketEvents={JSON.parse(JSON.stringify(translatedPoly))}
       blogPosts={JSON.parse(JSON.stringify(blogPosts))}
     />
   );
