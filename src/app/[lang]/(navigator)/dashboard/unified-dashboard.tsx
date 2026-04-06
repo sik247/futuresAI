@@ -221,7 +221,7 @@ export default function UnifiedDashboard({
     <div className="bg-black text-zinc-100 min-h-screen flex flex-col" style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}>
 
       {/* ── Top bar: BTC price header ── */}
-      <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-2 flex items-center gap-4 flex-wrap select-none">
+      <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-1.5 flex items-center gap-4 select-none shrink-0 overflow-x-auto">
         {btcSignal && (
           <>
             <span className="font-mono font-bold text-zinc-100 text-sm tabular-nums">
@@ -257,10 +257,10 @@ export default function UnifiedDashboard({
       </div>
 
       {/* ── Main 3-column layout ── */}
-      <div className="flex flex-1 overflow-hidden lg:h-[calc(100vh-88px)]">
+      <div className="flex flex-1 overflow-hidden lg:h-[calc(100vh-120px)]">
 
-        {/* ══════════ LEFT PANEL (280px) ══════════ */}
-        <div className="hidden lg:flex flex-col w-[280px] shrink-0 border-r border-zinc-800 overflow-y-auto">
+        {/* ══════════ LEFT PANEL ══════════ */}
+        <div className="hidden xl:flex flex-col w-[260px] shrink-0 border-r border-zinc-800 overflow-y-auto">
 
           {/* Account Overview */}
           <div className="p-3 border-b border-zinc-800">
@@ -434,15 +434,15 @@ export default function UnifiedDashboard({
         </div>
 
         {/* ══════════ CENTER PANEL (flex-1) ══════════ */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-y-auto lg:overflow-hidden">
+        <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
 
           {/* Signals Table */}
           <div className="flex-1 p-0 overflow-hidden flex flex-col">
             <div className="px-4 pt-3 pb-2 border-b border-zinc-800">
               <SectionHeader>{lang === "ko" ? "시장 신호" : "Market Signals"}</SectionHeader>
             </div>
-            <div className="flex-1 overflow-y-auto">
-              <table className="w-full text-xs" style={{ fontVariantNumeric: "tabular-nums" }}>
+            <div className="flex-1 overflow-y-auto overflow-x-auto">
+              <table className="w-full text-xs min-w-[600px]" style={{ fontVariantNumeric: "tabular-nums" }}>
                 <thead className="sticky top-0 bg-black z-10">
                   <tr className="border-b border-zinc-800 text-zinc-500">
                     <th className="text-left px-4 py-2 font-semibold text-[10px] uppercase tracking-wider">
@@ -529,7 +529,7 @@ export default function UnifiedDashboard({
           </div>
 
           {/* ── Center Widgets (below signals) ── */}
-          <div className="hidden lg:grid grid-cols-3 gap-0 border-t border-zinc-800">
+          <div className="hidden xl:grid grid-cols-3 gap-0 border-t border-zinc-800">
             {/* Payback Widget */}
             <div className="p-4 border-r border-zinc-800">
               <SectionHeader>{lang === "ko" ? "페이백" : "Payback"}</SectionHeader>
@@ -617,7 +617,7 @@ export default function UnifiedDashboard({
           </div>
 
           {/* Mobile-only: stacked sections */}
-          <div className="lg:hidden p-4 space-y-4">
+          <div className="xl:hidden p-4 space-y-4">
             {/* Mobile Account */}
             <div className="border border-zinc-800 p-3">
               <SectionHeader>Account</SectionHeader>
@@ -675,7 +675,7 @@ export default function UnifiedDashboard({
         </div>
 
         {/* ══════════ RIGHT PANEL (320px) ══════════ */}
-        <div className="hidden lg:flex flex-col w-[320px] shrink-0 border-l border-zinc-800 overflow-y-auto">
+        <div className="hidden xl:flex flex-col w-[280px] shrink-0 border-l border-zinc-800 overflow-y-auto">
 
           {/* Online Users Badge */}
           <div className="px-3 py-2 border-b border-zinc-800 flex items-center justify-between">
