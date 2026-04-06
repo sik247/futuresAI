@@ -866,231 +866,175 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
           {/* RIGHT PANEL: compact analysis grid — minimize scrolling */}
           <div className="lg:w-full flex flex-col gap-3 lg:max-h-[90vh] lg:overflow-y-auto lg:pr-2 custom-scrollbar">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {/* Live Context */}
-          {analysis.liveContext && (
-            <Card className="md:col-span-2 lg:col-span-3 p-4 bg-zinc-950/50 backdrop-blur-sm border-blue-500/20">
-              <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-4">
-                Live Market Data
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
-                <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
-                  <p className="text-xs text-zinc-500 mb-1">Live Price</p>
-                  <p className="text-lg font-bold font-mono text-foreground">
-                    ${analysis.liveContext.currentPrice?.toLocaleString()}
-                  </p>
-                </div>
-                <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
-                  <p className="text-xs text-zinc-500 mb-1">24h Change</p>
-                  <p className={`text-lg font-bold font-mono ${analysis.liveContext.change24h >= 0 ? "text-green-400" : "text-red-400"}`}>
-                    {analysis.liveContext.change24h >= 0 ? "+" : ""}{analysis.liveContext.change24h?.toFixed(2)}%
-                  </p>
-                </div>
-                <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
-                  <p className="text-xs text-zinc-500 mb-1">24h Volume</p>
-                  <p className="text-lg font-bold font-mono text-foreground">
-                    ${(analysis.liveContext.volume24h / 1e6).toFixed(1)}M
-                  </p>
-                </div>
-                <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
-                  <p className="text-xs text-zinc-500 mb-1">Sentiment</p>
-                  <span className={`inline-block px-2 py-0.5 rounded text-sm font-semibold border ${sentimentColors[analysis.liveContext.sentiment] || sentimentColors.NEUTRAL}`}>
-                    {analysis.liveContext.sentiment}
-                  </span>
-                </div>
-                <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
-                  <p className="text-xs text-zinc-500 mb-1">Order Book</p>
-                  <span className={`inline-block px-2 py-0.5 rounded text-sm font-semibold border ${
-                    analysis.liveContext.orderBookBias === "BUY_PRESSURE"
-                      ? "text-green-400 bg-green-500/10 border-green-500/30"
-                      : analysis.liveContext.orderBookBias === "SELL_PRESSURE"
-                      ? "text-red-400 bg-red-500/10 border-red-500/30"
-                      : "text-zinc-400 bg-zinc-500/10 border-zinc-500/30"
-                  }`}>
-                    {analysis.liveContext.orderBookBias?.replace("_", " ")}
-                  </span>
-                </div>
-              </div>
-              {analysis.liveContext.keyNews && analysis.liveContext.keyNews.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider">Latest News</p>
-                  {analysis.liveContext.keyNews.map((news, i) => (
-                    <div key={i} className="flex gap-2 text-sm">
-                      <span className="text-blue-400 flex-shrink-0">&#8226;</span>
-                      <div>
-                        <span className="text-zinc-300 font-medium">{news.title}</span>
-                        {news.snippet && (
-                          <span className="text-zinc-500 ml-1">— {news.snippet.slice(0, 120)}</span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </Card>
-          )}
 
-          {/* OCR Data */}
-          {analysis.ocrData && (
-            <Card className="md:col-span-2 lg:col-span-3 p-4 bg-zinc-950/50 backdrop-blur-sm border-white/10">
-              <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
-                {translations.chartAnalysis_ocrData || "Chart Data (OCR)"}
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
-                  <p className="text-xs text-zinc-500 mb-1">{translations.chartAnalysis_currentPrice || "Current Price"}</p>
-                  <p className="text-lg font-bold font-mono text-foreground">${analysis.ocrData.currentPrice?.toLocaleString()}</p>
-                </div>
-                <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
-                  <p className="text-xs text-zinc-500 mb-1">{translations.chartAnalysis_timeframe || "Timeframe"}</p>
-                  <p className="text-lg font-bold font-mono text-foreground">{analysis.ocrData.timeframe}</p>
-                </div>
-                <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
-                  <p className="text-xs text-zinc-500 mb-1">Range High</p>
-                  <p className="text-lg font-bold font-mono text-green-400">${analysis.ocrData.priceRange?.high?.toLocaleString()}</p>
-                </div>
-                <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
-                  <p className="text-xs text-zinc-500 mb-1">Range Low</p>
-                  <p className="text-lg font-bold font-mono text-red-400">${analysis.ocrData.priceRange?.low?.toLocaleString()}</p>
-                </div>
-              </div>
-              {analysis.ocrData.visibleIndicators?.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {analysis.ocrData.visibleIndicators.map((ind, i) => (
-                    <span key={i} className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/10 border border-blue-500/30 text-blue-300">
-                      {ind}{analysis.ocrData.readValues?.[ind.split(" ")[0]] ? `: ${analysis.ocrData.readValues[ind.split(" ")[0]]}` : ""}
+          {/* ── CARD 1: Trade Setup (Bloomberg ticket style, full width, most prominent) ── */}
+          {(() => {
+            const ts = analysis.tradeSetup;
+            const ep = ts.entry || 0;
+            const slPct = ep ? ((ts.stopLoss - ep) / ep * 100).toFixed(2) : "0";
+            const tpPct = ep ? ((ts.takeProfit - ep) / ep * 100).toFixed(2) : "0";
+            const buySignals = analysis.indicators.filter(i => i.signal === "BUY").length;
+            const sellSignals = analysis.indicators.filter(i => i.signal === "SELL").length;
+            const isLong = ts.direction === "LONG";
+            const isShort = ts.direction === "SHORT";
+            const borderColor = isLong ? "border-l-green-500" : isShort ? "border-l-red-500" : "border-l-amber-500";
+            const directionBg = isLong ? "bg-green-500/10 text-green-400" : isShort ? "bg-red-500/10 text-red-400" : "bg-amber-500/10 text-amber-400";
+            const dirArrow = isLong ? "\u25B2" : isShort ? "\u25BC" : "\u25C6";
+            const riskLabel = analysis.riskScore <= 3 ? "Low Risk" : analysis.riskScore <= 6 ? "Medium Risk" : "High Risk";
+            const riskColor = analysis.riskScore <= 3 ? "text-green-400" : analysis.riskScore <= 6 ? "text-amber-400" : "text-red-400";
+            return (
+              <Card className={`col-span-full p-0 overflow-hidden bg-zinc-950/50 backdrop-blur-sm border-white/10 border-l-4 ${borderColor}`}>
+                {/* Header row */}
+                <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-white/[0.06]">
+                  <div className="flex items-center gap-3">
+                    <span className={`flex items-center gap-1.5 px-3 py-1 rounded font-bold text-sm ${directionBg}`}>
+                      {dirArrow} {ts.direction}
                     </span>
-                  ))}
+                    <span className="font-mono font-semibold text-zinc-200 text-sm">{selectedPair.replace("USDT", "/USDT")}</span>
+                    <span className={`text-xs font-mono ${trendColors[analysis.trend] || "text-zinc-400"}`}>{analysis.trend}</span>
+                    {analysis.patterns.length > 0 && analysis.patterns.slice(0, 2).map((p, i) => (
+                      <span key={i} className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 border border-purple-500/30 text-purple-300">{p}</span>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-zinc-500 font-mono">{ts.confidence}% CONF</span>
+                    <span className={`text-xs font-mono font-semibold ${riskColor}`}>
+                      Risk {analysis.riskScore}/10 &mdash; {riskLabel}
+                    </span>
+                  </div>
                 </div>
-              )}
-            </Card>
-          )}
 
-          {/* Summary + Trend */}
-          <Card className="md:col-span-2 lg:col-span-3 p-4 bg-zinc-950/50 backdrop-blur-sm border-white/10">
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-foreground">{translations.chartAnalysis_summary || "Analysis Summary"}</h2>
-                <div className="flex items-center gap-3">
-                  <span className={`text-sm font-bold ${trendColors[analysis.trend] || "text-zinc-400"}`}>{analysis.trend}</span>
-                  <span className="text-xs text-zinc-500">|</span>
-                  <span className="text-sm text-zinc-400">
-                    {translations.chartAnalysis_confidence || "Confidence"}: <span className="text-foreground font-mono">{analysis.confidence}%</span>
-                  </span>
+                {/* Main ticket body */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/[0.06]">
+                  {/* Entry */}
+                  <div className="px-5 py-4 flex flex-col gap-1">
+                    <span className="text-[10px] font-mono text-blue-400 uppercase tracking-[0.15em]">Entry</span>
+                    <span className="text-2xl font-bold font-mono text-zinc-100">${ep.toLocaleString()}</span>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="h-1.5 flex-1 rounded-full bg-zinc-800" />
+                      <span className="text-[10px] text-zinc-600 font-mono">at market</span>
+                    </div>
+                  </div>
+
+                  {/* Stop Loss */}
+                  <div className="px-5 py-4 flex flex-col gap-1">
+                    <span className="text-[10px] font-mono text-red-400 uppercase tracking-[0.15em]">Stop Loss</span>
+                    <span className="text-2xl font-bold font-mono text-zinc-100">${ts.stopLoss?.toLocaleString()}</span>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={`text-xs font-mono ${Number(slPct) > 0 ? "text-red-400" : "text-green-400"}`}>
+                        {Number(slPct) > 0 ? "+" : ""}{slPct}%
+                      </span>
+                      {analysis.lines.find(l => l.type === "stopLoss")?.hitProbability != null && (
+                        <>
+                          <div className="w-16 h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+                            <div className="h-full rounded-full bg-red-500/70" style={{ width: `${analysis.lines.find(l => l.type === "stopLoss")!.hitProbability}%` }} />
+                          </div>
+                          <span className="text-[10px] text-zinc-500 font-mono">{analysis.lines.find(l => l.type === "stopLoss")!.hitProbability}% hit</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Take Profit */}
+                  <div className="px-5 py-4 flex flex-col gap-1">
+                    <span className="text-[10px] font-mono text-green-400 uppercase tracking-[0.15em]">Take Profit</span>
+                    <span className="text-2xl font-bold font-mono text-zinc-100">${ts.takeProfit?.toLocaleString()}</span>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={`text-xs font-mono ${Number(tpPct) > 0 ? "text-green-400" : "text-red-400"}`}>
+                        {Number(tpPct) > 0 ? "+" : ""}{tpPct}%
+                      </span>
+                      {analysis.lines.find(l => l.type === "takeProfit")?.hitProbability != null && (
+                        <>
+                          <div className="w-16 h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+                            <div className="h-full rounded-full bg-green-500/70" style={{ width: `${analysis.lines.find(l => l.type === "takeProfit")!.hitProbability}%` }} />
+                          </div>
+                          <span className="text-[10px] text-zinc-500 font-mono">{analysis.lines.find(l => l.type === "takeProfit")!.hitProbability}% hit</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <p className="text-zinc-300 leading-relaxed">{analysis.summary}</p>
-              {analysis.patterns.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {analysis.patterns.map((p, i) => (
-                    <span key={i} className="px-3 py-1 rounded-full text-xs font-medium bg-purple-500/10 border border-purple-500/30 text-purple-300">{p}</span>
-                  ))}
+
+                {/* Footer stats row */}
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 px-5 py-3 border-t border-white/[0.06] bg-white/[0.01]">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">R:R</span>
+                    <span className="text-sm font-bold font-mono text-amber-400">{ts.riskReward}</span>
+                  </div>
+                  <div className="w-px h-3.5 bg-white/[0.08]" />
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Signals</span>
+                    <span className="text-xs font-mono text-green-400">{buySignals} Buy</span>
+                    <span className="text-[10px] text-zinc-600">/</span>
+                    <span className="text-xs font-mono text-red-400">{sellSignals} Sell</span>
+                  </div>
+                  <div className="w-px h-3.5 bg-white/[0.08]" />
+                  <div className="flex items-center gap-2">
+                    {analysis.supportLevels.slice(0, 2).map((lvl, i) => (
+                      <span key={i} className="text-[10px] font-mono text-green-400">S{i+1} ${lvl?.toLocaleString()}</span>
+                    ))}
+                  </div>
+                  <div className="w-px h-3.5 bg-white/[0.08]" />
+                  <div className="flex items-center gap-2">
+                    {analysis.resistanceLevels.slice(0, 2).map((lvl, i) => (
+                      <span key={i} className="text-[10px] font-mono text-red-400">R{i+1} ${lvl?.toLocaleString()}</span>
+                    ))}
+                  </div>
                 </div>
-              )}
-            </div>
-          </Card>
+              </Card>
+            );
+          })()}
 
-          {/* Risk Score */}
-          <Card className="p-6 bg-zinc-950/50 backdrop-blur-sm border-white/10">
-            <div className="flex flex-col items-center gap-4">
-              <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">{translations.chartAnalysis_riskScore || "Risk Score"}</h3>
-              <div className="relative w-24 h-24">
-                <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="#27272a" strokeWidth="8" />
-                  <circle cx="50" cy="50" r="42" fill="none"
-                    stroke={analysis.riskScore <= 3 ? "#22c55e" : analysis.riskScore <= 6 ? "#f59e0b" : "#ef4444"}
-                    strokeWidth="8" strokeDasharray={`${(analysis.riskScore / 10) * 264} 264`} strokeLinecap="round" />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-2xl font-bold text-foreground">{analysis.riskScore}</span>
-                  <span className="text-xs text-zinc-500">/10</span>
-                </div>
-              </div>
-              <span className="text-xs text-zinc-500">{analysis.riskScore <= 3 ? "Low Risk" : analysis.riskScore <= 6 ? "Medium Risk" : "High Risk"}</span>
-            </div>
-          </Card>
-
-          {/* Trade Setup */}
-          <Card className="p-6 bg-zinc-950/50 backdrop-blur-sm border-white/10">
-            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">{translations.chartAnalysis_tradeSetup || "Trade Setup"}</h3>
-            <div className="flex flex-col gap-3">
-              <div className="flex justify-between items-center">
-                <span className="text-zinc-500 text-sm">Direction</span>
-                <span className={`font-bold text-sm ${analysis.tradeSetup.direction === "LONG" ? "text-green-400" : analysis.tradeSetup.direction === "SHORT" ? "text-red-400" : "text-zinc-400"}`}>
-                  {analysis.tradeSetup.direction}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-blue-400 text-sm">Entry</span>
-                <span className="text-foreground font-mono text-sm">${analysis.tradeSetup.entry?.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-red-400 text-sm">Stop Loss</span>
-                <span className="text-foreground font-mono text-sm">${analysis.tradeSetup.stopLoss?.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-green-400 text-sm">Take Profit</span>
-                <span className="text-foreground font-mono text-sm">${analysis.tradeSetup.takeProfit?.toLocaleString()}</span>
-              </div>
-              <div className="h-px bg-white/10 my-1" />
-              <div className="flex justify-between items-center">
-                <span className="text-zinc-500 text-sm">R:R</span>
-                <span className="text-foreground font-mono font-bold text-sm">{analysis.tradeSetup.riskReward}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-zinc-500 text-sm">Confidence</span>
-                <span className="text-foreground font-mono text-sm">{analysis.tradeSetup.confidence}%</span>
-              </div>
-            </div>
-          </Card>
-
-          {/* Research Brief */}
+          {/* ── CARD 2: Research Brief (full width, clean hierarchy) ── */}
           {analysis.professionalSummary && (
-            <Card className="p-6 bg-zinc-950/50 backdrop-blur-sm border-blue-500/20 col-span-full">
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-1 h-5 rounded-full bg-blue-500" />
-                <h3 className="text-sm font-semibold text-zinc-300 uppercase tracking-wider">
+            <Card className="col-span-full p-0 overflow-hidden bg-zinc-950/50 backdrop-blur-sm border-blue-500/20">
+              <div className="flex items-center gap-3 px-6 pt-5 pb-4 border-b border-white/[0.06]">
+                <div className="w-1 h-5 rounded-full bg-blue-500 flex-shrink-0" />
+                <h3 className="text-sm font-bold text-zinc-200 uppercase tracking-wider">
                   {lang === "ko" ? "리서치 브리프" : "Research Brief"}
                 </h3>
-                <span className="text-[10px] font-mono text-zinc-600">
+                <span className="text-[10px] font-mono text-zinc-600 ml-auto">
                   {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                 </span>
               </div>
 
-              <div className="space-y-5">
+              <div className="px-6 py-5 space-y-5">
                 {/* Executive Summary */}
-                <div>
-                  <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.15em] mb-1.5">
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-mono text-blue-400/80 uppercase tracking-[0.15em]">
                     {lang === "ko" ? "요약" : "Executive Summary"}
                   </p>
-                  <p className="text-sm text-zinc-300 leading-relaxed">{analysis.professionalSummary.executiveSummary}</p>
+                  <p className="text-sm text-zinc-200 leading-relaxed font-medium">{analysis.professionalSummary.executiveSummary}</p>
                 </div>
 
-                {/* Market Structure */}
-                <div>
-                  <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.15em] mb-1.5">
-                    {lang === "ko" ? "시장 구조" : "Market Structure"}
-                  </p>
-                  <p className="text-sm text-zinc-300 leading-relaxed">{analysis.professionalSummary.marketStructure}</p>
-                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* Market Structure */}
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.15em]">
+                      {lang === "ko" ? "시장 구조" : "Market Structure"}
+                    </p>
+                    <p className="text-sm text-zinc-400 leading-relaxed">{analysis.professionalSummary.marketStructure}</p>
+                  </div>
 
-                {/* Trading Thesis */}
-                <div>
-                  <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.15em] mb-1.5">
-                    {lang === "ko" ? "트레이딩 논거" : "Trading Thesis"}
-                  </p>
-                  <p className="text-sm text-zinc-300 leading-relaxed">{analysis.professionalSummary.tradingThesis}</p>
+                  {/* Trading Thesis */}
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.15em]">
+                      {lang === "ko" ? "트레이딩 논거" : "Trading Thesis"}
+                    </p>
+                    <p className="text-sm text-zinc-400 leading-relaxed">{analysis.professionalSummary.tradingThesis}</p>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Key Risks */}
                   <div className="rounded-xl bg-red-500/[0.05] border border-red-500/10 p-4">
-                    <p className="text-[10px] font-mono text-red-400 uppercase tracking-[0.15em] mb-2">
+                    <p className="text-[10px] font-mono text-red-400 uppercase tracking-[0.15em] mb-3">
                       {lang === "ko" ? "주요 리스크" : "Key Risks"}
                     </p>
-                    <ul className="space-y-1.5">
+                    <ul className="space-y-2">
                       {analysis.professionalSummary.keyRisks?.map((risk, i) => (
-                        <li key={i} className="text-xs text-zinc-400 flex gap-2">
-                          <span className="text-red-400 shrink-0">-</span>
+                        <li key={i} className="text-xs text-zinc-400 flex gap-2 leading-relaxed">
+                          <span className="text-red-400 shrink-0 mt-px">&#x2012;</span>
                           {risk}
                         </li>
                       ))}
@@ -1099,13 +1043,13 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
 
                   {/* Key Catalysts */}
                   <div className="rounded-xl bg-emerald-500/[0.05] border border-emerald-500/10 p-4">
-                    <p className="text-[10px] font-mono text-emerald-400 uppercase tracking-[0.15em] mb-2">
+                    <p className="text-[10px] font-mono text-emerald-400 uppercase tracking-[0.15em] mb-3">
                       {lang === "ko" ? "주요 촉매" : "Key Catalysts"}
                     </p>
-                    <ul className="space-y-1.5">
+                    <ul className="space-y-2">
                       {analysis.professionalSummary.keyCatalysts?.map((cat, i) => (
-                        <li key={i} className="text-xs text-zinc-400 flex gap-2">
-                          <span className="text-emerald-400 shrink-0">+</span>
+                        <li key={i} className="text-xs text-zinc-400 flex gap-2 leading-relaxed">
+                          <span className="text-emerald-400 shrink-0 mt-px">+</span>
                           {cat}
                         </li>
                       ))}
@@ -1116,150 +1060,222 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
             </Card>
           )}
 
-          {/* Indicators */}
-          <Card className="p-6 bg-zinc-950/50 backdrop-blur-sm border-white/10">
-            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">{translations.chartAnalysis_indicators || "Technical Indicators"}</h3>
+          {/* ── 3-COLUMN GRID: Indicators | Fibonacci + Quant | Statistical Targets + Volume ── */}
+
+          {/* Column 1: Indicators */}
+          <Card className="p-5 bg-zinc-950/50 backdrop-blur-sm border-white/10 flex flex-col gap-4">
+            <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+              {translations.chartAnalysis_indicators || "Technical Indicators"}
+            </h3>
             <div className="flex flex-col gap-3">
               {analysis.indicators.map((ind, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-foreground text-sm font-medium">{ind.name}</span>
-                    <span className="text-zinc-500 text-xs">{ind.value}</span>
+                <div key={i} className="flex items-center justify-between gap-2">
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-zinc-200 text-sm font-medium">{ind.name}</span>
+                    <span className="text-zinc-500 text-xs truncate">{ind.value}</span>
                   </div>
-                  <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${signalColors[ind.signal]}`}>{ind.signal}</span>
+                  <span className={`flex-shrink-0 px-2 py-0.5 rounded text-xs font-semibold border ${signalColors[ind.signal]}`}>{ind.signal}</span>
                 </div>
               ))}
             </div>
           </Card>
 
-          {/* Quant Analysis */}
+          {/* Column 2: Fibonacci + Quant (Bollinger / RSI divergence) */}
           {analysis.quantAnalysis && (
-            <Card className="md:col-span-2 lg:col-span-3 p-4 bg-zinc-950/50 backdrop-blur-sm border-white/10">
-              <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
-                {translations.chartAnalysis_quantAnalysis || "Quantitative Analysis"}
+            <Card className="p-5 bg-zinc-950/50 backdrop-blur-sm border-white/10 flex flex-col gap-4">
+              <h3 className="text-xs font-semibold text-amber-400 uppercase tracking-wider">
+                {translations.chartAnalysis_fibonacci || "Fibonacci Levels"}
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Fibonacci */}
-                <div>
-                  <h4 className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-3">
-                    {translations.chartAnalysis_fibonacci || "Fibonacci Levels"}
-                  </h4>
-                  <div className="space-y-2">
-                    {analysis.quantAnalysis.fibonacciLevels?.map((fib, i) => (
-                      <div key={i} className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <span className="text-amber-400/70 font-mono text-xs w-12">{fib.level}</span>
-                          <span className="text-zinc-400 text-xs">{fib.significance}</span>
-                        </div>
-                        <span className="text-foreground font-mono">${fib.price?.toLocaleString()}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Statistical Targets */}
-                <div>
-                  <h4 className="text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-3">
-                    {translations.chartAnalysis_statisticalTargets || "Statistical Targets"}
-                  </h4>
-                  <div className="space-y-2">
-                    {analysis.quantAnalysis.statisticalTargets?.map((target, i) => (
-                      <div key={i} className="flex items-center justify-between text-sm">
-                        <span className="text-foreground font-mono">${target.price?.toLocaleString()}</span>
-                        <div className="flex items-center gap-2">
-                          <div className="w-20 h-1.5 rounded-full bg-zinc-800 overflow-hidden">
-                            <div
-                              className="h-full rounded-full"
-                              style={{
-                                width: `${target.probability}%`,
-                                backgroundColor: target.probability >= 70 ? "#22c55e" : target.probability >= 40 ? "#f59e0b" : "#ef4444",
-                              }}
-                            />
-                          </div>
-                          <span className="text-zinc-400 font-mono text-xs w-8">{target.probability}%</span>
-                          <span className="text-zinc-600 text-xs">{target.timeframe}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Bollinger & RSI */}
-                <div>
-                  <h4 className="text-xs font-semibold text-purple-400 uppercase tracking-wider mb-2">Bollinger Bands</h4>
-                  <p className="text-zinc-300 text-sm">{analysis.quantAnalysis.bollingerPosition}</p>
-                  {analysis.quantAnalysis.rsiDivergence && (
-                    <div className="mt-3">
-                      <h4 className="text-xs font-semibold text-orange-400 uppercase tracking-wider mb-2">RSI Divergence</h4>
-                      <p className="text-zinc-300 text-sm">{analysis.quantAnalysis.rsiDivergence}</p>
+              <div className="space-y-2">
+                {analysis.quantAnalysis.fibonacciLevels?.map((fib, i) => (
+                  <div key={i} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-amber-400/70 font-mono text-xs w-10 flex-shrink-0">{fib.level}</span>
+                      <span className="text-zinc-500 text-xs truncate">{fib.significance}</span>
                     </div>
-                  )}
-                </div>
-
-                {/* Volume Profile */}
-                <div>
-                  <h4 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">Volume Profile</h4>
-                  <p className="text-zinc-300 text-sm">{analysis.quantAnalysis.volumeProfile}</p>
-                  <div className="mt-3 flex items-center gap-2">
-                    <span className="text-zinc-500 text-xs">RSI:</span>
-                    <span className={`font-mono font-bold text-sm ${
-                      analysis.quantAnalysis.rsiValue < 30 ? "text-green-400" :
-                      analysis.quantAnalysis.rsiValue > 70 ? "text-red-400" : "text-zinc-300"
-                    }`}>{analysis.quantAnalysis.rsiValue}</span>
+                    <span className="text-zinc-200 font-mono text-xs flex-shrink-0 ml-2">${fib.price?.toLocaleString()}</span>
                   </div>
-                </div>
+                ))}
               </div>
+
+              {analysis.quantAnalysis.bollingerPosition && (
+                <div className="pt-3 border-t border-white/[0.06] space-y-1.5">
+                  <h4 className="text-xs font-semibold text-purple-400 uppercase tracking-wider">Bollinger Bands</h4>
+                  <p className="text-zinc-400 text-xs leading-relaxed">{analysis.quantAnalysis.bollingerPosition}</p>
+                </div>
+              )}
+
+              {analysis.quantAnalysis.rsiDivergence && (
+                <div className="pt-3 border-t border-white/[0.06] space-y-1.5">
+                  <h4 className="text-xs font-semibold text-orange-400 uppercase tracking-wider">RSI Divergence</h4>
+                  <p className="text-zinc-400 text-xs leading-relaxed">{analysis.quantAnalysis.rsiDivergence}</p>
+                </div>
+              )}
             </Card>
           )}
 
-          {/* Key Levels */}
-          <Card className="p-6 bg-zinc-950/50 backdrop-blur-sm border-white/10">
-            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">{translations.chartAnalysis_keyLevels || "Key Price Levels"}</h3>
-            <div className="flex flex-col gap-4">
-              <div>
-                <span className="text-green-400 text-xs font-semibold uppercase tracking-wider">Support</span>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {analysis.supportLevels.map((level, i) => (
-                    <span key={i} className="px-3 py-1 rounded bg-green-500/10 border border-green-500/30 text-green-300 font-mono text-sm">
-                      ${level?.toLocaleString()}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <span className="text-red-400 text-xs font-semibold uppercase tracking-wider">Resistance</span>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {analysis.resistanceLevels.map((level, i) => (
-                    <span key={i} className="px-3 py-1 rounded bg-red-500/10 border border-red-500/30 text-red-300 font-mono text-sm">
-                      ${level?.toLocaleString()}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          {/* Line Probabilities */}
-          <Card className="md:col-span-2 lg:col-span-3 p-4 bg-zinc-950/50 backdrop-blur-sm border-white/10">
-            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">
-              {translations.chartAnalysis_hitProbability || "Hit Probability"}
-            </h3>
-            <div className="space-y-3">
-              {analysis.lines.filter(l => l.hitProbability > 0).map((line, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: line.color }} />
-                  <span className="text-zinc-300 text-sm flex-1">{line.label}</span>
-                  <div className="w-32 h-2 rounded-full bg-zinc-800 overflow-hidden">
-                    <div className="h-full rounded-full transition-all" style={{
-                      width: `${line.hitProbability}%`,
-                      backgroundColor: line.hitProbability >= 70 ? "#22c55e" : line.hitProbability >= 40 ? "#f59e0b" : "#ef4444",
-                    }} />
+          {/* Column 3: Statistical Targets + Volume Profile */}
+          {analysis.quantAnalysis && (
+            <Card className="p-5 bg-zinc-950/50 backdrop-blur-sm border-white/10 flex flex-col gap-4">
+              <h3 className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">
+                {translations.chartAnalysis_statisticalTargets || "Statistical Targets"}
+              </h3>
+              <div className="space-y-2.5">
+                {analysis.quantAnalysis.statisticalTargets?.map((target, i) => (
+                  <div key={i} className="flex flex-col gap-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-zinc-200 font-mono text-xs">${target.price?.toLocaleString()}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-zinc-400 font-mono text-xs">{target.probability}%</span>
+                        <span className="text-zinc-600 text-[10px]">{target.timeframe}</span>
+                      </div>
+                    </div>
+                    <div className="w-full h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${target.probability}%`,
+                          backgroundColor: target.probability >= 70 ? "#22c55e" : target.probability >= 40 ? "#f59e0b" : "#ef4444",
+                        }}
+                      />
+                    </div>
                   </div>
-                  <span className="text-foreground font-mono font-bold text-sm w-10 text-right">{line.hitProbability}%</span>
+                ))}
+              </div>
+
+              {analysis.quantAnalysis.volumeProfile && (
+                <div className="pt-3 border-t border-white/[0.06] space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-xs font-semibold text-blue-400 uppercase tracking-wider">Volume Profile</h4>
+                    {analysis.quantAnalysis.rsiValue != null && (
+                      <span className={`ml-auto text-xs font-mono font-bold ${
+                        analysis.quantAnalysis.rsiValue < 30 ? "text-green-400" :
+                        analysis.quantAnalysis.rsiValue > 70 ? "text-red-400" : "text-zinc-300"
+                      }`}>RSI {analysis.quantAnalysis.rsiValue}</span>
+                    )}
+                  </div>
+                  <p className="text-zinc-400 text-xs leading-relaxed">{analysis.quantAnalysis.volumeProfile}</p>
                 </div>
-              ))}
-            </div>
-          </Card>
+              )}
+            </Card>
+          )}
+
+          {/* ── Collapsible: Live Context (diagnostic) ── */}
+          {analysis.liveContext && (
+            <details className="col-span-full group rounded-xl bg-zinc-950/50 backdrop-blur-sm border border-blue-500/20 overflow-hidden">
+              <summary className="flex items-center justify-between px-5 py-3.5 cursor-pointer hover:bg-white/[0.02] transition-colors list-none">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse flex-shrink-0" />
+                  <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">Live Market Data</span>
+                  <span className="text-[10px] text-zinc-600 font-mono ml-1">
+                    ${analysis.liveContext.currentPrice?.toLocaleString()} &nbsp;&bull;&nbsp;
+                    <span className={analysis.liveContext.change24h >= 0 ? "text-green-400" : "text-red-400"}>
+                      {analysis.liveContext.change24h >= 0 ? "+" : ""}{analysis.liveContext.change24h?.toFixed(2)}%
+                    </span>
+                  </span>
+                </div>
+                <svg className="w-3.5 h-3.5 text-zinc-600 transition-transform group-open:rotate-180 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </summary>
+              <div className="px-5 pb-5 pt-1 border-t border-white/[0.06]">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4 mt-3">
+                  <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
+                    <p className="text-xs text-zinc-500 mb-1">Live Price</p>
+                    <p className="text-base font-bold font-mono text-foreground">${analysis.liveContext.currentPrice?.toLocaleString()}</p>
+                  </div>
+                  <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
+                    <p className="text-xs text-zinc-500 mb-1">24h Change</p>
+                    <p className={`text-base font-bold font-mono ${analysis.liveContext.change24h >= 0 ? "text-green-400" : "text-red-400"}`}>
+                      {analysis.liveContext.change24h >= 0 ? "+" : ""}{analysis.liveContext.change24h?.toFixed(2)}%
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
+                    <p className="text-xs text-zinc-500 mb-1">24h Volume</p>
+                    <p className="text-base font-bold font-mono text-foreground">${(analysis.liveContext.volume24h / 1e6).toFixed(1)}M</p>
+                  </div>
+                  <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
+                    <p className="text-xs text-zinc-500 mb-1">Sentiment</p>
+                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold border ${sentimentColors[analysis.liveContext.sentiment] || sentimentColors.NEUTRAL}`}>
+                      {analysis.liveContext.sentiment}
+                    </span>
+                  </div>
+                  <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
+                    <p className="text-xs text-zinc-500 mb-1">Order Book</p>
+                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold border ${
+                      analysis.liveContext.orderBookBias === "BUY_PRESSURE"
+                        ? "text-green-400 bg-green-500/10 border-green-500/30"
+                        : analysis.liveContext.orderBookBias === "SELL_PRESSURE"
+                        ? "text-red-400 bg-red-500/10 border-red-500/30"
+                        : "text-zinc-400 bg-zinc-500/10 border-zinc-500/30"
+                    }`}>
+                      {analysis.liveContext.orderBookBias?.replace("_", " ")}
+                    </span>
+                  </div>
+                </div>
+                {analysis.liveContext.keyNews && analysis.liveContext.keyNews.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Latest News</p>
+                    {analysis.liveContext.keyNews.map((news, i) => (
+                      <div key={i} className="flex gap-2 text-sm">
+                        <span className="text-blue-400 flex-shrink-0">&#8226;</span>
+                        <div>
+                          <span className="text-zinc-300 font-medium text-xs">{news.title}</span>
+                          {news.snippet && (
+                            <span className="text-zinc-500 ml-1 text-xs">&#x2014; {news.snippet.slice(0, 120)}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </details>
+          )}
+
+          {/* ── Collapsible: OCR Data (diagnostic) ── */}
+          {analysis.ocrData && (
+            <details className="col-span-full group rounded-xl bg-zinc-950/50 backdrop-blur-sm border border-white/[0.08] overflow-hidden">
+              <summary className="flex items-center justify-between px-5 py-3.5 cursor-pointer hover:bg-white/[0.02] transition-colors list-none">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                    {translations.chartAnalysis_ocrData || "Chart Data (OCR)"}
+                  </span>
+                  <span className="text-[10px] text-zinc-600 font-mono ml-1">
+                    {analysis.ocrData.timeframe} &nbsp;&bull;&nbsp; ${analysis.ocrData.currentPrice?.toLocaleString()}
+                  </span>
+                </div>
+                <svg className="w-3.5 h-3.5 text-zinc-600 transition-transform group-open:rotate-180 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </summary>
+              <div className="px-5 pb-5 pt-1 border-t border-white/[0.06]">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+                  <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
+                    <p className="text-xs text-zinc-500 mb-1">{translations.chartAnalysis_currentPrice || "Current Price"}</p>
+                    <p className="text-base font-bold font-mono text-foreground">${analysis.ocrData.currentPrice?.toLocaleString()}</p>
+                  </div>
+                  <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
+                    <p className="text-xs text-zinc-500 mb-1">{translations.chartAnalysis_timeframe || "Timeframe"}</p>
+                    <p className="text-base font-bold font-mono text-foreground">{analysis.ocrData.timeframe}</p>
+                  </div>
+                  <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
+                    <p className="text-xs text-zinc-500 mb-1">Range High</p>
+                    <p className="text-base font-bold font-mono text-green-400">${analysis.ocrData.priceRange?.high?.toLocaleString()}</p>
+                  </div>
+                  <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
+                    <p className="text-xs text-zinc-500 mb-1">Range Low</p>
+                    <p className="text-base font-bold font-mono text-red-400">${analysis.ocrData.priceRange?.low?.toLocaleString()}</p>
+                  </div>
+                </div>
+                {analysis.ocrData.visibleIndicators?.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {analysis.ocrData.visibleIndicators.map((ind, i) => (
+                      <span key={i} className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/10 border border-blue-500/30 text-blue-300">
+                        {ind}{analysis.ocrData.readValues?.[ind.split(" ")[0]] ? `: ${analysis.ocrData.readValues[ind.split(" ")[0]]}` : ""}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </details>
+          )}
 
           {/* ============================================================ */}
           {/*  AI Commentary + Share Post (Grok-style)                      */}
