@@ -759,24 +759,30 @@ function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: st
 
 function ChatWidget({ lang }: { lang: string }) {
   const [input, setInput] = useState("");
-  const [lastResponse, setLastResponse] = useState("");
+  const [messages, setMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const ko = lang === "ko";
 
-  const handleSend = async () => {
-    if (!input.trim() || loading) return;
+  const suggestions = ko
+    ? ["BTC 지금 사도 될까요?", "ETH 분석해줘", "오늘 시장 전망은?"]
+    : ["Should I buy BTC now?", "Analyze ETH for me", "Market outlook today?"];
+
+  const handleSend = async (msg?: string) => {
+    const text = (msg || input).trim();
+    if (!text || loading) return;
+    setMessages((prev) => [...prev, { role: "user", text }]);
+    setInput("");
     setLoading(true);
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input, persona: "crypto", sessionId: "widget", lang }),
+        body: JSON.stringify({ message: text, persona: "crypto", sessionId: "widget", lang }),
       });
       const data = await res.json();
-      setLastResponse(data.response || data.error || "No response");
-      setInput("");
+      setMessages((prev) => [...prev, { role: "ai", text: data.response || data.error || "No response" }]);
     } catch {
-      setLastResponse("Error. Try again.");
+      setMessages((prev) => [...prev, { role: "ai", text: "Error. Try again." }]);
     } finally {
       setLoading(false);
     }
@@ -784,36 +790,72 @@ function ChatWidget({ lang }: { lang: string }) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-3">
-        {lastResponse ? (
-          <div className="text-[11px] text-zinc-300 leading-relaxed whitespace-pre-wrap">{lastResponse}</div>
+      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+        {messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30 flex items-center justify-center">
+              <svg className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+              </svg>
+            </div>
+            <p className="text-xs text-zinc-400 text-center">{ko ? "AI 퀀트 애널리스트에게\n무엇이든 물어보세요" : "Ask our AI quant analyst\nanything about crypto"}</p>
+            <div className="flex flex-col gap-1.5 w-full px-2">
+              {suggestions.map((s, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleSend(s)}
+                  className="text-left text-[11px] text-zinc-400 bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 hover:bg-white/[0.06] hover:border-white/[0.1] hover:text-zinc-200 transition-all cursor-pointer"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <span className="text-2xl mb-2">🤖</span>
-            <p className="text-[11px] text-zinc-500">{ko ? "암호화폐에 대해 물어보세요" : "Ask about any crypto"}</p>
+          messages.map((m, i) => (
+            <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div className={`max-w-[85%] rounded-xl px-3 py-2 ${
+                m.role === "user"
+                  ? "bg-blue-600/20 border border-blue-500/30 text-blue-100"
+                  : "bg-white/[0.04] border border-white/[0.06] text-zinc-300"
+              }`}>
+                <p className="text-[11px] leading-relaxed whitespace-pre-wrap">{m.text}</p>
+              </div>
+            </div>
+          ))
+        )}
+        {loading && (
+          <div className="flex justify-start">
+            <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2">
+              <div className="flex gap-1">
+                <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" />
+              </div>
+            </div>
           </div>
         )}
       </div>
-      <div className="border-t border-white/[0.06] p-2 flex gap-2">
+      <div className="border-t border-white/[0.06] p-2.5 flex gap-2">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder={ko ? "질문하기..." : "Ask anything..."}
-          className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 text-[11px] text-white placeholder-zinc-600 focus:outline-none focus:border-white/[0.16]"
+          placeholder={ko ? "BTC 전망이 어때요?" : "What's the outlook for BTC?"}
+          className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-blue-500/40 transition-colors"
           disabled={loading}
         />
         <button
-          onClick={handleSend}
+          onClick={() => handleSend()}
           disabled={loading || !input.trim()}
-          className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[10px] font-mono disabled:opacity-30 cursor-pointer hover:bg-blue-500"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold disabled:opacity-30 cursor-pointer transition-colors"
         >
-          {loading ? "..." : "Ask"}
+          {loading ? "..." : ko ? "전송" : "Send"}
         </button>
       </div>
       <Link
         href={`/${lang}/chat`}
-        className="text-center py-1.5 text-[9px] text-blue-400 hover:text-blue-300 border-t border-white/[0.04]"
+        className="text-center py-2 text-[10px] text-blue-400 hover:text-blue-300 border-t border-white/[0.04] font-medium transition-colors"
       >
         {ko ? "전체 채팅 열기 →" : "Open full chat →"}
       </Link>
