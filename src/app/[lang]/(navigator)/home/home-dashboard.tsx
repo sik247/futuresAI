@@ -739,7 +739,7 @@ export default function HomeDashboard({
   const [mobileTab, setMobileTab] = useState<"market" | "whales" | "news" | "research" | "predictions">("market");
 
   return (
-    <div className="bg-zinc-950 font-mono flex flex-col pt-[92px]" style={{ height: "100vh" }}>
+    <div className="bg-zinc-950 font-mono flex flex-col" style={{ height: "calc(100vh - 92px)" }}>
       {/* Stat Bar */}
       <StatBar
         btcData={btcData}

@@ -48,7 +48,7 @@ export default async function LanguageLayout({
     <>
       <PriceTicker />
       <Headers lang={lang} translations={dictionary} />
-      <main className="min-h-screen">{children}</main>
+      <main className="min-h-screen pt-[92px]">{children}</main>
       <Footer lang={lang} translations={dictionary} />
     </>
   );

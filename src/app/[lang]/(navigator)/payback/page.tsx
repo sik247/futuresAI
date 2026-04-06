@@ -14,13 +14,15 @@ export const metadata: Metadata = {
 };
 
 const EXCHANGES = [
+  // Row 1: 4 exchanges
   { name: "Bitget", paybackRate: 55, makerFee: 0.02, takerFee: 0.06, link: "https://partner.bitget.com/bg/FuturesAI", logo: "/icons/exchange/bitget.png" },
-  { name: "Bybit", paybackRate: 20, makerFee: 0.02, takerFee: 0.055, link: "https://partner.bybit.com/b/FUTURESAI", logo: "/icons/exchange/bybit.png" },
-  { name: "BingX", paybackRate: 50, makerFee: 0.02, takerFee: 0.05, link: "https://bingx.com/en/invite/FCC9QDJK", logo: "/icons/exchange/bingx.png" },
-  { name: "Gate.io", paybackRate: 75, makerFee: 0.02, takerFee: 0.05, link: "https://www.gate.com/share/FuturesAI", logo: "/icons/exchange/gate.png" },
-  { name: "HTX", paybackRate: 54, makerFee: 0.02, takerFee: 0.05, link: "https://www.htx.com.gt/invite/en-us/1h?invite_code=miqkc223", logo: "/icons/exchange/htx.png" },
   { name: "OKX", paybackRate: 20, makerFee: 0.02, takerFee: 0.05, link: "https://www.okx.com/join/futuresai", logo: "/icons/exchange/okx.png" },
+  { name: "Bybit", paybackRate: 20, makerFee: 0.02, takerFee: 0.055, link: "https://partner.bybit.com/b/FUTURESAI", logo: "/icons/exchange/bybit.png" },
+  { name: "Gate.io", paybackRate: 75, makerFee: 0.02, takerFee: 0.05, link: "https://www.gate.com/share/FuturesAI", logo: "/icons/exchange/gate.png" },
+  // Row 2: 3 exchanges (centered)
+  { name: "BingX", paybackRate: 50, makerFee: 0.02, takerFee: 0.05, link: "https://bingx.com/en/invite/FCC9QDJK", logo: "/icons/exchange/bingx.png" },
   { name: "EdgeX", paybackRate: 30, makerFee: 0.009, takerFee: 0.025, link: "https://pro.edgex.exchange/en-US/referral/FUTURESAI", logo: "/icons/exchange/edgex.png" },
+  { name: "HTX", paybackRate: 54, makerFee: 0.02, takerFee: 0.05, link: "https://www.htx.com.gt/invite/en-us/1h?invite_code=miqkc223", logo: "/icons/exchange/htx.png" },
 ];
 
 export default async function PaybackPage({
@@ -111,12 +113,12 @@ export default async function PaybackPage({
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex flex-wrap justify-center gap-5">
             {EXCHANGES.map((exchange) => (
               <div
                 key={exchange.name}
                 data-anim="exchange-card"
-                className="group relative rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 transition-all duration-300 hover:border-blue-500/30 hover:bg-white/[0.06] hover:-translate-y-1"
+                className="group relative rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 transition-all duration-300 hover:border-blue-500/30 hover:bg-white/[0.06] hover:-translate-y-1 w-full sm:w-[calc(50%-10px)] lg:w-[calc(25%-15px)]"
               >
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-14 h-14 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center overflow-hidden">

@@ -135,7 +135,7 @@ export default async function ChartsPage({
   const btcChange = btcData?.usd_24h_change ?? 0;
 
   return (
-    <div className="bg-zinc-950 font-mono pt-[92px]">
+    <div className="bg-zinc-950 font-mono">
       {/* Stat Bar */}
       <div className="flex items-center gap-3 px-4 py-3 bg-zinc-900/80 border-b border-white/[0.06] text-xs font-mono overflow-x-auto shrink-0">
         <span className="text-zinc-500 shrink-0">BTC</span>
@@ -180,7 +180,7 @@ export default async function ChartsPage({
       />
 
       {/* Desktop layout: single screen, no scroll */}
-      <div className="hidden lg:grid h-[calc(100vh-92px-48px)] grid-rows-[60%_40%] overflow-hidden">
+      <div className="hidden lg:grid h-[calc(100vh-92px-44px)] grid-rows-[60%_40%] overflow-hidden">
         {/* Top row: Chart (65%) + Fear & Greed / Market Stats (35%) */}
         <div className="grid grid-cols-[1fr_380px] border-b border-white/[0.06] overflow-hidden">
           {/* Chart Terminal */}
