@@ -138,7 +138,7 @@ export async function buildCryptoContext(query: string): Promise<ChatContextResu
 
   // Fetch ALL data sources in parallel
   const [binanceRes, upbitData, technicals, fngRes, cryptoPanicRes, rssNewsResult, xFeedResult] = await Promise.allSettled([
-    ticker ? fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${ticker.ticker}`, { signal: AbortSignal.timeout(3000) }) : Promise.resolve(null),
+    ticker ? fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${ticker.ticker}`, { signal: AbortSignal.timeout(3000), cache: "no-store" }) : Promise.resolve(null),
     baseSymbol ? fetchUpbitPrice(baseSymbol) : Promise.resolve(null),
     baseSymbol ? fetchBinanceKlines(baseSymbol) : Promise.resolve(null),
     fetch("https://api.alternative.me/fng/?limit=1", { signal: AbortSignal.timeout(3000) }),

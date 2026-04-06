@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import type { CryptoNewsItem } from "@/lib/services/news/crypto-news.service";
 import type { HLWalletData } from "@/lib/services/whales/hyperliquid.service";
@@ -757,11 +757,28 @@ function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: st
 }
 
 
+const FREE_MSG_LIMIT = 5;
+
+type ChatMsg = {
+  role: "user" | "ai";
+  text: string;
+  ticker?: { symbol: string; exchange: string };
+  news?: { title: string; url: string; source: string }[];
+};
+
 function ChatWidget({ lang }: { lang: string }) {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<{ role: "user" | "ai"; text: string }[]>([]);
+  const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [loading, setLoading] = useState(false);
+  const [msgCount, setMsgCount] = useState(0);
   const ko = lang === "ko";
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages, loading]);
+
+  const atLimit = msgCount >= FREE_MSG_LIMIT;
 
   const suggestions = ko
     ? ["BTC 지금 사도 될까요?", "ETH 분석해줘", "오늘 시장 전망은?"]
@@ -769,18 +786,29 @@ function ChatWidget({ lang }: { lang: string }) {
 
   const handleSend = async (msg?: string) => {
     const text = (msg || input).trim();
-    if (!text || loading) return;
+    if (!text || loading || atLimit) return;
     setMessages((prev) => [...prev, { role: "user", text }]);
     setInput("");
     setLoading(true);
+    setMsgCount((c) => c + 1);
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, persona: "crypto", sessionId: "widget", lang }),
+        body: JSON.stringify({ message: text, persona: "crypto", sessionId: "home-widget", lang }),
       });
       const data = await res.json();
-      setMessages((prev) => [...prev, { role: "ai", text: data.response || data.error || "No response" }]);
+      if (data.error === "Daily message limit reached") {
+        setMessages((prev) => [...prev, { role: "ai", text: ko ? "일일 무료 메시지 한도에 도달했습니다. 프리미엄으로 업그레이드하세요." : "Free message limit reached. Upgrade to Premium for more." }]);
+        setMsgCount(FREE_MSG_LIMIT);
+      } else {
+        setMessages((prev) => [...prev, {
+          role: "ai",
+          text: data.response || data.error || "No response",
+          ticker: data.ticker ?? undefined,
+          news: data.news ?? undefined,
+        }]);
+      }
     } catch {
       setMessages((prev) => [...prev, { role: "ai", text: "Error. Try again." }]);
     } finally {
@@ -814,12 +842,39 @@ function ChatWidget({ lang }: { lang: string }) {
         ) : (
           messages.map((m, i) => (
             <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[85%] rounded-xl px-3 py-2 ${
+              <div className={`max-w-[90%] rounded-xl px-3 py-2 ${
                 m.role === "user"
                   ? "bg-blue-600/20 border border-blue-500/30 text-blue-100"
                   : "bg-white/[0.04] border border-white/[0.06] text-zinc-300"
               }`}>
-                <p className="text-[11px] leading-relaxed whitespace-pre-wrap">{m.text}</p>
+                <p className="text-[12px] leading-relaxed whitespace-pre-wrap">{m.text}</p>
+                {/* TradingView chart if ticker detected */}
+                {m.ticker && (
+                  <div className="mt-2 rounded-lg overflow-hidden border border-white/[0.06]">
+                    <div className="flex items-center gap-2 px-2 py-1 border-b border-white/[0.06] bg-zinc-900/60">
+                      <span className="w-1 h-1 rounded-full bg-emerald-500" />
+                      <span className="text-[10px] font-mono text-zinc-400">{m.ticker.exchange}:{m.ticker.symbol}</span>
+                    </div>
+                    <iframe
+                      src={`https://s.tradingview.com/widgetembed/?frameElementId=tv_mini&symbol=${m.ticker.exchange}:${m.ticker.symbol}&interval=D&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=0a0a0f&studies=[]&theme=dark&style=1&timezone=exchange&withdateranges=0&showpopupbutton=0&locale=${ko ? "kr" : "en"}&width=100%25&height=200`}
+                      className="w-full border-0"
+                      style={{ height: 200 }}
+                      title={`${m.ticker.symbol} Chart`}
+                    />
+                  </div>
+                )}
+                {/* Related news */}
+                {m.news && m.news.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {m.news.slice(0, 3).map((n, ni) => (
+                      <a key={ni} href={n.url} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-[10px] text-zinc-500 hover:text-blue-400 transition-colors">
+                        <span className="w-3 h-3 rounded-sm bg-blue-500/15 flex items-center justify-center text-[7px] font-bold text-blue-400">{ni + 1}</span>
+                        <span className="truncate">{n.title}</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ))
@@ -836,29 +891,45 @@ function ChatWidget({ lang }: { lang: string }) {
           </div>
         )}
       </div>
-      <div className="border-t border-white/[0.06] p-2.5 flex gap-2">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          placeholder={ko ? "BTC 전망이 어때요?" : "What's the outlook for BTC?"}
-          className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-blue-500/40 transition-colors"
-          disabled={loading}
-        />
-        <button
-          onClick={() => handleSend()}
-          disabled={loading || !input.trim()}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold disabled:opacity-30 cursor-pointer transition-colors"
-        >
-          {loading ? "..." : ko ? "전송" : "Send"}
-        </button>
-      </div>
-      <Link
-        href={`/${lang}/chat`}
-        className="text-center py-2 text-[10px] text-blue-400 hover:text-blue-300 border-t border-white/[0.04] font-medium transition-colors"
-      >
-        {ko ? "전체 채팅 열기 →" : "Open full chat →"}
-      </Link>
+      {/* Input area or premium lock */}
+      {atLimit ? (
+        <div className="border-t border-white/[0.06] p-4 text-center">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <svg className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" /></svg>
+            <span className="text-[12px] font-semibold text-amber-400">{ko ? "무료 메시지 소진" : "Free messages used"}</span>
+          </div>
+          <p className="text-[11px] text-zinc-500 mb-3">{ko ? "프리미엄으로 업그레이드하여 무제한 AI 분석을 받으세요" : "Upgrade to Premium for unlimited AI analysis"}</p>
+          <Link href={`/${lang}/pricing`} className="inline-block px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg text-[11px] font-semibold hover:from-amber-400 hover:to-amber-500 transition-all cursor-pointer">
+            {ko ? "프리미엄 시작 →" : "Get Premium →"}
+          </Link>
+        </div>
+      ) : (
+        <>
+          <div className="border-t border-white/[0.06] p-2.5 flex gap-2">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              placeholder={ko ? "BTC 전망이 어때요?" : "What's the outlook for BTC?"}
+              className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-blue-500/40 transition-colors"
+              disabled={loading}
+            />
+            <button
+              onClick={() => handleSend()}
+              disabled={loading || !input.trim()}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold disabled:opacity-30 cursor-pointer transition-colors"
+            >
+              {loading ? "..." : ko ? "전송" : "Send"}
+            </button>
+          </div>
+          <div className="flex items-center justify-between px-3 py-1.5 border-t border-white/[0.04]">
+            <span className="text-[9px] text-zinc-600">{ko ? `무료 ${FREE_MSG_LIMIT - msgCount}/${FREE_MSG_LIMIT}` : `Free ${FREE_MSG_LIMIT - msgCount}/${FREE_MSG_LIMIT}`}</span>
+            <Link href={`/${lang}/chat`} className="text-[10px] text-blue-400 hover:text-blue-300 font-medium transition-colors">
+              {ko ? "전체 채팅 →" : "Full chat →"}
+            </Link>
+          </div>
+        </>
+      )}
     </div>
   );
 }
