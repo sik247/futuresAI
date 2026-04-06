@@ -74,14 +74,19 @@ export default async function HomePage({
     fetchYouTubeFeeds().catch(() => []),
     // Quant signals
     fetchMarketSignals().catch(() => ({ signals: [], fearGreed: { value: 50, classification: "Neutral" }, btcTrend: "above_sma", marketSummary: "", updatedAt: new Date().toISOString() })),
-    // Polymarket crypto events
-    fetch(
-      "https://gamma-api.polymarket.com/events?closed=false&tag_slug=crypto&limit=50&order=volume&ascending=false",
-      {
-        signal: AbortSignal.timeout(5000),
-        next: { revalidate: 120 },
+    // Polymarket events (crypto + popular)
+    Promise.all([
+      fetch("https://gamma-api.polymarket.com/events?closed=false&tag_slug=crypto&limit=20&order=volume&ascending=false", { signal: AbortSignal.timeout(5000), next: { revalidate: 120 } }).then(r => r.json()).catch(() => []),
+      fetch("https://gamma-api.polymarket.com/events?closed=false&limit=20&order=volume&ascending=false", { signal: AbortSignal.timeout(5000), next: { revalidate: 120 } }).then(r => r.json()).catch(() => []),
+    ]).then(([crypto, all]) => {
+      // Merge, dedup by id, crypto first
+      const seen = new Set<string>();
+      const merged: any[] = [];
+      for (const e of [...(crypto || []), ...(all || [])]) {
+        if (!seen.has(e.id)) { seen.add(e.id); merged.push(e); }
       }
-    ).then((r) => r.json()),
+      return merged;
+    }),
   ]);
 
   const btcData = btcR.status === "fulfilled" ? btcR.value : null;

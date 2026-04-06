@@ -93,6 +93,8 @@ type PolymarketEvent = {
     outcomePrices: string[];
     outcomes: string[];
     volume: number;
+    groupItemTitle?: string;
+    oneDayPriceChange?: number | string;
   }[];
 };
 
@@ -666,91 +668,82 @@ function SignalsWidget({ signals, lang }: { signals: SignalsData; lang: string }
 /* ------------------------------------------------------------------ */
 
 function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: string }) {
-  // Parse and filter predictions
-  const interesting = events
+  // Parse multi-outcome events (Perplexity-style)
+  const parsed = events
+    .filter((e) => e.markets && e.markets.length > 0)
     .map((e) => {
-      if (!e.markets || e.markets.length === 0) return null;
-      const m = e.markets[0];
-      // outcomePrices can be a JSON string or already parsed array
-      let prices: string[] = [];
-      if (typeof m.outcomePrices === "string") {
-        try { prices = JSON.parse(m.outcomePrices); } catch { prices = []; }
-      } else if (Array.isArray(m.outcomePrices)) {
-        prices = m.outcomePrices;
+      // Parse all outcomes for multi-market events
+      const outcomes: { label: string; pct: number; change: number }[] = [];
+      for (const m of e.markets.slice(0, 6)) {
+        let prices: string[] = [];
+        if (typeof m.outcomePrices === "string") {
+          try { prices = JSON.parse(m.outcomePrices); } catch { prices = []; }
+        } else if (Array.isArray(m.outcomePrices)) {
+          prices = m.outcomePrices;
+        }
+        const yesPrice = parseFloat(prices[0] || "0");
+        if (yesPrice <= 0.01) continue; // skip 0%
+        const label = m.groupItemTitle || m.question || "";
+        const change = typeof m.oneDayPriceChange === "number" ? m.oneDayPriceChange * 100 :
+          typeof m.oneDayPriceChange === "string" ? parseFloat(m.oneDayPriceChange) * 100 : 0;
+        outcomes.push({ label, pct: yesPrice * 100, change });
       }
-      if (prices.length < 2) return null;
-      const yesPrice = parseFloat(prices[0] || "0");
-      // Skip boring 0/100 outcomes
-      if (yesPrice <= 0.02 || yesPrice >= 0.98) return null;
-      return { ...e, parsedYes: yesPrice };
+      if (outcomes.length === 0) return null;
+      // Sort by probability descending
+      outcomes.sort((a, b) => b.pct - a.pct);
+      const totalVol = e.volume || 0;
+      return { ...e, outcomes: outcomes.slice(0, 4), totalVol };
     })
-    .filter((e): e is PolymarketEvent & { parsedYes: number } => e !== null)
-    .slice(0, 10);
+    .filter(Boolean)
+    .slice(0, 8) as (PolymarketEvent & { outcomes: { label: string; pct: number; change: number }[]; totalVol: number })[];
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex-1 overflow-y-auto p-2 space-y-2">
-        {interesting.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-[10px] font-mono text-zinc-700">
+      <div className="flex-1 overflow-y-auto p-2 space-y-3">
+        {parsed.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-[11px] font-mono text-zinc-700">
             No active predictions
           </div>
         ) : (
-          interesting.map((event) => {
-            const yesPrice = event.parsedYes;
-            const yesPct = Math.round(yesPrice * 100);
-            const noPct = 100 - yesPct;
-            const vol = event.markets[0]?.volume ?? event.volume;
-            return (
-              <div
-                key={event.id}
-                className="rounded-lg border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.14] transition-all overflow-hidden"
-              >
-                <div className="flex gap-2.5 p-2.5">
-                  {/* Thumbnail */}
-                  {event.image ? (
-                    <img
-                      src={event.image}
-                      alt=""
-                      className="w-10 h-10 rounded-md shrink-0 object-cover bg-zinc-800"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-md shrink-0 bg-zinc-800 flex items-center justify-center">
-                      <span className="text-xs font-bold text-zinc-600">{event.title[0]}</span>
-                    </div>
-                  )}
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-medium text-zinc-200 leading-snug line-clamp-2 mb-1.5">
-                      {event.title}
-                    </p>
-                    {/* Yes/No probability bar */}
-                    <div className="w-full h-2 rounded-full overflow-hidden flex">
-                      <div
-                        className="h-full bg-gradient-to-r from-emerald-600 to-emerald-500"
-                        style={{ width: `${yesPct}%` }}
-                      />
-                      <div
-                        className="h-full bg-gradient-to-r from-red-500 to-red-600 flex-1"
-                      />
-                    </div>
-                    <div className="flex justify-between items-center mt-1">
-                      <span className="text-[9px] font-mono font-bold text-emerald-400 tabular-nums">
-                        Yes {yesPct}%
-                      </span>
-                      {vol > 0 && (
-                        <span className="text-[8px] font-mono text-zinc-600 tabular-nums">
-                          Vol {fmtUsd(vol)}
-                        </span>
-                      )}
-                      <span className="text-[9px] font-mono font-bold text-red-400 tabular-nums">
-                        No {noPct}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
+          parsed.map((event) => (
+            <div key={event.id} className="rounded-lg border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all p-3">
+              {/* Header: title + volume */}
+              <div className="flex items-start justify-between gap-2 mb-2.5">
+                <h3 className="text-[12px] font-semibold text-zinc-100 leading-snug flex-1">{event.title}</h3>
+                {event.totalVol > 0 && (
+                  <span className="text-[9px] font-mono text-zinc-600 bg-white/[0.04] px-1.5 py-0.5 rounded shrink-0 tabular-nums">
+                    {fmtUsd(event.totalVol)} vol
+                  </span>
+                )}
               </div>
-            );
-          })
+
+              {/* Outcomes table */}
+              <div className="space-y-1.5">
+                {event.outcomes.map((o, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <span className="text-[11px] text-zinc-400 flex-1 truncate">{o.label}</span>
+                    <span className="text-[11px] font-mono font-bold text-zinc-200 tabular-nums w-12 text-right">{o.pct.toFixed(0)}%</span>
+                    <span className={`text-[10px] font-mono tabular-nums w-14 text-right ${
+                      o.change > 0 ? "text-emerald-400" : o.change < 0 ? "text-red-400" : "text-zinc-600"
+                    }`}>
+                      {o.change > 0 ? "↑" : o.change < 0 ? "↓" : "—"} {Math.abs(o.change).toFixed(1)}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Footer */}
+              <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-white/[0.04]">
+                {event.image && (
+                  <img src={event.image} alt="" className="w-4 h-4 rounded-full" />
+                )}
+                <span className="text-[8px] font-mono text-zinc-600">
+                  {event.markets.length} {event.markets.length === 1 ? "market" : "markets"}
+                </span>
+                <span className="text-[8px] font-mono text-blue-400">Polymarket</span>
+              </div>
+            </div>
+          ))
         )}
       </div>
     </div>
