@@ -130,6 +130,22 @@ export type ChatContextResult = {
   detectedSymbol: string | null;
 };
 
+// Fetch Binance price with fallback endpoints
+async function fetchBinancePrice(symbol: string): Promise<Response | null> {
+  const endpoints = [
+    `https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`,
+    `https://api1.binance.com/api/v3/ticker/24hr?symbol=${symbol}`,
+    `https://data-api.binance.vision/api/v3/ticker/24hr?symbol=${symbol}`,
+  ];
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(3000), cache: "no-store" });
+      if (res.ok) return res;
+    } catch { continue; }
+  }
+  return null;
+}
+
 export async function buildCryptoContext(query: string): Promise<ChatContextResult> {
   const parts: string[] = [];
 
@@ -138,7 +154,7 @@ export async function buildCryptoContext(query: string): Promise<ChatContextResu
 
   // Fetch ALL data sources in parallel
   const [binanceRes, upbitData, technicals, fngRes, cryptoPanicRes, rssNewsResult, xFeedResult] = await Promise.allSettled([
-    ticker ? fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${ticker.ticker}`, { signal: AbortSignal.timeout(3000), cache: "no-store" }) : Promise.resolve(null),
+    ticker ? fetchBinancePrice(ticker.ticker) : Promise.resolve(null),
     baseSymbol ? fetchUpbitPrice(baseSymbol) : Promise.resolve(null),
     baseSymbol ? fetchBinanceKlines(baseSymbol) : Promise.resolve(null),
     fetch("https://api.alternative.me/fng/?limit=1", { signal: AbortSignal.timeout(3000) }),

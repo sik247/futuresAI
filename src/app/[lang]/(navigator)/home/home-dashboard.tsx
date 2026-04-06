@@ -759,6 +759,34 @@ function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: st
 
 const FREE_MSG_LIMIT = 5;
 
+// Simple markdown renderer for AI responses
+function renderMarkdown(text: string) {
+  return text
+    .split("\n")
+    .map((line, i) => {
+      // Headers
+      if (line.startsWith("## ")) return <h3 key={i} className="text-[13px] font-bold text-white mt-3 mb-1">{line.slice(3)}</h3>;
+      if (line.startsWith("# ")) return <h2 key={i} className="text-[14px] font-bold text-white mt-3 mb-1">{line.slice(2)}</h2>;
+      // Bold
+      const boldParts = line.split(/\*\*(.*?)\*\*/g);
+      if (boldParts.length > 1) {
+        return (
+          <p key={i} className="text-[12px] leading-relaxed">
+            {boldParts.map((part, j) =>
+              j % 2 === 1 ? <strong key={j} className="text-white font-semibold">{part}</strong> : <span key={j}>{part}</span>
+            )}
+          </p>
+        );
+      }
+      // List items
+      if (line.startsWith("* ") || line.startsWith("- ")) return <li key={i} className="text-[12px] leading-relaxed ml-3 list-disc">{line.slice(2)}</li>;
+      // Empty line
+      if (line.trim() === "") return <div key={i} className="h-1.5" />;
+      // Normal text
+      return <p key={i} className="text-[12px] leading-relaxed">{line}</p>;
+    });
+}
+
 type ChatMsg = {
   role: "user" | "ai";
   text: string;
@@ -847,7 +875,9 @@ function ChatWidget({ lang }: { lang: string }) {
                   ? "bg-blue-600/20 border border-blue-500/30 text-blue-100"
                   : "bg-white/[0.04] border border-white/[0.06] text-zinc-300"
               }`}>
-                <p className="text-[12px] leading-relaxed whitespace-pre-wrap">{m.text}</p>
+                <div className="text-[12px] leading-relaxed text-zinc-300">
+                  {m.role === "ai" ? renderMarkdown(m.text) : <p className="whitespace-pre-wrap">{m.text}</p>}
+                </div>
                 {/* TradingView chart if ticker detected */}
                 {m.ticker && (
                   <div className="mt-2 rounded-lg overflow-hidden border border-white/[0.06]">
@@ -965,21 +995,34 @@ export default function HomeDashboard({
 
       {/* ── Desktop: 3-column layout ── */}
       <div className="hidden lg:flex flex-1 overflow-hidden">
-        {/* LEFT: Prediction Markets (30%) */}
-        <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "30%" }}>
-          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-            <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400 font-semibold">{ko ? "예측 시장" : "Prediction Markets"}</span>
-            <Link href={`/${lang}/markets`} className="text-[11px] text-blue-400 hover:text-blue-300">All →</Link>
+        {/* LEFT: Predictions + News stacked (25%) */}
+        <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "25%" }}>
+          {/* Predictions (top 55%) */}
+          <div className="border-b border-white/[0.06] flex flex-col overflow-hidden" style={{ flex: "55 0 0", minHeight: 0 }}>
+            <div className="px-3 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+              <span className="text-[12px] font-mono uppercase tracking-[0.12em] text-zinc-400 font-semibold">{ko ? "예측 시장" : "Predictions"}</span>
+              <Link href={`/${lang}/markets`} className="text-[10px] text-blue-400">All →</Link>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <PredictionCards events={polymarketEvents} lang={lang} />
+            </div>
           </div>
-          <div className="flex-1 overflow-y-auto">
-            <PredictionCards events={polymarketEvents} lang={lang} />
+          {/* News (bottom 45%) */}
+          <div className="flex flex-col overflow-hidden" style={{ flex: "45 0 0", minHeight: 0 }}>
+            <div className="px-3 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+              <span className="text-[12px] font-mono uppercase tracking-[0.12em] text-zinc-400 font-semibold">{ko ? "뉴스" : "News"}</span>
+              <Link href={`/${lang}/sns`} className="text-[10px] text-blue-400">All →</Link>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
+            </div>
           </div>
         </div>
 
-        {/* CENTER: Chart + News + Signals + Research (40%) */}
-        <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "40%" }}>
-          {/* TradingView Chart (top 35%) */}
-          <div className="border-b border-white/[0.06] flex flex-col overflow-hidden" style={{ flex: "35 0 0", minHeight: 0 }}>
+        {/* CENTER: Chart + Signals + Research (45%) */}
+        <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "45%" }}>
+          {/* TradingView Chart (top 40%) */}
+          <div className="border-b border-white/[0.06] flex flex-col overflow-hidden" style={{ flex: "40 0 0", minHeight: 0 }}>
             <div className="px-4 py-2 border-b border-white/[0.06] flex items-center gap-3 shrink-0">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[13px] font-mono text-zinc-300">BTC/USDT</span>
@@ -994,23 +1037,12 @@ export default function HomeDashboard({
             </div>
           </div>
 
-          {/* Bottom: News | Signals | Research — 3 equal columns (65%) */}
-          <div className="flex overflow-hidden" style={{ flex: "65 0 0", minHeight: 0 }}>
-            {/* News Feed */}
+          {/* Bottom: Signals + Research — 2 equal columns (60%) */}
+          <div className="flex overflow-hidden" style={{ flex: "60 0 0", minHeight: 0 }}>
+            {/* Quant Signals (50%) */}
             <div className="border-r border-white/[0.06] flex flex-col overflow-hidden flex-1">
               <div className="px-3 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-                <span className="text-[12px] font-mono uppercase tracking-[0.12em] text-zinc-400">{ko ? "뉴스" : "News"}</span>
-                <Link href={`/${lang}/sns`} className="text-[10px] text-blue-400">All →</Link>
-              </div>
-              <div className="flex-1 overflow-y-auto">
-                <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
-              </div>
-            </div>
-
-            {/* Quant Signals */}
-            <div className="border-r border-white/[0.06] flex flex-col overflow-hidden flex-1">
-              <div className="px-3 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-                <span className="text-[12px] font-mono uppercase tracking-[0.12em] text-zinc-400">{ko ? "시그널" : "Signals"}</span>
+                <span className="text-[12px] font-mono uppercase tracking-[0.12em] text-zinc-400">{ko ? "퀀트 시그널" : "Quant Signals"}</span>
                 <Link href={`/${lang}/quant`} className="text-[10px] text-blue-400">All →</Link>
               </div>
               <div className="flex-1 overflow-y-auto">
@@ -1018,7 +1050,7 @@ export default function HomeDashboard({
               </div>
             </div>
 
-            {/* Market Research */}
+            {/* Market Research (50%) */}
             <div className="flex flex-col overflow-hidden flex-1">
               <div className="px-3 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
                 <span className="text-[12px] font-mono uppercase tracking-[0.12em] text-zinc-400">{ko ? "리서치" : "Research"}</span>
