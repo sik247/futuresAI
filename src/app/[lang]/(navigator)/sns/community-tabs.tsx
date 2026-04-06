@@ -43,6 +43,10 @@ const XFeedTab = dynamic(() => import("./tabs/x-feed-tab"), {
   loading: () => <TabSkeleton />,
 });
 
+const BlogTab = dynamic(() => import("./tabs/blog-tab"), {
+  loading: () => <TabSkeleton />,
+});
+
 // ── Serialized Types (dates come as ISO strings from server) ─────────
 
 interface SerializedNewsItem {
@@ -82,6 +86,7 @@ interface CommunityTabsProps {
 
 const TABS = [
   { key: "all", label: "All" },
+  { key: "blog", label: "Blog" },
   { key: "xfeed", label: "X Feed" },
   { key: "news", label: "News" },
   { key: "youtube", label: "YouTube" },
@@ -389,6 +394,7 @@ export function CommunityTabs({
           )}
 
           {/* ── Lazy-loaded tabs ───────────────────────────────────── */}
+          {activeTab === "blog" && <BlogTab lang={lang} />}
           {activeTab === "xfeed" && <XFeedTab xFeedItems={xFeedItems} />}
           {activeTab === "news" && <NewsTab newsItems={displayNewsItems} />}
           {activeTab === "youtube" && <YouTubeTab youtubeItems={youtubeItems} />}

@@ -68,6 +68,7 @@
     "htmlparser2": "^9.1.0",
     "jsdom": "^25.0.1",
     "jszip": "^3.10.1",
+    "lightweight-charts": "^5.1.0",
     "lucide-react": "^0.394.0",
     "moment": "^2.30.1",
     "negotiator": "^1.0.0",

@@ -11,6 +11,20 @@ import { toast } from "@/components/ui/use-toast";
 import { Dictionary } from "@/i18n";
 import { ClipboardDocumentIcon, ShareIcon } from "@heroicons/react/24/outline";
 import type { ChartAnalysisResult, ChartLine } from "@/lib/services/chart-analysis/chart-analysis.service";
+import dynamic from "next/dynamic";
+import type { ChartLevel, ChartZone } from "@/components/trading-chart";
+
+const TradingChart = dynamic(() => import("@/components/trading-chart"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[600px] bg-zinc-900/50 rounded-lg flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <div className="h-10 w-10 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
+        <p className="text-sm text-zinc-500 font-mono">Loading Chart...</p>
+      </div>
+    </div>
+  ),
+});
 
 /* ------------------------------------------------------------------ */
 /*  Post generator + Grok-style AI commentary                          */
@@ -248,6 +262,20 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     }
   }, [imageLoaded]);
 
+  /* ================================================================== */
+  /*  TradingView-style chart overlay — bold, highly visible              */
+  /* ================================================================== */
+  const TV = {
+    green: "#26a69a",
+    red: "#ef5350",
+    blue: "#2196f3",
+    amber: "#ff9800",
+    white: "#ffffff",
+    bg: "rgba(0,0,0,0.85)",
+    font: "system-ui, -apple-system, sans-serif",
+    mono: "Consolas, 'Courier New', monospace",
+  };
+
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -259,11 +287,35 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
 
     if (!analysis?.lines) return;
 
-    // Draw clean lines only — no header overlay, no centered text
+    const entryPrice = analysis.tradeSetup?.entry || 0;
+    const W = dimensions.width;
+    const H = dimensions.height;
+
+    // --- Zone fills (visible, like TradingView long/short position tool) ---
+    const entryLine = analysis.lines.find((l) => l.type === "entry");
+    const slLine = analysis.lines.find((l) => l.type === "stopLoss");
+    const tpLine = analysis.lines.find((l) => l.type === "takeProfit");
+
+    if (entryLine && slLine) {
+      const eY = (entryLine.yPercent / 100) * H;
+      const sY = (slLine.yPercent / 100) * H;
+      ctx.fillStyle = "rgba(239, 83, 80, 0.12)";
+      ctx.fillRect(0, Math.min(eY, sY), W, Math.abs(sY - eY));
+    }
+    if (entryLine && tpLine) {
+      const eY = (entryLine.yPercent / 100) * H;
+      const tY = (tpLine.yPercent / 100) * H;
+      ctx.fillStyle = "rgba(38, 166, 154, 0.12)";
+      ctx.fillRect(0, Math.min(eY, tY), W, Math.abs(tY - eY));
+    }
+
+    // --- Draw all lines ---
     analysis.lines.forEach((line) => {
-      const y = (line.yPercent / 100) * dimensions.height;
-      drawAnalysisLine(ctx, y, line, dimensions.width);
+      const y = (line.yPercent / 100) * H;
+      drawAnalysisLine(ctx, y, line, W, entryPrice);
     });
+
+    // --- No canvas panel — strategy data is shown in the HTML bar above ---
   }, [dimensions, analysis]);
 
   useEffect(() => { drawCanvas(); }, [drawCanvas]);
@@ -272,53 +324,103 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     ctx: CanvasRenderingContext2D,
     y: number,
     line: ChartLine,
-    width: number
+    width: number,
+    entryPrice: number
   ) => {
     const isEntry = line.type === "entry";
     const isSL = line.type === "stopLoss";
     const isTP = line.type === "takeProfit";
+    const isStrategy = isEntry || isSL || isTP;
+    const isSupport = line.type === "support";
+    const isResistance = line.type === "resistance";
+    const isTrend = line.type === "trend";
+    const isLevel = isSupport || isResistance || isTrend;
 
-    // --- Clean single line (no zone fill, no glow) ---
-    ctx.strokeStyle = line.color;
-    ctx.lineWidth = isEntry ? 2.5 : 2;
-    ctx.setLineDash(line.dashed ? [8, 4] : isSL ? [5, 3] : isTP ? [5, 3] : []);
-    ctx.globalAlpha = 1;
+    const lineColor = isEntry ? TV.blue : isSL ? TV.red : isTP ? TV.green
+      : isSupport ? TV.green : isResistance ? TV.red : TV.amber;
+
+    // --- Thick horizontal line ---
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = isEntry ? 3 : isStrategy ? 2.5 : isLevel ? 2 : 1.5;
+    ctx.setLineDash(isSL || isTP ? [14, 6] : line.dashed ? [12, 6] : []);
+    ctx.globalAlpha = isStrategy ? 0.9 : 0.7;
     ctx.beginPath();
     ctx.moveTo(0, y);
     ctx.lineTo(width, y);
     ctx.stroke();
     ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
 
-    // --- Right-side price tag only (TradingView-style, clean) ---
+    // --- Left label (TradingView style: colored filled badge) ---
+    let label = "";
+    if (isEntry) label = "ENTRY";
+    else if (isSL) label = "STOP";
+    else if (isTP) label = "TARGET";
+    else if (isLevel) {
+      const m = line.label.match(/^(S\d|R\d)/)?.[0];
+      label = m || (isTrend ? "TREND" : isSupport ? "S" : "R");
+    }
+
+    if (label) {
+      ctx.font = `bold 14px ${TV.font}`;
+      const lw = ctx.measureText(label).width;
+      const pw = lw + 16;
+      const ph = 24;
+      const px = 6;
+      const py = y - ph / 2;
+
+      // Filled colored badge
+      ctx.fillStyle = lineColor;
+      ctx.globalAlpha = 0.95;
+      ctx.fillRect(px, py, pw, ph);
+      ctx.globalAlpha = 1;
+
+      // White text
+      ctx.fillStyle = TV.white;
+      ctx.fillText(label, px + 8, y + 5);
+    }
+
+    // --- Right price tag (TradingView style: colored bg, large bold text) ---
     const priceMatch = line.label.match(/\$[\d,.]+/)?.[0] || "";
     if (priceMatch) {
-      ctx.font = "bold 11px monospace";
-      const priceWidth = ctx.measureText(priceMatch).width;
-      const pad = 6;
-      const tagW = priceWidth + pad * 2;
-      const tagH = 20;
-      const tagX = width - tagW - 4;
+      // Build suffix
+      let suffix = "";
+      if (entryPrice > 0 && (isSL || isTP)) {
+        const price = parseFloat(priceMatch.replace(/[$,]/g, ""));
+        if (!isNaN(price)) {
+          const pct = ((price - entryPrice) / entryPrice * 100).toFixed(2);
+          suffix = `  ${Number(pct) > 0 ? "+" : ""}${pct}%`;
+        }
+      } else if (isLevel && line.hitProbability > 0) {
+        suffix = `  ${line.hitProbability}%`;
+      }
+
+      const displayText = priceMatch + suffix;
+      ctx.font = `bold 14px ${TV.mono}`;
+      const tw = ctx.measureText(displayText).width;
+      const pad = 10;
+      const tagW = tw + pad * 2;
+      const tagH = 26;
+      const tagX = width - tagW;
       const tagY = y - tagH / 2;
 
-      // Tag background
-      ctx.fillStyle = line.color;
-      ctx.globalAlpha = 0.95;
-      ctx.beginPath();
-      ctx.roundRect(tagX, tagY, tagW, tagH, 3);
-      ctx.fill();
+      // Colored tag background
+      ctx.fillStyle = lineColor;
+      ctx.globalAlpha = 0.92;
+      ctx.fillRect(tagX, tagY, tagW, tagH);
+      ctx.globalAlpha = 1;
 
-      // Arrow
+      // Arrow pointer
       ctx.beginPath();
-      ctx.moveTo(tagX - 4, y);
-      ctx.lineTo(tagX, y - 4);
-      ctx.lineTo(tagX, y + 4);
+      ctx.moveTo(tagX - 8, y);
+      ctx.lineTo(tagX, y - 8);
+      ctx.lineTo(tagX, y + 8);
       ctx.closePath();
       ctx.fill();
 
-      // Price text
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = "#ffffff";
-      ctx.fillText(priceMatch, tagX + pad, tagY + 14);
+      // White text
+      ctx.fillStyle = TV.white;
+      ctx.fillText(displayText, tagX + pad, tagY + 18);
     }
   };
 
@@ -490,25 +592,6 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
             </Button>
           </a>
         </Card>
-      ) : !isAdmin ? (
-        <Card className="p-12 bg-zinc-950/50 backdrop-blur-sm border-white/10 flex flex-col items-center gap-6 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-            <LockClosedIcon className="w-8 h-8 text-amber-400" />
-          </div>
-          <div className="flex flex-col gap-2">
-            <h2 className="text-xl font-bold text-zinc-200">
-              {lang === "ko" ? "구독자 전용 기능" : "Subscribers Only"}
-            </h2>
-            <p className="text-sm text-zinc-500 max-w-md">
-              {lang === "ko"
-                ? "AI 차트 분석은 유료 구독자만 이용할 수 있습니다. 구독하여 무제한 분석을 시작하세요."
-                : "AI Chart Analysis is available to paid subscribers. Subscribe to start analyzing your charts with AI."}
-            </p>
-          </div>
-          <Button disabled className="bg-zinc-700 text-zinc-400 cursor-not-allowed">
-            {lang === "ko" ? "구독 준비 중" : "Coming Soon"}
-          </Button>
-        </Card>
       ) : (
       <>
       {/* Pair Selector */}
@@ -626,61 +709,66 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
           </label>
         ) : (
           <div className="relative">
-            {/* Strategy Legend — above the chart */}
-            {analysis?.tradeSetup && (
-              <div className="bg-zinc-900/95 border border-white/[0.06] rounded-t-xl px-4 py-3">
-                {/* Direction + Key Levels */}
-                <div className="flex flex-wrap items-center gap-3 mb-2">
-                  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold border ${
-                    analysis.tradeSetup.direction === "LONG"
-                      ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400"
-                      : analysis.tradeSetup.direction === "SHORT"
-                      ? "bg-red-500/15 border-red-500/30 text-red-400"
-                      : "bg-amber-500/15 border-amber-500/30 text-amber-400"
-                  }`}>
-                    {analysis.tradeSetup.direction === "LONG" ? "\u25B2" : analysis.tradeSetup.direction === "SHORT" ? "\u25BC" : "\u25C6"}{" "}
-                    {analysis.tradeSetup.direction}
-                  </span>
-                  {analysis.tradeSetup.entry && (
-                    <span className="text-xs font-mono text-blue-400 bg-blue-500/10 px-2 py-1 rounded">
-                      Entry: ${analysis.tradeSetup.entry.toLocaleString()}
-                    </span>
-                  )}
-                  {analysis.tradeSetup.stopLoss && (
-                    <span className="text-xs font-mono text-red-400 bg-red-500/10 px-2 py-1 rounded">
-                      SL: ${analysis.tradeSetup.stopLoss.toLocaleString()}
-                    </span>
-                  )}
-                  {analysis.tradeSetup.takeProfit && (
-                    <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded">
-                      TP: ${analysis.tradeSetup.takeProfit.toLocaleString()}
-                    </span>
-                  )}
-                  {analysis.tradeSetup.riskReward && (
-                    <span className="text-xs font-mono text-purple-400 bg-purple-500/10 px-2 py-1 rounded">
-                      R:R {analysis.tradeSetup.riskReward}
-                    </span>
-                  )}
-                  <span className="text-xs text-zinc-500">
-                    {analysis.confidence}% confidence
-                  </span>
-                </div>
-                {/* Line Legend */}
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                  {analysis.lines?.map((l, i) => (
-                    <div key={i} className="flex items-center gap-1.5">
-                      <span className="w-4 h-0.5 rounded-full" style={{ backgroundColor: l.color, borderStyle: l.dashed ? "dashed" : "solid" }} />
-                      <span className="text-[10px] font-mono text-zinc-400">{l.label}</span>
-                      {l.hitProbability > 0 && (
-                        <span className={`text-[9px] font-mono ${l.hitProbability >= 70 ? "text-emerald-500" : l.hitProbability >= 40 ? "text-amber-500" : "text-red-500"}`}>
-                          {l.hitProbability}%
-                        </span>
-                      )}
+            {/* Strategy Bar */}
+            {analysis?.tradeSetup && (() => {
+              const ts = analysis.tradeSetup;
+              const ep = ts.entry || 0;
+              const slPct = ep ? ((ts.stopLoss - ep) / ep * 100).toFixed(2) : "0";
+              const tpPct = ep ? ((ts.takeProfit - ep) / ep * 100).toFixed(2) : "0";
+              const sLines = analysis.lines?.filter((l) => l.type === "support") || [];
+              const rLines = analysis.lines?.filter((l) => l.type === "resistance") || [];
+              return (
+                <div className="bg-[#0a0a0f] border border-white/[0.06] font-mono text-[11px] select-none">
+                  {/* Top bar: direction + strategy */}
+                  <div className="flex flex-wrap items-center border-b border-white/[0.06]">
+                    <div className={`px-4 py-2.5 font-bold text-xs tracking-wider shrink-0 ${
+                      ts.direction === "LONG" ? "bg-[#26a69a]/15 text-[#26a69a]" :
+                      ts.direction === "SHORT" ? "bg-[#ef5350]/15 text-[#ef5350]" :
+                      "bg-amber-500/15 text-amber-400"
+                    }`}>
+                      {ts.direction === "LONG" ? "\u25B2" : ts.direction === "SHORT" ? "\u25BC" : "\u25C6"} {ts.direction}
                     </div>
-                  ))}
+                    <div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-4 py-2 flex-1 min-w-0">
+                      <span className="text-[#2196f3] whitespace-nowrap">ENTRY <span className="text-zinc-200 ml-1">${ep.toLocaleString()}</span></span>
+                      <span className="text-[#ef5350] whitespace-nowrap">SL <span className="text-zinc-200 ml-1">${ts.stopLoss?.toLocaleString()}</span> <span className="opacity-75 ml-1">{Number(slPct) > 0 ? "+" : ""}{slPct}%</span></span>
+                      <span className="text-[#26a69a] whitespace-nowrap">TP <span className="text-zinc-200 ml-1">${ts.takeProfit?.toLocaleString()}</span> <span className="opacity-75 ml-1">{Number(tpPct) > 0 ? "+" : ""}{tpPct}%</span></span>
+                      <span className="text-amber-400 whitespace-nowrap">R:R {ts.riskReward}</span>
+                      <span className="text-zinc-500 whitespace-nowrap">{analysis.confidence}%</span>
+                    </div>
+                  </div>
+                  {/* Bottom bar: key levels */}
+                  {(rLines.length > 0 || sLines.length > 0) && (
+                    <div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-4 py-1.5 text-[10px]">
+                      {rLines.map((r, i) => {
+                        const p = r.label.match(/\$[\d,.]+/)?.[0] || "";
+                        const lb = r.label.match(/^(R\d)/)?.[0] || "R";
+                        const fib = r.label.match(/\(([^)]+)\)/)?.[1] || "";
+                        return (
+                          <span key={`r${i}`} className="text-[#ef5350] whitespace-nowrap">
+                            {lb} <span className="text-zinc-300">{p}</span>
+                            {fib && <span className="text-zinc-600 ml-1">{fib}</span>}
+                            {r.hitProbability > 0 && <span className={`ml-1 ${r.hitProbability >= 60 ? "text-[#26a69a]" : "text-zinc-500"}`}>{r.hitProbability}%</span>}
+                          </span>
+                        );
+                      })}
+                      {rLines.length > 0 && sLines.length > 0 && <span className="text-white/[0.08]">|</span>}
+                      {sLines.map((s, i) => {
+                        const p = s.label.match(/\$[\d,.]+/)?.[0] || "";
+                        const lb = s.label.match(/^(S\d)/)?.[0] || "S";
+                        const fib = s.label.match(/\(([^)]+)\)/)?.[1] || "";
+                        return (
+                          <span key={`s${i}`} className="text-[#26a69a] whitespace-nowrap">
+                            {lb} <span className="text-zinc-300">{p}</span>
+                            {fib && <span className="text-zinc-600 ml-1">{fib}</span>}
+                            {s.hitProbability > 0 && <span className={`ml-1 ${s.hitProbability >= 60 ? "text-[#26a69a]" : "text-zinc-500"}`}>{s.hitProbability}%</span>}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
+              );
+            })()}
             <div ref={containerRef} className="w-full">
               {imageLoaded ? (
                 <canvas ref={canvasRef} width={dimensions.width} height={dimensions.height}
@@ -739,7 +827,39 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
         )}
       </Card>
 
-      {/* Analysis Results — side by side on desktop */}
+      {/* Interactive TradingView Chart with analysis levels */}
+      {analysis && (
+        <Card className="p-0 bg-zinc-950/50 backdrop-blur-sm border-white/10 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <TradingChart
+            pair={selectedPair}
+            interval="4h"
+            height={600}
+            levels={(() => {
+              const lvls: ChartLevel[] = [];
+              const ts = analysis.tradeSetup;
+              if (ts?.entry) lvls.push({ price: ts.entry, label: "ENTRY", color: "#2196f3", lineStyle: "dashed", lineWidth: 2 });
+              if (ts?.stopLoss) lvls.push({ price: ts.stopLoss, label: "STOP LOSS", color: "#ef5350", lineStyle: "dashed", lineWidth: 2 });
+              if (ts?.takeProfit) lvls.push({ price: ts.takeProfit, label: "TAKE PROFIT", color: "#26a69a", lineStyle: "dashed", lineWidth: 2 });
+              analysis.supportLevels?.forEach((p, i) => lvls.push({ price: p, label: `S${i + 1}`, color: "#26a69a", lineStyle: "solid", lineWidth: 1 }));
+              analysis.resistanceLevels?.forEach((p, i) => lvls.push({ price: p, label: `R${i + 1}`, color: "#ef5350", lineStyle: "solid", lineWidth: 1 }));
+              return lvls;
+            })()}
+            zones={(() => {
+              const z: ChartZone[] = [];
+              const ts = analysis.tradeSetup;
+              if (ts?.entry && ts?.stopLoss) {
+                z.push({ topPrice: Math.max(ts.entry, ts.stopLoss), bottomPrice: Math.min(ts.entry, ts.stopLoss), color: "rgba(239, 83, 80, 0.15)" });
+              }
+              if (ts?.entry && ts?.takeProfit) {
+                z.push({ topPrice: Math.max(ts.entry, ts.takeProfit), bottomPrice: Math.min(ts.entry, ts.takeProfit), color: "rgba(38, 166, 154, 0.15)" });
+              }
+              return z;
+            })()}
+          />
+        </Card>
+      )}
+
+      {/* Analysis Results */}
       {analysis && (
         <div className="flex flex-col lg:flex-row gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
 

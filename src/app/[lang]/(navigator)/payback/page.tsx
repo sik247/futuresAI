@@ -14,12 +14,12 @@ export const metadata: Metadata = {
 };
 
 const EXCHANGES = [
-  { name: "Bitget", account: "base03", paybackRate: 55, makerFee: 0.02, takerFee: 0.06, link: "https://www.bitget.com", logo: "/icons/exchange/bitget.png" },
-  { name: "Bybit", account: "BBLL", paybackRate: 20, makerFee: 0.02, takerFee: 0.055, link: "https://www.bybit.com", logo: "/icons/exchange/bybit.png" },
-  { name: "BingX", account: "FCC9QDJK", paybackRate: 50, makerFee: 0.02, takerFee: 0.05, link: "https://www.bingx.com", logo: "/icons/exchange/bingx.png" },
-  { name: "Gate.io", account: "COINBASE", paybackRate: 75, makerFee: 0.02, takerFee: 0.05, link: "https://www.gate.io", logo: "/icons/exchange/gate.png" },
-  { name: "HTX", account: "miqkc223", paybackRate: 54, makerFee: 0.02, takerFee: 0.05, link: "https://www.htx.com", logo: "/icons/exchange/htx.png" },
-  { name: "OKX", account: "", paybackRate: 20, makerFee: 0.02, takerFee: 0.05, link: "https://www.okx.com", logo: "/icons/exchange/okx.png" },
+  { name: "Bitget", paybackRate: 55, makerFee: 0.02, takerFee: 0.06, link: "https://partner.bitget.com/bg/FuturesAI", logo: "/icons/exchange/bitget.png" },
+  { name: "Bybit", paybackRate: 20, makerFee: 0.02, takerFee: 0.055, link: "https://partner.bybit.com/b/FUTURESAI", logo: "/icons/exchange/bybit.png" },
+  { name: "BingX", paybackRate: 50, makerFee: 0.02, takerFee: 0.05, link: "https://bingx.com/en/invite/FCC9QDJK", logo: "/icons/exchange/bingx.png" },
+  { name: "Gate.io", paybackRate: 75, makerFee: 0.02, takerFee: 0.05, link: "https://www.gate.com/share/FuturesAI", logo: "/icons/exchange/gate.png" },
+  { name: "HTX", paybackRate: 54, makerFee: 0.02, takerFee: 0.05, link: "https://www.htx.com.gt/invite/en-us/1h?invite_code=miqkc223", logo: "/icons/exchange/htx.png" },
+  { name: "OKX", paybackRate: 20, makerFee: 0.02, takerFee: 0.05, link: "https://www.okx.com/join/futuresai", logo: "/icons/exchange/okx.png" },
 ];
 
 export default async function PaybackPage({
@@ -123,7 +123,6 @@ export default async function PaybackPage({
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-white">{exchange.name}</h3>
-                    <span className="text-xs text-zinc-500 font-mono">{exchange.account}</span>
                   </div>
                 </div>
 
@@ -157,7 +156,7 @@ export default async function PaybackPage({
                   rel="noopener noreferrer"
                   className="mt-6 flex items-center justify-center w-full gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-sm text-zinc-400 font-medium transition-all duration-300 hover:bg-blue-600/10 hover:border-blue-500/30 hover:text-blue-300"
                 >
-                  {ko ? "거래소 방문" : "Visit Exchange"}
+                  {ko ? "수수료 절약하기" : "Save on Trades"}
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 14 14" stroke="currentColor" strokeWidth="2">
                     <path d="M1 7h12M8 2l5 5-5 5" />
                   </svg>

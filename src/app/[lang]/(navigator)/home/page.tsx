@@ -1,83 +1,128 @@
 import { Metadata } from "next";
-import { fetchAllHLWhales } from "@/lib/services/whales/hyperliquid.service";
+import { auth } from "@/auth";
+import prisma from "@/lib/prisma";
+import { fetchMarketSignals } from "@/lib/services/signals/signals.service";
+import { fetchPortfolioPrices } from "@/lib/services/portfolio/portfolio-prices";
+import { fetchAllHLTrades } from "@/lib/services/whales/hyperliquid.service";
 import { fetchCryptoNews } from "@/lib/services/news/crypto-news.service";
-import HomeDashboard from "./home-dashboard";
+import UnifiedDashboard from "../dashboard/unified-dashboard";
 
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "CryptoX - Bloomberg-Style Crypto Command Center",
+  title: "CryptoX - Crypto Command Center",
   description:
-    "Real-time crypto market dashboard: BTC/ETH prices, whale positions, fear & greed index, top movers, live news, and AI trading tools. Your complete crypto intelligence center.",
+    "Real-time crypto dashboard: signals, whale tracking, payback, predictions, news, and AI analysis — all at a glance.",
   openGraph: {
-    title: "CryptoX - Bloomberg-Style Crypto Command Center",
+    title: "CryptoX - Crypto Command Center",
     description:
-      "Real-time crypto market dashboard with whale tracking, live prices, AI trading signals, and market intelligence.",
+      "Real-time crypto dashboard with whale tracking, live prices, AI trading signals, and market intelligence.",
     type: "website",
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "CryptoX - Bloomberg-Style Crypto Command Center",
-    description:
-      "Real-time crypto market dashboard with whale tracking, live prices, AI trading signals, and market intelligence.",
-  },
 };
-
-/* ------------------------------------------------------------------ */
-/*  Page                                                               */
-/* ------------------------------------------------------------------ */
 
 export default async function HomePage({
   params: { lang },
 }: {
   params: { lang: string };
 }) {
-  const results = await Promise.allSettled([
-    fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT", {
-      signal: AbortSignal.timeout(5000),
-      next: { revalidate: 60 },
-    }).then((r) => r.json()),
-    fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT", {
-      signal: AbortSignal.timeout(5000),
-      next: { revalidate: 60 },
-    }).then((r) => r.json()),
-    fetch("https://api.alternative.me/fng/?limit=1", {
-      signal: AbortSignal.timeout(5000),
-      next: { revalidate: 300 },
-    }).then((r) => r.json()),
-    fetch("https://api.coingecko.com/api/v3/global", {
-      signal: AbortSignal.timeout(5000),
-      next: { revalidate: 120 },
-    }).then((r) => r.json()),
-    fetch(
-      "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=20&sparkline=false&price_change_percentage=1h,24h,7d",
-      {
-        signal: AbortSignal.timeout(5000),
-        next: { revalidate: 120 },
-      }
-    ).then((r) => r.json()),
-    fetchAllHLWhales(),
-    fetchCryptoNews(),
+  const session = await auth();
+  const userEmail = session?.user?.email;
+
+  // Public data (always fetched)
+  const publicFetches = Promise.allSettled([
+    fetchMarketSignals(),
+    fetchAllHLTrades().catch(() => []),
+    fetchCryptoNews().catch(() => []),
   ]);
 
-  const btcData = results[0].status === "fulfilled" ? results[0].value : null;
-  const ethData = results[1].status === "fulfilled" ? results[1].value : null;
-  const fearGreed = results[2].status === "fulfilled" ? results[2].value : null;
-  const globalData = results[3].status === "fulfilled" ? results[3].value : null;
-  const topCoins = results[4].status === "fulfilled" ? results[4].value : [];
-  const hlWhales = results[5].status === "fulfilled" ? results[5].value : [];
-  const news = results[6].status === "fulfilled" ? results[6].value : [];
+  // User-specific data (only if logged in)
+  let user = null;
+  let portfolio = { totalValue: 0, totalCost: 0, holdingCount: 0, change24h: 0 };
+  let paybackAccounts: { exchangeName: string; exchangeImage: string | null; totalEarned: number; unpaid: number; tradeCount: number }[] = [];
+  let analyses: { id: string; pair: string | null; trend: string; confidence: number; createdAt: Date }[] = [];
+
+  if (userEmail) {
+    const dbUser = await prisma.user.findUnique({ where: { email: userEmail } });
+    if (dbUser) {
+      user = { name: dbUser.name, email: dbUser.email, role: dbUser.role, credits: dbUser.credits, isPremium: dbUser.isPremium };
+
+      // Fetch user data in parallel
+      const [portfolioR, accountsR, analysesR] = await Promise.allSettled([
+        prisma.portfolio.findFirst({ where: { userId: dbUser.id }, include: { holdings: true } }),
+        prisma.exchangeAccount.findMany({
+          where: { userId: dbUser.id },
+          include: {
+            exchange: true,
+            trades: { where: { status: "SUCCESS" }, select: { payback: true, withdrawId: true } },
+          },
+        }),
+        prisma.chartAnalysis.findMany({
+          where: { userId: dbUser.id },
+          orderBy: { createdAt: "desc" },
+          take: 5,
+          select: { id: true, pair: true, trend: true, confidence: true, createdAt: true },
+        }),
+      ]);
+
+      // Portfolio
+      if (portfolioR.status === "fulfilled" && portfolioR.value) {
+        const p = portfolioR.value;
+        const coinIds = p.holdings.map((h) => h.coinId);
+        if (coinIds.length > 0) {
+          const prices = await fetchPortfolioPrices(coinIds).catch(() => ({})) as Record<string, { usd: number; usd_24h_change: number }>;
+          let tv = 0, tc = 0, c24 = 0;
+          p.holdings.forEach((h) => {
+            const pr = prices[h.coinId];
+            if (pr) {
+              const val = h.quantity * pr.usd;
+              tv += val;
+              tc += h.quantity * h.avgBuyPrice;
+              c24 += val * (pr.usd_24h_change / 100);
+            }
+          });
+          portfolio = { totalValue: tv, totalCost: tc, holdingCount: p.holdings.length, change24h: c24 };
+        }
+      }
+
+      // Payback
+      if (accountsR.status === "fulfilled") {
+        paybackAccounts = accountsR.value.map((acc) => ({
+          exchangeName: acc.exchange.name,
+          exchangeImage: acc.exchange.imageUrl,
+          totalEarned: acc.trades.reduce((s, t) => s + t.payback, 0),
+          unpaid: acc.trades.filter((t) => !t.withdrawId).reduce((s, t) => s + t.payback, 0),
+          tradeCount: acc.trades.length,
+        }));
+      }
+
+      // Analyses
+      if (analysesR.status === "fulfilled") {
+        analyses = analysesR.value;
+      }
+    }
+  }
+
+  // Wait for public data
+  const [signalsR, tradesR, newsR] = await publicFetches;
+
+  const signals = signalsR.status === "fulfilled" ? signalsR.value : {
+    signals: [], fearGreed: { value: 50, classification: "Neutral" },
+    btcTrend: "below_sma" as const, marketSummary: "Data unavailable", updatedAt: new Date().toISOString(),
+  };
+  const trades = tradesR.status === "fulfilled" ? tradesR.value : [];
+  const news = newsR.status === "fulfilled" ? newsR.value : [];
 
   return (
-    <HomeDashboard
+    <UnifiedDashboard
       lang={lang}
-      btcData={btcData}
-      ethData={ethData}
-      fearGreed={fearGreed}
-      globalData={globalData}
-      topCoins={Array.isArray(topCoins) ? topCoins : []}
-      hlWhales={hlWhales}
-      news={news.slice(0, 10)}
+      user={user || { name: "Guest", email: "", role: "USER", credits: 0, isPremium: false }}
+      signals={signals}
+      portfolio={portfolio}
+      paybackAccounts={JSON.parse(JSON.stringify(paybackAccounts))}
+      whalesTrades={JSON.parse(JSON.stringify(trades.slice(0, 8)))}
+      recentAnalyses={JSON.parse(JSON.stringify(analyses))}
+      news={JSON.parse(JSON.stringify(news.slice(0, 8)))}
     />
   );
 }

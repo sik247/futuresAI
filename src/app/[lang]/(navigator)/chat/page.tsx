@@ -22,9 +22,7 @@ export default async function ChatPage({
   });
   if (!user) redirect(`/${lang}/login`);
 
-  const hasAccess = user.role === "ADMIN" || user.chatEnabled;
-
   return (
-    <ChatClient lang={lang} hasAccess={hasAccess} userName={user.name} />
+    <ChatClient lang={lang} userName={user.name} />
   );
 }

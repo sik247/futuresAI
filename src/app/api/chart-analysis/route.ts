@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { runMultiAgentAnalysis } from "@/lib/services/chart-analysis/orchestrator";
-import { checkUsageAllowance, incrementUsage } from "@/lib/services/chart-analysis/subscription.service";
+import { checkDailyLimit } from "@/lib/services/usage.service";
 import {
   notifyAdmin,
   formatChartAnalysisNotification,
@@ -36,13 +36,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Admin users bypass subscription check; paid users need active subscription
+    // Admin users bypass daily limit check
     if (user.role !== "ADMIN") {
-      const { allowed, periodEnd } = await checkUsageAllowance(user.id);
+      const { allowed, used, limit } = await checkDailyLimit(user.id, user.isPremium, "chart");
       if (!allowed) {
         return NextResponse.json(
-          { error: "Subscription required", periodEnd },
-          { status: 403 }
+          { error: "Daily chart analysis limit reached", used, limit },
+          { status: 429 }
         );
       }
     }
@@ -77,11 +77,6 @@ export async function POST(req: NextRequest) {
         chargedAt: new Date(),
       },
     });
-
-    // Increment usage for non-admin users
-    if (user.role !== "ADMIN") {
-      await incrementUsage(user.id);
-    }
 
     // Notify admin
     try {

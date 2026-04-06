@@ -8,6 +8,7 @@ declare module "next-auth" {
       email: string;
       name: string;
       role: string;
+      isPremium: boolean;
       accessToken: string;
     };
   }
@@ -19,6 +20,7 @@ declare module "next-auth/jwt" {
     name: string;
     email: string;
     role: string;
+    isPremium: boolean;
     access_token: string;
   }
 }

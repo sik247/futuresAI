@@ -75,7 +75,7 @@ export const authOptions: NextAuthOptions = {
           });
         }
 
-        return { id: user.id, email: user.email, name: user.name, role: user.role };
+        return { id: user.id, email: user.email, name: user.name, role: user.role, isPremium: user.isPremium };
       },
     }),
     // Email/password login
@@ -110,6 +110,7 @@ export const authOptions: NextAuthOptions = {
       session.user.email = token.email;
       session.user.name = token.name;
       session.user.role = token.role;
+      session.user.isPremium = token.isPremium;
       return session;
     },
     async jwt({ token, user, account }) {
@@ -118,8 +119,9 @@ export const authOptions: NextAuthOptions = {
         token.email = user.email ?? "";
         token.name = user.name ?? "";
         token.role = (user as any).role ?? "USER";
+        token.isPremium = (user as any).isPremium ?? false;
       }
-      // For OAuth sign-in, fetch user from DB to get role
+      // For OAuth sign-in, fetch user from DB to get role + premium status
       if (account && account.provider !== "credentials") {
         const dbUser = await prisma.user.findUnique({
           where: { email: token.email! },
@@ -127,6 +129,7 @@ export const authOptions: NextAuthOptions = {
         if (dbUser) {
           token.id = dbUser.id;
           token.role = dbUser.role;
+          token.isPremium = dbUser.isPremium;
         }
       }
       return token;
