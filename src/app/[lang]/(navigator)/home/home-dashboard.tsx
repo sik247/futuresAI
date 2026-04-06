@@ -125,6 +125,7 @@ function fmtUsd(v: number) {
 }
 
 function fmtPrice(v: number) {
+  if (isNaN(v) || !isFinite(v)) return "--";
   if (v >= 10000) return v.toLocaleString(undefined, { maximumFractionDigits: 0 });
   if (v >= 1) return v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   return v.toFixed(6);
@@ -159,10 +160,14 @@ function StatBar({
   fearGreed,
   globalData,
 }: Pick<HomeDashboardProps, "btcData" | "ethData" | "fearGreed" | "globalData">) {
-  const btcPrice = btcData ? parseFloat(btcData.lastPrice) : null;
-  const btcPct = btcData ? parseFloat(btcData.priceChangePercent) : null;
-  const ethPrice = ethData ? parseFloat(ethData.lastPrice) : null;
-  const ethPct = ethData ? parseFloat(ethData.priceChangePercent) : null;
+  const btcPriceRaw = btcData?.lastPrice ? parseFloat(btcData.lastPrice) : null;
+  const btcPrice = btcPriceRaw !== null && !isNaN(btcPriceRaw) ? btcPriceRaw : null;
+  const btcPctRaw = btcData?.priceChangePercent ? parseFloat(btcData.priceChangePercent) : null;
+  const btcPct = btcPctRaw !== null && !isNaN(btcPctRaw) ? btcPctRaw : null;
+  const ethPriceRaw = ethData?.lastPrice ? parseFloat(ethData.lastPrice) : null;
+  const ethPrice = ethPriceRaw !== null && !isNaN(ethPriceRaw) ? ethPriceRaw : null;
+  const ethPctRaw = ethData?.priceChangePercent ? parseFloat(ethData.priceChangePercent) : null;
+  const ethPct = ethPctRaw !== null && !isNaN(ethPctRaw) ? ethPctRaw : null;
   const fg = fearGreed?.data?.[0];
   const mktCap = globalData?.data?.total_market_cap?.usd ?? null;
   const vol = globalData?.data?.total_volume?.usd ?? null;
@@ -172,7 +177,7 @@ function StatBar({
     <div className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900/80 border-b border-white/[0.06] text-xs font-mono overflow-x-auto shrink-0 whitespace-nowrap">
       {/* BTC */}
       <span className="text-zinc-500">BTC</span>
-      {btcPrice !== null ? (
+      {btcPrice !== null && !isNaN(btcPrice) ? (
         <>
           <span className="text-white font-bold tabular-nums">${fmtPrice(btcPrice)}</span>
           <span className={`tabular-nums ${pctColor(btcPct)}`}>{pctFmt(btcPct)}</span>
@@ -183,7 +188,7 @@ function StatBar({
       <span className="text-zinc-700">|</span>
       {/* ETH */}
       <span className="text-zinc-500">ETH</span>
-      {ethPrice !== null ? (
+      {ethPrice !== null && !isNaN(ethPrice) ? (
         <>
           <span className="text-white font-bold tabular-nums">${fmtPrice(ethPrice)}</span>
           <span className={`tabular-nums ${pctColor(ethPct)}`}>{pctFmt(ethPct)}</span>
@@ -603,32 +608,63 @@ function SignalsWidget({ signals, lang }: { signals: SignalsData; lang: string }
         <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">Quant Signals</span>
         <Link href={`/${lang}/quant`} className="text-[9px] font-mono text-blue-400 hover:text-blue-300 transition-colors">All →</Link>
       </div>
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
         {topSignals.length === 0 ? (
           <div className="flex items-center justify-center h-full text-[10px] font-mono text-zinc-700">No signals</div>
         ) : (
           topSignals.map((s) => {
-            const signalColor = s.signal === "Strong Buy" ? "text-emerald-400 bg-emerald-500/15" :
-              s.signal === "Buy" ? "text-emerald-400 bg-emerald-500/10" :
-              s.signal === "Sell" ? "text-red-400 bg-red-500/10" :
-              s.signal === "Strong Sell" ? "text-red-400 bg-red-500/15" :
-              "text-zinc-400 bg-zinc-500/10";
-            const dirColor = s.direction === "LONG" ? "text-emerald-400" : s.direction === "SHORT" ? "text-red-400" : "text-zinc-500";
+            const signalColor = s.signal === "Strong Buy" ? "text-emerald-300 bg-emerald-500/20 border-emerald-500/30" :
+              s.signal === "Buy" ? "text-emerald-400 bg-emerald-500/15 border-emerald-500/25" :
+              s.signal === "Sell" ? "text-red-400 bg-red-500/15 border-red-500/25" :
+              s.signal === "Strong Sell" ? "text-red-300 bg-red-500/20 border-red-500/30" :
+              "text-zinc-400 bg-zinc-500/15 border-zinc-500/25";
+            const dirBg = s.direction === "LONG" ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" :
+              s.direction === "SHORT" ? "bg-red-500/20 text-red-300 border-red-500/30" :
+              "bg-zinc-500/15 text-zinc-400 border-zinc-500/25";
+            const coinLetter = s.symbol[0];
+            const coinColor = s.direction === "LONG" ? "bg-emerald-500/20 text-emerald-400" :
+              s.direction === "SHORT" ? "bg-red-500/20 text-red-400" :
+              "bg-zinc-700 text-zinc-400";
             return (
-              <div key={s.symbol} className="flex items-center gap-2 px-3 py-1.5 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-                <span className="text-[10px] font-mono font-bold text-white w-10">{s.symbol}</span>
-                <span className={`text-[8px] font-mono font-bold px-1.5 py-0.5 rounded ${signalColor}`}>{s.signal}</span>
-                <span className={`text-[8px] font-mono font-bold ${dirColor}`}>{s.direction}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1">
-                    <span className="text-[8px] font-mono text-zinc-600">RSI</span>
-                    <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full ${s.rsi > 70 ? "bg-red-500" : s.rsi < 30 ? "bg-emerald-500" : "bg-blue-500"}`} style={{ width: `${Math.min(s.rsi, 100)}%` }} />
+              <div key={s.symbol} className="rounded-lg border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.10] transition-all px-2.5 py-2.5">
+                {/* Top row: coin icon + symbol/name + price + change */}
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold ${coinColor}`}>
+                    {coinLetter}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] font-mono font-bold text-white">{s.symbol}</span>
+                      <span className="text-[8px] font-mono text-zinc-600 truncate">{s.name}</span>
                     </div>
-                    <span className={`text-[8px] font-mono tabular-nums ${s.rsi > 70 ? "text-red-400" : s.rsi < 30 ? "text-emerald-400" : "text-zinc-400"}`}>{s.rsi?.toFixed(0)}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[9px] font-mono text-zinc-300 tabular-nums">${fmtPrice(s.price)}</span>
+                      <span className={`text-[9px] font-mono tabular-nums ${s.change24h >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                        {s.change24h >= 0 ? "+" : ""}{s.change24h?.toFixed(2)}%
+                      </span>
+                    </div>
+                  </div>
+                  {/* Badges */}
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${signalColor}`}>{s.signal}</span>
+                    <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${dirBg}`}>{s.direction}</span>
                   </div>
                 </div>
-                <span className="text-[9px] font-mono text-zinc-600 tabular-nums">{s.confidence}%</span>
+                {/* Bottom row: RSI bar + confidence */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[8px] font-mono text-zinc-600 shrink-0">RSI</span>
+                  <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${s.rsi > 70 ? "bg-red-500" : s.rsi < 30 ? "bg-emerald-500" : "bg-blue-500"}`}
+                      style={{ width: `${Math.min(s.rsi, 100)}%` }}
+                    />
+                  </div>
+                  <span className={`text-[9px] font-mono tabular-nums shrink-0 ${s.rsi > 70 ? "text-red-400" : s.rsi < 30 ? "text-emerald-400" : "text-zinc-400"}`}>
+                    {s.rsi?.toFixed(0)}
+                  </span>
+                  <span className="text-[8px] font-mono text-zinc-600 shrink-0">|</span>
+                  <span className="text-[9px] font-mono text-zinc-400 tabular-nums shrink-0">{s.confidence}%</span>
+                </div>
               </div>
             );
           })
@@ -672,7 +708,7 @@ function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: st
           All →
         </Link>
       </div>
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto p-2 space-y-2">
         {interesting.length === 0 ? (
           <div className="flex items-center justify-center h-full text-[10px] font-mono text-zinc-700">
             No active predictions
@@ -680,34 +716,56 @@ function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: st
         ) : (
           interesting.map((event) => {
             const yesPrice = event.parsedYes;
+            const yesPct = Math.round(yesPrice * 100);
+            const noPct = 100 - yesPct;
+            const vol = event.markets[0]?.volume ?? event.volume;
             return (
               <div
                 key={event.id}
-                className="flex items-center gap-2 px-3 py-2 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
+                className="rounded-lg border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.14] transition-all overflow-hidden"
               >
-                {event.image && (
-                  <img
-                    src={event.image}
-                    alt=""
-                    className="w-6 h-6 rounded-full shrink-0 object-cover"
-                  />
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] text-zinc-300 truncate">{event.title}</p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[9px] font-mono text-emerald-400 tabular-nums">
-                    Yes {(yesPrice * 100).toFixed(0)}%
-                  </span>
-                  <div className="w-16 h-1.5 rounded-full bg-zinc-800 overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-emerald-500"
-                      style={{ width: `${yesPrice * 100}%` }}
+                <div className="flex gap-2.5 p-2.5">
+                  {/* Thumbnail */}
+                  {event.image ? (
+                    <img
+                      src={event.image}
+                      alt=""
+                      className="w-10 h-10 rounded-md shrink-0 object-cover bg-zinc-800"
                     />
+                  ) : (
+                    <div className="w-10 h-10 rounded-md shrink-0 bg-zinc-800 flex items-center justify-center">
+                      <span className="text-xs font-bold text-zinc-600">{event.title[0]}</span>
+                    </div>
+                  )}
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-medium text-zinc-200 leading-snug line-clamp-2 mb-1.5">
+                      {event.title}
+                    </p>
+                    {/* Yes/No probability bar */}
+                    <div className="w-full h-2 rounded-full overflow-hidden flex">
+                      <div
+                        className="h-full bg-gradient-to-r from-emerald-600 to-emerald-500"
+                        style={{ width: `${yesPct}%` }}
+                      />
+                      <div
+                        className="h-full bg-gradient-to-r from-red-500 to-red-600 flex-1"
+                      />
+                    </div>
+                    <div className="flex justify-between items-center mt-1">
+                      <span className="text-[9px] font-mono font-bold text-emerald-400 tabular-nums">
+                        Yes {yesPct}%
+                      </span>
+                      {vol > 0 && (
+                        <span className="text-[8px] font-mono text-zinc-600 tabular-nums">
+                          Vol {fmtUsd(vol)}
+                        </span>
+                      )}
+                      <span className="text-[9px] font-mono font-bold text-red-400 tabular-nums">
+                        No {noPct}%
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-[9px] font-mono text-red-400 tabular-nums">
-                    No {((1 - yesPrice) * 100).toFixed(0)}%
-                  </span>
                 </div>
               </div>
             );
@@ -768,7 +826,7 @@ export default function HomeDashboard({
       {/* ── Desktop: Two-row layout ─────────────────────────────── */}
       <div className="hidden lg:flex flex-col flex-1 overflow-hidden min-h-0">
         {/* Top row (50%) — Predictions + Whales + Signals */}
-        <div className="flex border-b border-white/[0.06] overflow-hidden shrink-0" style={{ height: "50%" }}>
+        <div className="flex border-b border-white/[0.06] overflow-hidden flex-1 min-h-0" style={{ flex: "1 1 0" }}>
           {/* Predictions (40%) — main focus */}
           <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "40%" }}>
             <PredictionCards events={polymarketEvents} lang={lang} />
@@ -796,7 +854,7 @@ export default function HomeDashboard({
         </div>
 
         {/* Bottom row (50%) — News (bigger) + Research (bigger) */}
-        <div className="flex flex-1 overflow-hidden min-h-0">
+        <div className="flex overflow-hidden min-h-0" style={{ flex: "1 1 0" }}>
           {/* Content Feed — News + YouTube (55%) */}
           <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "55%" }}>
             <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
