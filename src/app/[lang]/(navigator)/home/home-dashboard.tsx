@@ -61,6 +61,27 @@ type YouTubeItem = {
   thumbnailUrl: string;
 };
 
+type SignalItem = {
+  symbol: string;
+  name: string;
+  price: number;
+  change24h: number;
+  signal: string;
+  direction: string;
+  rsi: number;
+  macdHistogram: number;
+  confidence: number;
+  volume24h: number;
+};
+
+type SignalsData = {
+  signals: SignalItem[];
+  fearGreed: { value: number; classification: string };
+  btcTrend: string;
+  marketSummary: string;
+  updatedAt: string;
+};
+
 type PolymarketEvent = {
   id: string;
   title: string;
@@ -86,6 +107,7 @@ export type HomeDashboardProps = {
   hlWhales: HLWalletData[];
   news: CryptoNewsItem[];
   youtubeItems: YouTubeItem[];
+  signals: SignalsData;
   polymarketEvents: PolymarketEvent[];
   blogPosts: BlogPost[];
 };
@@ -570,21 +592,77 @@ function BlogCards({ posts, lang }: { posts: BlogPost[]; lang: string }) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Quant Signals Widget                                               */
+/* ------------------------------------------------------------------ */
+
+function SignalsWidget({ signals, lang }: { signals: SignalsData; lang: string }) {
+  const topSignals = (signals.signals || []).slice(0, 6);
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
+        <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">Quant Signals</span>
+        <Link href={`/${lang}/quant`} className="text-[9px] font-mono text-blue-400 hover:text-blue-300 transition-colors">All →</Link>
+      </div>
+      <div className="flex-1 overflow-y-auto">
+        {topSignals.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-[10px] font-mono text-zinc-700">No signals</div>
+        ) : (
+          topSignals.map((s) => {
+            const signalColor = s.signal === "Strong Buy" ? "text-emerald-400 bg-emerald-500/15" :
+              s.signal === "Buy" ? "text-emerald-400 bg-emerald-500/10" :
+              s.signal === "Sell" ? "text-red-400 bg-red-500/10" :
+              s.signal === "Strong Sell" ? "text-red-400 bg-red-500/15" :
+              "text-zinc-400 bg-zinc-500/10";
+            const dirColor = s.direction === "LONG" ? "text-emerald-400" : s.direction === "SHORT" ? "text-red-400" : "text-zinc-500";
+            return (
+              <div key={s.symbol} className="flex items-center gap-2 px-3 py-1.5 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
+                <span className="text-[10px] font-mono font-bold text-white w-10">{s.symbol}</span>
+                <span className={`text-[8px] font-mono font-bold px-1.5 py-0.5 rounded ${signalColor}`}>{s.signal}</span>
+                <span className={`text-[8px] font-mono font-bold ${dirColor}`}>{s.direction}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[8px] font-mono text-zinc-600">RSI</span>
+                    <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full ${s.rsi > 70 ? "bg-red-500" : s.rsi < 30 ? "bg-emerald-500" : "bg-blue-500"}`} style={{ width: `${Math.min(s.rsi, 100)}%` }} />
+                    </div>
+                    <span className={`text-[8px] font-mono tabular-nums ${s.rsi > 70 ? "text-red-400" : s.rsi < 30 ? "text-emerald-400" : "text-zinc-400"}`}>{s.rsi?.toFixed(0)}</span>
+                  </div>
+                </div>
+                <span className="text-[9px] font-mono text-zinc-600 tabular-nums">{s.confidence}%</span>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Prediction Cards (Polymarket)                                      */
 /* ------------------------------------------------------------------ */
 
 function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: string }) {
-  // Filter to interesting predictions (not 0%/100% or near-certain)
+  // Parse and filter predictions
   const interesting = events
-    .filter((e) => {
-      if (!e.markets || e.markets.length === 0) return false;
+    .map((e) => {
+      if (!e.markets || e.markets.length === 0) return null;
       const m = e.markets[0];
-      if (!m.outcomePrices || m.outcomePrices.length < 2) return false;
-      const yesPrice = parseFloat(m.outcomePrices[0] || "0");
-      const noPrice = parseFloat(m.outcomePrices[1] || "0");
-      return yesPrice > 0.05 && yesPrice < 0.95 && noPrice > 0.05 && noPrice < 0.95;
+      // outcomePrices can be a JSON string or already parsed array
+      let prices: string[] = [];
+      if (typeof m.outcomePrices === "string") {
+        try { prices = JSON.parse(m.outcomePrices); } catch { prices = []; }
+      } else if (Array.isArray(m.outcomePrices)) {
+        prices = m.outcomePrices;
+      }
+      if (prices.length < 2) return null;
+      const yesPrice = parseFloat(prices[0] || "0");
+      // Skip boring 0/100 outcomes
+      if (yesPrice <= 0.02 || yesPrice >= 0.98) return null;
+      return { ...e, parsedYes: yesPrice };
     })
-    .slice(0, 8);
+    .filter((e): e is PolymarketEvent & { parsedYes: number } => e !== null)
+    .slice(0, 10);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -601,8 +679,7 @@ function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: st
           </div>
         ) : (
           interesting.map((event) => {
-            const m = event.markets[0];
-            const yesPrice = parseFloat(m.outcomePrices[0] || "0");
+            const yesPrice = event.parsedYes;
             return (
               <div
                 key={event.id}
@@ -655,13 +732,14 @@ export default function HomeDashboard({
   hlWhales,
   news,
   youtubeItems,
+  signals,
   polymarketEvents,
   blogPosts,
 }: HomeDashboardProps) {
   const [mobileTab, setMobileTab] = useState<"market" | "whales" | "news" | "research" | "predictions">("market");
 
   return (
-    <div className="bg-zinc-950 font-mono flex flex-col" style={{ height: "calc(100vh - 64px)" }}>
+    <div className="bg-zinc-950 font-mono flex flex-col" style={{ height: "calc(100vh - 140px)" }}>
       {/* Stat Bar */}
       <StatBar
         btcData={btcData}
@@ -722,18 +800,22 @@ export default function HomeDashboard({
           </div>
         </div>
 
-        {/* Bottom row (40%) — 3 equal columns: News | Research | Predictions */}
+        {/* Bottom row (40%) — 4 columns: Signals | Feed | Research | Predictions */}
         <div className="flex flex-1 overflow-hidden min-h-0">
-          {/* News Cards (1/3) */}
-          <div className="border-r border-white/[0.06] overflow-hidden flex flex-col flex-1">
+          {/* Quant Signals (20%) */}
+          <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "20%" }}>
+            <SignalsWidget signals={signals} lang={lang} />
+          </div>
+          {/* Content Feed (30%) */}
+          <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "30%" }}>
             <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
           </div>
-          {/* Blog Research Cards (1/3) */}
-          <div className="border-r border-white/[0.06] overflow-hidden flex flex-col flex-1">
+          {/* Blog Research (25%) */}
+          <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "25%" }}>
             <BlogCards posts={blogPosts} lang={lang} />
           </div>
-          {/* Prediction Cards (1/3) */}
-          <div className="overflow-hidden flex flex-col flex-1">
+          {/* Predictions (25%) */}
+          <div className="overflow-hidden flex flex-col" style={{ width: "25%" }}>
             <PredictionCards events={polymarketEvents} lang={lang} />
           </div>
         </div>

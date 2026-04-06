@@ -180,7 +180,7 @@ export default async function ChartsPage({
       />
 
       {/* Desktop layout: single screen, no scroll */}
-      <div className="hidden lg:grid h-[calc(100vh-108px)] grid-rows-[60%_40%] overflow-hidden">
+      <div className="hidden lg:grid h-[calc(100vh-140px)] grid-rows-[60%_40%] overflow-hidden">
         {/* Top row: Chart (65%) + Fear & Greed / Market Stats (35%) */}
         <div className="grid grid-cols-[1fr_380px] border-b border-white/[0.06] overflow-hidden">
           {/* Chart Terminal */}

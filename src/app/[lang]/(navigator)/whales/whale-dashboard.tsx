@@ -607,7 +607,7 @@ export default function WhaleDashboard({
       </div>
 
       {/* Main grid — desktop */}
-      <div className="hidden lg:grid h-[calc(100vh-108px)]" style={{ gridTemplateColumns: "260px 1fr" }}>
+      <div className="hidden lg:grid h-[calc(100vh-140px)]" style={{ gridTemplateColumns: "260px 1fr" }}>
         {/* Left sidebar */}
         <div className="border-r border-white/[0.06] flex flex-col overflow-hidden">
           <div className="px-3 py-2 border-b border-white/[0.06] shrink-0 flex items-center justify-between">
@@ -711,7 +711,7 @@ export default function WhaleDashboard({
       </div>
 
       {/* Mobile views */}
-      <div className="lg:hidden" style={{ height: "calc(100vh - 108px)", overflow: "hidden" }}>
+      <div className="lg:hidden" style={{ height: "calc(100vh - 140px)", overflow: "hidden" }}>
         {mobileTab === "figures" && (
           <div className="h-full overflow-y-auto">
             {/* Horizontal strip of figures with data */}

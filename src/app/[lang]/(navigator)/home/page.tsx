@@ -3,6 +3,7 @@ import HomeDashboard from "./home-dashboard";
 import { fetchCryptoNews } from "@/lib/services/news/crypto-news.service";
 import { fetchYouTubeFeeds } from "@/lib/services/social/youtube-feed.service";
 import { fetchAllHLWhales } from "@/lib/services/whales/hyperliquid.service";
+import { fetchMarketSignals } from "@/lib/services/signals/signals.service";
 import { QUANT_BLOG_POSTS } from "@/lib/data/quant-blog-posts";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,7 @@ export default async function HomePage({
     hlWhalesR,
     newsR,
     youtubeR,
+    signalsR,
     polymarketR,
   ] = await Promise.allSettled([
     // BTC price from Binance
@@ -70,6 +72,8 @@ export default async function HomePage({
     fetchCryptoNews().catch(() => []),
     // YouTube feeds
     fetchYouTubeFeeds().catch(() => []),
+    // Quant signals
+    fetchMarketSignals().catch(() => ({ signals: [], fearGreed: { value: 50, classification: "Neutral" }, btcTrend: "above_sma", marketSummary: "", updatedAt: new Date().toISOString() })),
     // Polymarket crypto events
     fetch(
       "https://gamma-api.polymarket.com/events?closed=false&tag_slug=crypto&limit=50&order=volume&ascending=false",
@@ -91,6 +95,7 @@ export default async function HomePage({
   const hlWhales = hlWhalesR.status === "fulfilled" ? hlWhalesR.value : [];
   const news = newsR.status === "fulfilled" ? newsR.value : [];
   const youtubeItems = youtubeR.status === "fulfilled" ? youtubeR.value : [];
+  const signals = signalsR.status === "fulfilled" ? signalsR.value : { signals: [], fearGreed: { value: 50, classification: "Neutral" }, btcTrend: "above_sma", marketSummary: "", updatedAt: new Date().toISOString() };
   const polymarketEvents =
     polymarketR.status === "fulfilled" && Array.isArray(polymarketR.value)
       ? polymarketR.value
@@ -110,6 +115,7 @@ export default async function HomePage({
       hlWhales={JSON.parse(JSON.stringify(hlWhales.slice(0, 8)))}
       news={JSON.parse(JSON.stringify(news.slice(0, 12)))}
       youtubeItems={JSON.parse(JSON.stringify(youtubeItems.slice(0, 6).map((y: any) => ({ ...y, publishedAt: y.publishedAt.toISOString() }))))}
+      signals={JSON.parse(JSON.stringify(signals))}
       polymarketEvents={JSON.parse(JSON.stringify(polymarketEvents))}
       blogPosts={JSON.parse(JSON.stringify(blogPosts))}
     />
