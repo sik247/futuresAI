@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import type { JSX } from "react";
 import type { CryptoNewsItem } from "@/lib/services/news/crypto-news.service";
 import type { HLWalletData } from "@/lib/services/whales/hyperliquid.service";
 
@@ -177,7 +176,7 @@ function StatBar({
   const btcDom = globalData?.data?.market_cap_percentage?.btc ?? null;
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900/80 border-b border-white/[0.06] text-xs font-mono overflow-x-auto shrink-0 whitespace-nowrap">
+    <div className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900/80 border-b border-white/[0.06] text-[13px] font-mono overflow-x-auto shrink-0 whitespace-nowrap">
       {/* BTC */}
       <span className="text-zinc-500">BTC</span>
       {btcPrice !== null && !isNaN(btcPrice) ? (
@@ -236,7 +235,7 @@ function StatBar({
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
           <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
         </span>
-        <span className="text-emerald-400 text-[10px] uppercase tracking-[0.15em]">LIVE</span>
+        <span className="text-emerald-400 text-[12px] uppercase tracking-[0.15em]">LIVE</span>
       </span>
     </div>
   );
@@ -484,10 +483,10 @@ function ContentFeed({ news, youtubeItems, lang }: { news: CryptoNewsItem[]; you
                     </div>
                   </div>
                   <div className="p-2">
-                    <p className="text-[10px] text-zinc-300 group-hover:text-white leading-snug line-clamp-2 transition-colors">{yt.title}</p>
+                    <p className="text-[13px] text-zinc-300 group-hover:text-white leading-snug line-clamp-2 transition-colors">{yt.title}</p>
                     <div className="flex items-center gap-1.5 mt-1">
-                      <span className="text-[8px] text-zinc-600">{yt.channelName}</span>
-                      <span className="text-[8px] text-zinc-700">{timeAgo(new Date(yt.publishedAt))}</span>
+                      <span className="text-[11px] text-zinc-600">{yt.channelName}</span>
+                      <span className="text-[11px] text-zinc-700">{timeAgo(new Date(yt.publishedAt))}</span>
                     </div>
                   </div>
                 </a>
@@ -513,12 +512,12 @@ function ContentFeed({ news, youtubeItems, lang }: { news: CryptoNewsItem[]; you
                   </div>
                 )}
                 <div className="p-2">
-                  <span className="text-[8px] font-mono text-zinc-600">{timeAgo(n.publishedAt)}</span>
-                  <p className="text-[10px] text-zinc-300 group-hover:text-white leading-snug line-clamp-2 transition-colors mt-0.5">{n.title}</p>
+                  <span className="text-[11px] font-mono text-zinc-600">{timeAgo(n.publishedAt)}</span>
+                  <p className="text-[13px] text-zinc-300 group-hover:text-white leading-snug line-clamp-2 transition-colors mt-0.5">{n.title}</p>
                   {n.categories && n.categories.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1">
                       {n.categories.slice(0, 2).map((cat) => (
-                        <span key={cat} className="px-1 py-0.5 text-[7px] font-mono uppercase rounded bg-white/[0.04] text-zinc-600">{cat}</span>
+                        <span key={cat} className="px-1 py-0.5 text-[10px] font-mono uppercase rounded bg-white/[0.04] text-zinc-600">{cat}</span>
                       ))}
                     </div>
                   )}
@@ -561,11 +560,11 @@ function BlogCards({ posts, lang }: { posts: BlogPost[]; lang: string }) {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
-                  <span className="text-[8px] font-mono font-bold text-white bg-white/[0.08] px-1 py-0.5 rounded">
+                  <span className="text-[11px] font-mono font-bold text-white bg-white/[0.08] px-1 py-0.5 rounded">
                     {post.symbol}
                   </span>
                   <span
-                    className={`text-[8px] font-mono font-bold px-1 py-0.5 rounded ${
+                    className={`text-[11px] font-mono font-bold px-1 py-0.5 rounded ${
                       post.direction === "LONG"
                         ? "bg-emerald-500/15 text-emerald-400"
                         : post.direction === "SHORT"
@@ -575,9 +574,9 @@ function BlogCards({ posts, lang }: { posts: BlogPost[]; lang: string }) {
                   >
                     {post.direction}
                   </span>
-                  <span className="text-[8px] font-mono text-zinc-600">RSI {post.rsi}</span>
+                  <span className="text-[11px] font-mono text-zinc-600">RSI {post.rsi}</span>
                 </div>
-                <p className="text-[10px] text-zinc-300 group-hover:text-white leading-snug line-clamp-2 transition-colors">
+                <p className="text-[13px] text-zinc-300 group-hover:text-white leading-snug line-clamp-2 transition-colors">
                   {lang === "ko" ? post.titleKo : post.title}
                 </p>
               </div>
@@ -623,36 +622,36 @@ function SignalsWidget({ signals, lang }: { signals: SignalsData; lang: string }
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1">
-                      <span className="text-[10px] font-mono font-bold text-white">{s.symbol}</span>
-                      <span className="text-[8px] font-mono text-zinc-600 truncate">{s.name}</span>
+                      <span className="text-[12px] font-mono font-bold text-white">{s.symbol}</span>
+                      <span className="text-[11px] font-mono text-zinc-600 truncate">{s.name}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[9px] font-mono text-zinc-300 tabular-nums">${fmtPrice(s.price)}</span>
-                      <span className={`text-[9px] font-mono tabular-nums ${s.change24h >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                      <span className="text-[12px] font-mono text-zinc-300 tabular-nums">${fmtPrice(s.price)}</span>
+                      <span className={`text-[12px] font-mono tabular-nums ${s.change24h >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                         {s.change24h >= 0 ? "+" : ""}{s.change24h?.toFixed(2)}%
                       </span>
                     </div>
                   </div>
                   {/* Badges */}
                   <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${signalColor}`}>{s.signal}</span>
-                    <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${dirBg}`}>{s.direction}</span>
+                    <span className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded border ${signalColor}`}>{s.signal}</span>
+                    <span className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded border ${dirBg}`}>{s.direction}</span>
                   </div>
                 </div>
                 {/* Bottom row: RSI bar + confidence */}
                 <div className="flex items-center gap-2">
-                  <span className="text-[8px] font-mono text-zinc-600 shrink-0">RSI</span>
+                  <span className="text-[11px] font-mono text-zinc-600 shrink-0">RSI</span>
                   <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full ${s.rsi > 70 ? "bg-red-500" : s.rsi < 30 ? "bg-emerald-500" : "bg-blue-500"}`}
                       style={{ width: `${Math.min(s.rsi, 100)}%` }}
                     />
                   </div>
-                  <span className={`text-[9px] font-mono tabular-nums shrink-0 ${s.rsi > 70 ? "text-red-400" : s.rsi < 30 ? "text-emerald-400" : "text-zinc-400"}`}>
+                  <span className={`text-[11px] font-mono tabular-nums shrink-0 ${s.rsi > 70 ? "text-red-400" : s.rsi < 30 ? "text-emerald-400" : "text-zinc-400"}`}>
                     {s.rsi?.toFixed(0)}
                   </span>
-                  <span className="text-[8px] font-mono text-zinc-600 shrink-0">|</span>
-                  <span className="text-[9px] font-mono text-zinc-400 tabular-nums shrink-0">{s.confidence}%</span>
+                  <span className="text-[11px] font-mono text-zinc-600 shrink-0">|</span>
+                  <span className="text-[11px] font-mono text-zinc-400 tabular-nums shrink-0">{s.confidence}%</span>
                 </div>
               </div>
             );
@@ -709,9 +708,9 @@ function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: st
             <div key={event.id} className="rounded-lg border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all p-3">
               {/* Header: title + volume */}
               <div className="flex items-start justify-between gap-2 mb-2.5">
-                <h3 className="text-[12px] font-semibold text-zinc-100 leading-snug flex-1">{event.title}</h3>
+                <h3 className="text-[14px] font-semibold text-zinc-100 leading-snug flex-1">{event.title}</h3>
                 {event.totalVol > 0 && (
-                  <span className="text-[9px] font-mono text-zinc-600 bg-white/[0.04] px-1.5 py-0.5 rounded shrink-0 tabular-nums">
+                  <span className="text-[11px] font-mono text-zinc-600 bg-white/[0.04] px-1.5 py-0.5 rounded shrink-0 tabular-nums">
                     {fmtUsd(event.totalVol)} vol
                   </span>
                 )}
@@ -721,9 +720,9 @@ function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: st
               <div className="space-y-1.5">
                 {event.outcomes.map((o, i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <span className="text-[11px] text-zinc-400 flex-1 truncate">{o.label}</span>
-                    <span className="text-[11px] font-mono font-bold text-zinc-200 tabular-nums w-12 text-right">{o.pct.toFixed(0)}%</span>
-                    <span className={`text-[10px] font-mono tabular-nums w-14 text-right ${
+                    <span className="text-[12px] text-zinc-400 flex-1 truncate">{o.label}</span>
+                    <span className="text-[13px] font-mono font-bold text-zinc-200 tabular-nums w-12 text-right">{o.pct.toFixed(0)}%</span>
+                    <span className={`text-[11px] font-mono tabular-nums w-14 text-right ${
                       o.change > 0 ? "text-emerald-400" : o.change < 0 ? "text-red-400" : "text-zinc-600"
                     }`}>
                       {o.change > 0 ? "↑" : o.change < 0 ? "↓" : "—"} {Math.abs(o.change).toFixed(1)}%
@@ -732,15 +731,22 @@ function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: st
                 ))}
               </div>
 
+              {/* Analysis text */}
+              <p className="text-[12px] text-zinc-500 leading-relaxed mt-2">
+                {event.outcomes[0] && `${event.outcomes[0].label} leads at ${event.outcomes[0].pct.toFixed(0)}% probability${
+                  event.outcomes[0].change !== 0 ? `, ${event.outcomes[0].change > 0 ? "up" : "down"} ${Math.abs(event.outcomes[0].change).toFixed(1)}% in 24h` : ""
+                }. ${event.outcomes.length > 1 ? `${event.outcomes[1].label} follows at ${event.outcomes[1].pct.toFixed(0)}%.` : ""}`}
+              </p>
+
               {/* Footer */}
               <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-white/[0.04]">
                 {event.image && (
                   <img src={event.image} alt="" className="w-4 h-4 rounded-full" />
                 )}
-                <span className="text-[8px] font-mono text-zinc-600">
+                <span className="text-[11px] font-mono text-zinc-600">
                   {event.markets.length} {event.markets.length === 1 ? "market" : "markets"}
                 </span>
-                <span className="text-[8px] font-mono text-blue-400">Polymarket</span>
+                <span className="text-[11px] font-mono text-blue-400">Polymarket</span>
               </div>
             </div>
           ))
@@ -750,84 +756,6 @@ function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: st
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Widget System                                                      */
-/* ------------------------------------------------------------------ */
-
-const WIDGET_KEYS = ["predictions", "feed", "signals", "chat", "research"] as const;
-type WidgetKey = typeof WIDGET_KEYS[number];
-
-const WIDGET_META: Record<WidgetKey, { label: string; labelKo: string; icon: JSX.Element }> = {
-  predictions: {
-    label: "Predictions",
-    labelKo: "예측 시장",
-    icon: (
-      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-      </svg>
-    ),
-  },
-  feed: {
-    label: "Feed",
-    labelKo: "뉴스",
-    icon: (
-      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6V7.5z" />
-      </svg>
-    ),
-  },
-  signals: {
-    label: "Signals",
-    labelKo: "시그널",
-    icon: (
-      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
-      </svg>
-    ),
-  },
-  chat: {
-    label: "AI Chat",
-    labelKo: "AI 채팅",
-    icon: (
-      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-      </svg>
-    ),
-  },
-  research: {
-    label: "Research",
-    labelKo: "리서치",
-    icon: (
-      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-      </svg>
-    ),
-  },
-};
-
-const DEFAULT_WIDGETS: Record<WidgetKey, boolean> = {
-  predictions: true,
-  feed: true,
-  signals: true,
-  chat: true,
-  research: true,
-};
-
-function WidgetCard({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
-  return (
-    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden flex flex-col h-full">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
-        <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-zinc-400">{title}</span>
-        <button onClick={onClose} className="text-zinc-600 hover:text-red-400 transition-colors cursor-pointer p-0.5">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-      <div className="flex-1 overflow-auto">{children}</div>
-    </div>
-  );
-}
 
 function ChatWidget({ lang }: { lang: string }) {
   const [input, setInput] = useState("");
@@ -911,31 +839,10 @@ export default function HomeDashboard({
   polymarketEvents,
   blogPosts,
 }: HomeDashboardProps) {
-  const [widgets, setWidgets] = useState<Record<WidgetKey, boolean>>(() => {
-    if (typeof window === "undefined") return { ...DEFAULT_WIDGETS };
-    try {
-      const saved = localStorage.getItem("dashboard-widgets");
-      return saved ? JSON.parse(saved) : { ...DEFAULT_WIDGETS };
-    } catch {
-      return { ...DEFAULT_WIDGETS };
-    }
-  });
-
-  const toggleWidget = (key: WidgetKey) => {
-    setWidgets((prev) => {
-      const next = { ...prev, [key]: !prev[key] };
-      if (typeof window !== "undefined") {
-        localStorage.setItem("dashboard-widgets", JSON.stringify(next));
-      }
-      return next;
-    });
-  };
-
   const ko = lang === "ko";
 
   return (
     <div className="bg-zinc-950 font-mono flex flex-col" style={{ height: "calc(100vh - 92px)" }}>
-      {/* Stat Bar */}
       <StatBar
         btcData={btcData}
         ethData={ethData}
@@ -943,112 +850,114 @@ export default function HomeDashboard({
         globalData={globalData}
       />
 
-      {/* Widget Toggle Bar */}
-      <div className="flex items-center gap-1.5 px-3 py-2 border-b border-white/[0.06] bg-zinc-900/40 shrink-0 overflow-x-auto">
-        <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-wider shrink-0 mr-1">Widgets:</span>
-        {WIDGET_KEYS.map((key) => {
-          const meta = WIDGET_META[key];
-          const active = widgets[key];
-          return (
-            <button
-              key={key}
-              onClick={() => toggleWidget(key)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer shrink-0 ${
-                active
-                  ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                  : "bg-white/[0.02] text-zinc-600 border border-white/[0.04] hover:text-zinc-400"
-              }`}
-            >
-              {meta.icon}
-              <span>{ko ? meta.labelKo : meta.label}</span>
-              {active && (
-                <svg className="w-3 h-3 ml-0.5 text-zinc-600 hover:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── Desktop: Fixed panel layout (bigger, cleaner) ──── */}
-      <div className="hidden lg:flex flex-col flex-1 overflow-hidden min-h-0">
-        {/* Top row — Predictions + Feed + Signals */}
-        <div className="flex border-b border-white/[0.06] overflow-hidden" style={{ flex: "1 1 0" }}>
-          {/* Predictions (35%) */}
-          {widgets.predictions && (
-            <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "35%" }}>
-              <WidgetCard title={ko ? "예측 시장" : "Predictions"} onClose={() => toggleWidget("predictions")}>
-                <PredictionCards events={polymarketEvents} lang={lang} />
-              </WidgetCard>
+      {/* Desktop layout - fixed panels, zero gaps */}
+      <div className="hidden lg:flex flex-col flex-1 overflow-hidden">
+        {/* Top row 55% */}
+        <div className="flex border-b border-white/[0.06]" style={{ flex: "55 0 0" }}>
+          {/* Predictions 45% */}
+          <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "45%" }}>
+            <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+              <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">Prediction Markets</span>
+              <Link href={`/${lang}/markets`} className="text-[11px] text-blue-400">All →</Link>
             </div>
-          )}
-          {/* News Feed (40%) */}
-          {widgets.feed && (
-            <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "40%" }}>
-              <WidgetCard title={ko ? "뉴스 피드" : "Feed"} onClose={() => toggleWidget("feed")}>
-                <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
-              </WidgetCard>
+            <div className="flex-1 overflow-y-auto">
+              <PredictionCards events={polymarketEvents} lang={lang} />
             </div>
-          )}
-          {/* Quant Signals (25%) */}
-          {widgets.signals && (
-            <div className="overflow-hidden flex flex-col flex-1">
-              <WidgetCard title={ko ? "퀀트 시그널" : "Signals"} onClose={() => toggleWidget("signals")}>
-                <SignalsWidget signals={signals} lang={lang} />
-              </WidgetCard>
+          </div>
+          {/* Feed 55% */}
+          <div className="flex flex-col overflow-hidden flex-1">
+            <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+              <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">Feed</span>
+              <Link href={`/${lang}/sns`} className="text-[11px] text-blue-400">All →</Link>
             </div>
-          )}
+            <div className="flex-1 overflow-y-auto">
+              <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
+            </div>
+          </div>
         </div>
 
-        {/* Bottom row — AI Chat + Research */}
-        <div className="flex overflow-hidden" style={{ flex: "1 1 0" }}>
-          {/* AI Chat (40%) */}
-          {widgets.chat && (
-            <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "40%" }}>
-              <WidgetCard title={ko ? "AI 채팅" : "AI Chat"} onClose={() => toggleWidget("chat")}>
-                <ChatWidget lang={lang} />
-              </WidgetCard>
+        {/* Bottom row 45% */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* AI Chat 35% */}
+          <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "35%" }}>
+            <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+              <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">{ko ? "AI 채팅" : "AI Chat"}</span>
+              <Link href={`/${lang}/chat`} className="text-[11px] text-blue-400">{ko ? "전체 →" : "Full →"}</Link>
             </div>
-          )}
-          {/* Market Research (60%) */}
-          {widgets.research && (
-            <div className="overflow-hidden flex flex-col flex-1">
-              <WidgetCard title={ko ? "마켓 리서치" : "Market Research"} onClose={() => toggleWidget("research")}>
-                <BlogCards posts={blogPosts} lang={lang} />
-              </WidgetCard>
+            <div className="flex-1 overflow-hidden">
+              <ChatWidget lang={lang} />
             </div>
-          )}
+          </div>
+          {/* Signals 30% */}
+          <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "30%" }}>
+            <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+              <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">{ko ? "시그널" : "Signals"}</span>
+              <Link href={`/${lang}/quant`} className="text-[11px] text-blue-400">All →</Link>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <SignalsWidget signals={signals} lang={lang} />
+            </div>
+          </div>
+          {/* Research 35% */}
+          <div className="flex flex-col overflow-hidden flex-1">
+            <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+              <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">{ko ? "리서치" : "Research"}</span>
+              <Link href={`/${lang}/quant`} className="text-[11px] text-blue-400">All →</Link>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <BlogCards posts={blogPosts} lang={lang} />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ── Mobile: scrollable widgets ──── */}
-      <div className="lg:hidden flex-1 overflow-auto p-3 space-y-3">
-        {widgets.predictions && (
-          <WidgetCard title={ko ? "예측 시장" : "Predictions"} onClose={() => toggleWidget("predictions")}>
+      {/* Mobile: scrollable */}
+      <div className="lg:hidden flex-1 overflow-auto p-3 space-y-4">
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
+            <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">Prediction Markets</span>
+            <Link href={`/${lang}/markets`} className="text-[11px] text-blue-400">All →</Link>
+          </div>
+          <div className="max-h-96 overflow-y-auto">
             <PredictionCards events={polymarketEvents} lang={lang} />
-          </WidgetCard>
-        )}
-        {widgets.feed && (
-          <WidgetCard title={ko ? "뉴스 피드" : "Feed"} onClose={() => toggleWidget("feed")}>
+          </div>
+        </div>
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
+            <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">Feed</span>
+            <Link href={`/${lang}/sns`} className="text-[11px] text-blue-400">All →</Link>
+          </div>
+          <div className="max-h-96 overflow-y-auto">
             <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
-          </WidgetCard>
-        )}
-        {widgets.signals && (
-          <WidgetCard title={ko ? "퀀트 시그널" : "Signals"} onClose={() => toggleWidget("signals")}>
-            <SignalsWidget signals={signals} lang={lang} />
-          </WidgetCard>
-        )}
-        {widgets.chat && (
-          <WidgetCard title={ko ? "AI 채팅" : "AI Chat"} onClose={() => toggleWidget("chat")}>
+          </div>
+        </div>
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
+            <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">{ko ? "AI 채팅" : "AI Chat"}</span>
+            <Link href={`/${lang}/chat`} className="text-[11px] text-blue-400">{ko ? "전체 →" : "Full →"}</Link>
+          </div>
+          <div className="h-80 overflow-hidden">
             <ChatWidget lang={lang} />
-          </WidgetCard>
-        )}
-        {widgets.research && (
-          <WidgetCard title={ko ? "마켓 리서치" : "Market Research"} onClose={() => toggleWidget("research")}>
+          </div>
+        </div>
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
+            <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">{ko ? "시그널" : "Signals"}</span>
+            <Link href={`/${lang}/quant`} className="text-[11px] text-blue-400">All →</Link>
+          </div>
+          <div className="max-h-96 overflow-y-auto">
+            <SignalsWidget signals={signals} lang={lang} />
+          </div>
+        </div>
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
+            <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-zinc-400">{ko ? "리서치" : "Research"}</span>
+            <Link href={`/${lang}/quant`} className="text-[11px] text-blue-400">All →</Link>
+          </div>
+          <div className="max-h-96 overflow-y-auto">
             <BlogCards posts={blogPosts} lang={lang} />
-          </WidgetCard>
-        )}
+          </div>
+        </div>
       </div>
     </div>
   );
