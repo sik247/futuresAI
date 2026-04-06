@@ -83,9 +83,9 @@ export const EXCHANGES: ExchangeInfo[] = [
     logo: "/icons/exchange/edgex.png",
     makerFee: 0.009,
     takerFee: 0.025,
-    paybackRate: 0.30,
+    paybackRate: 0,
     color: "#7c3aed",
-    features: ["DEX", "Hyperliquid Alternative"],
+    features: ["DEX", "10% Fee Discount"],
     referralLink: "https://pro.edgex.exchange/en-US/referral/FUTURESAI",
   },
 ];

@@ -21,7 +21,7 @@ const EXCHANGES = [
   { name: "Gate.io", paybackRate: 75, makerFee: 0.02, takerFee: 0.05, link: "https://www.gate.com/share/FuturesAI", logo: "/icons/exchange/gate.png" },
   // Row 2: 3 exchanges (centered)
   { name: "BingX", paybackRate: 50, makerFee: 0.02, takerFee: 0.05, link: "https://bingx.com/en/invite/FCC9QDJK", logo: "/icons/exchange/bingx.png" },
-  { name: "EdgeX", paybackRate: 30, makerFee: 0.009, takerFee: 0.025, link: "https://pro.edgex.exchange/en-US/referral/FUTURESAI", logo: "/icons/exchange/edgex.png" },
+  { name: "EdgeX", paybackRate: 0, makerFee: 0.009, takerFee: 0.025, link: "https://pro.edgex.exchange/en-US/referral/FUTURESAI", logo: "/icons/exchange/edgex.png", feeDiscount: 10 },
   { name: "HTX", paybackRate: 54, makerFee: 0.02, takerFee: 0.05, link: "https://www.htx.com.gt/invite/en-us/1h?invite_code=miqkc223", logo: "/icons/exchange/htx.png" },
 ];
 
@@ -131,10 +131,12 @@ export default async function PaybackPage({
 
                 <div className="mb-6 p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
                   <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1 font-medium">
-                    {ko ? "페이백 비율" : "Payback Rate"}
+                    {(exchange as any).feeDiscount
+                      ? (ko ? "수수료 할인" : "Fee Discount")
+                      : (ko ? "페이백 비율" : "Payback Rate")}
                   </p>
                   <p className="text-4xl font-bold font-mono tabular-nums bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                    {exchange.paybackRate}%
+                    {(exchange as any).feeDiscount ? `${(exchange as any).feeDiscount}%` : `${exchange.paybackRate}%`}
                   </p>
                 </div>
 
