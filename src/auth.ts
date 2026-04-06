@@ -132,6 +132,33 @@ export const authOptions: NextAuthOptions = {
           token.isPremium = dbUser.isPremium;
         }
       }
+
+      // On login: verify any PENDING payments via TronScan
+      if (user && token.id && !token.isPremium) {
+        try {
+          const pendingPayments = await prisma.payment.findMany({
+            where: { userId: token.id as string, status: "PENDING" },
+          });
+          if (pendingPayments.length > 0) {
+            const { verifyTronTransaction } = await import("@/lib/services/payment/tron-verify.service");
+            const walletAddress = process.env.PAYMENT_WALLET_ADDRESS || "";
+            for (const payment of pendingPayments) {
+              const result = await verifyTronTransaction(payment.txid, walletAddress, payment.amount);
+              if (result.verified) {
+                await prisma.$transaction([
+                  prisma.payment.update({ where: { id: payment.id }, data: { status: "VERIFIED", verifiedAt: new Date() } }),
+                  prisma.user.update({ where: { id: token.id as string }, data: { isPremium: true } }),
+                ]);
+                token.isPremium = true;
+                break;
+              }
+            }
+          }
+        } catch {
+          // Don't block login if verification fails
+        }
+      }
+
       return token;
     },
   },
