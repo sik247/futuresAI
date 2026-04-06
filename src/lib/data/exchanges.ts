@@ -7,6 +7,7 @@ export interface ExchangeInfo {
   paybackRate: number;
   color: string;
   features: string[];
+  referralLink?: string;
 }
 
 export const EXCHANGES: ExchangeInfo[] = [
@@ -19,6 +20,7 @@ export const EXCHANGES: ExchangeInfo[] = [
     paybackRate: 0.20,
     color: "#f7a600",
     features: ["Lowest Maker Fees", "High Liquidity"],
+    referralLink: "https://partner.bybit.com/b/FUTURESAI",
   },
   {
     id: "bitget",
@@ -29,6 +31,7 @@ export const EXCHANGES: ExchangeInfo[] = [
     paybackRate: 0.55,
     color: "#00b894",
     features: ["Copy Trading", "Social Features"],
+    referralLink: "https://partner.bitget.com/bg/FuturesAI",
   },
   {
     id: "okx",
@@ -39,6 +42,7 @@ export const EXCHANGES: ExchangeInfo[] = [
     paybackRate: 0.20,
     color: "#ffffff",
     features: ["DEX Aggregator", "Earn Products"],
+    referralLink: "https://www.okx.com/join/futuresai",
   },
   {
     id: "gate",
@@ -49,6 +53,7 @@ export const EXCHANGES: ExchangeInfo[] = [
     paybackRate: 0.75,
     color: "#2d8cf0",
     features: ["Wide Token Selection", "Margin Trading"],
+    referralLink: "https://www.gate.com/share/FuturesAI",
   },
   {
     id: "bingx",
@@ -59,6 +64,7 @@ export const EXCHANGES: ExchangeInfo[] = [
     paybackRate: 0.50,
     color: "#2c6ecf",
     features: ["Copy Trading", "Grid Trading"],
+    referralLink: "https://bingx.com/en/invite/FCC9QDJK",
   },
   {
     id: "htx",
@@ -69,5 +75,6 @@ export const EXCHANGES: ExchangeInfo[] = [
     paybackRate: 0.54,
     color: "#2b6aff",
     features: ["Global Exchange", "Staking Rewards"],
+    referralLink: "https://www.htx.com.gt/invite/en-us/1h?invite_code=miqkc223",
   },
 ];

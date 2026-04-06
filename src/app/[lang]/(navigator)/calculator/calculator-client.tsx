@@ -542,22 +542,25 @@ export default function CalculatorClient({
             Join thousands of traders who are getting their fees back through
             Futures AI.
           </p>
-          <button className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 py-3.5 rounded-lg transition-colors text-lg">
-            Sign Up Now
-          </button>
-          <div className="flex items-center justify-center gap-6 mt-8">
+          <div className="flex items-center justify-center gap-4 mt-4 flex-wrap">
             {exchanges.map((ex) => (
-              <div
+              <a
                 key={ex.id}
-                className="w-8 h-8 relative opacity-50 hover:opacity-100 transition-opacity"
+                href={ex.referralLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/[0.15] transition-all cursor-pointer group"
               >
-                <Image
-                  src={ex.logo}
-                  alt={ex.name}
-                  fill
-                  className="object-contain"
-                />
-              </div>
+                <div className="w-6 h-6 relative shrink-0">
+                  <Image
+                    src={ex.logo}
+                    alt={ex.name}
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+                <span className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">{ex.name}</span>
+              </a>
             ))}
           </div>
         </div>
