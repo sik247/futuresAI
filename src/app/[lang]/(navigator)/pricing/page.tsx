@@ -129,7 +129,7 @@ export default function PricingPage({
 
             <div className="mt-6 pt-5 border-t border-blue-500/10 relative">
               <a
-                href="https://t.me/FuturesAI_Bot?start=premium"
+                href="https://t.me/futreaiadminbot?start=premium"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full text-center py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-mono uppercase tracking-[0.15em] transition-colors duration-200 cursor-pointer shadow-lg shadow-blue-500/20"

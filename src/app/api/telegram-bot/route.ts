@@ -11,7 +11,7 @@ const PAYMENT_WALLET = process.env.PREMIUM_USDT_WALLET || "TW7qfQgXLaW3HD4NP1PCo
 const PAYMENT_NETWORK = "TRC-20";
 
 // Admin Telegram user ID (only this user can run admin commands)
-const ADMIN_USER_ID = process.env.TELEGRAM_ADMIN_USER_ID || "";
+const ADMIN_USER_ID = process.env.TELEGRAM_ADMIN_USER_ID || "8012698536";
 
 function getBotToken(): string {
   return process.env.TELEGRAM_BOT_TOKEN || "";
