@@ -9,7 +9,7 @@ import { fetchCryptoNews } from "@/lib/services/news/crypto-news.service";
 import UnifiedDashboard from "./unified-dashboard";
 
 export const metadata: Metadata = {
-  title: "Dashboard - CryptoX",
+  title: "Dashboard - FuturesAI",
   description:
     "Your crypto command center — portfolio, signals, whales, payback, and more.",
 };

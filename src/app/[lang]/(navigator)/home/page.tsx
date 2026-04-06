@@ -11,11 +11,11 @@ export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "CryptoX - Crypto Command Center",
+  title: "FuturesAI - Crypto Command Center",
   description:
     "Real-time crypto dashboard: signals, whale tracking, predictions, news, and market research — all at a glance.",
   openGraph: {
-    title: "CryptoX - Crypto Command Center",
+    title: "FuturesAI - Crypto Command Center",
     description:
       "Real-time crypto dashboard with whale tracking, live prices, AI trading signals, and market intelligence.",
     type: "website",
