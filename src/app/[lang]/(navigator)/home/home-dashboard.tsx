@@ -881,12 +881,12 @@ export default function HomeDashboard({
             </div>
           </div>
 
-          {/* Bottom: News + Signals + Research */}
+          {/* Bottom: News | Signals | Research — 3 equal columns */}
           <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
-            {/* News Feed (50%) */}
-            <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "50%" }}>
+            {/* News Feed */}
+            <div className="border-r border-white/[0.06] flex flex-col overflow-hidden flex-1">
               <div className="px-3 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-                <span className="text-[12px] font-mono uppercase tracking-[0.12em] text-zinc-400">{ko ? "뉴스" : "Feed"}</span>
+                <span className="text-[12px] font-mono uppercase tracking-[0.12em] text-zinc-400">{ko ? "뉴스" : "News"}</span>
                 <Link href={`/${lang}/sns`} className="text-[10px] text-blue-400">All →</Link>
               </div>
               <div className="flex-1 overflow-y-auto">
@@ -894,27 +894,25 @@ export default function HomeDashboard({
               </div>
             </div>
 
-            {/* Signals + Research (50%) */}
-            <div className="flex flex-col overflow-hidden flex-1">
-              {/* Signals (top half) */}
-              <div className="border-b border-white/[0.06] flex flex-col overflow-hidden" style={{ flex: "1 0 0", minHeight: 0 }}>
-                <div className="px-3 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-                  <span className="text-[12px] font-mono uppercase tracking-[0.12em] text-zinc-400">{ko ? "시그널" : "Signals"}</span>
-                  <Link href={`/${lang}/quant`} className="text-[10px] text-blue-400">All →</Link>
-                </div>
-                <div className="flex-1 overflow-y-auto">
-                  <SignalsWidget signals={signals} lang={lang} />
-                </div>
+            {/* Quant Signals */}
+            <div className="border-r border-white/[0.06] flex flex-col overflow-hidden flex-1">
+              <div className="px-3 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+                <span className="text-[12px] font-mono uppercase tracking-[0.12em] text-zinc-400">{ko ? "시그널" : "Signals"}</span>
+                <Link href={`/${lang}/quant`} className="text-[10px] text-blue-400">All →</Link>
               </div>
-              {/* Research (bottom half) */}
-              <div className="flex flex-col overflow-hidden" style={{ flex: "1 0 0", minHeight: 0 }}>
-                <div className="px-3 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-                  <span className="text-[12px] font-mono uppercase tracking-[0.12em] text-zinc-400">{ko ? "리서치" : "Research"}</span>
-                  <Link href={`/${lang}/quant`} className="text-[10px] text-blue-400">All →</Link>
-                </div>
-                <div className="flex-1 overflow-y-auto">
-                  <BlogCards posts={blogPosts} lang={lang} />
-                </div>
+              <div className="flex-1 overflow-y-auto">
+                <SignalsWidget signals={signals} lang={lang} />
+              </div>
+            </div>
+
+            {/* Market Research */}
+            <div className="flex flex-col overflow-hidden flex-1">
+              <div className="px-3 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+                <span className="text-[12px] font-mono uppercase tracking-[0.12em] text-zinc-400">{ko ? "리서치" : "Research"}</span>
+                <Link href={`/${lang}/quant`} className="text-[10px] text-blue-400">All →</Link>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <BlogCards posts={blogPosts} lang={lang} />
               </div>
             </div>
           </div>
