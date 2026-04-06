@@ -188,6 +188,8 @@ Return a JSON object with this exact structure:
 - Support levels must be BELOW current price. Resistance must be ABOVE.
 - Stop loss must be on the opposite side of entry from take profit.
 - yPercent must accurately map to the price's position on the chart image.
+- CRITICAL: Ensure minimum 4% vertical spacing between adjacent lines (yPercent values). If two levels are too close, merge them or drop the less significant one. Overlapping labels make the chart unreadable.
+- Maximum 8 lines total. Prioritize: entry > stopLoss > takeProfit > strongest support > strongest resistance > trend. Drop weak levels rather than overcrowding.
 - Write with the precision of a research analyst at Goldman Sachs or Two Sigma.`;
 
 async function fetchImageAsBase64(url: string): Promise<{ base64: string; mimeType: string }> {

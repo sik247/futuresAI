@@ -309,10 +309,26 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
       ctx.fillRect(0, Math.min(eY, tY), W, Math.abs(tY - eY));
     }
 
-    // --- Draw all lines ---
-    analysis.lines.forEach((line) => {
-      const y = (line.yPercent / 100) * H;
-      drawAnalysisLine(ctx, y, line, W, entryPrice);
+    // --- Draw all lines (with label collision avoidance) ---
+    // Sort lines by yPercent to detect overlaps
+    const sortedLines = [...analysis.lines].sort((a, b) => a.yPercent - b.yPercent);
+    const MIN_LABEL_GAP = 30; // minimum pixels between label centers
+    const labelPositions: number[] = [];
+
+    sortedLines.forEach((line) => {
+      let y = (line.yPercent / 100) * H;
+
+      // Offset label if too close to previous label
+      for (const prevY of labelPositions) {
+        if (Math.abs(y - prevY) < MIN_LABEL_GAP) {
+          y = prevY + MIN_LABEL_GAP * (y > prevY ? 1 : -1);
+        }
+      }
+      labelPositions.push(y);
+
+      // Always draw the line at original position
+      const lineY = (line.yPercent / 100) * H;
+      drawAnalysisLine(ctx, lineY, y, line, W, entryPrice);
     });
 
     // --- No canvas panel — strategy data is shown in the HTML bar above ---
@@ -322,11 +338,14 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
 
   const drawAnalysisLine = (
     ctx: CanvasRenderingContext2D,
-    y: number,
+    lineY: number,
+    labelY: number,
     line: ChartLine,
     width: number,
     entryPrice: number
   ) => {
+    const y = lineY; // line draws at original position
+    const ly = labelY; // labels draw at offset position to avoid overlap
     const isEntry = line.type === "entry";
     const isSL = line.type === "stopLoss";
     const isTP = line.type === "takeProfit";
@@ -367,7 +386,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
       const pw = lw + 16;
       const ph = 24;
       const px = 6;
-      const py = y - ph / 2;
+      const py = ly - ph / 2;
 
       // Filled colored badge
       ctx.fillStyle = lineColor;
@@ -377,7 +396,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
 
       // White text
       ctx.fillStyle = TV.white;
-      ctx.fillText(label, px + 8, y + 5);
+      ctx.fillText(label, px + 8, ly + 5);
     }
 
     // --- Right price tag (TradingView style: colored bg, large bold text) ---
@@ -402,7 +421,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
       const tagW = tw + pad * 2;
       const tagH = 26;
       const tagX = width - tagW;
-      const tagY = y - tagH / 2;
+      const tagY = ly - tagH / 2;
 
       // Colored tag background
       ctx.fillStyle = lineColor;
@@ -410,11 +429,11 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
       ctx.fillRect(tagX, tagY, tagW, tagH);
       ctx.globalAlpha = 1;
 
-      // Arrow pointer
+      // Arrow pointer (points to label position)
       ctx.beginPath();
-      ctx.moveTo(tagX - 8, y);
-      ctx.lineTo(tagX, y - 8);
-      ctx.lineTo(tagX, y + 8);
+      ctx.moveTo(tagX - 8, ly);
+      ctx.lineTo(tagX, ly - 8);
+      ctx.lineTo(tagX, ly + 8);
       ctx.closePath();
       ctx.fill();
 
