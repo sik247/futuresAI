@@ -53,6 +53,14 @@ type BlogPost = {
   publishedAt: string;
 };
 
+type YouTubeItem = {
+  videoId: string;
+  title: string;
+  channelName: string;
+  publishedAt: string;
+  thumbnailUrl: string;
+};
+
 type PolymarketEvent = {
   id: string;
   title: string;
@@ -77,6 +85,7 @@ export type HomeDashboardProps = {
   topCoins: CoinMarket[];
   hlWhales: HLWalletData[];
   news: CryptoNewsItem[];
+  youtubeItems: YouTubeItem[];
   polymarketEvents: PolymarketEvent[];
   blogPosts: BlogPost[];
 };
@@ -410,58 +419,87 @@ function HLWhaleCard({ whale }: { whale: HLWalletData }) {
 /*  News Cards                                                         */
 /* ------------------------------------------------------------------ */
 
-function NewsCards({ news, lang }: { news: CryptoNewsItem[]; lang: string }) {
+function ContentFeed({ news, youtubeItems, lang }: { news: CryptoNewsItem[]; youtubeItems: YouTubeItem[]; lang: string }) {
+  // Interleave news and YouTube for visual variety
+  type FeedItem = { type: "news"; data: CryptoNewsItem } | { type: "youtube"; data: YouTubeItem };
+  const items: FeedItem[] = [];
+  const maxNews = Math.min(news.length, 8);
+  const maxYt = Math.min(youtubeItems.length, 4);
+  let ni = 0, yi = 0;
+  while (ni < maxNews || yi < maxYt) {
+    if (ni < maxNews) items.push({ type: "news", data: news[ni++] });
+    if (ni < maxNews) items.push({ type: "news", data: news[ni++] });
+    if (yi < maxYt) items.push({ type: "youtube", data: youtubeItems[yi++] });
+  }
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
-        <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">Latest News</span>
-        <Link href={`/${lang}/news`} className="text-[9px] font-mono text-blue-400 hover:text-blue-300 transition-colors">
-          All →
-        </Link>
+        <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">Feed</span>
+        <Link href={`/${lang}/sns`} className="text-[9px] font-mono text-blue-400 hover:text-blue-300 transition-colors">All →</Link>
       </div>
-      <div className="flex-1 overflow-y-auto p-2 grid grid-cols-2 gap-2 auto-rows-min">
-        {news.length === 0 ? (
-          <div className="col-span-2 flex items-center justify-center py-6 text-[10px] font-mono text-zinc-700">
-            No news available
-          </div>
+      <div className="flex-1 overflow-y-auto p-2 grid grid-cols-3 gap-2 auto-rows-min">
+        {items.length === 0 ? (
+          <div className="col-span-3 flex items-center justify-center py-6 text-[10px] font-mono text-zinc-700">No content</div>
         ) : (
-          news.slice(0, 6).map((item, i) => (
-            <a
-              key={item.id ?? i}
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group rounded-lg border border-white/[0.06] bg-white/[0.02] overflow-hidden hover:border-white/[0.12] hover:bg-white/[0.04] transition-all cursor-pointer"
-            >
-              {/* Image */}
-              {item.imageUrl ? (
-                <div className="h-20 bg-zinc-900 overflow-hidden">
-                  <img
-                    src={item.imageUrl}
-                    alt=""
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+          items.map((item, i) => {
+            if (item.type === "youtube") {
+              const yt = item.data;
+              return (
+                <a key={`yt-${yt.videoId}`} href={`https://www.youtube.com/watch?v=${yt.videoId}`} target="_blank" rel="noopener noreferrer"
+                  className="group relative rounded-lg border border-white/[0.06] bg-white/[0.02] overflow-hidden hover:border-red-500/25 hover:bg-white/[0.04] transition-all cursor-pointer">
+                  <div className="absolute top-2 right-2 z-10 px-1.5 py-0.5 rounded-full text-[8px] font-bold uppercase bg-red-500/20 text-red-400 border border-red-500/25">Video</div>
+                  <div className="relative h-24 bg-zinc-900 overflow-hidden">
+                    <img src={yt.thumbnailUrl} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                    <div className="absolute inset-0 bg-zinc-950/30 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-full bg-red-600/90 flex items-center justify-center">
+                        <svg className="w-3.5 h-3.5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-2">
+                    <p className="text-[10px] text-zinc-300 group-hover:text-white leading-snug line-clamp-2 transition-colors">{yt.title}</p>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <span className="text-[8px] text-zinc-600">{yt.channelName}</span>
+                      <span className="text-[8px] text-zinc-700">{timeAgo(new Date(yt.publishedAt))}</span>
+                    </div>
+                  </div>
+                </a>
+              );
+            }
+            const n = item.data;
+            return (
+              <a key={`n-${n.id ?? i}`} href={n.url} target="_blank" rel="noopener noreferrer"
+                className="group relative rounded-lg border border-white/[0.06] bg-white/[0.02] overflow-hidden hover:border-blue-500/25 hover:bg-white/[0.04] transition-all cursor-pointer">
+                <div className="absolute top-2 right-2 z-10 px-1.5 py-0.5 rounded-full text-[8px] font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/25">News</div>
+                {n.imageUrl ? (
+                  <div className="h-24 bg-zinc-900 overflow-hidden">
+                    <img src={n.imageUrl} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                    <div className="absolute bottom-[calc(100%-96px+8px)] left-2">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-950/70 backdrop-blur-sm text-[8px] font-mono text-blue-400 border border-white/[0.08]">
+                        {n.source}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="h-24 bg-gradient-to-br from-blue-950/40 to-zinc-900 flex items-center justify-center">
+                    <span className="text-xl font-bold text-white/[0.06]">{n.source[0]}</span>
+                  </div>
+                )}
+                <div className="p-2">
+                  <span className="text-[8px] font-mono text-zinc-600">{timeAgo(n.publishedAt)}</span>
+                  <p className="text-[10px] text-zinc-300 group-hover:text-white leading-snug line-clamp-2 transition-colors mt-0.5">{n.title}</p>
+                  {n.categories && n.categories.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {n.categories.slice(0, 2).map((cat) => (
+                        <span key={cat} className="px-1 py-0.5 text-[7px] font-mono uppercase rounded bg-white/[0.04] text-zinc-600">{cat}</span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="h-20 bg-gradient-to-br from-blue-950/40 to-zinc-900 flex items-center justify-center">
-                  <span className="text-xl font-bold text-white/[0.06]">{item.source[0]}</span>
-                </div>
-              )}
-              <div className="p-2">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className="text-[8px] font-mono bg-blue-500/10 text-blue-400 px-1 py-0.5 rounded truncate max-w-[64px]">
-                    {item.source}
-                  </span>
-                  <span className="text-[8px] font-mono text-zinc-600 shrink-0">
-                    {timeAgo(item.publishedAt)}
-                  </span>
-                </div>
-                <p className="text-[10px] text-zinc-300 group-hover:text-white leading-snug line-clamp-2 transition-colors">
-                  {item.title}
-                </p>
-              </div>
-            </a>
-          ))
+              </a>
+            );
+          })
         )}
       </div>
     </div>
@@ -616,6 +654,7 @@ export default function HomeDashboard({
   topCoins,
   hlWhales,
   news,
+  youtubeItems,
   polymarketEvents,
   blogPosts,
 }: HomeDashboardProps) {
@@ -687,7 +726,7 @@ export default function HomeDashboard({
         <div className="flex flex-1 overflow-hidden min-h-0">
           {/* News Cards (1/3) */}
           <div className="border-r border-white/[0.06] overflow-hidden flex flex-col flex-1">
-            <NewsCards news={news} lang={lang} />
+            <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
           </div>
           {/* Blog Research Cards (1/3) */}
           <div className="border-r border-white/[0.06] overflow-hidden flex flex-col flex-1">
@@ -732,7 +771,7 @@ export default function HomeDashboard({
         )}
         {mobileTab === "news" && (
           <div className="h-full overflow-hidden flex flex-col">
-            <NewsCards news={news} lang={lang} />
+            <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
           </div>
         )}
         {mobileTab === "research" && (

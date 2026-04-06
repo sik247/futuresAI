@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import HomeDashboard from "./home-dashboard";
 import { fetchCryptoNews } from "@/lib/services/news/crypto-news.service";
+import { fetchYouTubeFeeds } from "@/lib/services/social/youtube-feed.service";
 import { fetchAllHLWhales } from "@/lib/services/whales/hyperliquid.service";
 import { QUANT_BLOG_POSTS } from "@/lib/data/quant-blog-posts";
 
@@ -32,6 +33,7 @@ export default async function HomePage({
     topCoinsR,
     hlWhalesR,
     newsR,
+    youtubeR,
     polymarketR,
   ] = await Promise.allSettled([
     // BTC price from Binance
@@ -66,6 +68,8 @@ export default async function HomePage({
     fetchAllHLWhales().catch(() => []),
     // Crypto news
     fetchCryptoNews().catch(() => []),
+    // YouTube feeds
+    fetchYouTubeFeeds().catch(() => []),
     // Polymarket crypto events
     fetch(
       "https://gamma-api.polymarket.com/events?closed=false&tag_slug=crypto&limit=50&order=volume&ascending=false",
@@ -86,6 +90,7 @@ export default async function HomePage({
       : [];
   const hlWhales = hlWhalesR.status === "fulfilled" ? hlWhalesR.value : [];
   const news = newsR.status === "fulfilled" ? newsR.value : [];
+  const youtubeItems = youtubeR.status === "fulfilled" ? youtubeR.value : [];
   const polymarketEvents =
     polymarketR.status === "fulfilled" && Array.isArray(polymarketR.value)
       ? polymarketR.value
@@ -103,7 +108,8 @@ export default async function HomePage({
       globalData={globalData}
       topCoins={JSON.parse(JSON.stringify(topCoins))}
       hlWhales={JSON.parse(JSON.stringify(hlWhales.slice(0, 8)))}
-      news={JSON.parse(JSON.stringify(news.slice(0, 8)))}
+      news={JSON.parse(JSON.stringify(news.slice(0, 12)))}
+      youtubeItems={JSON.parse(JSON.stringify(youtubeItems.slice(0, 6).map((y: any) => ({ ...y, publishedAt: y.publishedAt.toISOString() }))))}
       polymarketEvents={JSON.parse(JSON.stringify(polymarketEvents))}
       blogPosts={JSON.parse(JSON.stringify(blogPosts))}
     />
