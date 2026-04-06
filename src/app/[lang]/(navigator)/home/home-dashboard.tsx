@@ -907,8 +907,8 @@ export default function HomeDashboard({
 
         {/* CENTER: Chart + News + Signals + Research (40%) */}
         <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "40%" }}>
-          {/* TradingView Chart (top 45%) */}
-          <div className="border-b border-white/[0.06] flex flex-col overflow-hidden" style={{ flex: "45 0 0", minHeight: 0 }}>
+          {/* TradingView Chart (top 35%) */}
+          <div className="border-b border-white/[0.06] flex flex-col overflow-hidden" style={{ flex: "35 0 0", minHeight: 0 }}>
             <div className="px-4 py-2 border-b border-white/[0.06] flex items-center gap-3 shrink-0">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[13px] font-mono text-zinc-300">BTC/USDT</span>
@@ -923,8 +923,8 @@ export default function HomeDashboard({
             </div>
           </div>
 
-          {/* Bottom: News | Signals | Research — 3 equal columns */}
-          <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
+          {/* Bottom: News | Signals | Research — 3 equal columns (65%) */}
+          <div className="flex overflow-hidden" style={{ flex: "65 0 0", minHeight: 0 }}>
             {/* News Feed */}
             <div className="border-r border-white/[0.06] flex flex-col overflow-hidden flex-1">
               <div className="px-3 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
