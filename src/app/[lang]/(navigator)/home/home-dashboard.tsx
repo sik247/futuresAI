@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import type { JSX } from "react";
 import type { CryptoNewsItem } from "@/lib/services/news/crypto-news.service";
 import type { HLWalletData } from "@/lib/services/whales/hyperliquid.service";
 
@@ -461,10 +462,6 @@ function ContentFeed({ news, youtubeItems, lang }: { news: CryptoNewsItem[]; you
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
-        <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">Feed</span>
-        <Link href={`/${lang}/sns`} className="text-[9px] font-mono text-blue-400 hover:text-blue-300 transition-colors">All →</Link>
-      </div>
       <div className="flex-1 overflow-y-auto p-2 grid grid-cols-3 gap-2 auto-rows-min">
         {items.length === 0 ? (
           <div className="col-span-3 flex items-center justify-center py-6 text-[10px] font-mono text-zinc-700">No content</div>
@@ -540,12 +537,6 @@ function ContentFeed({ news, youtubeItems, lang }: { news: CryptoNewsItem[]; you
 function BlogCards({ posts, lang }: { posts: BlogPost[]; lang: string }) {
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
-        <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">Market Research</span>
-        <Link href={`/${lang}/quant`} className="text-[9px] font-mono text-blue-400 hover:text-blue-300 transition-colors">
-          All →
-        </Link>
-      </div>
       <div className="flex-1 overflow-y-auto p-2 space-y-2">
         {posts.length === 0 ? (
           <div className="flex items-center justify-center py-6 text-[10px] font-mono text-zinc-700">
@@ -604,10 +595,6 @@ function SignalsWidget({ signals, lang }: { signals: SignalsData; lang: string }
   const topSignals = (signals.signals || []).slice(0, 6);
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
-        <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">Quant Signals</span>
-        <Link href={`/${lang}/quant`} className="text-[9px] font-mono text-blue-400 hover:text-blue-300 transition-colors">All →</Link>
-      </div>
       <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
         {topSignals.length === 0 ? (
           <div className="flex items-center justify-center h-full text-[10px] font-mono text-zinc-700">No signals</div>
@@ -702,12 +689,6 @@ function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: st
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
-        <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">Predictions</span>
-        <Link href={`/${lang}/markets`} className="text-[9px] font-mono text-blue-400 hover:text-blue-300 transition-colors">
-          All →
-        </Link>
-      </div>
       <div className="flex-1 overflow-y-auto p-2 space-y-2">
         {interesting.length === 0 ? (
           <div className="flex items-center justify-center h-full text-[10px] font-mono text-zinc-700">
@@ -777,6 +758,149 @@ function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: st
 }
 
 /* ------------------------------------------------------------------ */
+/*  Widget System                                                      */
+/* ------------------------------------------------------------------ */
+
+const WIDGET_KEYS = ["predictions", "feed", "signals", "chat", "research"] as const;
+type WidgetKey = typeof WIDGET_KEYS[number];
+
+const WIDGET_META: Record<WidgetKey, { label: string; labelKo: string; icon: JSX.Element }> = {
+  predictions: {
+    label: "Predictions",
+    labelKo: "예측 시장",
+    icon: (
+      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+      </svg>
+    ),
+  },
+  feed: {
+    label: "Feed",
+    labelKo: "뉴스",
+    icon: (
+      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6V7.5z" />
+      </svg>
+    ),
+  },
+  signals: {
+    label: "Signals",
+    labelKo: "시그널",
+    icon: (
+      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+      </svg>
+    ),
+  },
+  chat: {
+    label: "AI Chat",
+    labelKo: "AI 채팅",
+    icon: (
+      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+      </svg>
+    ),
+  },
+  research: {
+    label: "Research",
+    labelKo: "리서치",
+    icon: (
+      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+      </svg>
+    ),
+  },
+};
+
+const DEFAULT_WIDGETS: Record<WidgetKey, boolean> = {
+  predictions: true,
+  feed: true,
+  signals: true,
+  chat: true,
+  research: true,
+};
+
+function WidgetCard({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+  return (
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden flex flex-col h-full">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
+        <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-zinc-400">{title}</span>
+        <button onClick={onClose} className="text-zinc-600 hover:text-red-400 transition-colors cursor-pointer p-0.5">
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div className="flex-1 overflow-auto">{children}</div>
+    </div>
+  );
+}
+
+function ChatWidget({ lang }: { lang: string }) {
+  const [input, setInput] = useState("");
+  const [lastResponse, setLastResponse] = useState("");
+  const [loading, setLoading] = useState(false);
+  const ko = lang === "ko";
+
+  const handleSend = async () => {
+    if (!input.trim() || loading) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: input, persona: "crypto", sessionId: "widget", lang }),
+      });
+      const data = await res.json();
+      setLastResponse(data.response || data.error || "No response");
+      setInput("");
+    } catch {
+      setLastResponse("Error. Try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto p-3">
+        {lastResponse ? (
+          <div className="text-[11px] text-zinc-300 leading-relaxed whitespace-pre-wrap">{lastResponse}</div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full text-center">
+            <span className="text-2xl mb-2">🤖</span>
+            <p className="text-[11px] text-zinc-500">{ko ? "암호화폐에 대해 물어보세요" : "Ask about any crypto"}</p>
+          </div>
+        )}
+      </div>
+      <div className="border-t border-white/[0.06] p-2 flex gap-2">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          placeholder={ko ? "질문하기..." : "Ask anything..."}
+          className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 text-[11px] text-white placeholder-zinc-600 focus:outline-none focus:border-white/[0.16]"
+          disabled={loading}
+        />
+        <button
+          onClick={handleSend}
+          disabled={loading || !input.trim()}
+          className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[10px] font-mono disabled:opacity-30 cursor-pointer hover:bg-blue-500"
+        >
+          {loading ? "..." : "Ask"}
+        </button>
+      </div>
+      <Link
+        href={`/${lang}/chat`}
+        className="text-center py-1.5 text-[9px] text-blue-400 hover:text-blue-300 border-t border-white/[0.04]"
+      >
+        {ko ? "전체 채팅 열기 →" : "Open full chat →"}
+      </Link>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Main Dashboard                                                     */
 /* ------------------------------------------------------------------ */
 
@@ -786,15 +910,35 @@ export default function HomeDashboard({
   ethData,
   fearGreed,
   globalData,
-  topCoins,
-  hlWhales,
+  topCoins: _topCoins,
+  hlWhales: _hlWhales,
   news,
   youtubeItems,
   signals,
   polymarketEvents,
   blogPosts,
 }: HomeDashboardProps) {
-  const [mobileTab, setMobileTab] = useState<"market" | "whales" | "news" | "research" | "predictions">("market");
+  const [widgets, setWidgets] = useState<Record<WidgetKey, boolean>>(() => {
+    if (typeof window === "undefined") return { ...DEFAULT_WIDGETS };
+    try {
+      const saved = localStorage.getItem("dashboard-widgets");
+      return saved ? JSON.parse(saved) : { ...DEFAULT_WIDGETS };
+    } catch {
+      return { ...DEFAULT_WIDGETS };
+    }
+  });
+
+  const toggleWidget = (key: WidgetKey) => {
+    setWidgets((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      if (typeof window !== "undefined") {
+        localStorage.setItem("dashboard-widgets", JSON.stringify(next));
+      }
+      return next;
+    });
+  };
+
+  const ko = lang === "ko";
 
   return (
     <div className="bg-zinc-950 font-mono flex flex-col" style={{ height: "calc(100vh - 92px)" }}>
@@ -806,111 +950,63 @@ export default function HomeDashboard({
         globalData={globalData}
       />
 
-      {/* Mobile tab bar */}
-      <div className="flex lg:hidden border-b border-white/[0.06] bg-zinc-900/60 shrink-0 overflow-x-auto">
-        {(["market", "whales", "news", "research", "predictions"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setMobileTab(tab)}
-            className={`flex-shrink-0 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.1em] transition-colors cursor-pointer ${
-              mobileTab === tab
-                ? "text-white border-b-2 border-emerald-500"
-                : "text-zinc-600 hover:text-zinc-400"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
+      {/* Widget Toggle Bar */}
+      <div className="flex items-center gap-1.5 px-3 py-2 border-b border-white/[0.06] bg-zinc-900/40 shrink-0 overflow-x-auto">
+        <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-wider shrink-0 mr-1">Widgets:</span>
+        {WIDGET_KEYS.map((key) => {
+          const meta = WIDGET_META[key];
+          const active = widgets[key];
+          return (
+            <button
+              key={key}
+              onClick={() => toggleWidget(key)}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-mono transition-all cursor-pointer shrink-0 ${
+                active
+                  ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                  : "bg-white/[0.02] text-zinc-600 border border-white/[0.04] hover:text-zinc-400"
+              }`}
+            >
+              {meta.icon}
+              <span>{ko ? meta.labelKo : meta.label}</span>
+              {active && (
+                <svg className="w-3 h-3 ml-0.5 text-zinc-600 hover:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              )}
+            </button>
+          );
+        })}
       </div>
 
-      {/* ── Desktop: Two-row layout ─────────────────────────────── */}
-      <div className="hidden lg:flex flex-col flex-1 overflow-hidden min-h-0">
-        {/* Top row (50%) — Predictions + Whales + Signals */}
-        <div className="flex border-b border-white/[0.06] overflow-hidden flex-1 min-h-0" style={{ flex: "1 1 0" }}>
-          {/* Predictions (40%) — main focus */}
-          <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "40%" }}>
-            <PredictionCards events={polymarketEvents} lang={lang} />
-          </div>
-          {/* Whale Positions (35%) */}
-          <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "35%" }}>
-            <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
-              <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-zinc-500">Whale Positions</span>
-              <Link href={`/${lang}/whales`} className="text-[10px] font-mono text-blue-400 hover:text-blue-300 transition-colors">All →</Link>
-            </div>
-            {hlWhales.length === 0 ? (
-              <div className="flex items-center justify-center flex-1 text-[11px] font-mono text-zinc-700">No active positions</div>
-            ) : (
-              <div className="grid grid-cols-2 gap-2 p-2 flex-1 overflow-y-auto content-start">
-                {hlWhales.map((whale) => (
-                  <HLWhaleCard key={whale.address} whale={whale} />
-                ))}
-              </div>
-            )}
-          </div>
-          {/* Quant Signals (25%) */}
-          <div className="overflow-hidden flex flex-col flex-1">
-            <SignalsWidget signals={signals} lang={lang} />
-          </div>
+      {/* Widget Grid */}
+      <div className="flex-1 overflow-auto p-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 auto-rows-[minmax(250px,1fr)]">
+          {widgets.predictions && (
+            <WidgetCard title={ko ? "예측 시장" : "Predictions"} onClose={() => toggleWidget("predictions")}>
+              <PredictionCards events={polymarketEvents} lang={lang} />
+            </WidgetCard>
+          )}
+          {widgets.feed && (
+            <WidgetCard title={ko ? "뉴스 피드" : "Feed"} onClose={() => toggleWidget("feed")}>
+              <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
+            </WidgetCard>
+          )}
+          {widgets.signals && (
+            <WidgetCard title={ko ? "퀀트 시그널" : "Quant Signals"} onClose={() => toggleWidget("signals")}>
+              <SignalsWidget signals={signals} lang={lang} />
+            </WidgetCard>
+          )}
+          {widgets.chat && (
+            <WidgetCard title={ko ? "AI 채팅" : "AI Chat"} onClose={() => toggleWidget("chat")}>
+              <ChatWidget lang={lang} />
+            </WidgetCard>
+          )}
+          {widgets.research && (
+            <WidgetCard title={ko ? "마켓 리서치" : "Market Research"} onClose={() => toggleWidget("research")}>
+              <BlogCards posts={blogPosts} lang={lang} />
+            </WidgetCard>
+          )}
         </div>
-
-        {/* Bottom row (50%) — News (bigger) + Research (bigger) */}
-        <div className="flex overflow-hidden min-h-0" style={{ flex: "1 1 0" }}>
-          {/* Content Feed — News + YouTube (55%) */}
-          <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "55%" }}>
-            <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
-          </div>
-          {/* Market Research (45%) */}
-          <div className="overflow-hidden flex flex-col flex-1">
-            <BlogCards posts={blogPosts} lang={lang} />
-          </div>
-        </div>
-      </div>
-
-      {/* ── Mobile: tab-driven panels ─────────────────────────── */}
-      <div className="lg:hidden flex-1 overflow-hidden min-h-0">
-        {mobileTab === "market" && (
-          <div className="h-full overflow-hidden flex flex-col">
-            <TopMoversTable coins={topCoins} />
-          </div>
-        )}
-        {mobileTab === "whales" && (
-          <div className="h-full overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
-              <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">
-                Whale Positions
-              </span>
-              <span className="text-[9px] font-mono text-zinc-700">
-                {hlWhales.reduce((s, w) => s + (w.positions?.length ?? 0), 0)} open
-              </span>
-            </div>
-            {hlWhales.length === 0 ? (
-              <div className="flex items-center justify-center flex-1 text-[10px] font-mono text-zinc-700">
-                No active positions
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-2 p-2 flex-1 overflow-y-auto">
-                {hlWhales.map((whale) => (
-                  <HLWhaleCard key={whale.address} whale={whale} />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-        {mobileTab === "news" && (
-          <div className="h-full overflow-hidden flex flex-col">
-            <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
-          </div>
-        )}
-        {mobileTab === "research" && (
-          <div className="h-full overflow-hidden flex flex-col">
-            <BlogCards posts={blogPosts} lang={lang} />
-          </div>
-        )}
-        {mobileTab === "predictions" && (
-          <div className="h-full overflow-hidden flex flex-col">
-            <PredictionCards events={polymarketEvents} lang={lang} />
-          </div>
-        )}
       </div>
     </div>
   );
