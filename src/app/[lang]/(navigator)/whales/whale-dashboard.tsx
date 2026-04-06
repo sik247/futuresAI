@@ -166,25 +166,25 @@ function FigureRow({ figure }: { figure: Figure }) {
   return (
     <div className={`border-b border-white/[0.04] ${tracked ? "" : "opacity-50"}`}>
       <button
-        className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-white/[0.03] transition-colors text-left cursor-pointer"
+        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-white/[0.03] transition-colors text-left cursor-pointer"
         onClick={() => tracked && setExpanded((e) => !e)}
         disabled={!tracked}
       >
         <div className="relative shrink-0">
-          <Avatar image={figure.image} name={figure.name} size={34} />
+          <Avatar image={figure.image} name={figure.name} size={28} />
           {tracked && (
             <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-[#0d0e14]" />
           )}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-xs font-semibold text-white truncate leading-tight">
+            <span className="text-[11px] font-semibold text-white truncate leading-tight">
               {figure.name}
             </span>
             <StanceBadge stance={figure.stance} />
           </div>
           <div className="flex items-center gap-1 mt-0.5">
-            <span className="text-[10px] font-mono text-zinc-500 truncate">{figure.role}</span>
+            <span className="text-[9px] font-mono text-zinc-500 truncate">{figure.role}</span>
           </div>
         </div>
         {hasData && figure.walletData && (
@@ -309,10 +309,10 @@ function HLWhaleCard({ whale }: { whale: HLWhale }) {
           <div className="text-[9px] font-mono text-zinc-700 text-center py-2">No open positions</div>
         ) : (
           topPositions.map((pos, i) => (
-            <div key={i} className="flex items-center gap-1.5 text-[10px] font-mono">
-              <span className="text-white font-semibold w-14 truncate">{pos.coin}</span>
+            <div key={i} className="flex items-center gap-1 text-[9px] font-mono">
+              <span className="text-white font-semibold w-12 truncate">{pos.coin}</span>
               <span
-                className={`text-[8px] font-bold px-1 py-0.5 rounded ${
+                className={`text-[7px] font-bold px-0.5 py-0.5 rounded ${
                   pos.direction === "LONG"
                     ? "bg-emerald-500/15 text-emerald-400"
                     : "bg-red-500/15 text-red-400"
@@ -320,17 +320,17 @@ function HLWhaleCard({ whale }: { whale: HLWhale }) {
               >
                 {pos.direction === "LONG" ? "L" : "S"}
               </span>
-              <span className="text-zinc-500 text-[9px]">{pos.leverage}x</span>
-              <span className="text-zinc-400 flex-1 text-right">{fmtNum(pos.size)}</span>
+              <span className="text-zinc-500 text-[8px]">{pos.leverage}x</span>
+              <span className="text-zinc-400 flex-1 text-right tabular-nums">{fmtNum(pos.size)}</span>
               <span
-                className={`w-14 text-right ${
+                className={`w-16 text-right tabular-nums ${
                   pos.unrealizedPnl >= 0 ? "text-emerald-400" : "text-red-400"
                 }`}
               >
                 {pos.unrealizedPnl >= 0 ? "+" : ""}{fmtUsd(pos.unrealizedPnl)}
               </span>
               <span
-                className={`w-12 text-right text-[9px] ${
+                className={`w-10 text-right text-[8px] tabular-nums ${
                   pos.roe >= 0 ? "text-emerald-400/70" : "text-red-400/70"
                 }`}
               >
@@ -358,7 +358,7 @@ function RecentTradesTable({ trades }: { trades: HLTrade[] }) {
         <span className="text-[9px] font-mono text-zinc-700">{displayTrades.length} fills</span>
       </div>
       {/* Column headers */}
-      <div className="grid grid-cols-[1fr_60px_42px_60px_50px_50px] gap-1 px-3 py-1.5 border-b border-white/[0.04] shrink-0">
+      <div className="grid grid-cols-[1fr_55px_35px_55px_45px_45px] gap-1 px-3 py-1.5 border-b border-white/[0.04] shrink-0">
         {["Whale", "Coin", "Side", "Size", "PnL", "Time"].map((h) => (
           <span key={h} className="text-[8px] font-mono uppercase tracking-[0.1em] text-zinc-700">{h}</span>
         ))}
@@ -373,7 +373,7 @@ function RecentTradesTable({ trades }: { trades: HLTrade[] }) {
           displayTrades.map((t, i) => (
             <div
               key={i}
-              className="grid grid-cols-[1fr_60px_42px_60px_50px_50px] gap-1 px-3 py-1 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
+              className="grid grid-cols-[1fr_55px_35px_55px_45px_45px] gap-1 px-3 py-1 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
             >
               <span className="text-[9px] font-mono text-zinc-400 truncate tabular-nums">{t.whale}</span>
               <span className="text-[9px] font-mono text-white font-semibold truncate tabular-nums">{t.coin}</span>
@@ -481,14 +481,14 @@ function HLMarketTable({ markets }: { markets: HLMarketData[] }) {
         <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">HL Funding & OI</span>
         <span className="text-[9px] font-mono text-zinc-700">{markets.length} markets</span>
       </div>
-      <div className="grid grid-cols-[1fr_70px_80px_70px] gap-1 px-3 py-1.5 border-b border-white/[0.04] shrink-0">
-        {["Coin", "Price", "OI (USD)", "Fund APR"].map((h) => (
+      <div className="grid grid-cols-[1fr_65px_65px_55px] gap-1 px-3 py-1.5 border-b border-white/[0.04] shrink-0">
+        {["Coin", "Price", "OI", "APR"].map((h) => (
           <span key={h} className="text-[8px] font-mono uppercase tracking-[0.1em] text-zinc-700">{h}</span>
         ))}
       </div>
       <div className="flex-1 overflow-y-auto">
         {top.map((m) => (
-          <div key={m.coin} className="grid grid-cols-[1fr_70px_80px_70px] gap-1 px-3 py-1 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
+          <div key={m.coin} className="grid grid-cols-[1fr_65px_65px_55px] gap-1 px-3 py-1 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
             <span className="text-[10px] font-mono text-white font-semibold truncate">{m.coin}</span>
             <span className="text-[9px] font-mono text-zinc-300 tabular-nums">${m.markPrice >= 1 ? m.markPrice.toLocaleString(undefined, { maximumFractionDigits: 2 }) : m.markPrice.toFixed(4)}</span>
             <span className="text-[9px] font-mono text-zinc-400 tabular-nums">{fmtUsd(m.openInterestUsd)}</span>
@@ -607,10 +607,10 @@ export default function WhaleDashboard({
       </div>
 
       {/* Main grid — desktop */}
-      <div className="hidden lg:grid h-[calc(100vh-108px)]" style={{ gridTemplateColumns: "320px 1fr" }}>
+      <div className="hidden lg:grid h-[calc(100vh-108px)]" style={{ gridTemplateColumns: "260px 1fr" }}>
         {/* Left sidebar */}
         <div className="border-r border-white/[0.06] flex flex-col overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-white/[0.06] shrink-0 flex items-center justify-between">
+          <div className="px-3 py-2 border-b border-white/[0.06] shrink-0 flex items-center justify-between">
             <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold">Key Figures</span>
             <span className="text-[9px] font-mono bg-white/[0.06] text-zinc-400 px-1.5 py-0.5 rounded-full tabular-nums">{figuresWithData.length}</span>
           </div>
@@ -688,15 +688,15 @@ export default function WhaleDashboard({
             )}
           </div>
 
-          {/* Bottom: Trades + Funding/OI + Activity */}
+          {/* Bottom: Trades + Funding/OI (left) | Activity (right) */}
           <div className="flex flex-1 overflow-hidden min-h-0">
-            {/* Left 40%: Recent Trades */}
-            <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "40%" }}>
+            {/* Left 55%: Trades */}
+            <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "35%" }}>
               <RecentTradesTable trades={hlTrades} />
             </div>
 
-            {/* Middle 30%: HL Funding & OI */}
-            <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "30%" }}>
+            {/* Middle 35%: HL Funding & OI */}
+            <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "35%" }}>
               <HLMarketTable markets={hlMarkets} />
             </div>
 
