@@ -850,105 +850,94 @@ export default function HomeDashboard({
         globalData={globalData}
       />
 
-      {/* Desktop layout - 3-column fixed panels, zero white space */}
-      <div className="hidden lg:flex flex-col flex-1 overflow-hidden">
+      {/* ── Desktop: 3-column layout ── */}
+      <div className="hidden lg:flex flex-1 overflow-hidden">
+        {/* LEFT: Prediction Markets (30%) */}
+        <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "30%" }}>
+          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+            <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400 font-semibold">{ko ? "예측 시장" : "Prediction Markets"}</span>
+            <Link href={`/${lang}/markets`} className="text-[11px] text-blue-400 hover:text-blue-300">All →</Link>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            <PredictionCards events={polymarketEvents} lang={lang} />
+          </div>
+        </div>
 
-        {/* Top row - 50% height */}
-        <div className="flex border-b border-white/[0.06]" style={{ flex: "1 0 0", minHeight: 0 }}>
-
-          {/* PREDICTIONS - 40% */}
-          <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "40%" }}>
-            <div className="px-4 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-              <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
-                {ko ? "예측 시장" : "Prediction Markets"}
-              </span>
-              <Link href={`/${lang}/markets`} className="text-[12px] text-blue-400 hover:text-blue-300">All →</Link>
+        {/* CENTER: Chart + News + Signals + Research (40%) */}
+        <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "40%" }}>
+          {/* TradingView Chart (top 45%) */}
+          <div className="border-b border-white/[0.06] flex flex-col overflow-hidden" style={{ flex: "45 0 0", minHeight: 0 }}>
+            <div className="px-4 py-2 border-b border-white/[0.06] flex items-center gap-3 shrink-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[13px] font-mono text-zinc-300">BTC/USDT</span>
+              <span className="text-[11px] font-mono text-zinc-600 uppercase tracking-wider">Live</span>
             </div>
-            <div className="flex-1 overflow-y-auto">
-              <PredictionCards events={polymarketEvents} lang={lang} />
+            <div className="flex-1 overflow-hidden">
+              <iframe
+                src="https://s.tradingview.com/widgetembed/?frameElementId=tv_chart&symbol=BINANCE:BTCUSDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=0a0a0f&studies=[]&theme=dark&style=1&timezone=exchange&withdateranges=1&showpopupbutton=0&locale=en&width=100%25&height=100%25"
+                className="w-full h-full border-0"
+                title="BTC/USDT Chart"
+              />
             </div>
           </div>
 
-          {/* WHALE POSITIONS - 30% */}
-          <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "30%" }}>
-            <div className="px-4 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-              <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
-                {ko ? "웨일 포지션" : "Whale Positions"}
-              </span>
-              <Link href={`/${lang}/whales`} className="text-[12px] text-blue-400 hover:text-blue-300">All →</Link>
+          {/* Bottom: News + Signals + Research */}
+          <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
+            {/* News Feed (50%) */}
+            <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "50%" }}>
+              <div className="px-3 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+                <span className="text-[12px] font-mono uppercase tracking-[0.12em] text-zinc-400">{ko ? "뉴스" : "Feed"}</span>
+                <Link href={`/${lang}/sns`} className="text-[10px] text-blue-400">All →</Link>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
+              </div>
             </div>
-            <div className="flex-1 overflow-y-auto p-2">
-              {hlWhales.length === 0 ? (
-                <div className="flex items-center justify-center h-full text-[12px] font-mono text-zinc-700">No whale data</div>
-              ) : (
-                <div className="grid grid-cols-2 gap-2">
-                  {hlWhales.slice(0, 6).map((whale) => (
-                    <HLWhaleCard key={whale.address} whale={whale} />
-                  ))}
+
+            {/* Signals + Research (50%) */}
+            <div className="flex flex-col overflow-hidden flex-1">
+              {/* Signals (top half) */}
+              <div className="border-b border-white/[0.06] flex flex-col overflow-hidden" style={{ flex: "1 0 0", minHeight: 0 }}>
+                <div className="px-3 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+                  <span className="text-[12px] font-mono uppercase tracking-[0.12em] text-zinc-400">{ko ? "시그널" : "Signals"}</span>
+                  <Link href={`/${lang}/quant`} className="text-[10px] text-blue-400">All →</Link>
                 </div>
-              )}
-            </div>
-          </div>
-
-          {/* QUANT SIGNALS - 30% */}
-          <div className="flex flex-col overflow-hidden flex-1">
-            <div className="px-4 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-              <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
-                {ko ? "퀀트 시그널" : "Quant Signals"}
-              </span>
-              <Link href={`/${lang}/quant`} className="text-[12px] text-blue-400 hover:text-blue-300">All →</Link>
-            </div>
-            <div className="flex-1 overflow-y-auto">
-              <SignalsWidget signals={signals} lang={lang} />
+                <div className="flex-1 overflow-y-auto">
+                  <SignalsWidget signals={signals} lang={lang} />
+                </div>
+              </div>
+              {/* Research (bottom half) */}
+              <div className="flex flex-col overflow-hidden" style={{ flex: "1 0 0", minHeight: 0 }}>
+                <div className="px-3 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+                  <span className="text-[12px] font-mono uppercase tracking-[0.12em] text-zinc-400">{ko ? "리서치" : "Research"}</span>
+                  <Link href={`/${lang}/quant`} className="text-[10px] text-blue-400">All →</Link>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                  <BlogCards posts={blogPosts} lang={lang} />
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom row - 50% height */}
-        <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
-
-          {/* NEWS FEED - 35% */}
-          <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "35%" }}>
-            <div className="px-4 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-              <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
-                {ko ? "뉴스 피드" : "News Feed"}
-              </span>
-              <Link href={`/${lang}/news`} className="text-[12px] text-blue-400 hover:text-blue-300">All →</Link>
+        {/* RIGHT: AI Quant Chat (30%) */}
+        <div className="flex flex-col overflow-hidden flex-1">
+          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+              </svg>
+              <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400 font-semibold">{ko ? "AI 퀀트 채팅" : "AI Quant Chat"}</span>
             </div>
-            <div className="flex-1 overflow-y-auto">
-              <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
-            </div>
+            <Link href={`/${lang}/chat`} className="text-[11px] text-blue-400 hover:text-blue-300">{ko ? "전체 →" : "Full →"}</Link>
           </div>
-
-          {/* MARKET RESEARCH - 40% */}
-          <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "40%" }}>
-            <div className="px-4 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-              <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
-                {ko ? "마켓 리서치" : "Market Research"}
-              </span>
-              <Link href={`/${lang}/quant`} className="text-[12px] text-blue-400 hover:text-blue-300">All →</Link>
-            </div>
-            <div className="flex-1 overflow-y-auto">
-              <BlogCards posts={blogPosts} lang={lang} />
-            </div>
-          </div>
-
-          {/* AI CHAT - 25% */}
-          <div className="flex flex-col overflow-hidden flex-1">
-            <div className="px-4 py-2 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-              <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
-                {ko ? "AI 채팅" : "AI Chat"}
-              </span>
-              <Link href={`/${lang}/chat`} className="text-[12px] text-blue-400 hover:text-blue-300">
-                {ko ? "전체 →" : "Full →"}
-              </Link>
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <ChatWidget lang={lang} />
-            </div>
+          <div className="flex-1 overflow-hidden">
+            <ChatWidget lang={lang} />
           </div>
         </div>
       </div>
+
+      {/* (old layout removed) */}
 
       {/* Mobile: simple scrollable stack */}
       <div className="lg:hidden flex-1 overflow-auto p-3 space-y-4">
