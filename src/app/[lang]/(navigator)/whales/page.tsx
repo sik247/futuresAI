@@ -57,7 +57,8 @@ const KEY_FIGURES: KeyFigure[] = [
   { name: "Do Kwon", role: "Terraform Labs", image: "https://upload.wikimedia.org/wikipedia/commons/2/29/Do_Kwon.png", walletAddress: "0xbec5e1ad5422e52821735b59b39dc03810aae682", stance: "", knownHoldings: ["BTC"], category: "founder" },
   // ── Traders ──
   { name: "Arthur Hayes", role: "BitMEX Co-founder", image: "https://cryptoslate.com/wp-content/uploads/2019/05/person-arthur-hayes-01.jpg", walletAddress: "0x94845333028B1204Fbe14E1278Fd4Adde46B22ce", stance: "Bullish", knownHoldings: ["BTC", "ETH", "SOL"], category: "trader" },
-  { name: "WLFI Treasury", role: "World Liberty Financial", image: "", walletAddress: "0x5be9a4959308A0D0c7bC0870E319314d8D957dBB", stance: "Bullish", knownHoldings: ["ETH", "WBTC"], category: "founder" },
+  { name: "WLFI Treasury", role: "Trump World Liberty Financial", image: "", walletAddress: "0x5be9a4959308A0D0c7bC0870E319314d8D957dBB", stance: "Bullish", knownHoldings: ["WLFI", "USD1", "USDC", "USDT", "ONDO"], category: "founder" },
+  { name: "Donald Trump", role: "45th/47th US President", image: "https://upload.wikimedia.org/wikipedia/commons/5/56/Donald_Trump_official_portrait.jpg", walletAddress: "0x94845333028B1204Fbe14E1278Fd4Adde46B22ce", stance: "Bullish", knownHoldings: ["ETH", "WLFI", "TRUMP"], category: "investor" },
   { name: "Wintermute", role: "Market Maker", image: "", walletAddress: "0x0000006daea1723962647b7e189d311d757Fb793", stance: "", knownHoldings: ["ETH", "USDC"], category: "trader" },
   { name: "Alameda Research", role: "FTX Trading Arm", image: "", walletAddress: "0x84D34f4f83a87596Cd3FB6887cFf8F17Bf5A7B83", stance: "", knownHoldings: ["ETH"], category: "trader" },
   // ── Investors ──
