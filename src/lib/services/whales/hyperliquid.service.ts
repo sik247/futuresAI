@@ -34,7 +34,61 @@ const HL_WHALES = [
   { name: "Crocodile Whale", address: "0x5b5d51203a0f9079f8aeb098a6523a13f298c060" },
   { name: "Machi Big Brother", address: "0x020ca66c30bec2c4fe3861a94e4db4a498a35872" },
   { name: "James Wynn", address: "0x5078c2fbea2b2ad61bc840bc023e35fce56bedb6" },
-];
+]
+
+/* ── Market-wide HL data (funding, OI, prices) ──────────────────────── */
+
+export interface HLMarketData {
+  coin: string;
+  markPrice: number;
+  openInterest: number;
+  openInterestUsd: number;
+  fundingRate: number;
+  fundingRateApr: number;
+  volume24h: number;
+}
+
+export async function fetchHLMarketData(): Promise<HLMarketData[]> {
+  try {
+    const res = await fetch(HL_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "metaAndAssetCtxs" }),
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length < 2) return [];
+
+    const meta = data[0];
+    const ctxs = data[1];
+    const coins = (meta.universe || []).map((u: any) => u.name);
+
+    const markets: HLMarketData[] = [];
+    for (let i = 0; i < Math.min(coins.length, ctxs.length); i++) {
+      const ctx = ctxs[i];
+      const markPrice = parseFloat(ctx.markPx || "0");
+      const oi = parseFloat(ctx.openInterest || "0");
+      const funding = parseFloat(ctx.funding || "0");
+      const vol24h = parseFloat(ctx.dayNtlVlm || "0");
+
+      if (oi === 0 && vol24h === 0) continue;
+
+      markets.push({
+        coin: coins[i],
+        markPrice,
+        openInterest: oi,
+        openInterestUsd: oi * markPrice,
+        fundingRate: funding,
+        fundingRateApr: funding * 876000, // annualized (8h * 3 * 365)
+        volume24h: vol24h,
+      });
+    }
+
+    return markets.sort((a, b) => b.openInterestUsd - a.openInterestUsd);
+  } catch {
+    return [];
+  }
+};
 
 export async function fetchHLWalletData(address: string, name: string): Promise<HLWalletData | null> {
   try {

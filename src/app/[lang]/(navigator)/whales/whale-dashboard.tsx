@@ -59,11 +59,22 @@ type HLTrade = {
   time: number;
 };
 
+type HLMarketData = {
+  coin: string;
+  markPrice: number;
+  openInterest: number;
+  openInterestUsd: number;
+  fundingRate: number;
+  fundingRateApr: number;
+  volume24h: number;
+};
+
 export type WhaleDashboardProps = {
   ethPrice: number;
   figures: Figure[];
   hlWhales: HLWhale[];
   hlTrades: HLTrade[];
+  hlMarkets: HLMarketData[];
   lang: string;
 };
 
@@ -458,11 +469,45 @@ function WhaleAlerts({ hlWhales }: { hlWhales: HLWhale[] }) {
 /*  Main Dashboard                                                     */
 /* ------------------------------------------------------------------ */
 
+/* ------------------------------------------------------------------ */
+/*  HL Market Data Table (Funding + OI)                                */
+/* ------------------------------------------------------------------ */
+
+function HLMarketTable({ markets }: { markets: HLMarketData[] }) {
+  const top = markets.slice(0, 12);
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
+        <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">HL Funding & OI</span>
+        <span className="text-[9px] font-mono text-zinc-700">{markets.length} markets</span>
+      </div>
+      <div className="grid grid-cols-[1fr_70px_80px_70px] gap-1 px-3 py-1.5 border-b border-white/[0.04] shrink-0">
+        {["Coin", "Price", "OI (USD)", "Fund APR"].map((h) => (
+          <span key={h} className="text-[8px] font-mono uppercase tracking-[0.1em] text-zinc-700">{h}</span>
+        ))}
+      </div>
+      <div className="flex-1 overflow-y-auto">
+        {top.map((m) => (
+          <div key={m.coin} className="grid grid-cols-[1fr_70px_80px_70px] gap-1 px-3 py-1 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
+            <span className="text-[10px] font-mono text-white font-semibold truncate">{m.coin}</span>
+            <span className="text-[9px] font-mono text-zinc-300 tabular-nums">${m.markPrice >= 1 ? m.markPrice.toLocaleString(undefined, { maximumFractionDigits: 2 }) : m.markPrice.toFixed(4)}</span>
+            <span className="text-[9px] font-mono text-zinc-400 tabular-nums">{fmtUsd(m.openInterestUsd)}</span>
+            <span className={`text-[9px] font-mono tabular-nums ${m.fundingRateApr >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+              {m.fundingRateApr >= 0 ? "+" : ""}{m.fundingRateApr.toFixed(1)}%
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function WhaleDashboard({
   ethPrice,
   figures,
   hlWhales,
   hlTrades,
+  hlMarkets,
 }: WhaleDashboardProps) {
   const [mobileTab, setMobileTab] = useState<"figures" | "positions" | "trades">("positions");
   const [showOthers, setShowOthers] = useState(false);
@@ -613,14 +658,19 @@ export default function WhaleDashboard({
             )}
           </div>
 
-          {/* Bottom: Trades + Activity */}
+          {/* Bottom: Trades + Funding/OI + Activity */}
           <div className="flex flex-1 overflow-hidden min-h-0">
-            {/* Left 60%: Recent Trades */}
-            <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "60%" }}>
+            {/* Left 40%: Recent Trades */}
+            <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "40%" }}>
               <RecentTradesTable trades={hlTrades} />
             </div>
 
-            {/* Right 40%: Activity Feed */}
+            {/* Middle 30%: HL Funding & OI */}
+            <div className="border-r border-white/[0.06] overflow-hidden flex flex-col" style={{ width: "30%" }}>
+              <HLMarketTable markets={hlMarkets} />
+            </div>
+
+            {/* Right 30%: Activity Feed */}
             <div className="overflow-y-auto flex-1">
               <div className="p-3 h-full">
                 <WhaleActivityFeed />

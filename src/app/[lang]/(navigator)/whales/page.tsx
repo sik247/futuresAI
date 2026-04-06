@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { fetchAllHLWhales, fetchAllHLTrades } from "@/lib/services/whales/hyperliquid.service";
+import { fetchAllHLWhales, fetchAllHLTrades, fetchHLMarketData } from "@/lib/services/whales/hyperliquid.service";
 import WhaleDashboard from "./whale-dashboard";
 
 export const metadata: Metadata = {
@@ -130,10 +130,11 @@ export default async function WhalesPage({
   params: { lang: string };
 }) {
   // Fetch ETH price and Hyperliquid data in parallel
-  const [ethPrice, hlWhales, hlTrades] = await Promise.all([
+  const [ethPrice, hlWhales, hlTrades, hlMarkets] = await Promise.all([
     fetchEthPrice(),
     fetchAllHLWhales(),
     fetchAllHLTrades(),
+    fetchHLMarketData(),
   ]);
 
   // Fetch on-chain data for figures with wallet addresses (parallel)
@@ -171,6 +172,7 @@ export default async function WhalesPage({
       figures={figures}
       hlWhales={hlWhales}
       hlTrades={hlTrades}
+      hlMarkets={hlMarkets}
       lang={lang}
     />
   );
