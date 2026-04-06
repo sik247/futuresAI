@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import WhaleActivityFeed from "./whale-activity-feed";
 
 /* ------------------------------------------------------------------ */
@@ -505,12 +505,36 @@ function HLMarketTable({ markets }: { markets: HLMarketData[] }) {
 export default function WhaleDashboard({
   ethPrice,
   figures,
-  hlWhales,
-  hlTrades,
-  hlMarkets,
+  hlWhales: initialWhales,
+  hlTrades: initialTrades,
+  hlMarkets: initialMarkets,
 }: WhaleDashboardProps) {
   const [mobileTab, setMobileTab] = useState<"figures" | "positions" | "trades">("positions");
   const [showOthers, setShowOthers] = useState(false);
+  const [hlWhales, setHlWhales] = useState(initialWhales);
+  const [hlTrades, setHlTrades] = useState(initialTrades);
+  const [hlMarkets, setHlMarkets] = useState(initialMarkets);
+  const [lastUpdate, setLastUpdate] = useState<string>("");
+
+  // Auto-refresh HL data every 30 seconds
+  const refreshHL = useCallback(async () => {
+    try {
+      const res = await fetch("/api/hl-live");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.whales?.length > 0) setHlWhales(data.whales);
+      if (data.trades?.length > 0) setHlTrades(data.trades);
+      if (data.markets?.length > 0) setHlMarkets(data.markets);
+      if (data.updatedAt) setLastUpdate(new Date(data.updatedAt).toLocaleTimeString());
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(refreshHL, 30_000);
+    // Initial refresh after 5s to get fresh data
+    const timeout = setTimeout(refreshHL, 5_000);
+    return () => { clearInterval(interval); clearTimeout(timeout); };
+  }, [refreshHL]);
 
   // Figures with actual on-chain data
   const figuresWithData = figures.filter(
@@ -557,6 +581,12 @@ export default function WhaleDashboard({
           </span>
           <span className="text-emerald-400 text-[10px] uppercase tracking-[0.15em]">LIVE</span>
         </span>
+        {lastUpdate && (
+          <>
+            <span className="text-zinc-700 shrink-0">|</span>
+            <span className="text-[10px] text-zinc-600 shrink-0 tabular-nums">{lastUpdate}</span>
+          </>
+        )}
       </div>
 
       {/* Mobile tab bar */}

@@ -33,8 +33,10 @@ const HL_WHALES = [
   { name: "Mega Whale", address: "0xfc667adba8d4837586078f4fdcdc29804337ca06" },
   { name: "Crocodile Whale", address: "0x5b5d51203a0f9079f8aeb098a6523a13f298c060" },
   { name: "Machi Big Brother", address: "0x020ca66c30bec2c4fe3861a94e4db4a498a35872" },
-  { name: "James Wynn", address: "0x5078c2fbea2b2ad61bc840bc023e35fce56bedb6" },
-]
+];
+
+// Minimum account value to display (filter out empty/tiny wallets)
+const MIN_ACCOUNT_VALUE = 1000;
 
 /* ── Market-wide HL data (funding, OI, prices) ──────────────────────── */
 
@@ -134,7 +136,8 @@ export async function fetchAllHLWhales(): Promise<HLWalletData[]> {
   );
   return results
     .filter((r): r is PromiseFulfilledResult<HLWalletData | null> => r.status === "fulfilled" && r.value !== null)
-    .map(r => r.value!);
+    .map(r => r.value!)
+    .filter(w => w.accountValue >= MIN_ACCOUNT_VALUE); // Only show major wallets
 }
 
 /* ── Recent fills (trades) for a whale ─────────────────────────────── */
