@@ -44,7 +44,6 @@ const NAV_ITEMS = [
   { path: "markets", key: "markets" as const, icon: GlobeAltIcon, group: 1 },
   { path: "whales", key: "whales" as const, icon: CurrencyDollarIcon, group: 2 },
   { path: "sns", key: "sns" as const, icon: ChatBubbleLeftRightIcon, group: 2 },
-  { path: "news", key: "news" as const, icon: NewspaperIcon, group: 2 },
   { path: "payback", key: "payback" as const, icon: CalculatorIcon, group: 3 },
   { path: "pricing", key: "pricing" as const, icon: TagIcon, group: 3 },
 ] as const;

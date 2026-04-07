@@ -34,7 +34,6 @@ const MENU_ITEMS = [
   { path: "markets", key: "markets" as const, icon: GlobeAltIcon },
   { path: "whales", key: "whales" as const, icon: CurrencyDollarIcon },
   { path: "sns", key: "sns" as const, icon: ChatBubbleLeftRightIcon },
-  { path: "news", key: "news" as const, icon: NewspaperIcon },
   { path: "calculator", key: "calculator" as const, icon: CalculatorIcon },
   { path: "insights", key: "insights" as const, icon: SparklesIcon },
   { path: "team", key: "team" as const, icon: UserGroupIcon },
