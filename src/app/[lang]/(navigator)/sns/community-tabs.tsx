@@ -158,7 +158,7 @@ export function CommunityTabs({
   const unifiedFeed = useMemo<UnifiedItem[]>(() => {
     const items: UnifiedItem[] = [];
 
-    newsItems.slice(0, 8).forEach((n) => {
+    displayNewsItems.slice(0, 8).forEach((n) => {
       items.push({
         id: `news-${n.id}`,
         type: "news",
@@ -186,7 +186,7 @@ export function CommunityTabs({
       if (byType.youtube[i]) interleaved.push(byType.youtube[i]);
     }
     return interleaved;
-  }, [newsItems, youtubeItems]);
+  }, [displayNewsItems, youtubeItems]);
 
   // ── GSAP tab indicator ───────────────────────────────────────────
   const moveIndicator = useCallback((tabKey: string) => {

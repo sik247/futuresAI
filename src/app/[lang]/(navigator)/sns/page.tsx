@@ -117,86 +117,33 @@ export default async function SnsPage({ params: { lang } }: { params: { lang: st
   }));
 
   return (
-    <div className="min-h-screen bg-zinc-950 pt-24 sm:pt-28 pb-24 sm:pb-32">
-      {/* ── Hero Section ─────────────────────────────────────────── */}
-      <section className="relative pt-16 pb-20 overflow-hidden">
-        {/* Background gradient orbs */}
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-950/20 via-zinc-950 to-zinc-950" />
-        <div className="absolute top-[-80px] left-1/4 w-[500px] h-[500px] bg-blue-600/[0.07] rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute top-[-40px] right-1/4 w-[400px] h-[400px] bg-cyan-600/[0.05] rounded-full blur-[100px] animate-pulse [animation-delay:2s]" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-indigo-600/[0.04] rounded-full blur-[80px]" />
-
-        <Container className="relative z-10 flex flex-col gap-6">
-          <p className="text-[11px] font-mono uppercase tracking-[0.3em] text-zinc-500">
-            {t.sns_realtime}
-          </p>
-
-          <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[0.9]">
-            <span className="text-white">Crypto</span>
-            <br />
-            <span className="bg-gradient-to-r from-white via-blue-400 to-blue-400 bg-clip-text text-transparent">
-              {t.sns_title}
-            </span>
-          </h1>
-
-          <p className="text-base md:text-lg text-zinc-400 max-w-2xl leading-relaxed">
-            {t.sns_subtitle}
-          </p>
-
-          {/* Telegram Channel Banner */}
+    <div className="min-h-screen bg-zinc-950 pb-16">
+      {/* ── Compact Header ─────────────────────────────────────────── */}
+      <section className="relative overflow-hidden border-b border-white/[0.06]">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-950/20 via-zinc-950 to-zinc-950" />
+        <Container className="relative z-10 py-6 flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+              {lang === "ko" ? "소셜 & 뉴스" : "Social & News"}
+            </h1>
+            <p className="text-sm text-zinc-500 mt-1">
+              {lang === "ko" ? "실시간 크립토 뉴스, 분석, 유튜브" : "Real-time crypto news, analysis, YouTube"}
+            </p>
+          </div>
+          {/* Telegram link - compact */}
           <a
             href="https://t.me/FuturesAIOfficial"
             target="_blank"
             rel="noopener noreferrer"
-            className="group mt-2 flex items-center gap-4 w-fit rounded-2xl border border-[#2AABEE]/20 bg-[#2AABEE]/[0.08] px-6 py-4 transition-all duration-300 hover:bg-[#2AABEE]/[0.15] hover:border-[#2AABEE]/40 hover:shadow-[0_0_30px_rgba(42,171,238,0.15)] hover:-translate-y-0.5"
+            className="flex items-center gap-2 rounded-lg border border-[#2AABEE]/20 bg-[#2AABEE]/[0.08] px-4 py-2 hover:bg-[#2AABEE]/[0.15] transition-all"
           >
-            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#2AABEE]/20">
-              <svg className="w-5 h-5 text-[#2AABEE]" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-              </svg>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold text-white group-hover:text-[#2AABEE] transition-colors">
-                Futures AI Official
-              </span>
-              <span className="text-xs text-zinc-400">
-                {lang === "ko" ? "텔레그램 채널에서 실시간 퀀트 알림을 받으세요" : "Join our Telegram for live quant alerts"}
-              </span>
-            </div>
-            <svg className="w-4 h-4 text-zinc-500 group-hover:text-[#2AABEE] group-hover:translate-x-1 transition-all ml-2" fill="none" viewBox="0 0 16 16" stroke="currentColor" strokeWidth="2">
-              <path d="M1 8h14M9 2l6 6-6 6" />
+            <svg className="w-4 h-4 text-[#2AABEE]" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
             </svg>
+            <span className="text-xs font-medium text-[#2AABEE]">Telegram</span>
           </a>
-
-          {/* Live Stats Bar */}
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-2">
-            {[
-              { label: `${newsItems.length} ${t.sns_articles}`, color: "bg-emerald-500" },
-              { label: `${youtubeItems.length} ${t.sns_videos}`, color: "bg-red-500" },
-              { label: `${t.sns_updated} ${updatedAgo}`, color: "bg-amber-500" },
-            ].map((stat, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span className="relative flex h-2 w-2">
-                  <span
-                    className={`animate-ping absolute inline-flex h-full w-full rounded-full ${stat.color} opacity-75`}
-                  />
-                  <span
-                    className={`relative inline-flex rounded-full h-2 w-2 ${stat.color}`}
-                  />
-                </span>
-                <span className="text-xs text-zinc-400 font-mono tracking-wide">
-                  {stat.label}
-                </span>
-                {i < 2 && (
-                  <div className="h-4 w-px bg-zinc-800 ml-2 hidden sm:block" />
-                )}
-              </div>
-            ))}
-          </div>
         </Container>
       </section>
-
-      {/* Breaking news ticker removed */}
 
       {/* ── Main Content Tabs ────────────────────────────────────── */}
       <CommunityTabs
