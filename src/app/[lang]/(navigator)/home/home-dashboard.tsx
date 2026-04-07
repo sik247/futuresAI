@@ -997,28 +997,71 @@ export default function HomeDashboard({
       <div className="hidden lg:flex flex-1 overflow-hidden">
         {/* LEFT: Chart + Predictions + News (65%) */}
         <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "65%" }}>
-          {/* TradingView Chart (top 45%) */}
-          <div className="border-b border-white/[0.06] flex flex-col overflow-hidden" style={{ flex: "45 0 0", minHeight: 0 }}>
-            <div className="px-4 py-2 border-b border-white/[0.06] flex items-center gap-3 shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[14px] font-mono text-zinc-200 font-semibold">BTC/USDT</span>
-              <span className="text-[11px] font-mono text-zinc-600 uppercase tracking-wider">Live</span>
+          {/* Top: Chart (75%) + Fear & Greed (25%) — 35% height */}
+          <div className="border-b border-white/[0.06] flex overflow-hidden" style={{ flex: "35 0 0", minHeight: 0 }}>
+            {/* Chart */}
+            <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "75%" }}>
+              <div className="px-3 py-1.5 border-b border-white/[0.06] flex items-center gap-2 shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[13px] font-mono text-zinc-200 font-semibold">BTC/USDT</span>
+                <span className="text-[10px] font-mono text-zinc-600 uppercase">Live</span>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <iframe
+                  src="https://s.tradingview.com/widgetembed/?frameElementId=tv_chart&symbol=BINANCE:BTCUSDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=0a0a0f&studies=[]&theme=dark&style=1&timezone=exchange&withdateranges=1&showpopupbutton=0&locale=en&width=100%25&height=100%25"
+                  className="w-full h-full border-0"
+                  title="BTC/USDT Chart"
+                />
+              </div>
             </div>
-            <div className="flex-1 overflow-hidden">
-              <iframe
-                src="https://s.tradingview.com/widgetembed/?frameElementId=tv_chart&symbol=BINANCE:BTCUSDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=0a0a0f&studies=[]&theme=dark&style=1&timezone=exchange&withdateranges=1&showpopupbutton=0&locale=en&width=100%25&height=100%25"
-                className="w-full h-full border-0"
-                title="BTC/USDT Chart"
-              />
+            {/* Fear & Greed + Quick Stats */}
+            <div className="flex flex-col overflow-hidden flex-1 bg-zinc-900/30">
+              <div className="px-3 py-1.5 border-b border-white/[0.06] shrink-0">
+                <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-zinc-500">Market</span>
+              </div>
+              <div className="flex-1 overflow-y-auto p-3 space-y-3">
+                {/* Fear & Greed */}
+                <div className="text-center">
+                  <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider mb-1">{ko ? "공포 & 탐욕" : "Fear & Greed"}</p>
+                  <p className={`text-2xl font-bold tabular-nums ${
+                    (fearGreed?.data?.[0] ? parseInt(fearGreed.data[0].value) : 50) <= 25 ? "text-red-400" :
+                    (fearGreed?.data?.[0] ? parseInt(fearGreed.data[0].value) : 50) >= 75 ? "text-emerald-400" : "text-amber-400"
+                  }`}>
+                    {fearGreed?.data?.[0]?.value ?? "--"}
+                  </p>
+                  <p className={`text-[11px] font-mono ${
+                    (fearGreed?.data?.[0] ? parseInt(fearGreed.data[0].value) : 50) <= 25 ? "text-red-400" : "text-amber-400"
+                  }`}>
+                    {fearGreed?.data?.[0]?.value_classification ?? ""}
+                  </p>
+                </div>
+                {/* Quick stats */}
+                {globalData?.data && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-[10px] text-zinc-600">{ko ? "시총" : "Mkt Cap"}</span>
+                      <span className="text-[11px] text-zinc-300 font-mono tabular-nums">${(globalData.data.total_market_cap.usd / 1e12).toFixed(2)}T</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[10px] text-zinc-600">BTC Dom</span>
+                      <span className="text-[11px] text-zinc-300 font-mono tabular-nums">{globalData.data.market_cap_percentage.btc.toFixed(1)}%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[10px] text-zinc-600">{ko ? "거래량" : "24h Vol"}</span>
+                      <span className="text-[11px] text-zinc-300 font-mono tabular-nums">${(globalData.data.total_volume.usd / 1e9).toFixed(1)}B</span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Bottom: Predictions + News side by side (55%) */}
-          <div className="flex overflow-hidden" style={{ flex: "55 0 0", minHeight: 0 }}>
-            {/* Predictions */}
-            <div className="border-r border-white/[0.06] flex flex-col overflow-hidden flex-1">
-              <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-                <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400 font-semibold">{ko ? "예측 시장" : "Prediction Markets"}</span>
+          <div className="flex overflow-hidden" style={{ flex: "65 0 0", minHeight: 0 }}>
+            {/* Predictions - blue accent bg */}
+            <div className="border-r border-blue-500/10 flex flex-col overflow-hidden flex-1 bg-blue-950/20">
+              <div className="px-4 py-2.5 border-b border-blue-500/10 bg-blue-950/30 flex items-center justify-between shrink-0">
+                <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-blue-300 font-semibold">{ko ? "예측 시장" : "Prediction Markets"}</span>
                 <Link href={`/${lang}/markets`} className="text-[11px] text-blue-400 hover:text-blue-300">All →</Link>
               </div>
               <div className="flex-1 overflow-y-auto">
@@ -1026,10 +1069,10 @@ export default function HomeDashboard({
               </div>
             </div>
 
-            {/* News */}
-            <div className="flex flex-col overflow-hidden flex-1">
-              <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
-                <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400 font-semibold">{ko ? "뉴스" : "News"}</span>
+            {/* News - emerald accent */}
+            <div className="flex flex-col overflow-hidden flex-1 bg-emerald-950/10">
+              <div className="px-4 py-2.5 border-b border-emerald-500/10 bg-emerald-950/20 flex items-center justify-between shrink-0">
+                <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-emerald-300 font-semibold">{ko ? "뉴스" : "News"}</span>
                 <Link href={`/${lang}/sns`} className="text-[11px] text-blue-400 hover:text-blue-300">All →</Link>
               </div>
               <div className="flex-1 overflow-y-auto">
@@ -1039,14 +1082,14 @@ export default function HomeDashboard({
           </div>
         </div>
 
-        {/* RIGHT: AI Quant Chat (35%) */}
-        <div className="flex flex-col overflow-hidden flex-1">
-          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+        {/* RIGHT: AI Quant Chat (35%) - purple accent */}
+        <div className="flex flex-col overflow-hidden flex-1 bg-purple-950/10">
+          <div className="px-4 py-2.5 border-b border-purple-500/10 bg-purple-950/20 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
               <svg className="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
               </svg>
-              <span className="text-[14px] font-mono uppercase tracking-[0.12em] text-zinc-300 font-semibold">{ko ? "AI 퀀트 채팅" : "AI Quant Chat"}</span>
+              <span className="text-[14px] font-mono uppercase tracking-[0.12em] text-purple-300 font-semibold">{ko ? "AI 퀀트 채팅" : "AI Quant Chat"}</span>
             </div>
             <Link href={`/${lang}/chat`} className="text-[11px] text-blue-400 hover:text-blue-300">{ko ? "전체 →" : "Full →"}</Link>
           </div>
