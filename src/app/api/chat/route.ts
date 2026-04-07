@@ -58,12 +58,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    // Daily chat limit (free: 10/day, premium: 30/day, admin: unlimited)
+    // Daily chat limit (free: 5/day, basic: 25/day, premium: 100/day, admin: unlimited)
     if (user.role !== "ADMIN") {
-      const { allowed, used, limit } = await checkDailyLimit(user.id, user.isPremium, "chat");
+      const { allowed, used, limit, tier, resetMessage } = await checkDailyLimit(user.id, user.isPremium, "chat", user.credits);
       if (!allowed) {
         return NextResponse.json(
-          { error: "Daily message limit reached", used, limit },
+          { error: resetMessage || "Daily message limit reached", used, limit, tier },
           { status: 429 }
         );
       }

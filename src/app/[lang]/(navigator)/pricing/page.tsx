@@ -91,20 +91,56 @@ export default function PricingPage({
           </p>
         </div>
 
-        {/* Pricing Card */}
-        <div className="max-w-lg mx-auto">
+        {/* Pricing Cards - 2 tiers */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 max-w-3xl mx-auto">
+          {/* Basic Tier */}
+          <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-6 lg:p-8 flex flex-col">
+            <div className="mb-6">
+              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                Basic
+              </span>
+              <div className="flex items-baseline gap-1 mt-3">
+                <span className="text-3xl font-bold text-white">$25</span>
+                <span className="text-sm text-zinc-500">USDT / {ko ? "월" : "month"}</span>
+              </div>
+              <p className="text-[11px] text-zinc-500 mt-2">
+                {ko ? "일일 AI 분석과 기본 기능" : "Daily AI analysis and core features"}
+              </p>
+            </div>
+            <div className="flex-1 border-t border-white/[0.06] pt-5 space-y-0.5">
+              <Feature included>{ko ? "AI 채팅 25회/일" : "25 AI chat messages/day"}</Feature>
+              <Feature included>{ko ? "차트 분석 10회/일" : "10 chart analyses/day"}</Feature>
+              <Feature included>{ko ? "고래 트래커" : "Whale tracker"}</Feature>
+              <Feature included>{ko ? "차트 & 시장 데이터" : "Charts & market data"}</Feature>
+              <Feature included>{ko ? "뉴스 피드" : "News feed"}</Feature>
+              <Feature included>{ko ? "커뮤니티 포스트" : "Community posts"}</Feature>
+              <Feature included={false}>{ko ? "실시간 고래 알림" : "Real-time whale alerts"}</Feature>
+              <Feature included={false}>{ko ? "업비트 + 김치 프리미엄" : "Upbit + Kimchi Premium"}</Feature>
+              <Feature included={false}>{ko ? "텔레그램 프리미엄 알림" : "Telegram premium alerts"}</Feature>
+            </div>
+            <div className="mt-6 pt-5 border-t border-white/[0.06]">
+              <a
+                href="https://t.me/FuturesAIAdminbot?start=basic"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full text-center py-2.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[11px] font-mono uppercase tracking-[0.15em] hover:bg-emerald-500/20 transition-colors cursor-pointer"
+              >
+                {ko ? "Basic 시작하기" : "Get Basic"}
+              </a>
+              <p className="text-center text-[9px] text-zinc-600 mt-2">$25 USDT (TRC-20)</p>
+            </div>
+          </div>
+
           {/* Premium Tier */}
           <div className="rounded-xl border border-blue-500/30 bg-blue-500/[0.03] p-6 lg:p-8 flex flex-col relative overflow-hidden">
-            {/* Glow effect */}
             <div className="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-
             <div className="mb-6 relative">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
                   Premium
                 </span>
                 <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                  {ko ? "추천" : "Recommended"}
+                  {ko ? "추천" : "Best Value"}
                 </span>
               </div>
               <div className="flex items-baseline gap-1 mt-3">
@@ -115,22 +151,18 @@ export default function PricingPage({
                 {ko ? "프로 트레이더를 위한 풀 액세스" : "Full access for professional traders"}
               </p>
             </div>
-
             <div className="flex-1 border-t border-blue-500/10 pt-5 space-y-0.5 relative">
-              <Feature included>{ko ? "AI 채팅 30회/일" : "30 AI chat messages/day"}</Feature>
-              <Feature included>{ko ? "차트 분석 10회/일" : "10 chart analyses/day"}</Feature>
+              <Feature included>{ko ? "AI 채팅 100회/일" : "100 AI chat messages/day"}</Feature>
+              <Feature included>{ko ? "차트 분석 30회/일" : "30 chart analyses/day"}</Feature>
               <Feature included>{ko ? "고래 트래커 (전체)" : "Whale tracker (full access)"}</Feature>
               <Feature included>{ko ? "차트 & 시장 데이터" : "Charts & market data"}</Feature>
               <Feature included>{ko ? "뉴스 피드" : "News feed"}</Feature>
               <Feature included>{ko ? "커뮤니티 포스트" : "Community posts"}</Feature>
               <Feature included>{ko ? "실시간 고래 알림" : "Real-time whale alerts"}</Feature>
               <Feature included>{ko ? "업비트 + 김치 프리미엄" : "Upbit + Kimchi Premium data"}</Feature>
-              <Feature included>{ko ? "고급 기술 지표 (RSI, MA)" : "Advanced indicators (RSI, MA)"}</Feature>
               <Feature included>{ko ? "텔레그램 프리미엄 알림" : "Telegram premium alerts"}</Feature>
             </div>
-
             <div className="mt-6 pt-5 border-t border-blue-500/10 relative">
-              {/* Payment section (client component handles auth state) */}
               <PaymentSection walletAddress={walletAddress} ko={ko} />
               <p className="text-center text-[9px] text-zinc-600 mt-3">
                 {ko ? "USDT 결제 · 즉시 활성화 · 언제든 취소" : "USDT payment · Instant activation · Cancel anytime"}
