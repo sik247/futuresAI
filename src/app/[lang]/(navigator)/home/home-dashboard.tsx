@@ -2,6 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import RGL from "react-grid-layout";
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
+
+type LayoutItem = { i: string; x: number; y: number; w: number; h: number; minW?: number; minH?: number };
+type Layouts = { [key: string]: LayoutItem[] };
+// Cast to React.ComponentType to bypass mismatched @types/react-grid-layout v1 vs runtime v2
+const ResponsiveGridLayout = (RGL as unknown as { ResponsiveGridLayout: React.ComponentType<Record<string, unknown>> }).ResponsiveGridLayout;
 import type { CryptoNewsItem } from "@/lib/services/news/crypto-news.service";
 import type { HLWalletData } from "@/lib/services/whales/hyperliquid.service";
 
@@ -965,6 +973,70 @@ function ChatWidget({ lang }: { lang: string }) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Grid Layout Config                                                 */
+/* ------------------------------------------------------------------ */
+
+type WidgetConfig = {
+  key: string;
+  title: string;
+  titleKo: string;
+  color: string;
+  headerBg: string;
+  borderColor: string;
+};
+
+const WIDGETS: WidgetConfig[] = [
+  { key: "chart", title: "BTC/USDT", titleKo: "BTC/USDT", color: "text-emerald-400", headerBg: "bg-zinc-900/50", borderColor: "border-white/[0.08]" },
+  { key: "feargreed", title: "Market", titleKo: "시장", color: "text-amber-400", headerBg: "bg-amber-950/20", borderColor: "border-amber-500/10" },
+  { key: "predictions", title: "Predictions", titleKo: "예측 시장", color: "text-blue-300", headerBg: "bg-blue-950/30", borderColor: "border-blue-500/10" },
+  { key: "news", title: "News", titleKo: "뉴스", color: "text-emerald-300", headerBg: "bg-emerald-950/20", borderColor: "border-emerald-500/10" },
+  { key: "chat", title: "AI Quant Chat", titleKo: "AI 퀀트 채팅", color: "text-purple-300", headerBg: "bg-purple-950/20", borderColor: "border-purple-500/10" },
+];
+
+const DEFAULT_LAYOUTS: Layouts = {
+  lg: [
+    { i: "chart", x: 0, y: 0, w: 7, h: 7, minW: 4, minH: 4 },
+    { i: "feargreed", x: 7, y: 0, w: 2, h: 7, minW: 2, minH: 3 },
+    { i: "chat", x: 9, y: 0, w: 3, h: 14, minW: 3, minH: 6 },
+    { i: "predictions", x: 0, y: 7, w: 4, h: 7, minW: 3, minH: 4 },
+    { i: "news", x: 4, y: 7, w: 5, h: 7, minW: 3, minH: 4 },
+  ],
+  md: [
+    { i: "chart", x: 0, y: 0, w: 6, h: 6, minW: 3, minH: 3 },
+    { i: "feargreed", x: 6, y: 0, w: 4, h: 6, minW: 2, minH: 3 },
+    { i: "chat", x: 0, y: 6, w: 10, h: 6, minW: 3, minH: 4 },
+    { i: "predictions", x: 0, y: 12, w: 5, h: 6, minW: 3, minH: 4 },
+    { i: "news", x: 5, y: 12, w: 5, h: 6, minW: 3, minH: 4 },
+  ],
+  sm: [
+    { i: "chart", x: 0, y: 0, w: 6, h: 5, minW: 3, minH: 3 },
+    { i: "feargreed", x: 0, y: 5, w: 6, h: 3, minW: 2, minH: 2 },
+    { i: "predictions", x: 0, y: 8, w: 6, h: 5, minW: 3, minH: 3 },
+    { i: "news", x: 0, y: 13, w: 6, h: 5, minW: 3, minH: 3 },
+    { i: "chat", x: 0, y: 18, w: 6, h: 6, minW: 3, minH: 4 },
+  ],
+};
+
+function WidgetWrapper({ config, ko, children }: { config: WidgetConfig; ko: boolean; children: React.ReactNode }) {
+  return (
+    <div className={`rounded-xl border ${config.borderColor} bg-zinc-950 overflow-hidden flex flex-col h-full`}>
+      {/* Drag handle header */}
+      <div className={`px-3 py-2 ${config.headerBg} border-b ${config.borderColor} flex items-center justify-between shrink-0 cursor-grab active:cursor-grabbing drag-handle`}>
+        <div className="flex items-center gap-2">
+          <svg className="w-3.5 h-3.5 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+          <span className={`text-[12px] font-mono uppercase tracking-[0.12em] ${config.color} font-semibold`}>
+            {ko ? config.titleKo : config.title}
+          </span>
+        </div>
+      </div>
+      <div className="flex-1 overflow-hidden">{children}</div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Main Dashboard                                                     */
 /* ------------------------------------------------------------------ */
 
@@ -975,204 +1047,121 @@ export default function HomeDashboard({
   fearGreed,
   globalData,
   topCoins: _topCoins,
-  hlWhales,
+  hlWhales: _hlWhales,
   news,
   youtubeItems,
-  signals,
+  signals: _signals,
   polymarketEvents,
-  blogPosts,
+  blogPosts: _blogPosts,
 }: HomeDashboardProps) {
   const ko = lang === "ko";
+  const [layouts, setLayouts] = useState<Layouts>(() => {
+    if (typeof window === "undefined") return DEFAULT_LAYOUTS;
+    try {
+      const saved = localStorage.getItem("dashboard-layout");
+      return saved ? JSON.parse(saved) : DEFAULT_LAYOUTS;
+    } catch { return DEFAULT_LAYOUTS; }
+  });
+
+  const handleLayoutChange = (_unknown: unknown, allLayouts: unknown) => {
+    setLayouts(allLayouts as Layouts);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("dashboard-layout", JSON.stringify(allLayouts));
+    }
+  };
+
+  const resetLayout = () => {
+    setLayouts(DEFAULT_LAYOUTS);
+    if (typeof window !== "undefined") localStorage.removeItem("dashboard-layout");
+  };
+
+  const widgetMap = WIDGETS.reduce((acc, w) => { acc[w.key] = w; return acc; }, {} as Record<string, WidgetConfig>);
+  void widgetMap;
+
+  const renderWidget = (key: string) => {
+    switch (key) {
+      case "chart":
+        return (
+          <div className="h-full overflow-hidden">
+            <iframe
+              src="https://s.tradingview.com/widgetembed/?frameElementId=tv_chart&symbol=BINANCE:BTCUSDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=0a0a0f&studies=[]&theme=dark&style=1&timezone=exchange&withdateranges=1&showpopupbutton=0&locale=en&width=100%25&height=100%25"
+              className="w-full h-full border-0"
+              title="BTC/USDT"
+            />
+          </div>
+        );
+      case "feargreed":
+        return (
+          <div className="p-3 space-y-3 overflow-y-auto h-full">
+            <div className="text-center">
+              <p className="text-[10px] font-mono text-zinc-600 uppercase mb-1">{ko ? "공포 & 탐욕" : "Fear & Greed"}</p>
+              <p className={`text-3xl font-bold ${(fearGreed?.data?.[0] ? parseInt(fearGreed.data[0].value) : 50) <= 25 ? "text-red-400" : "text-amber-400"}`}>
+                {fearGreed?.data?.[0]?.value ?? "--"}
+              </p>
+              <p className="text-[11px] text-zinc-500">{fearGreed?.data?.[0]?.value_classification ?? ""}</p>
+            </div>
+            {globalData?.data && (
+              <div className="space-y-2 text-[11px]">
+                <div className="flex justify-between"><span className="text-zinc-600">Mkt Cap</span><span className="text-zinc-300">${(globalData.data.total_market_cap.usd / 1e12).toFixed(2)}T</span></div>
+                <div className="flex justify-between"><span className="text-zinc-600">BTC Dom</span><span className="text-zinc-300">{globalData.data.market_cap_percentage.btc.toFixed(1)}%</span></div>
+                <div className="flex justify-between"><span className="text-zinc-600">24h Vol</span><span className="text-zinc-300">${(globalData.data.total_volume.usd / 1e9).toFixed(1)}B</span></div>
+              </div>
+            )}
+          </div>
+        );
+      case "predictions":
+        return <div className="h-full overflow-y-auto"><PredictionCards events={polymarketEvents} lang={lang} /></div>;
+      case "news":
+        return <div className="h-full overflow-y-auto"><ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} /></div>;
+      case "chat":
+        return <ChatWidget lang={lang} />;
+      default:
+        return null;
+    }
+  };
+
+  const gridStyles = `
+    .react-grid-placeholder { background: rgba(59, 130, 246, 0.15) !important; border-radius: 12px !important; border: 1px dashed rgba(59, 130, 246, 0.3) !important; }
+    .react-resizable-handle { opacity: 0; transition: opacity 0.2s; }
+    .react-grid-item:hover .react-resizable-handle { opacity: 1; }
+    .react-resizable-handle::after { border-color: rgba(255,255,255,0.2) !important; }
+  `;
 
   return (
     <div className="bg-zinc-950 font-mono flex flex-col" style={{ height: "calc(100vh - 92px)" }}>
-      <StatBar
-        btcData={btcData}
-        ethData={ethData}
-        fearGreed={fearGreed}
-        globalData={globalData}
-      />
+      <style>{gridStyles}</style>
+      <StatBar btcData={btcData} ethData={ethData} fearGreed={fearGreed} globalData={globalData} />
 
-      {/* ── Desktop: Simple 2-column layout ── */}
-      <div className="hidden lg:flex flex-1 overflow-hidden">
-        {/* LEFT: Chart + Predictions + News (65%) */}
-        <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "65%" }}>
-          {/* Top: Chart (75%) + Fear & Greed (25%) — 35% height */}
-          <div className="border-b border-white/[0.06] flex overflow-hidden" style={{ flex: "35 0 0", minHeight: 0 }}>
-            {/* Chart */}
-            <div className="border-r border-white/[0.06] flex flex-col overflow-hidden" style={{ width: "75%" }}>
-              <div className="px-3 py-1.5 border-b border-white/[0.06] flex items-center gap-2 shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[13px] font-mono text-zinc-200 font-semibold">BTC/USDT</span>
-                <span className="text-[10px] font-mono text-zinc-600 uppercase">Live</span>
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <iframe
-                  src="https://s.tradingview.com/widgetembed/?frameElementId=tv_chart&symbol=BINANCE:BTCUSDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=0a0a0f&studies=[]&theme=dark&style=1&timezone=exchange&withdateranges=1&showpopupbutton=0&locale=en&width=100%25&height=100%25"
-                  className="w-full h-full border-0"
-                  title="BTC/USDT Chart"
-                />
-              </div>
-            </div>
-            {/* Fear & Greed + Quick Stats */}
-            <div className="flex flex-col overflow-hidden flex-1 bg-zinc-900/30">
-              <div className="px-3 py-1.5 border-b border-white/[0.06] shrink-0">
-                <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-zinc-500">Market</span>
-              </div>
-              <div className="flex-1 overflow-y-auto p-3 space-y-3">
-                {/* Fear & Greed */}
-                <div className="text-center">
-                  <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider mb-1">{ko ? "공포 & 탐욕" : "Fear & Greed"}</p>
-                  <p className={`text-2xl font-bold tabular-nums ${
-                    (fearGreed?.data?.[0] ? parseInt(fearGreed.data[0].value) : 50) <= 25 ? "text-red-400" :
-                    (fearGreed?.data?.[0] ? parseInt(fearGreed.data[0].value) : 50) >= 75 ? "text-emerald-400" : "text-amber-400"
-                  }`}>
-                    {fearGreed?.data?.[0]?.value ?? "--"}
-                  </p>
-                  <p className={`text-[11px] font-mono ${
-                    (fearGreed?.data?.[0] ? parseInt(fearGreed.data[0].value) : 50) <= 25 ? "text-red-400" : "text-amber-400"
-                  }`}>
-                    {fearGreed?.data?.[0]?.value_classification ?? ""}
-                  </p>
-                </div>
-                {/* Quick stats */}
-                {globalData?.data && (
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-[10px] text-zinc-600">{ko ? "시총" : "Mkt Cap"}</span>
-                      <span className="text-[11px] text-zinc-300 font-mono tabular-nums">${(globalData.data.total_market_cap.usd / 1e12).toFixed(2)}T</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-[10px] text-zinc-600">BTC Dom</span>
-                      <span className="text-[11px] text-zinc-300 font-mono tabular-nums">{globalData.data.market_cap_percentage.btc.toFixed(1)}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-[10px] text-zinc-600">{ko ? "거래량" : "24h Vol"}</span>
-                      <span className="text-[11px] text-zinc-300 font-mono tabular-nums">${(globalData.data.total_volume.usd / 1e9).toFixed(1)}B</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom: Predictions + News side by side (55%) */}
-          <div className="flex overflow-hidden" style={{ flex: "65 0 0", minHeight: 0 }}>
-            {/* Predictions - blue accent bg */}
-            <div className="border-r border-blue-500/10 flex flex-col overflow-hidden flex-1 bg-blue-950/20">
-              <div className="px-4 py-2.5 border-b border-blue-500/10 bg-blue-950/30 flex items-center justify-between shrink-0">
-                <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-blue-300 font-semibold">{ko ? "예측 시장" : "Prediction Markets"}</span>
-                <Link href={`/${lang}/markets`} className="text-[11px] text-blue-400 hover:text-blue-300">All →</Link>
-              </div>
-              <div className="flex-1 overflow-y-auto">
-                <PredictionCards events={polymarketEvents} lang={lang} />
-              </div>
-            </div>
-
-            {/* News - emerald accent */}
-            <div className="flex flex-col overflow-hidden flex-1 bg-emerald-950/10">
-              <div className="px-4 py-2.5 border-b border-emerald-500/10 bg-emerald-950/20 flex items-center justify-between shrink-0">
-                <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-emerald-300 font-semibold">{ko ? "뉴스" : "News"}</span>
-                <Link href={`/${lang}/sns`} className="text-[11px] text-blue-400 hover:text-blue-300">All →</Link>
-              </div>
-              <div className="flex-1 overflow-y-auto">
-                <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT: AI Quant Chat (35%) - purple accent */}
-        <div className="flex flex-col overflow-hidden flex-1 bg-purple-950/10">
-          <div className="px-4 py-2.5 border-b border-purple-500/10 bg-purple-950/20 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-              </svg>
-              <span className="text-[14px] font-mono uppercase tracking-[0.12em] text-purple-300 font-semibold">{ko ? "AI 퀀트 채팅" : "AI Quant Chat"}</span>
-            </div>
-            <Link href={`/${lang}/chat`} className="text-[11px] text-blue-400 hover:text-blue-300">{ko ? "전체 →" : "Full →"}</Link>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <ChatWidget lang={lang} />
-          </div>
-        </div>
+      {/* Reset layout button */}
+      <div className="flex items-center justify-end px-3 py-1 border-b border-white/[0.04] shrink-0">
+        <button onClick={resetLayout} className="text-[9px] font-mono text-zinc-600 hover:text-zinc-400 cursor-pointer">
+          {ko ? "레이아웃 초기화" : "Reset Layout"}
+        </button>
       </div>
 
-      {/* (old layout removed) */}
-
-      {/* Mobile: simple scrollable stack */}
-      <div className="lg:hidden flex-1 overflow-auto p-3 space-y-4">
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
-            <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
-              {ko ? "예측 시장" : "Prediction Markets"}
-            </span>
-            <Link href={`/${lang}/markets`} className="text-[12px] text-blue-400">All →</Link>
-          </div>
-          <div className="max-h-96 overflow-y-auto">
-            <PredictionCards events={polymarketEvents} lang={lang} />
-          </div>
-        </div>
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
-            <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
-              {ko ? "웨일 포지션" : "Whale Positions"}
-            </span>
-            <Link href={`/${lang}/whales`} className="text-[12px] text-blue-400">All →</Link>
-          </div>
-          <div className="max-h-96 overflow-y-auto p-2">
-            <div className="grid grid-cols-2 gap-2">
-              {hlWhales.slice(0, 6).map((whale) => (
-                <HLWhaleCard key={whale.address} whale={whale} />
-              ))}
+      {/* Grid */}
+      <div className="flex-1 overflow-auto">
+        <ResponsiveGridLayout
+          className="layout"
+          layouts={layouts}
+          breakpoints={{ lg: 1200, md: 996, sm: 768 }}
+          cols={{ lg: 12, md: 10, sm: 6 }}
+          rowHeight={40}
+          onLayoutChange={handleLayoutChange}
+          draggableHandle=".drag-handle"
+          isResizable={true}
+          isDraggable={true}
+          margin={[8, 8]}
+          containerPadding={[8, 8]}
+        >
+          {WIDGETS.map((w) => (
+            <div key={w.key}>
+              <WidgetWrapper config={w} ko={ko}>
+                {renderWidget(w.key)}
+              </WidgetWrapper>
             </div>
-          </div>
-        </div>
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
-            <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
-              {ko ? "퀀트 시그널" : "Quant Signals"}
-            </span>
-            <Link href={`/${lang}/quant`} className="text-[12px] text-blue-400">All →</Link>
-          </div>
-          <div className="max-h-96 overflow-y-auto">
-            <SignalsWidget signals={signals} lang={lang} />
-          </div>
-        </div>
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
-            <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
-              {ko ? "뉴스 피드" : "News Feed"}
-            </span>
-            <Link href={`/${lang}/news`} className="text-[12px] text-blue-400">All →</Link>
-          </div>
-          <div className="max-h-96 overflow-y-auto">
-            <ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} />
-          </div>
-        </div>
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
-            <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
-              {ko ? "마켓 리서치" : "Market Research"}
-            </span>
-            <Link href={`/${lang}/quant`} className="text-[12px] text-blue-400">All →</Link>
-          </div>
-          <div className="max-h-96 overflow-y-auto">
-            <BlogCards posts={blogPosts} lang={lang} />
-          </div>
-        </div>
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
-          <div className="px-4 py-2.5 border-b border-white/[0.06] flex items-center justify-between">
-            <span className="text-[13px] font-mono uppercase tracking-[0.12em] text-zinc-400">
-              {ko ? "AI 채팅" : "AI Chat"}
-            </span>
-            <Link href={`/${lang}/chat`} className="text-[12px] text-blue-400">{ko ? "전체 →" : "Full →"}</Link>
-          </div>
-          <div className="h-80 overflow-hidden">
-            <ChatWidget lang={lang} />
-          </div>
-        </div>
+          ))}
+        </ResponsiveGridLayout>
       </div>
     </div>
   );
