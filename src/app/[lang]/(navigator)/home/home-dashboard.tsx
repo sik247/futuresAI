@@ -2,14 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import RGL from "react-grid-layout";
-import "react-grid-layout/css/styles.css";
-import "react-resizable/css/styles.css";
+const RGL = require("react-grid-layout");
+const ResponsiveGridLayout = RGL.ResponsiveGridLayout as React.ComponentType<any>;
+const useContainerWidth = RGL.useContainerWidth as (opts: { breakpoints: Record<string, number>; defaultWidth?: number }) => [React.RefCallback<HTMLDivElement>, number];
 
 type LayoutItem = { i: string; x: number; y: number; w: number; h: number; minW?: number; minH?: number };
 type Layouts = { [key: string]: LayoutItem[] };
-// Cast to React.ComponentType to bypass mismatched @types/react-grid-layout v1 vs runtime v2
-const ResponsiveGridLayout = (RGL as unknown as { ResponsiveGridLayout: React.ComponentType<Record<string, unknown>> }).ResponsiveGridLayout;
 import type { CryptoNewsItem } from "@/lib/services/news/crypto-news.service";
 import type { HLWalletData } from "@/lib/services/whales/hyperliquid.service";
 
@@ -1070,6 +1068,22 @@ export default function HomeDashboard({
     }
   };
 
+  // Container width for responsive grid
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(1200);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+    ro.observe(el);
+    setContainerWidth(el.clientWidth);
+    return () => ro.disconnect();
+  }, []);
+
   const resetLayout = () => {
     setLayouts(DEFAULT_LAYOUTS);
     if (typeof window !== "undefined") localStorage.removeItem("dashboard-layout");
@@ -1140,9 +1154,10 @@ export default function HomeDashboard({
       </div>
 
       {/* Grid */}
-      <div className="flex-1 overflow-auto">
+      <div ref={containerRef} className="flex-1 overflow-auto">
         <ResponsiveGridLayout
           className="layout"
+          width={containerWidth}
           layouts={layouts}
           breakpoints={{ lg: 1200, md: 996, sm: 768 }}
           cols={{ lg: 12, md: 10, sm: 6 }}

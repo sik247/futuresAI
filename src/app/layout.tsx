@@ -3,6 +3,8 @@ import { Inter, Noto_Sans_KR } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import { resolveMetadataBase } from "@/lib/site-metadata";
 import "@/app/globals.css";
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
 import { Toaster } from "@/components/ui/toaster";
 import Providers from "@/components/providers/providers";
 import Loading from "@/components/ui/loading";
