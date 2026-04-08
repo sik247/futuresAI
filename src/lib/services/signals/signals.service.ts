@@ -351,16 +351,18 @@ export async function fetchMarketSignals(): Promise<MarketSignals> {
     };
   });
 
-  // Market summary
+  // Market summary - clearly state long/short dominance
   const bullCount = signals.filter((s) => s.signal === "Strong Buy" || s.signal === "Buy").length;
   const bearCount = signals.filter((s) => s.signal === "Strong Sell" || s.signal === "Sell").length;
+  const longCount = signals.filter((s) => s.direction === "LONG").length;
+  const shortCount = signals.filter((s) => s.direction === "SHORT").length;
   let marketSummary: string;
-  if (bullCount > bearCount)
-    marketSummary = "Market conditions are generally favorable with bullish momentum across major assets.";
-  else if (bearCount > bullCount)
-    marketSummary = "Market conditions show bearish pressure. Consider risk management strategies.";
+  if (longCount > shortCount)
+    marketSummary = `[LONG] Long positions dominant (${longCount}/${signals.length}). ${bullCount} buy signals across major assets.`;
+  else if (shortCount > longCount)
+    marketSummary = `[SHORT] Short positions dominant (${shortCount}/${signals.length}). ${bearCount} sell signals across major assets.`;
   else
-    marketSummary = "Market is in a consolidation phase. Mixed signals across major assets.";
+    marketSummary = `[NEUTRAL] Market is in consolidation. Long ${longCount} / Short ${shortCount} — mixed signals.`;
 
   return {
     signals,

@@ -113,6 +113,9 @@ const REASON_KO: Record<string, string> = {
   "Market conditions are generally favorable with bullish momentum across major assets.": "시장 상황은 주요 자산 전반에 걸쳐 강세 모멘텀으로 전반적으로 유리합니다.",
   "Market conditions show bearish pressure. Consider risk management strategies.": "시장 상황은 약세 압력을 보이고 있습니다. 리스크 관리 전략을 고려하세요.",
   "Market is in a consolidation phase. Mixed signals across major assets.": "시장은 횡보 국면에 있습니다. 주요 자산 전반에 혼합된 신호가 나타나고 있습니다.",
+  "Long positions dominant": "롱 포지션이 우세",
+  "Short positions dominant": "숏 포지션이 우세",
+  "Market is in consolidation": "시장은 횡보 국면",
 };
 function translateText(text: string, isKo: boolean): string {
   if (!isKo) return text;
@@ -551,12 +554,27 @@ export default function QuantClient({
             </div>
 
             {/* -- Market Summary ----------------------------------------- */}
-            <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] px-6 py-4 mb-8">
-              <p className="text-sm text-zinc-400 leading-relaxed">
-                <span className="text-zinc-200 font-semibold">{t.quant_marketSummary}:</span>{" "}
-                {translateText(marketSummary, lang === "ko")}
-              </p>
-            </div>
+            {(() => {
+              const isLong = marketSummary.startsWith("[LONG]");
+              const isShort = marketSummary.startsWith("[SHORT]");
+              const borderColor = isLong ? "border-emerald-500/30" : isShort ? "border-red-500/30" : "border-white/[0.06]";
+              const bgColor = isLong ? "bg-emerald-500/[0.05]" : isShort ? "bg-red-500/[0.05]" : "bg-white/[0.03]";
+              const textColor = isLong ? "text-emerald-400" : isShort ? "text-red-400" : "text-zinc-200";
+              const displayText = marketSummary.replace(/^\[(LONG|SHORT|NEUTRAL)\]\s*/, "");
+              const label = isLong
+                ? (lang === "ko" ? "롱 포지션 우세" : "Long Dominant")
+                : isShort
+                ? (lang === "ko" ? "숏 포지션 우세" : "Short Dominant")
+                : (lang === "ko" ? "횡보" : "Neutral");
+              return (
+                <div className={`rounded-xl border ${borderColor} ${bgColor} px-6 py-4 mb-8`}>
+                  <p className="text-sm leading-relaxed">
+                    <span className={`font-bold ${textColor}`}>{t.quant_marketSummary}: {label}</span>
+                    <span className="text-zinc-400 ml-2">{translateText(displayText, lang === "ko")}</span>
+                  </p>
+                </div>
+              );
+            })()}
 
             {/* -- Asset Signals Header ----------------------------------- */}
             <div className="flex items-center gap-3 mb-5">

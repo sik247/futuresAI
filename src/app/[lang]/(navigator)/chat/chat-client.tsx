@@ -184,8 +184,8 @@ export default function ChatClient({ lang, userName }: Props) {
     } catch {}
   }, []);
 
-  const handleSend = useCallback(async () => {
-    const trimmed = input.trim();
+  const sendMessage = useCallback(async (text: string) => {
+    const trimmed = text.trim();
     if (!trimmed || loading) return;
 
     const userMessage: Message = { role: "user", content: trimmed, timestamp: Date.now() };
@@ -222,7 +222,11 @@ export default function ChatClient({ lang, userName }: Props) {
       setLoading(false);
       inputRef.current?.focus();
     }
-  }, [input, loading, persona, sessionId, lang, ko]);
+  }, [loading, persona, sessionId, lang, ko]);
+
+  const handleSend = useCallback(async () => {
+    await sendMessage(input);
+  }, [input, sendMessage]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -379,10 +383,7 @@ export default function ChatClient({ lang, userName }: Props) {
                   {suggestedPrompts.map((prompt) => (
                     <button
                       key={prompt}
-                      onClick={() => {
-                        setInput(prompt);
-                        inputRef.current?.focus();
-                      }}
+                      onClick={() => sendMessage(prompt)}
                       className="text-[11px] px-3 py-2.5 rounded-lg bg-white/[0.02] text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-200 border border-white/[0.06] hover:border-white/[0.12] transition-all duration-200 text-left cursor-pointer"
                     >
                       {prompt}
@@ -537,10 +538,7 @@ export default function ChatClient({ lang, userName }: Props) {
                               {msg.followUps.map((q, qi) => (
                                 <button
                                   key={qi}
-                                  onClick={() => {
-                                    setInput(q);
-                                    inputRef.current?.focus();
-                                  }}
+                                  onClick={() => sendMessage(q)}
                                   className="text-[10px] px-2.5 py-1.5 rounded-md bg-white/[0.02] text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-200 border border-white/[0.06] hover:border-white/[0.12] transition-all cursor-pointer text-left"
                                 >
                                   {q}

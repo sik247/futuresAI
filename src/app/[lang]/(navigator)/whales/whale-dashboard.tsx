@@ -279,40 +279,40 @@ function FigureRow({ figure }: { figure: Figure }) {
 function HLWhaleCard({ whale }: { whale: HLWhale }) {
   const topPositions = whale.positions.slice(0, 5);
   return (
-    <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-3 flex flex-col overflow-hidden cursor-default transition-colors duration-200 hover:border-white/[0.10]">
+    <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4 flex flex-col overflow-hidden cursor-default transition-colors duration-200 hover:border-white/[0.10]">
       {/* Header */}
-      <div className="flex items-start justify-between mb-2">
+      <div className="flex items-start justify-between mb-3">
         <div>
-          <div className="text-[11px] font-semibold text-white">{whale.name}</div>
-          <div className="text-[9px] font-mono text-zinc-500 mt-0.5">
+          <div className="text-sm font-semibold text-white">{whale.name}</div>
+          <div className="text-[11px] font-mono text-zinc-500 mt-0.5">
             {whale.address.slice(0, 8)}...{whale.address.slice(-6)}
           </div>
         </div>
         <div className="text-right">
-          <div className="text-[11px] font-mono font-bold text-white">{fmtUsd(whale.accountValue)}</div>
-          <div className="text-[9px] font-mono text-zinc-500">acct val</div>
+          <div className="text-sm font-mono font-bold text-white">{fmtUsd(whale.accountValue)}</div>
+          <div className="text-[11px] font-mono text-zinc-500">acct val</div>
         </div>
       </div>
 
       {/* Notional */}
-      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-white/[0.04]">
-        <span className="text-[9px] font-mono text-zinc-600">NOTIONAL</span>
-        <span className="text-[10px] font-mono text-blue-400 font-bold">{fmtUsd(whale.totalNotional)}</span>
-        <span className="text-[9px] font-mono text-zinc-600 ml-auto">
+      <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/[0.04]">
+        <span className="text-[11px] font-mono text-zinc-600">NOTIONAL</span>
+        <span className="text-xs font-mono text-blue-400 font-bold">{fmtUsd(whale.totalNotional)}</span>
+        <span className="text-[11px] font-mono text-zinc-600 ml-auto">
           {whale.positions.length} pos
         </span>
       </div>
 
       {/* Positions */}
-      <div className="space-y-1 flex-1 overflow-y-auto">
+      <div className="space-y-1.5 flex-1 overflow-y-auto">
         {topPositions.length === 0 ? (
-          <div className="text-[9px] font-mono text-zinc-700 text-center py-2">No open positions</div>
+          <div className="text-[11px] font-mono text-zinc-700 text-center py-2">No open positions</div>
         ) : (
           topPositions.map((pos, i) => (
-            <div key={i} className="flex items-center gap-1 text-[9px] font-mono">
-              <span className="text-white font-semibold w-12 truncate">{pos.coin}</span>
+            <div key={i} className="flex items-center gap-1.5 text-[11px] font-mono">
+              <span className="text-white font-semibold w-14 truncate">{pos.coin}</span>
               <span
-                className={`text-[7px] font-bold px-0.5 py-0.5 rounded ${
+                className={`text-[9px] font-bold px-1 py-0.5 rounded ${
                   pos.direction === "LONG"
                     ? "bg-emerald-500/15 text-emerald-400"
                     : "bg-red-500/15 text-red-400"
@@ -320,17 +320,17 @@ function HLWhaleCard({ whale }: { whale: HLWhale }) {
               >
                 {pos.direction === "LONG" ? "L" : "S"}
               </span>
-              <span className="text-zinc-500 text-[8px]">{pos.leverage}x</span>
+              <span className="text-zinc-500 text-[10px]">{pos.leverage}x</span>
               <span className="text-zinc-400 flex-1 text-right tabular-nums">{fmtNum(pos.size)}</span>
               <span
-                className={`w-16 text-right tabular-nums ${
+                className={`w-20 text-right tabular-nums ${
                   pos.unrealizedPnl >= 0 ? "text-emerald-400" : "text-red-400"
                 }`}
               >
                 {pos.unrealizedPnl >= 0 ? "+" : ""}{fmtUsd(pos.unrealizedPnl)}
               </span>
               <span
-                className={`w-10 text-right text-[8px] tabular-nums ${
+                className={`w-12 text-right text-[10px] tabular-nums ${
                   pos.roe >= 0 ? "text-emerald-400/70" : "text-red-400/70"
                 }`}
               >
@@ -353,40 +353,40 @@ function RecentTradesTable({ trades }: { trades: HLTrade[] }) {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
-        <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">HL Trades</span>
-        <span className="text-[9px] font-mono text-zinc-700">{displayTrades.length} fills</span>
+      <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/[0.06] shrink-0">
+        <span className="text-xs font-mono uppercase tracking-[0.15em] text-zinc-500">HL Trades</span>
+        <span className="text-[11px] font-mono text-zinc-700">{displayTrades.length} fills</span>
       </div>
       {/* Column headers */}
-      <div className="grid grid-cols-[1fr_55px_35px_55px_45px_45px] gap-1 px-3 py-1.5 border-b border-white/[0.04] shrink-0">
+      <div className="grid grid-cols-[1fr_60px_40px_60px_55px_50px] gap-1 px-3 py-1.5 border-b border-white/[0.04] shrink-0">
         {["Whale", "Coin", "Side", "Size", "PnL", "Time"].map((h) => (
-          <span key={h} className="text-[8px] font-mono uppercase tracking-[0.1em] text-zinc-700">{h}</span>
+          <span key={h} className="text-[10px] font-mono uppercase tracking-[0.1em] text-zinc-600">{h}</span>
         ))}
       </div>
       {/* Rows */}
       <div className="flex-1 overflow-y-auto">
         {displayTrades.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-[10px] font-mono text-zinc-700">
+          <div className="flex items-center justify-center h-full text-xs font-mono text-zinc-700">
             No recent trades
           </div>
         ) : (
           displayTrades.map((t, i) => (
             <div
               key={i}
-              className="grid grid-cols-[1fr_55px_35px_55px_45px_45px] gap-1 px-3 py-1 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
+              className="grid grid-cols-[1fr_60px_40px_60px_55px_50px] gap-1 px-3 py-1.5 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors"
             >
-              <span className="text-[9px] font-mono text-zinc-400 truncate tabular-nums">{t.whale}</span>
-              <span className="text-[9px] font-mono text-white font-semibold truncate tabular-nums">{t.coin}</span>
+              <span className="text-[11px] font-mono text-zinc-400 truncate tabular-nums">{t.whale}</span>
+              <span className="text-[11px] font-mono text-white font-semibold truncate tabular-nums">{t.coin}</span>
               <span
-                className={`text-[8px] font-mono font-bold ${
+                className={`text-[10px] font-mono font-bold ${
                   t.side === "BUY" ? "text-emerald-400" : "text-red-400"
                 }`}
               >
                 {t.side}
               </span>
-              <span className="text-[9px] font-mono text-zinc-300 tabular-nums">{fmtUsd(t.notional)}</span>
+              <span className="text-[11px] font-mono text-zinc-300 tabular-nums">{fmtUsd(t.notional)}</span>
               <span
-                className={`text-[9px] font-mono tabular-nums ${
+                className={`text-[11px] font-mono tabular-nums ${
                   t.closedPnl > 0 ? "text-emerald-400" : t.closedPnl < 0 ? "text-red-400" : "text-zinc-600"
                 }`}
               >
@@ -394,7 +394,7 @@ function RecentTradesTable({ trades }: { trades: HLTrade[] }) {
                   ? `${t.closedPnl > 0 ? "+" : ""}${fmtUsd(t.closedPnl)}`
                   : "-"}
               </span>
-              <span className="text-[9px] font-mono text-zinc-600 tabular-nums">{tradeTimeAgo(t.time)}</span>
+              <span className="text-[11px] font-mono text-zinc-600 tabular-nums">{tradeTimeAgo(t.time)}</span>
             </div>
           ))
         )}
@@ -445,11 +445,11 @@ function WhaleAlerts({ hlWhales }: { hlWhales: HLWhale[] }) {
           <svg className="w-3.5 h-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
-          <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-amber-400/80">Alerts</span>
+          <span className="text-xs font-mono uppercase tracking-[0.15em] text-amber-400/80">Alerts</span>
         </div>
         <div className="flex-1 overflow-x-auto flex gap-3">
           {topAlerts.map((alert, i) => (
-            <span key={i} className={`text-[10px] font-mono shrink-0 flex items-center gap-1.5 ${
+            <span key={i} className={`text-[11px] font-mono shrink-0 flex items-center gap-1.5 ${
               alert.type === "danger" ? "text-red-400" : alert.type === "warning" ? "text-amber-400" : "text-emerald-400"
             }`}>
               <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
@@ -477,22 +477,22 @@ function HLMarketTable({ markets }: { markets: HLMarketData[] }) {
   const top = markets.slice(0, 12);
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
-        <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">HL Funding & OI</span>
-        <span className="text-[9px] font-mono text-zinc-700">{markets.length} markets</span>
+      <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/[0.06] shrink-0">
+        <span className="text-xs font-mono uppercase tracking-[0.15em] text-zinc-500">HL Funding & OI</span>
+        <span className="text-[11px] font-mono text-zinc-700">{markets.length} markets</span>
       </div>
-      <div className="grid grid-cols-[1fr_65px_65px_55px] gap-1 px-3 py-1.5 border-b border-white/[0.04] shrink-0">
+      <div className="grid grid-cols-[1fr_75px_70px_60px] gap-1 px-3 py-1.5 border-b border-white/[0.04] shrink-0">
         {["Coin", "Price", "OI", "APR"].map((h) => (
-          <span key={h} className="text-[8px] font-mono uppercase tracking-[0.1em] text-zinc-700">{h}</span>
+          <span key={h} className="text-[10px] font-mono uppercase tracking-[0.1em] text-zinc-600">{h}</span>
         ))}
       </div>
       <div className="flex-1 overflow-y-auto">
         {top.map((m) => (
-          <div key={m.coin} className="grid grid-cols-[1fr_65px_65px_55px] gap-1 px-3 py-1 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-            <span className="text-[10px] font-mono text-white font-semibold truncate">{m.coin}</span>
-            <span className="text-[9px] font-mono text-zinc-300 tabular-nums">${m.markPrice >= 1 ? m.markPrice.toLocaleString(undefined, { maximumFractionDigits: 2 }) : m.markPrice.toFixed(4)}</span>
-            <span className="text-[9px] font-mono text-zinc-400 tabular-nums">{fmtUsd(m.openInterestUsd)}</span>
-            <span className={`text-[9px] font-mono tabular-nums ${m.fundingRateApr >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+          <div key={m.coin} className="grid grid-cols-[1fr_75px_70px_60px] gap-1 px-3 py-1.5 border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
+            <span className="text-xs font-mono text-white font-semibold truncate">{m.coin}</span>
+            <span className="text-[11px] font-mono text-zinc-300 tabular-nums">${m.markPrice >= 1 ? m.markPrice.toLocaleString(undefined, { maximumFractionDigits: 2 }) : m.markPrice.toFixed(4)}</span>
+            <span className="text-[11px] font-mono text-zinc-400 tabular-nums">{fmtUsd(m.openInterestUsd)}</span>
+            <span className={`text-[11px] font-mono tabular-nums ${m.fundingRateApr >= 0 ? "text-emerald-400" : "text-red-400"}`}>
               {m.fundingRateApr >= 0 ? "+" : ""}{m.fundingRateApr.toFixed(1)}%
             </span>
           </div>
@@ -667,11 +667,11 @@ export default function WhaleDashboard({
             className="border-b border-white/[0.06] overflow-hidden"
             style={{ height: "55%" }}
           >
-            <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] shrink-0">
-              <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">
+            <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/[0.06] shrink-0">
+              <span className="text-xs font-mono uppercase tracking-[0.15em] text-zinc-500">
                 Hyperliquid Positions
               </span>
-              <span className="text-[9px] font-mono text-zinc-700">
+              <span className="text-[11px] font-mono text-zinc-700">
                 {hlWhales.reduce((s, w) => s + w.positions.length, 0)} open
               </span>
             </div>

@@ -404,19 +404,19 @@ export default async function PaybackPage({
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`text-xs font-mono px-2 py-0.5 rounded ${ex.name === "EdgeX" ? "text-purple-400 bg-purple-500/10" : "text-zinc-500 bg-white/[0.04]"}`}>{ex.name === "EdgeX" ? "DEX" : "CEX"}</span>
+                        <span className={`text-xs font-mono px-2 py-0.5 rounded ${ex.name === "EdgeX" ? "text-purple-400 bg-purple-500/10" : "text-white bg-white/[0.06]"}`}>{ex.name === "EdgeX" ? "DEX" : "CEX"}</span>
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span className={`text-sm font-bold font-mono ${
-                          ex.paybackRate >= 50 ? "text-emerald-400" : ex.paybackRate >= 30 ? "text-blue-400" : "text-zinc-300"
+                          ex.paybackRate >= 50 ? "text-emerald-400" : ex.paybackRate >= 30 ? "text-blue-400" : "text-white"
                         }`}>
                           {ex.paybackRate}%
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right font-mono text-sm text-zinc-400">{ex.makerFee}%</td>
-                      <td className="px-4 py-3 text-right font-mono text-sm text-zinc-400">{ex.takerFee}%</td>
+                      <td className="px-4 py-3 text-right font-mono text-sm text-white">{ex.makerFee}%</td>
+                      <td className="px-4 py-3 text-right font-mono text-sm text-white">{ex.takerFee}%</td>
                       <td className="px-4 py-3">
-                        <span className="text-[10px] font-mono text-zinc-500 bg-white/[0.04] px-2 py-0.5 rounded">
+                        <span className="text-[10px] font-mono text-white/80 bg-white/[0.06] px-2 py-0.5 rounded">
                           {ex.name === "Bitget" ? (ko ? "카피트레이딩" : "Copy Trading") :
                            ex.name === "Bybit" ? (ko ? "높은 유동성" : "High Liquidity") :
                            ex.name === "BingX" ? (ko ? "카피트레이딩" : "Copy Trading") :

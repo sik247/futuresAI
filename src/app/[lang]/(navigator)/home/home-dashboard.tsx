@@ -163,11 +163,52 @@ function timeAgo(date: Date | string) {
 /* ------------------------------------------------------------------ */
 
 function StatBar({
-  btcData,
-  ethData,
-  fearGreed,
-  globalData,
+  btcData: initialBtc,
+  ethData: initialEth,
+  fearGreed: initialFg,
+  globalData: initialGlobal,
 }: Pick<HomeDashboardProps, "btcData" | "ethData" | "fearGreed" | "globalData">) {
+  const [btcData, setBtcData] = useState(initialBtc);
+  const [ethData, setEthData] = useState(initialEth);
+  const [fearGreedState, setFearGreedState] = useState(initialFg);
+  const [globalState, setGlobalState] = useState(initialGlobal);
+
+  // Client-side fallback: fetch missing data
+  useEffect(() => {
+    const needsBtc = !initialBtc?.lastPrice;
+    const needsEth = !initialEth?.lastPrice;
+    const needsFg = !initialFg?.data?.[0];
+    const needsGlobal = !initialGlobal?.data;
+    if (!needsBtc && !needsEth && !needsFg && !needsGlobal) return;
+
+    const fetches: Promise<void>[] = [];
+    if (needsBtc) {
+      fetches.push(
+        fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT")
+          .then((r) => r.json()).then((d) => setBtcData(d)).catch(() => {})
+      );
+    }
+    if (needsEth) {
+      fetches.push(
+        fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT")
+          .then((r) => r.json()).then((d) => setEthData(d)).catch(() => {})
+      );
+    }
+    if (needsFg) {
+      fetches.push(
+        fetch("https://api.alternative.me/fng/?limit=1")
+          .then((r) => r.json()).then((d) => setFearGreedState(d)).catch(() => {})
+      );
+    }
+    if (needsGlobal) {
+      fetches.push(
+        fetch("https://api.coingecko.com/api/v3/global")
+          .then((r) => r.json()).then((d) => setGlobalState(d)).catch(() => {})
+      );
+    }
+    Promise.allSettled(fetches);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const btcPriceRaw = btcData?.lastPrice ? parseFloat(btcData.lastPrice) : null;
   const btcPrice = btcPriceRaw !== null && !isNaN(btcPriceRaw) ? btcPriceRaw : null;
   const btcPctRaw = btcData?.priceChangePercent ? parseFloat(btcData.priceChangePercent) : null;
@@ -176,10 +217,10 @@ function StatBar({
   const ethPrice = ethPriceRaw !== null && !isNaN(ethPriceRaw) ? ethPriceRaw : null;
   const ethPctRaw = ethData?.priceChangePercent ? parseFloat(ethData.priceChangePercent) : null;
   const ethPct = ethPctRaw !== null && !isNaN(ethPctRaw) ? ethPctRaw : null;
-  const fg = fearGreed?.data?.[0];
-  const mktCap = globalData?.data?.total_market_cap?.usd ?? null;
-  const vol = globalData?.data?.total_volume?.usd ?? null;
-  const btcDom = globalData?.data?.market_cap_percentage?.btc ?? null;
+  const fg = fearGreedState?.data?.[0];
+  const mktCap = globalState?.data?.total_market_cap?.usd ?? null;
+  const vol = globalState?.data?.total_volume?.usd ?? null;
+  const btcDom = globalState?.data?.market_cap_percentage?.btc ?? null;
 
   return (
     <div className="flex items-center gap-2 px-4 py-2.5 bg-zinc-900/80 border-b border-white/[0.06] text-[13px] font-mono overflow-x-auto shrink-0 whitespace-nowrap">
@@ -1044,6 +1085,32 @@ export default function HomeDashboard({
   blogPosts: _blogPosts,
 }: HomeDashboardProps) {
   const ko = lang === "ko";
+
+  // Client-side fallback for Fear & Greed and global market data
+  const [fgData, setFgData] = useState(fearGreed);
+  const [globalMarket, setGlobalMarket] = useState(globalData);
+  const [fgHistory, setFgHistory] = useState<{ value: string; timestamp: string }[]>([]);
+
+  useEffect(() => {
+    // Fetch Fear & Greed history (7 days) for chart
+    fetch("https://api.alternative.me/fng/?limit=7")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.data) {
+          setFgHistory(d.data);
+          if (!fearGreed?.data?.[0]) setFgData(d);
+        }
+      })
+      .catch(() => {});
+    // Fetch global market data if missing
+    if (!globalData?.data) {
+      fetch("https://api.coingecko.com/api/v3/global")
+        .then((r) => r.json())
+        .then((d) => { if (d?.data) setGlobalMarket(d); })
+        .catch(() => {});
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [layouts, setLayouts] = useState<Layouts>(() => {
     if (typeof window === "undefined") return DEFAULT_LAYOUTS;
     try {
@@ -1095,25 +1162,73 @@ export default function HomeDashboard({
             />
           </div>
         );
-      case "feargreed":
+      case "feargreed": {
+        const fgVal = fgData?.data?.[0] ? parseInt(fgData.data[0].value) : null;
+        const fgClass = fgData?.data?.[0]?.value_classification ?? "";
+        const fgColor = fgVal !== null ? (fgVal <= 25 ? "text-red-400" : fgVal <= 45 ? "text-orange-400" : fgVal <= 55 ? "text-amber-400" : fgVal <= 75 ? "text-lime-400" : "text-emerald-400") : "text-zinc-500";
+        const gd = globalMarket?.data;
         return (
           <div className="p-3 space-y-3 overflow-y-auto h-full">
             <div className="text-center">
               <p className="text-[10px] font-mono text-zinc-600 uppercase mb-1">{ko ? "공포 & 탐욕" : "Fear & Greed"}</p>
-              <p className={`text-3xl font-bold ${(fearGreed?.data?.[0] ? parseInt(fearGreed.data[0].value) : 50) <= 25 ? "text-red-400" : "text-amber-400"}`}>
-                {fearGreed?.data?.[0]?.value ?? "--"}
+              <p className={`text-3xl font-bold ${fgColor}`}>
+                {fgVal ?? "--"}
               </p>
-              <p className="text-[11px] text-zinc-500">{fearGreed?.data?.[0]?.value_classification ?? ""}</p>
+              <p className="text-[11px] text-zinc-500">{fgClass}</p>
+              {/* Fear & Greed progress bar */}
+              {fgVal !== null && (
+                <div className="mt-2 mx-auto max-w-[160px]">
+                  <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${fgVal <= 25 ? "bg-red-500" : fgVal <= 45 ? "bg-orange-500" : fgVal <= 55 ? "bg-amber-500" : fgVal <= 75 ? "bg-lime-500" : "bg-emerald-500"}`}
+                      style={{ width: `${fgVal}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between mt-0.5 text-[8px] text-zinc-700">
+                    <span>0</span><span>50</span><span>100</span>
+                  </div>
+                </div>
+              )}
             </div>
-            {globalData?.data && (
-              <div className="space-y-2 text-[11px]">
-                <div className="flex justify-between"><span className="text-zinc-600">Mkt Cap</span><span className="text-zinc-300">${(globalData.data.total_market_cap.usd / 1e12).toFixed(2)}T</span></div>
-                <div className="flex justify-between"><span className="text-zinc-600">BTC Dom</span><span className="text-zinc-300">{globalData.data.market_cap_percentage.btc.toFixed(1)}%</span></div>
-                <div className="flex justify-between"><span className="text-zinc-600">24h Vol</span><span className="text-zinc-300">${(globalData.data.total_volume.usd / 1e9).toFixed(1)}B</span></div>
+            {/* 7-Day Fear & Greed History Chart */}
+            {fgHistory.length > 1 && (
+              <div>
+                <p className="text-[9px] font-mono text-zinc-600 uppercase mb-1.5">{ko ? "7일 추이" : "7-Day Trend"}</p>
+                <div className="flex items-end gap-1 h-[40px]">
+                  {[...fgHistory].reverse().map((d, i) => {
+                    const v = parseInt(d.value);
+                    const barColor = v <= 25 ? "bg-red-500" : v <= 45 ? "bg-orange-500" : v <= 55 ? "bg-amber-500" : v <= 75 ? "bg-lime-500" : "bg-emerald-500";
+                    return (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
+                        <span className="text-[7px] text-zinc-500 tabular-nums">{v}</span>
+                        <div
+                          className={`w-full rounded-sm ${barColor} transition-all`}
+                          style={{ height: `${Math.max(v * 0.35, 3)}px` }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
+            {/* Market Data */}
+            <div className="space-y-2 text-[11px]">
+              <div className="flex justify-between">
+                <span className="text-zinc-500">Mkt Cap</span>
+                <span className="text-white tabular-nums">{gd ? `$${(gd.total_market_cap.usd / 1e12).toFixed(2)}T` : "--"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-500">BTC Dom</span>
+                <span className="text-white tabular-nums">{gd ? `${gd.market_cap_percentage.btc.toFixed(1)}%` : "--"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-500">24h Vol</span>
+                <span className="text-white tabular-nums">{gd ? `$${(gd.total_volume.usd / 1e9).toFixed(1)}B` : "--"}</span>
+              </div>
+            </div>
           </div>
         );
+      }
       case "predictions":
         return <div className="h-full overflow-y-auto"><PredictionCards events={polymarketEvents} lang={lang} /></div>;
       case "news":

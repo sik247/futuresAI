@@ -251,7 +251,16 @@ export default function UnifiedDashboard({
         {signals.marketSummary && (
           <>
             <span className="text-zinc-700 hidden lg:inline">|</span>
-            <span className="text-xs text-zinc-500 hidden lg:block truncate max-w-xs">{signals.marketSummary}</span>
+            <span className={`text-xs font-semibold hidden lg:block truncate max-w-xs ${
+              signals.marketSummary.startsWith("[LONG]") ? "text-[#00C805]" :
+              signals.marketSummary.startsWith("[SHORT]") ? "text-[#FF5000]" : "text-zinc-400"
+            }`}>
+              {signals.marketSummary.startsWith("[LONG]")
+                ? (lang === "ko" ? "롱 포지션 우세" : "Long Dominant")
+                : signals.marketSummary.startsWith("[SHORT]")
+                ? (lang === "ko" ? "숏 포지션 우세" : "Short Dominant")
+                : (lang === "ko" ? "횡보" : "Neutral")}
+            </span>
           </>
         )}
       </div>
