@@ -1056,19 +1056,13 @@ const DEFAULT_LAYOUTS: Layouts = {
   ],
 };
 
-function WidgetWrapper({ config, ko, children }: { config: WidgetConfig; ko: boolean; children: React.ReactNode }) {
+function WidgetPanel({ title, color, headerBg, borderColor, children }: { title: string; color: string; headerBg: string; borderColor: string; children: React.ReactNode }) {
   return (
-    <div className={`rounded-xl border ${config.borderColor} bg-zinc-950 overflow-hidden flex flex-col h-full`}>
-      {/* Drag handle header */}
-      <div className={`px-3 py-2 ${config.headerBg} border-b ${config.borderColor} flex items-center justify-between shrink-0 cursor-grab active:cursor-grabbing drag-handle`}>
-        <div className="flex items-center gap-2">
-          <svg className="w-3.5 h-3.5 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-          </svg>
-          <span className={`text-[12px] font-mono uppercase tracking-[0.12em] ${config.color} font-semibold`}>
-            {ko ? config.titleKo : config.title}
-          </span>
-        </div>
+    <div className={`rounded-xl border ${borderColor} bg-zinc-950 overflow-hidden flex flex-col h-full`}>
+      <div className={`px-3 py-2 ${headerBg} border-b ${borderColor} shrink-0`}>
+        <span className={`text-[12px] font-mono uppercase tracking-[0.12em] ${color} font-semibold`}>
+          {title}
+        </span>
       </div>
       <div className="flex-1 overflow-hidden">{children}</div>
     </div>
@@ -1095,225 +1089,47 @@ export default function HomeDashboard({
 }: HomeDashboardProps) {
   const ko = lang === "ko";
 
-  // Client-side fallback for Fear & Greed and global market data
-  const [fgData, setFgData] = useState(fearGreed);
-  const [globalMarket, setGlobalMarket] = useState(globalData);
-  const [fgHistory, setFgHistory] = useState<{ value: string; timestamp: string }[]>([]);
-
-  useEffect(() => {
-    // Fetch Fear & Greed history (7 days) for chart
-    fetch("https://api.alternative.me/fng/?limit=7")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d?.data) {
-          setFgHistory(d.data);
-          if (!fearGreed?.data?.[0]) setFgData(d);
-        }
-      })
-      .catch(() => {});
-    // Fetch global market data if missing
-    if (!globalData?.data) {
-      fetch("https://api.coingecko.com/api/v3/global")
-        .then((r) => r.json())
-        .then((d) => { if (d?.data) setGlobalMarket(d); })
-        .catch(() => {});
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const LAYOUT_VERSION = "v4-signals"; // Bump to force reset old layouts
-
-  const [layouts, setLayouts] = useState<Layouts>(() => {
-    if (typeof window === "undefined") return DEFAULT_LAYOUTS;
-    try {
-      const ver = localStorage.getItem("dashboard-layout-version");
-      if (ver !== LAYOUT_VERSION) {
-        // Old layout version — reset to defaults to include new widgets
-        localStorage.removeItem("dashboard-layout");
-        localStorage.removeItem("dashboard-visible-widgets");
-        localStorage.setItem("dashboard-layout-version", LAYOUT_VERSION);
-        return DEFAULT_LAYOUTS;
-      }
-      const saved = localStorage.getItem("dashboard-layout");
-      if (!saved) return DEFAULT_LAYOUTS;
-      const parsed = JSON.parse(saved) as Layouts;
-      const merged: Layouts = {};
-      for (const bp of Object.keys(DEFAULT_LAYOUTS)) {
-        const savedBp = parsed[bp] || [];
-        const defaultBp = DEFAULT_LAYOUTS[bp] || [];
-        const existingKeys = new Set(savedBp.map((item: LayoutItem) => item.i));
-        merged[bp] = [
-          ...savedBp,
-          ...defaultBp.filter((d: LayoutItem) => !existingKeys.has(d.i)),
-        ];
-      }
-      return merged;
-    } catch { return DEFAULT_LAYOUTS; }
-  });
-
-  const [visibleWidgets, setVisibleWidgets] = useState<string[]>(() => {
-    const allKeys = WIDGETS.map(w => w.key);
-    if (typeof window === "undefined") return allKeys;
-    try {
-      const saved = localStorage.getItem("dashboard-visible-widgets");
-      if (!saved) return allKeys;
-      const parsed = JSON.parse(saved) as string[];
-      // Add any new widgets not in the saved list
-      const merged = [...parsed];
-      for (const key of allKeys) {
-        if (!merged.includes(key)) merged.push(key);
-      }
-      return merged;
-    } catch { return allKeys; }
-  });
-
-  const toggleWidget = (key: string) => {
-    setVisibleWidgets(prev => {
-      const next = prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key];
-      if (typeof window !== "undefined") localStorage.setItem("dashboard-visible-widgets", JSON.stringify(next));
-      return next;
-    });
-  };
-
-  const skipLayoutChangeRef = useRef(false);
-
-  const handleLayoutChange = (_unknown: unknown, allLayouts: unknown) => {
-    if (skipLayoutChangeRef.current) {
-      skipLayoutChangeRef.current = false;
-      return;
-    }
-    // Merge with DEFAULT_LAYOUTS to ensure all widget entries exist
-    const incoming = allLayouts as Layouts;
-    const merged: Layouts = {};
-    for (const bp of Object.keys(DEFAULT_LAYOUTS)) {
-      const incomingBp = incoming[bp] || [];
-      const defaultBp = DEFAULT_LAYOUTS[bp] || [];
-      const existingKeys = new Set(incomingBp.map((item: LayoutItem) => item.i));
-      // Keep incoming entries + add missing ones from defaults
-      merged[bp] = [
-        ...incomingBp,
-        ...defaultBp.filter((d: LayoutItem) => !existingKeys.has(d.i)),
-      ];
-    }
-    setLayouts(merged);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("dashboard-layout", JSON.stringify(merged));
-    }
-  };
-
-  // Container width for responsive grid
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(1200);
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setContainerWidth(entry.contentRect.width);
-      }
-    });
-    ro.observe(el);
-    setContainerWidth(el.clientWidth);
-    return () => ro.disconnect();
-  }, []);
-
-  const resetLayout = () => {
-    skipLayoutChangeRef.current = true;
-    setLayouts(DEFAULT_LAYOUTS);
-    setVisibleWidgets(WIDGETS.map(w => w.key));
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("dashboard-layout");
-      localStorage.removeItem("dashboard-visible-widgets");
-    }
-  };
-
-  const widgetMap = WIDGETS.reduce((acc, w) => { acc[w.key] = w; return acc; }, {} as Record<string, WidgetConfig>);
-  void widgetMap;
-
-  const renderWidget = (key: string) => {
-    switch (key) {
-      case "chart":
-        return (
-          <div className="h-full overflow-hidden">
-            <iframe
-              src="https://s.tradingview.com/widgetembed/?frameElementId=tv_chart&symbol=BINANCE:BTCUSDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=0a0a0f&studies=[]&theme=dark&style=1&timezone=exchange&withdateranges=1&showpopupbutton=0&locale=en&width=100%25&height=100%25"
-              className="w-full h-full border-0"
-              title="BTC/USDT"
-            />
-          </div>
-        );
-      case "signals":
-        return <div className="h-full overflow-y-auto"><SignalsWidget signals={_signals} lang={lang} /></div>;
-      case "predictions":
-        return <div className="h-full overflow-y-auto"><PredictionCards events={polymarketEvents} lang={lang} /></div>;
-      case "news":
-        return <div className="h-full overflow-y-auto"><ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} /></div>;
-      case "chat":
-        return <ChatWidget lang={lang} />;
-      default:
-        return null;
-    }
-  };
-
-  const gridStyles = `
-    .react-grid-placeholder { background: rgba(59, 130, 246, 0.15) !important; border-radius: 12px !important; border: 1px dashed rgba(59, 130, 246, 0.3) !important; }
-    .react-resizable-handle { opacity: 0; transition: opacity 0.2s; }
-    .react-grid-item:hover .react-resizable-handle { opacity: 1; }
-    .react-resizable-handle::after { border-color: rgba(255,255,255,0.2) !important; }
-  `;
-
   return (
     <div className="bg-zinc-950 font-mono flex flex-col" style={{ height: "calc(100vh - 92px)" }}>
-      <style>{gridStyles}</style>
       <StatBar btcData={btcData} ethData={ethData} fearGreed={fearGreed} globalData={globalData} />
 
-      {/* Widget management toolbar */}
-      <div className="flex items-center justify-between px-3 py-1 border-b border-white/[0.04] shrink-0 gap-2 overflow-x-auto">
-        <div className="flex items-center gap-1.5">
-          {WIDGETS.map((w) => (
-            <button
-              key={w.key}
-              onClick={() => toggleWidget(w.key)}
-              className={`text-[10px] font-mono px-2.5 py-1 rounded-md border transition-colors cursor-pointer whitespace-nowrap ${
-                visibleWidgets.includes(w.key)
-                  ? `${w.headerBg} ${w.borderColor} ${w.color}`
-                  : "bg-zinc-900 border-zinc-800 text-zinc-600"
-              }`}
-            >
-              {ko ? w.titleKo : w.title}
-            </button>
-          ))}
-        </div>
-        <button onClick={resetLayout} className="text-[9px] font-mono text-zinc-600 hover:text-zinc-400 cursor-pointer shrink-0">
-          {ko ? "레이아웃 초기화" : "Reset Layout"}
-        </button>
-      </div>
-
-      {/* Desktop Grid */}
-      <div ref={containerRef} className="flex-1 overflow-auto">
-        <ResponsiveGridLayout
-          className="layout"
-          width={containerWidth}
-          layouts={layouts}
-          breakpoints={{ lg: 1200, md: 996, sm: 768 }}
-          cols={{ lg: 12, md: 10, sm: 6 }}
-          rowHeight={40}
-          onLayoutChange={handleLayoutChange}
-          draggableHandle=".drag-handle"
-          isResizable={true}
-          isDraggable={true}
-          margin={[8, 8]}
-          containerPadding={[8, 8]}
-        >
-          {WIDGETS.filter(w => visibleWidgets.includes(w.key)).map((w) => (
-            <div key={w.key}>
-              <WidgetWrapper config={w} ko={ko}>
-                {renderWidget(w.key)}
-              </WidgetWrapper>
+      {/* Fixed grid — no drag/resize, instant render */}
+      <div className="flex-1 overflow-auto p-2 grid grid-cols-12 grid-rows-[1fr_1fr] gap-2" style={{ minHeight: 0 }}>
+        {/* Row 1: Chart (5) + Signals (4) + Chat (3) */}
+        <div className="col-span-5 row-span-1">
+          <WidgetPanel title={ko ? "BTC/USDT" : "BTC/USDT"} color="text-emerald-400" headerBg="bg-zinc-900/50" borderColor="border-white/[0.08]">
+            <div className="h-full overflow-hidden">
+              <iframe
+                src="https://s.tradingview.com/widgetembed/?frameElementId=tv_chart&symbol=BINANCE:BTCUSDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=0a0a0f&studies=[]&theme=dark&style=1&timezone=exchange&withdateranges=1&showpopupbutton=0&locale=en&width=100%25&height=100%25"
+                className="w-full h-full border-0"
+                title="BTC/USDT"
+              />
             </div>
-          ))}
-        </ResponsiveGridLayout>
-      </div>
+          </WidgetPanel>
+        </div>
+        <div className="col-span-4 row-span-1">
+          <WidgetPanel title={ko ? "퀀트 시그널" : "Quant Signals"} color="text-cyan-300" headerBg="bg-cyan-950/20" borderColor="border-cyan-500/15">
+            <div className="h-full overflow-y-auto"><SignalsWidget signals={_signals} lang={lang} /></div>
+          </WidgetPanel>
+        </div>
+        <div className="col-span-3 row-span-2">
+          <WidgetPanel title={ko ? "AI 퀀트 채팅" : "AI Quant Chat"} color="text-purple-300" headerBg="bg-gradient-to-r from-purple-950/40 to-indigo-950/30" borderColor="border-purple-500/20">
+            <ChatWidget lang={lang} />
+          </WidgetPanel>
+        </div>
 
+        {/* Row 2: Predictions (5) + News (4) */}
+        <div className="col-span-5 row-span-1">
+          <WidgetPanel title={ko ? "예측 시장" : "Predictions"} color="text-blue-300" headerBg="bg-blue-950/30" borderColor="border-blue-500/10">
+            <div className="h-full overflow-y-auto"><PredictionCards events={polymarketEvents} lang={lang} /></div>
+          </WidgetPanel>
+        </div>
+        <div className="col-span-4 row-span-1">
+          <WidgetPanel title={ko ? "뉴스" : "News"} color="text-emerald-300" headerBg="bg-emerald-950/20" borderColor="border-emerald-500/10">
+            <div className="h-full overflow-y-auto"><ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} /></div>
+          </WidgetPanel>
+        </div>
+      </div>
     </div>
   );
 }
