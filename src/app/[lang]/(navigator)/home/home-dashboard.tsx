@@ -643,67 +643,38 @@ function BlogCards({ posts, lang }: { posts: BlogPost[]; lang: string }) {
 /*  Quant Signals Widget                                               */
 /* ------------------------------------------------------------------ */
 
-function SignalsWidget({ signals, lang }: { signals: SignalsData; lang: string }) {
-  const topSignals = (signals.signals || []).slice(0, 8);
+function SignalsWidget({ signals }: { signals: SignalsData; lang: string }) {
+  const topSignals = (signals.signals || []).slice(0, 10);
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex-1 overflow-y-auto p-2.5 space-y-2">
+      {/* Table header */}
+      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-white/[0.04] text-[11px] font-mono text-zinc-600 uppercase tracking-wider shrink-0">
+        <span className="w-16">Coin</span>
+        <span className="flex-1 text-right">Price</span>
+        <span className="w-16 text-right">24h</span>
+        <span className="w-14 text-center">Signal</span>
+        <span className="w-14 text-center">Dir</span>
+      </div>
+      {/* Rows */}
+      <div className="flex-1 overflow-y-auto">
         {topSignals.length === 0 ? (
           <div className="flex items-center justify-center h-full text-sm font-mono text-zinc-700">No signals</div>
         ) : (
           topSignals.map((s) => {
-            const signalColor = s.signal === "Strong Buy" ? "text-emerald-300 bg-emerald-500/20 border-emerald-500/30" :
-              s.signal === "Buy" ? "text-emerald-400 bg-emerald-500/15 border-emerald-500/25" :
-              s.signal === "Sell" ? "text-red-400 bg-red-500/15 border-red-500/25" :
-              s.signal === "Strong Sell" ? "text-red-300 bg-red-500/20 border-red-500/30" :
-              "text-zinc-400 bg-zinc-500/15 border-zinc-500/25";
-            const dirBg = s.direction === "LONG" ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" :
-              s.direction === "SHORT" ? "bg-red-500/20 text-red-300 border-red-500/30" :
-              "bg-zinc-500/15 text-zinc-400 border-zinc-500/25";
-            const coinLetter = s.symbol[0];
-            const coinColor = s.direction === "LONG" ? "bg-emerald-500/20 text-emerald-400" :
-              s.direction === "SHORT" ? "bg-red-500/20 text-red-400" :
-              "bg-zinc-700 text-zinc-400";
+            const sigColor = s.signal.includes("Buy") ? "text-emerald-400" : s.signal.includes("Sell") ? "text-red-400" : "text-zinc-400";
+            const dirColor = s.direction === "LONG" ? "text-emerald-400" : s.direction === "SHORT" ? "text-red-400" : "text-zinc-500";
+            const pctColor = s.change24h >= 0 ? "text-emerald-400" : "text-red-400";
             return (
-              <div key={s.symbol} className="rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.10] transition-all px-3 py-3">
-                {/* Top row: coin icon + symbol/name + price + change */}
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-sm font-bold ${coinColor}`}>
-                    {coinLetter}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-sm font-mono font-bold text-white">{s.symbol}</span>
-                      <span className="text-xs font-mono text-zinc-500 truncate">{s.name}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-mono text-zinc-200 tabular-nums">${fmtPrice(s.price)}</span>
-                      <span className={`text-sm font-mono font-semibold tabular-nums ${s.change24h >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-                        {s.change24h >= 0 ? "+" : ""}{s.change24h?.toFixed(2)}%
-                      </span>
-                    </div>
-                  </div>
-                  {/* Badges */}
-                  <div className="flex flex-col items-end gap-1.5 shrink-0">
-                    <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded border ${signalColor}`}>{s.signal}</span>
-                    <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded border ${dirBg}`}>{s.direction}</span>
-                  </div>
-                </div>
-                {/* Bottom row: RSI bar + confidence */}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono text-zinc-500 shrink-0">RSI</span>
-                  <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full ${s.rsi > 70 ? "bg-red-500" : s.rsi < 30 ? "bg-emerald-500" : "bg-blue-500"}`}
-                      style={{ width: `${Math.min(s.rsi, 100)}%` }}
-                    />
-                  </div>
-                  <span className={`text-xs font-mono tabular-nums shrink-0 ${s.rsi > 70 ? "text-red-400" : s.rsi < 30 ? "text-emerald-400" : "text-zinc-400"}`}>
-                    {s.rsi?.toFixed(0)}
-                  </span>
-                  <span className="text-xs font-mono text-zinc-600 shrink-0">|</span>
-                  <span className="text-xs font-mono text-zinc-400 tabular-nums shrink-0">{s.confidence}%</span>
-                </div>
+              <div key={s.symbol} className="flex items-center gap-2 px-3 py-2 border-b border-white/[0.03] hover:bg-white/[0.03] transition-colors">
+                <span className="w-16 text-[13px] font-mono font-bold text-white">{s.symbol}</span>
+                <span className="flex-1 text-right text-[13px] font-mono text-zinc-200 tabular-nums">${fmtPrice(s.price)}</span>
+                <span className={`w-16 text-right text-[13px] font-mono font-semibold tabular-nums ${pctColor}`}>
+                  {s.change24h >= 0 ? "+" : ""}{s.change24h?.toFixed(1)}%
+                </span>
+                <span className={`w-14 text-center text-[11px] font-mono font-bold ${sigColor}`}>
+                  {s.signal === "Strong Buy" ? "S.Buy" : s.signal === "Strong Sell" ? "S.Sell" : s.signal}
+                </span>
+                <span className={`w-14 text-center text-[11px] font-mono font-bold ${dirColor}`}>{s.direction}</span>
               </div>
             );
           })
@@ -1093,11 +1064,11 @@ export default function HomeDashboard({
     <div className="bg-zinc-950 font-mono flex flex-col" style={{ height: "calc(100vh - 92px)" }}>
       <StatBar btcData={btcData} ethData={ethData} fearGreed={fearGreed} globalData={globalData} />
 
-      {/* Fixed grid — no drag/resize, instant render */}
-      <div className="flex-1 overflow-auto p-2 grid grid-cols-12 grid-rows-[1fr_1fr] gap-2" style={{ minHeight: 0 }}>
-        {/* Row 1: Chart (5) + Signals (4) + Chat (3) */}
-        <div className="col-span-5 row-span-1">
-          <WidgetPanel title={ko ? "BTC/USDT" : "BTC/USDT"} color="text-emerald-400" headerBg="bg-zinc-900/50" borderColor="border-white/[0.08]">
+      {/* Fixed grid — fits viewport, no page scroll */}
+      <div className="flex-1 min-h-0 p-2 grid grid-cols-12 grid-rows-[55%_45%] gap-2">
+        {/* Row 1: Chart (5) + Signals (4) + Chat (3, spans both rows) */}
+        <div className="col-span-5 min-h-0">
+          <WidgetPanel title="BTC/USDT" color="text-emerald-400" headerBg="bg-zinc-900/50" borderColor="border-white/[0.08]">
             <div className="h-full overflow-hidden">
               <iframe
                 src="https://s.tradingview.com/widgetembed/?frameElementId=tv_chart&symbol=BINANCE:BTCUSDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=0a0a0f&studies=[]&theme=dark&style=1&timezone=exchange&withdateranges=1&showpopupbutton=0&locale=en&width=100%25&height=100%25"
@@ -1107,24 +1078,24 @@ export default function HomeDashboard({
             </div>
           </WidgetPanel>
         </div>
-        <div className="col-span-4 row-span-1">
+        <div className="col-span-4 min-h-0">
           <WidgetPanel title={ko ? "퀀트 시그널" : "Quant Signals"} color="text-cyan-300" headerBg="bg-cyan-950/20" borderColor="border-cyan-500/15">
-            <div className="h-full overflow-y-auto"><SignalsWidget signals={_signals} lang={lang} /></div>
+            <SignalsWidget signals={_signals} lang={lang} />
           </WidgetPanel>
         </div>
-        <div className="col-span-3 row-span-2">
+        <div className="col-span-3 row-span-2 min-h-0">
           <WidgetPanel title={ko ? "AI 퀀트 채팅" : "AI Quant Chat"} color="text-purple-300" headerBg="bg-gradient-to-r from-purple-950/40 to-indigo-950/30" borderColor="border-purple-500/20">
             <ChatWidget lang={lang} />
           </WidgetPanel>
         </div>
 
         {/* Row 2: Predictions (5) + News (4) */}
-        <div className="col-span-5 row-span-1">
+        <div className="col-span-5 min-h-0">
           <WidgetPanel title={ko ? "예측 시장" : "Predictions"} color="text-blue-300" headerBg="bg-blue-950/30" borderColor="border-blue-500/10">
             <div className="h-full overflow-y-auto"><PredictionCards events={polymarketEvents} lang={lang} /></div>
           </WidgetPanel>
         </div>
-        <div className="col-span-4 row-span-1">
+        <div className="col-span-4 min-h-0">
           <WidgetPanel title={ko ? "뉴스" : "News"} color="text-emerald-300" headerBg="bg-emerald-950/20" borderColor="border-emerald-500/10">
             <div className="h-full overflow-y-auto"><ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} /></div>
           </WidgetPanel>
