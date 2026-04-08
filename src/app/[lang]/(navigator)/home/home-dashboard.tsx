@@ -1317,8 +1317,8 @@ export default function HomeDashboard({
       <style>{gridStyles}</style>
       <StatBar btcData={btcData} ethData={ethData} fearGreed={fearGreed} globalData={globalData} />
 
-      {/* Widget management toolbar (desktop only) */}
-      <div className="hidden sm:flex items-center justify-between px-3 py-1 border-b border-white/[0.04] shrink-0 gap-2 overflow-x-auto">
+      {/* Widget management toolbar */}
+      <div className="flex items-center justify-between px-3 py-1 border-b border-white/[0.04] shrink-0 gap-2 overflow-x-auto">
         <div className="flex items-center gap-1.5">
           {WIDGETS.map((w) => (
             <button
@@ -1339,8 +1339,8 @@ export default function HomeDashboard({
         </button>
       </div>
 
-      {/* Desktop Grid (hidden on mobile) */}
-      <div ref={containerRef} className="flex-1 overflow-auto hidden sm:block">
+      {/* Desktop Grid */}
+      <div ref={containerRef} className="flex-1 overflow-auto">
         <ResponsiveGridLayout
           className="layout"
           width={containerWidth}
@@ -1365,102 +1365,6 @@ export default function HomeDashboard({
         </ResponsiveGridLayout>
       </div>
 
-      {/* Mobile Layout (simple stacked cards) */}
-      <div className="sm:hidden flex-1 overflow-y-auto pb-16">
-        {/* Mobile Quick Stats */}
-        <div className="grid grid-cols-2 gap-2 p-3">
-          <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-3">
-            <p className="text-[10px] text-zinc-500 font-mono uppercase">{ko ? "공포 & 탐욕" : "Fear & Greed"}</p>
-            <p className={`text-2xl font-bold font-mono mt-1 ${
-              (fgData?.data?.[0] ? parseInt(fgData.data[0].value) : 50) <= 25 ? "text-red-400" : "text-amber-400"
-            }`}>
-              {fgData?.data?.[0]?.value ?? "--"}
-            </p>
-            <p className="text-[10px] text-zinc-600">{fgData?.data?.[0]?.value_classification ?? ""}</p>
-          </div>
-          <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-3">
-            <p className="text-[10px] text-zinc-500 font-mono uppercase">{ko ? "시장 데이터" : "Market"}</p>
-            {globalMarket?.data ? (
-              <div className="mt-1 space-y-1">
-                <div className="flex justify-between text-xs">
-                  <span className="text-zinc-500">Mkt Cap</span>
-                  <span className="text-white font-mono">${(globalMarket.data.total_market_cap.usd / 1e12).toFixed(2)}T</span>
-                </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-zinc-500">BTC Dom</span>
-                  <span className="text-white font-mono">{globalMarket.data.market_cap_percentage.btc.toFixed(1)}%</span>
-                </div>
-              </div>
-            ) : (
-              <p className="text-zinc-600 text-xs mt-1">--</p>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile Chart */}
-        <div className="px-3 pb-3">
-          <div className="rounded-xl border border-white/[0.08] bg-zinc-950 overflow-hidden">
-            <div className="px-3 py-2 bg-zinc-900/50 border-b border-white/[0.08] flex items-center justify-between">
-              <span className="text-xs font-mono uppercase tracking-[0.12em] text-emerald-400 font-semibold">BTC/USDT</span>
-              <span className="relative flex items-center gap-1">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-                </span>
-                <span className="text-[9px] text-emerald-400 uppercase">LIVE</span>
-              </span>
-            </div>
-            <div style={{ height: 280 }}>
-              <iframe
-                src="https://s.tradingview.com/widgetembed/?frameElementId=tv_chart_m&symbol=BINANCE:BTCUSDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=0a0a0f&studies=[]&theme=dark&style=1&timezone=exchange&withdateranges=1&showpopupbutton=0&locale=en&width=100%25&height=100%25"
-                className="w-full h-full border-0"
-                title="BTC/USDT"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Quick Links */}
-        <div className="px-3 pb-3">
-          <div className="flex gap-2 overflow-x-auto no-scrollbar">
-            <Link href={`/${lang}/quant`} className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75z" /></svg>
-              {ko ? "AI 시그널" : "AI Signals"}
-            </Link>
-            <Link href={`/${lang}/chat`} className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-semibold">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>
-              {ko ? "AI 채팅" : "AI Chat"}
-            </Link>
-            <Link href={`/${lang}/whales`} className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              {ko ? "고래 추적" : "Whales"}
-            </Link>
-            <Link href={`/${lang}/payback`} className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
-              {ko ? "페이백" : "Payback"}
-            </Link>
-          </div>
-        </div>
-
-        {/* Mobile News */}
-        <div className="px-3 pb-3">
-          <div className="rounded-xl border border-white/[0.06] bg-zinc-950 overflow-hidden">
-            <div className="px-3 py-2 bg-zinc-900/30 border-b border-white/[0.06]">
-              <span className="text-xs font-mono uppercase tracking-[0.12em] text-emerald-300 font-semibold">{ko ? "뉴스" : "News"}</span>
-            </div>
-            <div style={{ maxHeight: 280 }} className="overflow-y-auto">{renderWidget("news")}</div>
-          </div>
-        </div>
-
-        {/* Mobile Predictions */}
-        <div className="px-3 pb-3">
-          <div className="rounded-xl border border-white/[0.06] bg-zinc-950 overflow-hidden">
-            <div className="px-3 py-2 bg-zinc-900/30 border-b border-white/[0.06]">
-              <span className="text-xs font-mono uppercase tracking-[0.12em] text-blue-300 font-semibold">{ko ? "예측 시장" : "Predictions"}</span>
-            </div>
-            <div style={{ maxHeight: 280 }} className="overflow-y-auto">{renderWidget("predictions")}</div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

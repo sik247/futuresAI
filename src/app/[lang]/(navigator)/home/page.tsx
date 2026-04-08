@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import HomeDashboard from "./home-dashboard";
+import MobileHome from "./mobile-home";
 import { fetchCryptoNews } from "@/lib/services/news/crypto-news.service";
 import { fetchYouTubeFeeds } from "@/lib/services/social/youtube-feed.service";
 import { fetchAllHLWhales } from "@/lib/services/whales/hyperliquid.service";
@@ -146,20 +147,40 @@ export default async function HomePage({
   // Latest 10 blog posts (most recent first)
   const blogPosts = [...QUANT_BLOG_POSTS].reverse().slice(0, 10);
 
+  const serializedNews = JSON.parse(JSON.stringify(translatedNews));
+  const serializedSignals = JSON.parse(JSON.stringify(signals));
+
   return (
-    <HomeDashboard
-      lang={lang}
-      btcData={btcData}
-      ethData={ethData}
-      fearGreed={fearGreed}
-      globalData={globalData}
-      topCoins={JSON.parse(JSON.stringify(topCoins))}
-      hlWhales={JSON.parse(JSON.stringify(hlWhales.slice(0, 8)))}
-      news={JSON.parse(JSON.stringify(translatedNews))}
-      youtubeItems={JSON.parse(JSON.stringify(youtubeItems.slice(0, 6).map((y: any) => ({ ...y, publishedAt: y.publishedAt.toISOString() }))))}
-      signals={JSON.parse(JSON.stringify(signals))}
-      polymarketEvents={JSON.parse(JSON.stringify(translatedPoly))}
-      blogPosts={JSON.parse(JSON.stringify(blogPosts))}
-    />
+    <>
+      {/* Mobile: clean dedicated layout */}
+      <div className="lg:hidden">
+        <MobileHome
+          lang={lang}
+          btcData={btcData}
+          ethData={ethData}
+          fearGreed={fearGreed}
+          globalData={globalData}
+          news={serializedNews}
+          signals={serializedSignals}
+        />
+      </div>
+      {/* Desktop: full grid dashboard */}
+      <div className="hidden lg:block">
+        <HomeDashboard
+          lang={lang}
+          btcData={btcData}
+          ethData={ethData}
+          fearGreed={fearGreed}
+          globalData={globalData}
+          topCoins={JSON.parse(JSON.stringify(topCoins))}
+          hlWhales={JSON.parse(JSON.stringify(hlWhales.slice(0, 8)))}
+          news={serializedNews}
+          youtubeItems={JSON.parse(JSON.stringify(youtubeItems.slice(0, 6).map((y: any) => ({ ...y, publishedAt: y.publishedAt.toISOString() }))))}
+          signals={serializedSignals}
+          polymarketEvents={JSON.parse(JSON.stringify(translatedPoly))}
+          blogPosts={JSON.parse(JSON.stringify(blogPosts))}
+        />
+      </div>
+    </>
   );
 }
