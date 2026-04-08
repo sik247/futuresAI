@@ -1028,30 +1028,31 @@ const WIDGETS: WidgetConfig[] = [
   { key: "feargreed", title: "Market", titleKo: "시장", color: "text-amber-400", headerBg: "bg-amber-950/20", borderColor: "border-amber-500/10" },
   { key: "predictions", title: "Predictions", titleKo: "예측 시장", color: "text-blue-300", headerBg: "bg-blue-950/30", borderColor: "border-blue-500/10" },
   { key: "news", title: "News", titleKo: "뉴스", color: "text-emerald-300", headerBg: "bg-emerald-950/20", borderColor: "border-emerald-500/10" },
-  { key: "chat", title: "AI Chat", titleKo: "AI 퀀트 채팅", color: "text-purple-300", headerBg: "bg-purple-950/20", borderColor: "border-purple-500/10" },
+  { key: "chat", title: "AI Quant Chat", titleKo: "AI 퀀트 채팅", color: "text-purple-300", headerBg: "bg-gradient-to-r from-purple-950/40 to-indigo-950/30", borderColor: "border-purple-500/20" },
 ];
 
 const DEFAULT_LAYOUTS: Layouts = {
   lg: [
-    { i: "chart", x: 0, y: 0, w: 8, h: 8, minW: 2, minH: 2 },
-    { i: "feargreed", x: 8, y: 0, w: 4, h: 8, minW: 2, minH: 2 },
+    // AI Chat takes right column full height — it's the main feature
+    { i: "chat", x: 8, y: 0, w: 4, h: 15, minW: 3, minH: 6 },
+    { i: "chart", x: 0, y: 0, w: 5, h: 8, minW: 2, minH: 2 },
+    { i: "feargreed", x: 5, y: 0, w: 3, h: 8, minW: 2, minH: 2 },
     { i: "predictions", x: 0, y: 8, w: 4, h: 7, minW: 2, minH: 2 },
     { i: "news", x: 4, y: 8, w: 4, h: 7, minW: 2, minH: 2 },
-    { i: "chat", x: 8, y: 8, w: 4, h: 7, minW: 2, minH: 2 },
   ],
   md: [
-    { i: "chart", x: 0, y: 0, w: 6, h: 7, minW: 2, minH: 2 },
-    { i: "feargreed", x: 6, y: 0, w: 4, h: 7, minW: 2, minH: 2 },
-    { i: "predictions", x: 0, y: 7, w: 5, h: 6, minW: 2, minH: 2 },
-    { i: "news", x: 5, y: 7, w: 5, h: 6, minW: 2, minH: 2 },
-    { i: "chat", x: 0, y: 13, w: 10, h: 6, minW: 2, minH: 2 },
+    { i: "chat", x: 0, y: 0, w: 10, h: 8, minW: 3, minH: 4 },
+    { i: "chart", x: 0, y: 8, w: 6, h: 7, minW: 2, minH: 2 },
+    { i: "feargreed", x: 6, y: 8, w: 4, h: 7, minW: 2, minH: 2 },
+    { i: "predictions", x: 0, y: 15, w: 5, h: 6, minW: 2, minH: 2 },
+    { i: "news", x: 5, y: 15, w: 5, h: 6, minW: 2, minH: 2 },
   ],
   sm: [
-    { i: "chart", x: 0, y: 0, w: 6, h: 5, minW: 2, minH: 2 },
-    { i: "feargreed", x: 0, y: 5, w: 6, h: 3, minW: 2, minH: 2 },
-    { i: "predictions", x: 0, y: 8, w: 6, h: 5, minW: 2, minH: 2 },
-    { i: "news", x: 0, y: 13, w: 6, h: 5, minW: 2, minH: 2 },
-    { i: "chat", x: 0, y: 18, w: 6, h: 5, minW: 2, minH: 2 },
+    { i: "chat", x: 0, y: 0, w: 6, h: 7, minW: 2, minH: 3 },
+    { i: "chart", x: 0, y: 7, w: 6, h: 5, minW: 2, minH: 2 },
+    { i: "feargreed", x: 0, y: 12, w: 6, h: 3, minW: 2, minH: 2 },
+    { i: "predictions", x: 0, y: 15, w: 6, h: 5, minW: 2, minH: 2 },
+    { i: "news", x: 0, y: 20, w: 6, h: 5, minW: 2, minH: 2 },
   ],
 };
 
@@ -1119,7 +1120,7 @@ export default function HomeDashboard({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const LAYOUT_VERSION = "v2-chat"; // Bump to force reset old layouts
+  const LAYOUT_VERSION = "v3-chat-main"; // Bump to force reset old layouts
 
   const [layouts, setLayouts] = useState<Layouts>(() => {
     if (typeof window === "undefined") return DEFAULT_LAYOUTS;

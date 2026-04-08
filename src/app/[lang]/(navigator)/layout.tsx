@@ -4,6 +4,7 @@ import Footer from "@/components/footer";
 import { PriceTicker } from "@/components/price-ticker";
 import PaybackAlertBanner from "@/components/payback-alert-banner";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
+import FloatingChatButton from "@/components/floating-chat-button";
 import { Metadata } from "next";
 
 export async function generateMetadata({
@@ -55,6 +56,7 @@ export default async function LanguageLayout({
       </div>
       <main className="min-h-screen pb-16 lg:pb-0">{children}</main>
       <Footer lang={lang} translations={dictionary} />
+      <FloatingChatButton lang={lang} />
       <MobileBottomNav lang={lang} />
     </>
   );

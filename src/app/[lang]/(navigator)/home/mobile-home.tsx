@@ -162,13 +162,38 @@ export default function MobileHome({ lang, btcData, ethData, fearGreed, globalDa
         )}
       </div>
 
+      {/* ── AI Chat CTA (Main Feature) ── */}
+      <Link
+        href={`/${lang}/chat`}
+        className="mx-4 mb-4 block rounded-2xl overflow-hidden border border-purple-500/20 bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-zinc-950 active:scale-[0.99] transition-transform"
+      >
+        <div className="flex items-center gap-4 p-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shrink-0">
+            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-bold text-white">
+              {ko ? "AI 퀀트 채팅" : "AI Quant Chat"}
+            </h3>
+            <p className="text-xs text-zinc-400 mt-0.5">
+              {ko ? "AI에게 시장 분석을 물어보세요" : "Ask AI about market analysis"}
+            </p>
+          </div>
+          <svg className="w-5 h-5 text-purple-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </div>
+      </Link>
+
       {/* ── Quick Actions ── */}
       <div className="flex gap-2 px-4 mb-4 overflow-x-auto no-scrollbar">
         {[
           { href: `/${lang}/quant`, icon: "📊", label: ko ? "AI 시그널" : "AI Signals", color: "from-blue-600 to-cyan-600" },
-          { href: `/${lang}/chat`, icon: "✨", label: ko ? "AI 채팅" : "AI Chat", color: "from-purple-600 to-pink-600" },
           { href: `/${lang}/whales`, icon: "🐋", label: ko ? "고래 추적" : "Whales", color: "from-emerald-600 to-teal-600" },
           { href: `/${lang}/payback`, icon: "💰", label: ko ? "페이백" : "Payback", color: "from-amber-600 to-orange-600" },
+          { href: `/${lang}/guides`, icon: "📖", label: ko ? "가이드" : "Guides", color: "from-indigo-600 to-blue-600" },
         ].map((item) => (
           <Link
             key={item.href}
