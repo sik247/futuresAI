@@ -644,12 +644,12 @@ function BlogCards({ posts, lang }: { posts: BlogPost[]; lang: string }) {
 /* ------------------------------------------------------------------ */
 
 function SignalsWidget({ signals, lang }: { signals: SignalsData; lang: string }) {
-  const topSignals = (signals.signals || []).slice(0, 6);
+  const topSignals = (signals.signals || []).slice(0, 8);
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
+      <div className="flex-1 overflow-y-auto p-2.5 space-y-2">
         {topSignals.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-[10px] font-mono text-zinc-700">No signals</div>
+          <div className="flex items-center justify-center h-full text-sm font-mono text-zinc-700">No signals</div>
         ) : (
           topSignals.map((s) => {
             const signalColor = s.signal === "Strong Buy" ? "text-emerald-300 bg-emerald-500/20 border-emerald-500/30" :
@@ -665,44 +665,44 @@ function SignalsWidget({ signals, lang }: { signals: SignalsData; lang: string }
               s.direction === "SHORT" ? "bg-red-500/20 text-red-400" :
               "bg-zinc-700 text-zinc-400";
             return (
-              <div key={s.symbol} className="rounded-lg border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.10] transition-all px-2.5 py-2.5">
+              <div key={s.symbol} className="rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.10] transition-all px-3 py-3">
                 {/* Top row: coin icon + symbol/name + price + change */}
-                <div className="flex items-center gap-2 mb-2">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[10px] font-bold ${coinColor}`}>
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-sm font-bold ${coinColor}`}>
                     {coinLetter}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1">
-                      <span className="text-[13px] font-mono font-bold text-white">{s.symbol}</span>
-                      <span className="text-[12px] font-mono text-zinc-600 truncate">{s.name}</span>
-                    </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[12px] font-mono text-zinc-300 tabular-nums">${fmtPrice(s.price)}</span>
-                      <span className={`text-[12px] font-mono tabular-nums ${s.change24h >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                      <span className="text-sm font-mono font-bold text-white">{s.symbol}</span>
+                      <span className="text-xs font-mono text-zinc-500 truncate">{s.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-mono text-zinc-200 tabular-nums">${fmtPrice(s.price)}</span>
+                      <span className={`text-sm font-mono font-semibold tabular-nums ${s.change24h >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                         {s.change24h >= 0 ? "+" : ""}{s.change24h?.toFixed(2)}%
                       </span>
                     </div>
                   </div>
                   {/* Badges */}
-                  <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded border ${signalColor}`}>{s.signal}</span>
-                    <span className={`text-[11px] font-mono font-bold px-1.5 py-0.5 rounded border ${dirBg}`}>{s.direction}</span>
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded border ${signalColor}`}>{s.signal}</span>
+                    <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded border ${dirBg}`}>{s.direction}</span>
                   </div>
                 </div>
                 {/* Bottom row: RSI bar + confidence */}
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-mono text-zinc-600 shrink-0">RSI</span>
-                  <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                  <span className="text-xs font-mono text-zinc-500 shrink-0">RSI</span>
+                  <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full ${s.rsi > 70 ? "bg-red-500" : s.rsi < 30 ? "bg-emerald-500" : "bg-blue-500"}`}
                       style={{ width: `${Math.min(s.rsi, 100)}%` }}
                     />
                   </div>
-                  <span className={`text-[11px] font-mono tabular-nums shrink-0 ${s.rsi > 70 ? "text-red-400" : s.rsi < 30 ? "text-emerald-400" : "text-zinc-400"}`}>
+                  <span className={`text-xs font-mono tabular-nums shrink-0 ${s.rsi > 70 ? "text-red-400" : s.rsi < 30 ? "text-emerald-400" : "text-zinc-400"}`}>
                     {s.rsi?.toFixed(0)}
                   </span>
-                  <span className="text-[11px] font-mono text-zinc-600 shrink-0">|</span>
-                  <span className="text-[11px] font-mono text-zinc-400 tabular-nums shrink-0">{s.confidence}%</span>
+                  <span className="text-xs font-mono text-zinc-600 shrink-0">|</span>
+                  <span className="text-xs font-mono text-zinc-400 tabular-nums shrink-0">{s.confidence}%</span>
                 </div>
               </div>
             );
@@ -1025,7 +1025,7 @@ type WidgetConfig = {
 
 const WIDGETS: WidgetConfig[] = [
   { key: "chart", title: "BTC/USDT", titleKo: "BTC/USDT", color: "text-emerald-400", headerBg: "bg-zinc-900/50", borderColor: "border-white/[0.08]" },
-  { key: "feargreed", title: "Market", titleKo: "시장", color: "text-amber-400", headerBg: "bg-amber-950/20", borderColor: "border-amber-500/10" },
+  { key: "signals", title: "Quant Signals", titleKo: "퀀트 시그널", color: "text-cyan-300", headerBg: "bg-cyan-950/20", borderColor: "border-cyan-500/15" },
   { key: "predictions", title: "Predictions", titleKo: "예측 시장", color: "text-blue-300", headerBg: "bg-blue-950/30", borderColor: "border-blue-500/10" },
   { key: "news", title: "News", titleKo: "뉴스", color: "text-emerald-300", headerBg: "bg-emerald-950/20", borderColor: "border-emerald-500/10" },
   { key: "chat", title: "AI Quant Chat", titleKo: "AI 퀀트 채팅", color: "text-purple-300", headerBg: "bg-gradient-to-r from-purple-950/40 to-indigo-950/30", borderColor: "border-purple-500/20" },
@@ -1033,26 +1033,26 @@ const WIDGETS: WidgetConfig[] = [
 
 const DEFAULT_LAYOUTS: Layouts = {
   lg: [
-    // AI Chat takes right column full height — it's the main feature
-    { i: "chat", x: 8, y: 0, w: 4, h: 15, minW: 3, minH: 6 },
+    // Chat slimmer on right (3 cols), signals get prime real estate
+    { i: "chat", x: 9, y: 0, w: 3, h: 15, minW: 3, minH: 6 },
     { i: "chart", x: 0, y: 0, w: 5, h: 8, minW: 2, minH: 2 },
-    { i: "feargreed", x: 5, y: 0, w: 3, h: 8, minW: 2, minH: 2 },
+    { i: "signals", x: 5, y: 0, w: 4, h: 8, minW: 2, minH: 2 },
     { i: "predictions", x: 0, y: 8, w: 4, h: 7, minW: 2, minH: 2 },
-    { i: "news", x: 4, y: 8, w: 4, h: 7, minW: 2, minH: 2 },
+    { i: "news", x: 4, y: 8, w: 5, h: 7, minW: 2, minH: 2 },
   ],
   md: [
-    { i: "chat", x: 0, y: 0, w: 10, h: 8, minW: 3, minH: 4 },
-    { i: "chart", x: 0, y: 8, w: 6, h: 7, minW: 2, minH: 2 },
-    { i: "feargreed", x: 6, y: 8, w: 4, h: 7, minW: 2, minH: 2 },
-    { i: "predictions", x: 0, y: 15, w: 5, h: 6, minW: 2, minH: 2 },
-    { i: "news", x: 5, y: 15, w: 5, h: 6, minW: 2, minH: 2 },
+    { i: "chat", x: 0, y: 0, w: 10, h: 7, minW: 3, minH: 4 },
+    { i: "chart", x: 0, y: 7, w: 5, h: 7, minW: 2, minH: 2 },
+    { i: "signals", x: 5, y: 7, w: 5, h: 7, minW: 2, minH: 2 },
+    { i: "predictions", x: 0, y: 14, w: 5, h: 6, minW: 2, minH: 2 },
+    { i: "news", x: 5, y: 14, w: 5, h: 6, minW: 2, minH: 2 },
   ],
   sm: [
-    { i: "chat", x: 0, y: 0, w: 6, h: 7, minW: 2, minH: 3 },
-    { i: "chart", x: 0, y: 7, w: 6, h: 5, minW: 2, minH: 2 },
-    { i: "feargreed", x: 0, y: 12, w: 6, h: 3, minW: 2, minH: 2 },
-    { i: "predictions", x: 0, y: 15, w: 6, h: 5, minW: 2, minH: 2 },
-    { i: "news", x: 0, y: 20, w: 6, h: 5, minW: 2, minH: 2 },
+    { i: "chat", x: 0, y: 0, w: 6, h: 6, minW: 2, minH: 3 },
+    { i: "signals", x: 0, y: 6, w: 6, h: 5, minW: 2, minH: 2 },
+    { i: "chart", x: 0, y: 11, w: 6, h: 5, minW: 2, minH: 2 },
+    { i: "predictions", x: 0, y: 16, w: 6, h: 5, minW: 2, minH: 2 },
+    { i: "news", x: 0, y: 21, w: 6, h: 5, minW: 2, minH: 2 },
   ],
 };
 
@@ -1120,7 +1120,7 @@ export default function HomeDashboard({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const LAYOUT_VERSION = "v3-chat-main"; // Bump to force reset old layouts
+  const LAYOUT_VERSION = "v4-signals"; // Bump to force reset old layouts
 
   const [layouts, setLayouts] = useState<Layouts>(() => {
     if (typeof window === "undefined") return DEFAULT_LAYOUTS;
@@ -1241,73 +1241,8 @@ export default function HomeDashboard({
             />
           </div>
         );
-      case "feargreed": {
-        const fgVal = fgData?.data?.[0] ? parseInt(fgData.data[0].value) : null;
-        const fgClass = fgData?.data?.[0]?.value_classification ?? "";
-        const fgColor = fgVal !== null ? (fgVal <= 25 ? "text-red-400" : fgVal <= 45 ? "text-orange-400" : fgVal <= 55 ? "text-amber-400" : fgVal <= 75 ? "text-lime-400" : "text-emerald-400") : "text-zinc-500";
-        const gd = globalMarket?.data;
-        return (
-          <div className="p-3 space-y-3 overflow-y-auto h-full">
-            <div className="text-center">
-              <p className="text-[10px] font-mono text-zinc-600 uppercase mb-1">{ko ? "공포 & 탐욕" : "Fear & Greed"}</p>
-              <p className={`text-3xl font-bold ${fgColor}`}>
-                {fgVal ?? "--"}
-              </p>
-              <p className="text-[11px] text-zinc-500">{fgClass}</p>
-              {/* Fear & Greed progress bar */}
-              {fgVal !== null && (
-                <div className="mt-2 mx-auto max-w-[160px]">
-                  <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all ${fgVal <= 25 ? "bg-red-500" : fgVal <= 45 ? "bg-orange-500" : fgVal <= 55 ? "bg-amber-500" : fgVal <= 75 ? "bg-lime-500" : "bg-emerald-500"}`}
-                      style={{ width: `${fgVal}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between mt-0.5 text-[8px] text-zinc-700">
-                    <span>0</span><span>50</span><span>100</span>
-                  </div>
-                </div>
-              )}
-            </div>
-            {/* 7-Day Fear & Greed History Chart */}
-            {fgHistory.length > 1 && (
-              <div>
-                <p className="text-[9px] font-mono text-zinc-600 uppercase mb-1.5">{ko ? "7일 추이" : "7-Day Trend"}</p>
-                <div className="flex items-end gap-1 h-[40px]">
-                  {[...fgHistory].reverse().map((d, i) => {
-                    const v = parseInt(d.value);
-                    const barColor = v <= 25 ? "bg-red-500" : v <= 45 ? "bg-orange-500" : v <= 55 ? "bg-amber-500" : v <= 75 ? "bg-lime-500" : "bg-emerald-500";
-                    return (
-                      <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
-                        <span className="text-[7px] text-zinc-500 tabular-nums">{v}</span>
-                        <div
-                          className={`w-full rounded-sm ${barColor} transition-all`}
-                          style={{ height: `${Math.max(v * 0.35, 3)}px` }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            {/* Market Data */}
-            <div className="space-y-2 text-[11px]">
-              <div className="flex justify-between">
-                <span className="text-zinc-500">Mkt Cap</span>
-                <span className="text-white tabular-nums">{gd ? `$${(gd.total_market_cap.usd / 1e12).toFixed(2)}T` : "--"}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-500">BTC Dom</span>
-                <span className="text-white tabular-nums">{gd ? `${gd.market_cap_percentage.btc.toFixed(1)}%` : "--"}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-500">24h Vol</span>
-                <span className="text-white tabular-nums">{gd ? `$${(gd.total_volume.usd / 1e9).toFixed(1)}B` : "--"}</span>
-              </div>
-            </div>
-          </div>
-        );
-      }
+      case "signals":
+        return <div className="h-full overflow-y-auto"><SignalsWidget signals={_signals} lang={lang} /></div>;
       case "predictions":
         return <div className="h-full overflow-y-auto"><PredictionCards events={polymarketEvents} lang={lang} /></div>;
       case "news":
