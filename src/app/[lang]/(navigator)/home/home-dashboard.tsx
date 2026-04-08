@@ -1031,9 +1031,9 @@ const DEFAULT_LAYOUTS: Layouts = {
   lg: [
     { i: "chart", x: 0, y: 0, w: 8, h: 8, minW: 2, minH: 2 },
     { i: "feargreed", x: 8, y: 0, w: 4, h: 8, minW: 2, minH: 2 },
-    { i: "predictions", x: 0, y: 8, w: 6, h: 7, minW: 2, minH: 2 },
-    { i: "news", x: 6, y: 8, w: 6, h: 7, minW: 2, minH: 2 },
-    { i: "chat", x: 0, y: 15, w: 6, h: 6, minW: 2, minH: 2 },
+    { i: "predictions", x: 0, y: 8, w: 4, h: 7, minW: 2, minH: 2 },
+    { i: "news", x: 4, y: 8, w: 4, h: 7, minW: 2, minH: 2 },
+    { i: "chat", x: 8, y: 8, w: 4, h: 7, minW: 2, minH: 2 },
   ],
   md: [
     { i: "chart", x: 0, y: 0, w: 6, h: 7, minW: 2, minH: 2 },
@@ -1139,7 +1139,13 @@ export default function HomeDashboard({
     });
   };
 
+  const skipLayoutChangeRef = useRef(false);
+
   const handleLayoutChange = (_unknown: unknown, allLayouts: unknown) => {
+    if (skipLayoutChangeRef.current) {
+      skipLayoutChangeRef.current = false;
+      return;
+    }
     setLayouts(allLayouts as Layouts);
     if (typeof window !== "undefined") {
       localStorage.setItem("dashboard-layout", JSON.stringify(allLayouts));
@@ -1163,6 +1169,7 @@ export default function HomeDashboard({
   }, []);
 
   const resetLayout = () => {
+    skipLayoutChangeRef.current = true;
     setLayouts(DEFAULT_LAYOUTS);
     setVisibleWidgets(WIDGETS.map(w => w.key));
     if (typeof window !== "undefined") {
