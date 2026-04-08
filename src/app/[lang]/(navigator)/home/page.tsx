@@ -91,8 +91,24 @@ export default async function HomePage({
     }),
   ]);
 
-  const btcData = btcR.status === "fulfilled" ? btcR.value : null;
-  const ethData = ethR.status === "fulfilled" ? ethR.value : null;
+  let btcData = btcR.status === "fulfilled" ? btcR.value : null;
+  let ethData = ethR.status === "fulfilled" ? ethR.value : null;
+
+  // Server-side fallback: if Binance failed, try CoinGecko
+  if (!btcData?.lastPrice || !ethData?.lastPrice) {
+    try {
+      const cgR = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true", {
+        signal: AbortSignal.timeout(5000),
+        next: { revalidate: 60 },
+      }).then((r) => r.json());
+      if (!btcData?.lastPrice && cgR?.bitcoin) {
+        btcData = { symbol: "BTCUSDT", lastPrice: String(cgR.bitcoin.usd), priceChangePercent: String(cgR.bitcoin.usd_24h_change?.toFixed(2) || "0") };
+      }
+      if (!ethData?.lastPrice && cgR?.ethereum) {
+        ethData = { symbol: "ETHUSDT", lastPrice: String(cgR.ethereum.usd), priceChangePercent: String(cgR.ethereum.usd_24h_change?.toFixed(2) || "0") };
+      }
+    } catch {}
+  }
   const fearGreed = fearGreedR.status === "fulfilled" ? fearGreedR.value : null;
   const globalData = globalR.status === "fulfilled" ? globalR.value : null;
   const topCoins =

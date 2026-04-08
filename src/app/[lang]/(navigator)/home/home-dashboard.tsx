@@ -173,7 +173,7 @@ function StatBar({
   const [fearGreedState, setFearGreedState] = useState(initialFg);
   const [globalState, setGlobalState] = useState(initialGlobal);
 
-  // Client-side fallback: fetch missing data
+  // Client-side fallback: fetch missing data from multiple sources
   useEffect(() => {
     const needsBtc = !initialBtc?.lastPrice;
     const needsEth = !initialEth?.lastPrice;
@@ -181,36 +181,46 @@ function StatBar({
     const needsGlobal = !initialGlobal?.data;
     if (!needsBtc && !needsEth && !needsFg && !needsGlobal) return;
 
-    const fetches: Promise<void>[] = [];
     if (needsBtc || needsEth) {
-      // Try CoinGecko as fallback (more reliable from browser than Binance)
-      fetches.push(
-        fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true")
-          .then((r) => r.json())
-          .then((d) => {
-            if (needsBtc && d?.bitcoin) {
-              setBtcData({ symbol: "BTCUSDT", lastPrice: String(d.bitcoin.usd), priceChangePercent: String(d.bitcoin.usd_24h_change?.toFixed(2) || "0") });
-            }
-            if (needsEth && d?.ethereum) {
-              setEthData({ symbol: "ETHUSDT", lastPrice: String(d.ethereum.usd), priceChangePercent: String(d.ethereum.usd_24h_change?.toFixed(2) || "0") });
-            }
-          })
-          .catch(() => {})
-      );
+      // Try Binance first, then CoinGecko as backup
+      const tryBinance = async () => {
+        try {
+          if (needsBtc) {
+            const r = await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT");
+            if (r.ok) { const d = await r.json(); setBtcData(d); }
+          }
+        } catch {}
+        try {
+          if (needsEth) {
+            const r = await fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT");
+            if (r.ok) { const d = await r.json(); setEthData(d); }
+          }
+        } catch {}
+      };
+      const tryCoinGecko = async () => {
+        try {
+          const r = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true");
+          const d = await r.json();
+          if (needsBtc && !btcData?.lastPrice && d?.bitcoin) {
+            setBtcData({ symbol: "BTCUSDT", lastPrice: String(d.bitcoin.usd), priceChangePercent: String(d.bitcoin.usd_24h_change?.toFixed(2) || "0") });
+          }
+          if (needsEth && !ethData?.lastPrice && d?.ethereum) {
+            setEthData({ symbol: "ETHUSDT", lastPrice: String(d.ethereum.usd), priceChangePercent: String(d.ethereum.usd_24h_change?.toFixed(2) || "0") });
+          }
+        } catch {}
+      };
+      // Try both in parallel — first one to succeed wins
+      tryBinance();
+      setTimeout(tryCoinGecko, 500); // Slight delay so Binance gets priority
     }
     if (needsFg) {
-      fetches.push(
-        fetch("https://api.alternative.me/fng/?limit=1")
-          .then((r) => r.json()).then((d) => setFearGreedState(d)).catch(() => {})
-      );
+      fetch("https://api.alternative.me/fng/?limit=1")
+        .then((r) => r.json()).then((d) => setFearGreedState(d)).catch(() => {});
     }
     if (needsGlobal) {
-      fetches.push(
-        fetch("https://api.coingecko.com/api/v3/global")
-          .then((r) => r.json()).then((d) => setGlobalState(d)).catch(() => {})
-      );
+      fetch("https://api.coingecko.com/api/v3/global")
+        .then((r) => r.json()).then((d) => setGlobalState(d)).catch(() => {});
     }
-    Promise.allSettled(fetches);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const btcPriceRaw = btcData?.lastPrice ? parseFloat(btcData.lastPrice) : null;
