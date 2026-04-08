@@ -1119,16 +1119,37 @@ export default function HomeDashboard({
     if (typeof window === "undefined") return DEFAULT_LAYOUTS;
     try {
       const saved = localStorage.getItem("dashboard-layout");
-      return saved ? JSON.parse(saved) : DEFAULT_LAYOUTS;
+      if (!saved) return DEFAULT_LAYOUTS;
+      const parsed = JSON.parse(saved) as Layouts;
+      // Merge with defaults to add any new widgets (e.g. "chat") missing from old saves
+      const merged: Layouts = {};
+      for (const bp of Object.keys(DEFAULT_LAYOUTS)) {
+        const savedBp = parsed[bp] || [];
+        const defaultBp = DEFAULT_LAYOUTS[bp] || [];
+        const existingKeys = new Set(savedBp.map((item: LayoutItem) => item.i));
+        merged[bp] = [
+          ...savedBp,
+          ...defaultBp.filter((d: LayoutItem) => !existingKeys.has(d.i)),
+        ];
+      }
+      return merged;
     } catch { return DEFAULT_LAYOUTS; }
   });
 
   const [visibleWidgets, setVisibleWidgets] = useState<string[]>(() => {
-    if (typeof window === "undefined") return WIDGETS.map(w => w.key);
+    const allKeys = WIDGETS.map(w => w.key);
+    if (typeof window === "undefined") return allKeys;
     try {
       const saved = localStorage.getItem("dashboard-visible-widgets");
-      return saved ? JSON.parse(saved) : WIDGETS.map(w => w.key);
-    } catch { return WIDGETS.map(w => w.key); }
+      if (!saved) return allKeys;
+      const parsed = JSON.parse(saved) as string[];
+      // Add any new widgets not in the saved list
+      const merged = [...parsed];
+      for (const key of allKeys) {
+        if (!merged.includes(key)) merged.push(key);
+      }
+      return merged;
+    } catch { return allKeys; }
   });
 
   const toggleWidget = (key: string) => {
@@ -1146,9 +1167,22 @@ export default function HomeDashboard({
       skipLayoutChangeRef.current = false;
       return;
     }
-    setLayouts(allLayouts as Layouts);
+    // Merge with DEFAULT_LAYOUTS to ensure all widget entries exist
+    const incoming = allLayouts as Layouts;
+    const merged: Layouts = {};
+    for (const bp of Object.keys(DEFAULT_LAYOUTS)) {
+      const incomingBp = incoming[bp] || [];
+      const defaultBp = DEFAULT_LAYOUTS[bp] || [];
+      const existingKeys = new Set(incomingBp.map((item: LayoutItem) => item.i));
+      // Keep incoming entries + add missing ones from defaults
+      merged[bp] = [
+        ...incomingBp,
+        ...defaultBp.filter((d: LayoutItem) => !existingKeys.has(d.i)),
+      ];
+    }
+    setLayouts(merged);
     if (typeof window !== "undefined") {
-      localStorage.setItem("dashboard-layout", JSON.stringify(allLayouts));
+      localStorage.setItem("dashboard-layout", JSON.stringify(merged));
     }
   };
 
