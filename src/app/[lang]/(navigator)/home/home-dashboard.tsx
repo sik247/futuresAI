@@ -189,10 +189,10 @@ function StatBar({
           .then((r) => r.json())
           .then((d) => {
             if (needsBtc && d?.bitcoin) {
-              setBtcData({ lastPrice: String(d.bitcoin.usd), priceChangePercent: String(d.bitcoin.usd_24h_change?.toFixed(2) || "0") });
+              setBtcData({ symbol: "BTCUSDT", lastPrice: String(d.bitcoin.usd), priceChangePercent: String(d.bitcoin.usd_24h_change?.toFixed(2) || "0") });
             }
             if (needsEth && d?.ethereum) {
-              setEthData({ lastPrice: String(d.ethereum.usd), priceChangePercent: String(d.ethereum.usd_24h_change?.toFixed(2) || "0") });
+              setEthData({ symbol: "ETHUSDT", lastPrice: String(d.ethereum.usd), priceChangePercent: String(d.ethereum.usd_24h_change?.toFixed(2) || "0") });
             }
           })
           .catch(() => {})

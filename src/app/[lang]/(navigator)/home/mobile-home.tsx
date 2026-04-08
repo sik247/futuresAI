@@ -70,8 +70,8 @@ export default function MobileHome({ lang, btcData, ethData, fearGreed, globalDa
       fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true")
         .then(r => r.json())
         .then(d => {
-          if (!btcData?.lastPrice && d?.bitcoin) setBtc({ lastPrice: String(d.bitcoin.usd), priceChangePercent: String(d.bitcoin.usd_24h_change?.toFixed(2) || "0") });
-          if (!ethData?.lastPrice && d?.ethereum) setEth({ lastPrice: String(d.ethereum.usd), priceChangePercent: String(d.ethereum.usd_24h_change?.toFixed(2) || "0") });
+          if (!btcData?.lastPrice && d?.bitcoin) setBtc({ symbol: "BTCUSDT", lastPrice: String(d.bitcoin.usd), priceChangePercent: String(d.bitcoin.usd_24h_change?.toFixed(2) || "0") });
+          if (!ethData?.lastPrice && d?.ethereum) setEth({ symbol: "ETHUSDT", lastPrice: String(d.ethereum.usd), priceChangePercent: String(d.ethereum.usd_24h_change?.toFixed(2) || "0") });
         })
         .catch(() => {});
     }
