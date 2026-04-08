@@ -624,8 +624,8 @@ function getBingxGuide(isKo: boolean): GuideContent {
           {
             type: "text",
             content: isKo
-              ? "빙엑스(BingX) 로그인 후 오른쪽 상단에 있는 아이콘 모양을 클릭하고, Account & Security 메뉴를 클릭합니다."
-              : "After logging into BingX, click the icon in the top right corner and select 'Account & Security'.",
+              ? "빙엑스(BingX) 로그인 후 오른쪽 상단에 있는 아이콘 모양을 클릭하고, Security Center 메뉴를 클릭합니다."
+              : "After logging into BingX, click the icon in the top right corner and select 'Security Center'.",
           },
           {
             type: "image",
@@ -841,8 +841,8 @@ function getHtxGuide(isKo: boolean): GuideContent {
           {
             type: "text",
             content: isKo
-              ? "FuturesAI 신규 계정으로 로그인 후 'Verify' 버튼을 눌러 인증을 진행합니다. 이 때 기존 계정에서 사용하지 않았던 신원인증 수단을 선택해야 인증이 완료됩니다."
-              : "Log in with your new account and click 'Verify'. You must select an ID method not used on the previous account.",
+              ? "FuturesAI 신규 계정으로 로그인 후 'Unverified' 버튼을 눌러 인증을 진행합니다. 이 때 기존 계정에서 사용하지 않았던 신원인증 수단을 선택해야 인증이 완료됩니다."
+              : "Log in with your new account and click 'Unverified'. You must select an ID method not used on the previous account.",
           },
           {
             type: "images",
