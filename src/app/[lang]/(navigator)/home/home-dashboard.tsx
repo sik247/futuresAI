@@ -793,14 +793,9 @@ function renderMarkdown(text: string) {
     });
 }
 
-type ChatMsg = {
-  role: "user" | "ai";
-  text: string;
-  ticker?: { symbol: string; exchange: string };
-  news?: { title: string; url: string; source: string }[];
-};
+type ChatMsg = { role: "user" | "ai"; text: string; ticker?: { symbol: string; exchange: string }; news?: { title: string; url: string; source: string }[] };
 
-function ChatWidget({ lang }: { lang: string }) {
+function _ChatWidgetUnused({ lang }: { lang: string }) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [loading, setLoading] = useState(false);
@@ -988,30 +983,26 @@ const WIDGETS: WidgetConfig[] = [
   { key: "feargreed", title: "Market", titleKo: "시장", color: "text-amber-400", headerBg: "bg-amber-950/20", borderColor: "border-amber-500/10" },
   { key: "predictions", title: "Predictions", titleKo: "예측 시장", color: "text-blue-300", headerBg: "bg-blue-950/30", borderColor: "border-blue-500/10" },
   { key: "news", title: "News", titleKo: "뉴스", color: "text-emerald-300", headerBg: "bg-emerald-950/20", borderColor: "border-emerald-500/10" },
-  { key: "chat", title: "AI Quant Chat", titleKo: "AI 퀀트 채팅", color: "text-purple-300", headerBg: "bg-purple-950/20", borderColor: "border-purple-500/10" },
 ];
 
 const DEFAULT_LAYOUTS: Layouts = {
   lg: [
-    { i: "chart", x: 0, y: 0, w: 7, h: 7, minW: 4, minH: 4 },
-    { i: "feargreed", x: 7, y: 0, w: 2, h: 7, minW: 2, minH: 3 },
-    { i: "chat", x: 9, y: 0, w: 3, h: 14, minW: 3, minH: 6 },
-    { i: "predictions", x: 0, y: 7, w: 4, h: 7, minW: 3, minH: 4 },
-    { i: "news", x: 4, y: 7, w: 5, h: 7, minW: 3, minH: 4 },
+    { i: "chart", x: 0, y: 0, w: 8, h: 8, minW: 2, minH: 2 },
+    { i: "feargreed", x: 8, y: 0, w: 4, h: 8, minW: 2, minH: 2 },
+    { i: "predictions", x: 0, y: 8, w: 6, h: 7, minW: 2, minH: 2 },
+    { i: "news", x: 6, y: 8, w: 6, h: 7, minW: 2, minH: 2 },
   ],
   md: [
-    { i: "chart", x: 0, y: 0, w: 6, h: 6, minW: 3, minH: 3 },
-    { i: "feargreed", x: 6, y: 0, w: 4, h: 6, minW: 2, minH: 3 },
-    { i: "chat", x: 0, y: 6, w: 10, h: 6, minW: 3, minH: 4 },
-    { i: "predictions", x: 0, y: 12, w: 5, h: 6, minW: 3, minH: 4 },
-    { i: "news", x: 5, y: 12, w: 5, h: 6, minW: 3, minH: 4 },
+    { i: "chart", x: 0, y: 0, w: 6, h: 7, minW: 2, minH: 2 },
+    { i: "feargreed", x: 6, y: 0, w: 4, h: 7, minW: 2, minH: 2 },
+    { i: "predictions", x: 0, y: 7, w: 5, h: 6, minW: 2, minH: 2 },
+    { i: "news", x: 5, y: 7, w: 5, h: 6, minW: 2, minH: 2 },
   ],
   sm: [
-    { i: "chart", x: 0, y: 0, w: 6, h: 5, minW: 3, minH: 3 },
+    { i: "chart", x: 0, y: 0, w: 6, h: 5, minW: 2, minH: 2 },
     { i: "feargreed", x: 0, y: 5, w: 6, h: 3, minW: 2, minH: 2 },
-    { i: "predictions", x: 0, y: 8, w: 6, h: 5, minW: 3, minH: 3 },
-    { i: "news", x: 0, y: 13, w: 6, h: 5, minW: 3, minH: 3 },
-    { i: "chat", x: 0, y: 18, w: 6, h: 6, minW: 3, minH: 4 },
+    { i: "predictions", x: 0, y: 8, w: 6, h: 5, minW: 2, minH: 2 },
+    { i: "news", x: 0, y: 13, w: 6, h: 5, minW: 2, minH: 2 },
   ],
 };
 
@@ -1127,8 +1118,6 @@ export default function HomeDashboard({
         return <div className="h-full overflow-y-auto"><PredictionCards events={polymarketEvents} lang={lang} /></div>;
       case "news":
         return <div className="h-full overflow-y-auto"><ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} /></div>;
-      case "chat":
-        return <ChatWidget lang={lang} />;
       default:
         return null;
     }
