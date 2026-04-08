@@ -66,10 +66,15 @@ export default function MobileHome({ lang, btcData, ethData, fearGreed, globalDa
   const [gd, setGd] = useState(globalData);
 
   useEffect(() => {
-    if (!btcData?.lastPrice)
-      fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT").then(r => r.json()).then(setBtc).catch(() => {});
-    if (!ethData?.lastPrice)
-      fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT").then(r => r.json()).then(setEth).catch(() => {});
+    if (!btcData?.lastPrice || !ethData?.lastPrice) {
+      fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true")
+        .then(r => r.json())
+        .then(d => {
+          if (!btcData?.lastPrice && d?.bitcoin) setBtc({ lastPrice: String(d.bitcoin.usd), priceChangePercent: String(d.bitcoin.usd_24h_change?.toFixed(2) || "0") });
+          if (!ethData?.lastPrice && d?.ethereum) setEth({ lastPrice: String(d.ethereum.usd), priceChangePercent: String(d.ethereum.usd_24h_change?.toFixed(2) || "0") });
+        })
+        .catch(() => {});
+    }
     if (!fearGreed?.data?.[0])
       fetch("https://api.alternative.me/fng/?limit=1").then(r => r.json()).then(setFg).catch(() => {});
     if (!globalData?.data)

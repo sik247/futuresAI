@@ -182,16 +182,20 @@ function StatBar({
     if (!needsBtc && !needsEth && !needsFg && !needsGlobal) return;
 
     const fetches: Promise<void>[] = [];
-    if (needsBtc) {
+    if (needsBtc || needsEth) {
+      // Try CoinGecko as fallback (more reliable from browser than Binance)
       fetches.push(
-        fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT")
-          .then((r) => r.json()).then((d) => setBtcData(d)).catch(() => {})
-      );
-    }
-    if (needsEth) {
-      fetches.push(
-        fetch("https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT")
-          .then((r) => r.json()).then((d) => setEthData(d)).catch(() => {})
+        fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true")
+          .then((r) => r.json())
+          .then((d) => {
+            if (needsBtc && d?.bitcoin) {
+              setBtcData({ lastPrice: String(d.bitcoin.usd), priceChangePercent: String(d.bitcoin.usd_24h_change?.toFixed(2) || "0") });
+            }
+            if (needsEth && d?.ethereum) {
+              setEthData({ lastPrice: String(d.ethereum.usd), priceChangePercent: String(d.ethereum.usd_24h_change?.toFixed(2) || "0") });
+            }
+          })
+          .catch(() => {})
       );
     }
     if (needsFg) {
@@ -1115,13 +1119,22 @@ export default function HomeDashboard({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const LAYOUT_VERSION = "v2-chat"; // Bump to force reset old layouts
+
   const [layouts, setLayouts] = useState<Layouts>(() => {
     if (typeof window === "undefined") return DEFAULT_LAYOUTS;
     try {
+      const ver = localStorage.getItem("dashboard-layout-version");
+      if (ver !== LAYOUT_VERSION) {
+        // Old layout version — reset to defaults to include new widgets
+        localStorage.removeItem("dashboard-layout");
+        localStorage.removeItem("dashboard-visible-widgets");
+        localStorage.setItem("dashboard-layout-version", LAYOUT_VERSION);
+        return DEFAULT_LAYOUTS;
+      }
       const saved = localStorage.getItem("dashboard-layout");
       if (!saved) return DEFAULT_LAYOUTS;
       const parsed = JSON.parse(saved) as Layouts;
-      // Merge with defaults to add any new widgets (e.g. "chat") missing from old saves
       const merged: Layouts = {};
       for (const bp of Object.keys(DEFAULT_LAYOUTS)) {
         const savedBp = parsed[bp] || [];
