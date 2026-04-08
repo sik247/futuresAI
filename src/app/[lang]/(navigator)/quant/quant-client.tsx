@@ -490,7 +490,7 @@ export default function QuantClient({
               <div className="grid grid-cols-2 md:grid-cols-5 divide-x divide-white/[0.04]">
                 {/* Fear & Greed */}
                 <div className="p-5">
-                  <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-[0.15em] mb-2">{t.quant_fearGreed}</p>
+                  <p className="text-xs text-zinc-500 font-mono uppercase tracking-[0.15em] mb-2">{t.quant_fearGreed}</p>
                   <div className="flex items-baseline gap-2">
                     <AnimatedCounter value={fearGreed.value} decimals={0} className="text-2xl font-mono font-bold tabular-nums" />
                     <span className={`text-[11px] font-mono font-semibold ${fearGreed.value <= 25 ? "text-red-400" : fearGreed.value <= 45 ? "text-orange-400" : fearGreed.value <= 55 ? "text-yellow-400" : fearGreed.value <= 75 ? "text-lime-400" : "text-emerald-400"}`}>
@@ -504,7 +504,7 @@ export default function QuantClient({
 
                 {/* BTC Trend */}
                 <div className="p-5">
-                  <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-[0.15em] mb-2">{t.quant_btcTrend}</p>
+                  <p className="text-xs text-zinc-500 font-mono uppercase tracking-[0.15em] mb-2">{t.quant_btcTrend}</p>
                   <div className="flex items-center gap-2">
                     <div className={`w-2 h-2 rounded-full ${btcTrend === "above_sma" ? "bg-emerald-500" : "bg-red-500"}`} />
                     <span className={`text-lg font-mono font-bold ${btcTrend === "above_sma" ? "text-emerald-400" : "text-red-400"}`}>
@@ -516,7 +516,7 @@ export default function QuantClient({
 
                 {/* Bull/Bear Ratio */}
                 <div className="p-5">
-                  <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-[0.15em] mb-2">{lang === "ko" ? "시그널 비율" : "Signal Ratio"}</p>
+                  <p className="text-xs text-zinc-500 font-mono uppercase tracking-[0.15em] mb-2">{lang === "ko" ? "시그널 비율" : "Signal Ratio"}</p>
                   <div className="flex items-baseline gap-2">
                     <span className="text-emerald-400 text-lg font-mono font-bold tabular-nums">{signals.filter(s => s.signal === "Strong Buy" || s.signal === "Buy").length}</span>
                     <span className="text-zinc-600 text-sm font-mono">/</span>
@@ -529,7 +529,7 @@ export default function QuantClient({
 
                 {/* BTC Price */}
                 <div className="p-5">
-                  <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-[0.15em] mb-2">BTC/USDT</p>
+                  <p className="text-xs text-zinc-500 font-mono uppercase tracking-[0.15em] mb-2">BTC/USDT</p>
                   <AnimatedCounter value={signals[0]?.price || 0} prefix="$" decimals={0} className="text-lg font-mono font-bold text-white tabular-nums" />
                   <span className={`text-[11px] font-mono font-semibold ml-2 tabular-nums ${(signals[0]?.change24h || 0) >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                     {(signals[0]?.change24h || 0) >= 0 ? "+" : ""}{(signals[0]?.change24h || 0).toFixed(2)}%
@@ -538,7 +538,7 @@ export default function QuantClient({
 
                 {/* Refresh */}
                 <div className="p-5 flex flex-col justify-between">
-                  <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-[0.15em] mb-2">{t.quant_autoRefresh}</p>
+                  <p className="text-xs text-zinc-500 font-mono uppercase tracking-[0.15em] mb-2">{t.quant_autoRefresh}</p>
                   <span className="text-lg font-mono font-bold text-zinc-400 tabular-nums">{countdownDisplay}</span>
                   <button onClick={handleRefresh} disabled={loading}
                     className="mt-1 inline-flex items-center gap-1.5 text-xs font-mono text-blue-400 hover:text-blue-300 transition-colors duration-200 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 rounded cursor-pointer">
@@ -677,27 +677,27 @@ export default function QuantClient({
                             </div>
                             <div>
                               <div className="flex items-center gap-2">
-                                <h3 className="text-sm font-bold text-white leading-tight">{s.coin}</h3>
-                                <span className="text-[10px] font-mono text-zinc-600">{s.symbol}/USDT</span>
+                                <h3 className="text-base font-bold text-white leading-tight">{s.coin}</h3>
+                                <span className="text-xs font-mono text-zinc-600">{s.symbol}/USDT</span>
                               </div>
                               <div className="flex items-center gap-2 mt-0.5">
                                 <AnimatedCounter
                                   value={s.price}
                                   prefix="$"
                                   decimals={s.price > 100 ? 0 : 4}
-                                  className="text-xs font-mono font-semibold text-zinc-300 tabular-nums"
+                                  className="text-sm font-mono font-semibold text-zinc-300 tabular-nums"
                                 />
-                                <span className={`text-[10px] font-mono font-bold tabular-nums ${s.change24h >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                                <span className={`text-xs font-mono font-bold tabular-nums ${s.change24h >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                                   {s.change24h >= 0 ? "+" : ""}{s.change24h.toFixed(2)}%
                                 </span>
                               </div>
                             </div>
                           </div>
                           <div className="flex flex-col items-end gap-1.5">
-                            <span className={`px-2.5 py-1 text-[10px] font-mono font-bold rounded-full border ${signalStyle.bg} ${signalStyle.glow}`}>
+                            <span className={`px-2.5 py-1 text-xs font-mono font-bold rounded-full border ${signalStyle.bg} ${signalStyle.glow}`}>
                               {s.signal}
                             </span>
-                            <span className={`px-2 py-0.5 text-[9px] font-mono font-bold rounded-md border ${
+                            <span className={`px-2 py-0.5 text-[11px] font-mono font-bold rounded-md border ${
                               s.direction === "LONG"
                                 ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/25"
                                 : s.direction === "SHORT"
@@ -712,8 +712,8 @@ export default function QuantClient({
                         {/* Sparkline + Volume row */}
                         <div className="flex items-center justify-between mb-4 px-1">
                           <div className="flex flex-col gap-0.5">
-                            <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.12em]">{lang === "ko" ? "거래량" : "Volume"}</span>
-                            <span className="text-[11px] font-mono text-zinc-400">{formatVolume(s.volume24h)}</span>
+                            <span className="text-[11px] font-mono text-zinc-600 uppercase tracking-[0.12em]">{lang === "ko" ? "거래량" : "Volume"}</span>
+                            <span className="text-sm font-mono text-zinc-400">{formatVolume(s.volume24h)}</span>
                           </div>
                           <Sparkline data={s.sparkline} className="opacity-80 group-hover:opacity-100 transition-opacity duration-200" />
                         </div>
@@ -723,8 +723,8 @@ export default function QuantClient({
                           {/* Confidence bar */}
                           <div>
                             <div className="flex items-center justify-between mb-1">
-                              <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.12em]">{t.quant_confidence}</span>
-                              <AnimatedCounter value={s.confidence} suffix="%" decimals={0} className="text-[10px] font-mono font-semibold text-zinc-400 tabular-nums" />
+                              <span className="text-[11px] font-mono text-zinc-600 uppercase tracking-[0.12em]">{t.quant_confidence}</span>
+                              <AnimatedCounter value={s.confidence} suffix="%" decimals={0} className="text-xs font-mono font-semibold text-zinc-400 tabular-nums" />
                             </div>
                             <div className="h-1.5 rounded-full bg-white/[0.05] overflow-hidden">
                               <div
@@ -737,10 +737,10 @@ export default function QuantClient({
                           {/* RSI gauge */}
                           <div>
                             <div className="flex items-center justify-between mb-1">
-                              <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.12em]">RSI(14)</span>
+                              <span className="text-[11px] font-mono text-zinc-600 uppercase tracking-[0.12em]">RSI(14)</span>
                               <div className="flex items-center gap-1.5">
-                                <span className={`text-[9px] font-mono ${rsiColor} opacity-70`}>{rsiZoneLabel}</span>
-                                <span className={`text-[10px] font-mono font-semibold tabular-nums ${rsiColor}`}>{s.rsi?.toFixed(1) ?? "—"}</span>
+                                <span className={`text-[11px] font-mono ${rsiColor} opacity-70`}>{rsiZoneLabel}</span>
+                                <span className={`text-xs font-mono font-semibold tabular-nums ${rsiColor}`}>{s.rsi?.toFixed(1) ?? "—"}</span>
                               </div>
                             </div>
                             <div className="relative h-1.5 rounded-full bg-white/[0.05] overflow-hidden">
@@ -760,22 +760,22 @@ export default function QuantClient({
                               <div className="absolute top-0 left-[70%] w-px h-full bg-red-500/20" />
                             </div>
                             <div className="flex justify-between mt-0.5">
-                              <span className="text-[8px] font-mono text-zinc-700">0</span>
-                              <span className="text-[8px] font-mono text-emerald-700/60">30</span>
-                              <span className="text-[8px] font-mono text-red-700/60">70</span>
-                              <span className="text-[8px] font-mono text-zinc-700">100</span>
+                              <span className="text-[10px] font-mono text-zinc-700">0</span>
+                              <span className="text-[10px] font-mono text-emerald-700/60">30</span>
+                              <span className="text-[10px] font-mono text-red-700/60">70</span>
+                              <span className="text-[10px] font-mono text-zinc-700">100</span>
                             </div>
                           </div>
 
                           {/* MACD histogram */}
                           <div>
                             <div className="flex items-center justify-between mb-1">
-                              <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-[0.12em]">MACD Hist.</span>
+                              <span className="text-[11px] font-mono text-zinc-600 uppercase tracking-[0.12em]">MACD Hist.</span>
                               <div className="flex items-center gap-1.5">
-                                <span className={`text-[9px] font-mono ${macdPositive ? "text-emerald-600" : "text-red-600"} opacity-80`}>
+                                <span className={`text-[11px] font-mono ${macdPositive ? "text-emerald-600" : "text-red-600"} opacity-80`}>
                                   {macdPositive ? (lang === "ko" ? "상승" : "Bullish") : (lang === "ko" ? "하락" : "Bearish")}
                                 </span>
-                                <span className={`text-[10px] font-mono font-semibold tabular-nums ${macdPositive ? "text-emerald-400" : "text-red-400"}`}>
+                                <span className={`text-xs font-mono font-semibold tabular-nums ${macdPositive ? "text-emerald-400" : "text-red-400"}`}>
                                   {s.macd?.histogram != null ? `${macdPositive ? "+" : ""}${s.macd.histogram.toFixed(2)}` : "—"}
                                 </span>
                               </div>
@@ -812,7 +812,7 @@ export default function QuantClient({
                             {s.reasons.slice(0, 2).map((r, i) => (
                               <div key={i} className="flex items-start gap-2">
                                 <span className="mt-1.5 w-1 h-1 rounded-full bg-zinc-700 flex-shrink-0" />
-                                <span className="text-[11px] text-zinc-500 leading-relaxed">{translateText(r, lang === "ko")}</span>
+                                <span className="text-xs text-zinc-500 leading-relaxed">{translateText(r, lang === "ko")}</span>
                               </div>
                             ))}
                           </div>

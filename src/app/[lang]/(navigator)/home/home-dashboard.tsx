@@ -836,7 +836,7 @@ function renderMarkdown(text: string) {
 
 type ChatMsg = { role: "user" | "ai"; text: string; ticker?: { symbol: string; exchange: string }; news?: { title: string; url: string; source: string }[] };
 
-function _ChatWidgetUnused({ lang }: { lang: string }) {
+function ChatWidget({ lang }: { lang: string }) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [loading, setLoading] = useState(false);
@@ -1024,6 +1024,7 @@ const WIDGETS: WidgetConfig[] = [
   { key: "feargreed", title: "Market", titleKo: "시장", color: "text-amber-400", headerBg: "bg-amber-950/20", borderColor: "border-amber-500/10" },
   { key: "predictions", title: "Predictions", titleKo: "예측 시장", color: "text-blue-300", headerBg: "bg-blue-950/30", borderColor: "border-blue-500/10" },
   { key: "news", title: "News", titleKo: "뉴스", color: "text-emerald-300", headerBg: "bg-emerald-950/20", borderColor: "border-emerald-500/10" },
+  { key: "chat", title: "AI Chat", titleKo: "AI 퀀트 채팅", color: "text-purple-300", headerBg: "bg-purple-950/20", borderColor: "border-purple-500/10" },
 ];
 
 const DEFAULT_LAYOUTS: Layouts = {
@@ -1032,18 +1033,21 @@ const DEFAULT_LAYOUTS: Layouts = {
     { i: "feargreed", x: 8, y: 0, w: 4, h: 8, minW: 2, minH: 2 },
     { i: "predictions", x: 0, y: 8, w: 6, h: 7, minW: 2, minH: 2 },
     { i: "news", x: 6, y: 8, w: 6, h: 7, minW: 2, minH: 2 },
+    { i: "chat", x: 0, y: 15, w: 6, h: 6, minW: 2, minH: 2 },
   ],
   md: [
     { i: "chart", x: 0, y: 0, w: 6, h: 7, minW: 2, minH: 2 },
     { i: "feargreed", x: 6, y: 0, w: 4, h: 7, minW: 2, minH: 2 },
     { i: "predictions", x: 0, y: 7, w: 5, h: 6, minW: 2, minH: 2 },
     { i: "news", x: 5, y: 7, w: 5, h: 6, minW: 2, minH: 2 },
+    { i: "chat", x: 0, y: 13, w: 10, h: 6, minW: 2, minH: 2 },
   ],
   sm: [
     { i: "chart", x: 0, y: 0, w: 6, h: 5, minW: 2, minH: 2 },
     { i: "feargreed", x: 0, y: 5, w: 6, h: 3, minW: 2, minH: 2 },
     { i: "predictions", x: 0, y: 8, w: 6, h: 5, minW: 2, minH: 2 },
     { i: "news", x: 0, y: 13, w: 6, h: 5, minW: 2, minH: 2 },
+    { i: "chat", x: 0, y: 18, w: 6, h: 5, minW: 2, minH: 2 },
   ],
 };
 
@@ -1119,6 +1123,22 @@ export default function HomeDashboard({
     } catch { return DEFAULT_LAYOUTS; }
   });
 
+  const [visibleWidgets, setVisibleWidgets] = useState<string[]>(() => {
+    if (typeof window === "undefined") return WIDGETS.map(w => w.key);
+    try {
+      const saved = localStorage.getItem("dashboard-visible-widgets");
+      return saved ? JSON.parse(saved) : WIDGETS.map(w => w.key);
+    } catch { return WIDGETS.map(w => w.key); }
+  });
+
+  const toggleWidget = (key: string) => {
+    setVisibleWidgets(prev => {
+      const next = prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key];
+      if (typeof window !== "undefined") localStorage.setItem("dashboard-visible-widgets", JSON.stringify(next));
+      return next;
+    });
+  };
+
   const handleLayoutChange = (_unknown: unknown, allLayouts: unknown) => {
     setLayouts(allLayouts as Layouts);
     if (typeof window !== "undefined") {
@@ -1144,7 +1164,11 @@ export default function HomeDashboard({
 
   const resetLayout = () => {
     setLayouts(DEFAULT_LAYOUTS);
-    if (typeof window !== "undefined") localStorage.removeItem("dashboard-layout");
+    setVisibleWidgets(WIDGETS.map(w => w.key));
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("dashboard-layout");
+      localStorage.removeItem("dashboard-visible-widgets");
+    }
   };
 
   const widgetMap = WIDGETS.reduce((acc, w) => { acc[w.key] = w; return acc; }, {} as Record<string, WidgetConfig>);
@@ -1233,6 +1257,8 @@ export default function HomeDashboard({
         return <div className="h-full overflow-y-auto"><PredictionCards events={polymarketEvents} lang={lang} /></div>;
       case "news":
         return <div className="h-full overflow-y-auto"><ContentFeed news={news} youtubeItems={youtubeItems} lang={lang} /></div>;
+      case "chat":
+        return <ChatWidget lang={lang} />;
       default:
         return null;
     }
@@ -1250,15 +1276,30 @@ export default function HomeDashboard({
       <style>{gridStyles}</style>
       <StatBar btcData={btcData} ethData={ethData} fearGreed={fearGreed} globalData={globalData} />
 
-      {/* Reset layout button */}
-      <div className="flex items-center justify-end px-3 py-1 border-b border-white/[0.04] shrink-0">
-        <button onClick={resetLayout} className="text-[9px] font-mono text-zinc-600 hover:text-zinc-400 cursor-pointer">
+      {/* Widget management toolbar */}
+      <div className="flex items-center justify-between px-3 py-1 border-b border-white/[0.04] shrink-0 gap-2 overflow-x-auto">
+        <div className="flex items-center gap-1.5">
+          {WIDGETS.map((w) => (
+            <button
+              key={w.key}
+              onClick={() => toggleWidget(w.key)}
+              className={`text-[10px] font-mono px-2.5 py-1 rounded-md border transition-colors cursor-pointer whitespace-nowrap ${
+                visibleWidgets.includes(w.key)
+                  ? `${w.headerBg} ${w.borderColor} ${w.color}`
+                  : "bg-zinc-900 border-zinc-800 text-zinc-600"
+              }`}
+            >
+              {ko ? w.titleKo : w.title}
+            </button>
+          ))}
+        </div>
+        <button onClick={resetLayout} className="text-[9px] font-mono text-zinc-600 hover:text-zinc-400 cursor-pointer shrink-0">
           {ko ? "레이아웃 초기화" : "Reset Layout"}
         </button>
       </div>
 
-      {/* Grid */}
-      <div ref={containerRef} className="flex-1 overflow-auto">
+      {/* Desktop Grid (hidden on mobile) */}
+      <div ref={containerRef} className="flex-1 overflow-auto hidden sm:block">
         <ResponsiveGridLayout
           className="layout"
           width={containerWidth}
@@ -1273,7 +1314,7 @@ export default function HomeDashboard({
           margin={[8, 8]}
           containerPadding={[8, 8]}
         >
-          {WIDGETS.map((w) => (
+          {WIDGETS.filter(w => visibleWidgets.includes(w.key)).map((w) => (
             <div key={w.key}>
               <WidgetWrapper config={w} ko={ko}>
                 {renderWidget(w.key)}
@@ -1281,6 +1322,65 @@ export default function HomeDashboard({
             </div>
           ))}
         </ResponsiveGridLayout>
+      </div>
+
+      {/* Mobile Layout (simple stacked cards) */}
+      <div className="sm:hidden flex-1 overflow-y-auto p-3 space-y-3">
+        {/* Mobile Chart */}
+        {visibleWidgets.includes("chart") && (
+          <div className="rounded-xl border border-white/[0.08] bg-zinc-950 overflow-hidden">
+            <div className="px-3 py-2 bg-zinc-900/50 border-b border-white/[0.08]">
+              <span className="text-xs font-mono uppercase tracking-[0.12em] text-emerald-400 font-semibold">BTC/USDT</span>
+            </div>
+            <div style={{ height: 250 }}>
+              <iframe
+                src="https://s.tradingview.com/widgetembed/?frameElementId=tv_chart&symbol=BINANCE:BTCUSDT&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=0a0a0f&studies=[]&theme=dark&style=1&timezone=exchange&withdateranges=1&showpopupbutton=0&locale=en&width=100%25&height=100%25"
+                className="w-full h-full border-0"
+                title="BTC/USDT"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Market / Fear & Greed */}
+        {visibleWidgets.includes("feargreed") && (
+          <div className="rounded-xl border border-amber-500/10 bg-zinc-950 overflow-hidden">
+            <div className="px-3 py-2 bg-amber-950/20 border-b border-amber-500/10">
+              <span className="text-xs font-mono uppercase tracking-[0.12em] text-amber-400 font-semibold">{ko ? "시장" : "Market"}</span>
+            </div>
+            <div style={{ maxHeight: 200 }}>{renderWidget("feargreed")}</div>
+          </div>
+        )}
+
+        {/* Mobile News */}
+        {visibleWidgets.includes("news") && (
+          <div className="rounded-xl border border-emerald-500/10 bg-zinc-950 overflow-hidden">
+            <div className="px-3 py-2 bg-emerald-950/20 border-b border-emerald-500/10">
+              <span className="text-xs font-mono uppercase tracking-[0.12em] text-emerald-300 font-semibold">{ko ? "뉴스" : "News"}</span>
+            </div>
+            <div style={{ maxHeight: 300 }} className="overflow-y-auto">{renderWidget("news")}</div>
+          </div>
+        )}
+
+        {/* Mobile Predictions */}
+        {visibleWidgets.includes("predictions") && (
+          <div className="rounded-xl border border-blue-500/10 bg-zinc-950 overflow-hidden">
+            <div className="px-3 py-2 bg-blue-950/30 border-b border-blue-500/10">
+              <span className="text-xs font-mono uppercase tracking-[0.12em] text-blue-300 font-semibold">{ko ? "예측 시장" : "Predictions"}</span>
+            </div>
+            <div style={{ maxHeight: 300 }} className="overflow-y-auto">{renderWidget("predictions")}</div>
+          </div>
+        )}
+
+        {/* Mobile AI Chat */}
+        {visibleWidgets.includes("chat") && (
+          <div className="rounded-xl border border-purple-500/10 bg-zinc-950 overflow-hidden">
+            <div className="px-3 py-2 bg-purple-950/20 border-b border-purple-500/10">
+              <span className="text-xs font-mono uppercase tracking-[0.12em] text-purple-300 font-semibold">{ko ? "AI 퀀트 채팅" : "AI Chat"}</span>
+            </div>
+            <div style={{ height: 350 }}>{renderWidget("chat")}</div>
+          </div>
+        )}
       </div>
     </div>
   );
