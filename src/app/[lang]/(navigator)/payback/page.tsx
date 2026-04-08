@@ -5,6 +5,7 @@ import Container from "@/components/ui/container";
 import PaybackAnimations from "./payback-animations";
 import { auth } from "@/auth";
 import PaybackRequest from "./payback-request";
+import { EXCHANGE_GUIDES } from "../guides/exchange-data";
 
 export const metadata: Metadata = {
   title: "Trading Rebates and Payback",
@@ -239,6 +240,126 @@ export default async function PaybackPage({
                 </a>
               </div>
             </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* Exchange KYC & Payback Guides */}
+      <section className="relative border-b border-white/5">
+        <Container className="py-20 md:py-24">
+          <div data-anim="section-heading">
+            <p className="text-indigo-400 text-sm font-medium tracking-wider uppercase mb-3">
+              {ko ? "거래소별 상세 가이드" : "Detailed Exchange Guides"}
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+              {ko ? "거래소별 KYC 변경 & 페이백 가이드" : "Exchange KYC & Payback Guides"}
+            </h2>
+            <p className="text-zinc-500 mb-12 max-w-xl text-base">
+              {ko
+                ? "각 거래소별 KYC 변경 방법과 페이백 혜택을 받는 방법을 자세히 안내해 드립니다."
+                : "Step-by-step instructions for changing KYC and receiving payback benefits on each exchange."}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {EXCHANGE_GUIDES.map((exchange) => (
+              <Link
+                key={exchange.slug}
+                href={`/${lang}/guides/${exchange.slug}`}
+                data-anim="exchange-card"
+                className="group relative rounded-2xl border border-white/[0.08] bg-white/[0.03] transition-all duration-300 hover:border-indigo-500/30 hover:bg-white/[0.06] hover:-translate-y-1 overflow-hidden"
+              >
+                {/* Payback Badge */}
+                <div className="absolute top-4 right-4 z-10">
+                  <div
+                    className="px-3 py-1 rounded-full text-xs font-bold"
+                    style={{
+                      backgroundColor: `${exchange.color}20`,
+                      color: exchange.color,
+                      border: `1px solid ${exchange.color}40`,
+                    }}
+                  >
+                    {exchange.paybackPercent}% Payback
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  {/* Exchange Header */}
+                  <div className="flex items-center gap-3 mb-5">
+                    <div
+                      className="w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold"
+                      style={{
+                        backgroundColor: `${exchange.color}15`,
+                        color: exchange.color,
+                        border: `1px solid ${exchange.color}25`,
+                      }}
+                    >
+                      {exchange.logoText.charAt(0)}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-white group-hover:text-indigo-400 transition-colors">
+                        {exchange.name}
+                      </h3>
+                      {exchange.nameKo !== exchange.name && (
+                        <p className="text-sm text-zinc-500">{exchange.nameKo}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="space-y-3 mb-5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-zinc-500">
+                        {ko ? "레퍼럴 코드" : "Referral Code"}
+                      </span>
+                      <code className="text-sm font-mono px-2.5 py-0.5 rounded bg-white/[0.05] text-zinc-300 border border-white/[0.06]">
+                        {exchange.referralCode}
+                      </code>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-zinc-500">
+                        {ko ? "최대 계정" : "Max Accounts"}
+                      </span>
+                      <span className="text-sm text-zinc-300">
+                        {exchange.maxAccounts}{ko ? "개" : ""}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-zinc-500">
+                        {ko ? "코드 변경" : "Code Change"}
+                      </span>
+                      <span className={`text-sm ${exchange.canChangeReferral ? "text-emerald-400" : "text-amber-400"}`}>
+                        {exchange.canChangeReferral
+                          ? ko ? "조건부 가능" : "Conditional"
+                          : ko ? "신규 가입 필요" : "New Signup Required"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* CTA */}
+                  <div className="flex items-center gap-2 text-base font-medium text-indigo-400 group-hover:text-indigo-300 transition-colors">
+                    <span>{ko ? "상세 가이드 보기" : "View Detailed Guide"}</span>
+                    <svg
+                      className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Bottom accent bar */}
+                <div
+                  className="h-0.5 w-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{
+                    background: `linear-gradient(90deg, transparent, ${exchange.color}, transparent)`,
+                  }}
+                />
+              </Link>
+            ))}
           </div>
         </Container>
       </section>

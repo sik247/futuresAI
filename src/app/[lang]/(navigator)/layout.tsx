@@ -2,6 +2,7 @@ import { getDictionary } from "@/i18n";
 import Headers from "@/components/headers";
 import Footer from "@/components/footer";
 import { PriceTicker } from "@/components/price-ticker";
+import PaybackAlertBanner from "@/components/payback-alert-banner";
 import { Metadata } from "next";
 
 export async function generateMetadata({
@@ -48,7 +49,10 @@ export default async function LanguageLayout({
     <>
       <PriceTicker />
       <Headers lang={lang} translations={dictionary} />
-      <main className="min-h-screen pt-[92px]">{children}</main>
+      <div className="pt-[92px]">
+        <PaybackAlertBanner lang={lang} />
+      </div>
+      <main className="min-h-screen">{children}</main>
       <Footer lang={lang} translations={dictionary} />
     </>
   );

@@ -19,6 +19,7 @@ import {
   CalculatorIcon,
   SparklesIcon,
   TagIcon,
+  BookOpenIcon,
 } from "@heroicons/react/24/outline";
 
 import Logo from "@/components/logo";
@@ -44,6 +45,7 @@ const NAV_ITEMS = [
   { path: "markets", key: "markets" as const, icon: GlobeAltIcon, group: 1 },
   { path: "whales", key: "whales" as const, icon: CurrencyDollarIcon, group: 2 },
   { path: "sns", key: "sns" as const, icon: ChatBubbleLeftRightIcon, group: 2 },
+  { path: "guides", key: "guides" as const, icon: BookOpenIcon, group: 3 },
   { path: "payback", key: "payback" as const, icon: CalculatorIcon, group: 3 },
   { path: "pricing", key: "pricing" as const, icon: TagIcon, group: 3 },
 ] as const;
