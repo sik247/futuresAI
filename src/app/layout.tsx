@@ -111,6 +111,9 @@ export const metadata: Metadata = {
       en: `${baseUrl}/en`,
       ko: `${baseUrl}/ko`,
     },
+    types: {
+      "application/rss+xml": `${baseUrl}/feed`,
+    },
   },
   // Search engine verification
   // Register at https://searchadvisor.naver.com/ and https://search.google.com/search-console

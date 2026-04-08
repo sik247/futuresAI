@@ -1,9 +1,9 @@
 import { MetadataRoute } from 'next'
+import prisma from '@/lib/prisma'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://futuresai.io'
 
-  // Pages with their priorities and change frequencies
   const pages: Array<{
     path: string
     priority: number
@@ -21,6 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: 'chart-ideas', priority: 0.7, changeFrequency: 'daily' },
     { path: 'insights',    priority: 0.7, changeFrequency: 'daily' },
     { path: 'payback',     priority: 0.7, changeFrequency: 'weekly' },
+    { path: 'guides',      priority: 0.7, changeFrequency: 'weekly' },
     { path: 'exchanges',   priority: 0.6, changeFrequency: 'weekly' },
     { path: 'how-to',      priority: 0.6, changeFrequency: 'weekly' },
     { path: 'live',        priority: 0.7, changeFrequency: 'daily' },
@@ -40,7 +41,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 1,
   })
 
-  // Language root pages
+  // Language root pages + static pages
   for (const lang of ['en', 'ko']) {
     routes.push({
       url: `${baseUrl}/${lang}`,
@@ -49,13 +50,48 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     })
 
-    // Add each page for each language
     for (const page of pages) {
       routes.push({
         url: `${baseUrl}/${lang}/${page.path}`,
         lastModified: new Date(),
         changeFrequency: page.changeFrequency,
         priority: page.priority,
+      })
+    }
+  }
+
+  // Dynamic blog articles — critical for AdSense indexing
+  try {
+    const articles = await prisma.blogArticle.findMany({
+      where: { published: true },
+      select: { id: true, publishedAt: true, updatedAt: true },
+      orderBy: { publishedAt: 'desc' },
+      take: 200,
+    })
+
+    for (const article of articles) {
+      for (const lang of ['en', 'ko']) {
+        routes.push({
+          url: `${baseUrl}/${lang}/blog/${article.id}`,
+          lastModified: article.updatedAt || article.publishedAt || new Date(),
+          changeFrequency: 'weekly',
+          priority: 0.7,
+        })
+      }
+    }
+  } catch (e) {
+    console.log('[sitemap] Blog articles fetch failed, skipping:', e)
+  }
+
+  // Exchange guide pages
+  const exchanges = ['bitget', 'bybit', 'okx', 'gate', 'bingx', 'htx']
+  for (const lang of ['en', 'ko']) {
+    for (const ex of exchanges) {
+      routes.push({
+        url: `${baseUrl}/${lang}/guides/${ex}`,
+        lastModified: new Date(),
+        changeFrequency: 'monthly',
+        priority: 0.6,
       })
     }
   }
