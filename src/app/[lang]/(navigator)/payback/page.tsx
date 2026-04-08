@@ -108,8 +108,13 @@ export default async function PaybackPage({
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
               {ko ? "파트너 거래소" : "Partner Exchanges"}
             </h2>
-            <p className="text-zinc-500 mb-12 max-w-xl">
+            <p className="text-zinc-500 mb-4 max-w-xl">
               {ko ? "제휴 거래소와 현재 페이백 요율입니다." : "Our affiliated exchanges and their current payback rates."}
+            </p>
+            <p className="text-xs text-amber-400/80 mb-12 max-w-xl font-medium">
+              {ko
+                ? "※ 표시된 수수료는 Fee Payback 적용 후 실질 수수료 기준입니다."
+                : "※ Fees shown are effective rates after payback is applied."}
             </p>
           </div>
 
