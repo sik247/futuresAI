@@ -3,6 +3,7 @@ import Headers from "@/components/headers";
 import Footer from "@/components/footer";
 import { PriceTicker } from "@/components/price-ticker";
 import PaybackAlertBanner from "@/components/payback-alert-banner";
+import MobileBottomNav from "@/components/mobile-bottom-nav";
 import { Metadata } from "next";
 
 export async function generateMetadata({
@@ -52,8 +53,9 @@ export default async function LanguageLayout({
       <div className="pt-[92px]">
         <PaybackAlertBanner lang={lang} />
       </div>
-      <main className="min-h-screen">{children}</main>
+      <main className="min-h-screen pb-16 lg:pb-0">{children}</main>
       <Footer lang={lang} translations={dictionary} />
+      <MobileBottomNav lang={lang} />
     </>
   );
 }
