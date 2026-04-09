@@ -164,18 +164,45 @@ export async function buildCryptoContext(query: string): Promise<ChatContextResu
   ]);
 
   // ── Price data ──
+  let gotBinancePrice = false;
+  let binanceUsdPrice = 0;
   if (ticker && binanceRes.status === "fulfilled" && binanceRes.value && "ok" in binanceRes.value && binanceRes.value.ok) {
-    const data = await binanceRes.value.json();
-    const price = parseFloat(data.lastPrice);
-    const pct = parseFloat(data.priceChangePercent);
-    parts.push(`BINANCE ${ticker.ticker}: $${price.toLocaleString()} | 24h: ${pct >= 0 ? "+" : ""}${pct.toFixed(2)}% | Vol: $${(parseFloat(data.quoteVolume) / 1e6).toFixed(1)}M | High: $${parseFloat(data.highPrice).toLocaleString()} | Low: $${parseFloat(data.lowPrice).toLocaleString()}`);
+    try {
+      const data = await binanceRes.value.json();
+      const price = parseFloat(data.lastPrice);
+      const pct = parseFloat(data.priceChangePercent);
+      if (price > 0) {
+        gotBinancePrice = true;
+        binanceUsdPrice = price;
+        parts.push(`BINANCE ${ticker.ticker}: $${price.toLocaleString()} | 24h: ${pct >= 0 ? "+" : ""}${pct.toFixed(2)}% | Vol: $${(parseFloat(data.quoteVolume) / 1e6).toFixed(1)}M | High: $${parseFloat(data.highPrice).toLocaleString()} | Low: $${parseFloat(data.lowPrice).toLocaleString()}`);
+      }
+    } catch {}
+  }
 
-    const upbit = upbitData.status === "fulfilled" ? upbitData.value : null;
-    if (upbit && price > 0) {
-      const krwRate = upbit.price / price;
-      const premium = ((krwRate / 1370) - 1) * 100;
-      parts.push(`UPBIT ${baseSymbol}/KRW: ₩${upbit.price.toLocaleString()} | 24h: ${upbit.change >= 0 ? "+" : ""}${upbit.change.toFixed(2)}% | Vol: ₩${(upbit.volume / 1e8).toFixed(1)}억 | Kimchi Premium: ${premium >= 0 ? "+" : ""}${premium.toFixed(1)}%`);
-    }
+  // CoinGecko fallback if Binance failed
+  if (baseSymbol && !gotBinancePrice) {
+    try {
+      const cgIdMap: Record<string, string> = { BTC: "bitcoin", ETH: "ethereum", SOL: "solana", XRP: "ripple", BNB: "binancecoin", DOGE: "dogecoin", ADA: "cardano", AVAX: "avalanche-2", DOT: "polkadot", LINK: "chainlink", NEAR: "near", ATOM: "cosmos", SUI: "sui", APT: "aptos", ARB: "arbitrum", OP: "optimism", PEPE: "pepe", SHIB: "shiba-inu" };
+      const cgId = cgIdMap[baseSymbol];
+      if (cgId) {
+        const cgRes = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cgId}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_high_24h=true&include_low_24h=true`, { signal: AbortSignal.timeout(5000) });
+        const cgData = await cgRes.json();
+        const coin = cgData[cgId];
+        if (coin?.usd) {
+          binanceUsdPrice = coin.usd;
+          const pct = coin.usd_24h_change || 0;
+          parts.push(`${baseSymbol}/USD (CoinGecko): $${coin.usd.toLocaleString()} | 24h: ${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%${coin.usd_24h_vol ? ` | Vol: $${(coin.usd_24h_vol / 1e6).toFixed(1)}M` : ""}${coin.usd_24h_high ? ` | High: $${coin.usd_24h_high.toLocaleString()}` : ""}${coin.usd_24h_low ? ` | Low: $${coin.usd_24h_low.toLocaleString()}` : ""}`);
+        }
+      }
+    } catch {}
+  }
+
+  // Upbit KRW price + Kimchi Premium
+  const upbit = upbitData.status === "fulfilled" ? upbitData.value : null;
+  if (upbit && binanceUsdPrice > 0 && baseSymbol) {
+    const krwRate = upbit.price / binanceUsdPrice;
+    const premium = ((krwRate / 1370) - 1) * 100;
+    parts.push(`UPBIT ${baseSymbol}/KRW: ₩${upbit.price.toLocaleString()} | 24h: ${upbit.change >= 0 ? "+" : ""}${upbit.change.toFixed(2)}% | Vol: ₩${(upbit.volume / 1e8).toFixed(1)}억 | Kimchi Premium: ${premium >= 0 ? "+" : ""}${premium.toFixed(1)}%`);
   }
 
   // ── Technicals ──
