@@ -1,11 +1,5 @@
 import prisma from "@/lib/prisma";
-import { USAGE_LIMITS } from "@/lib/constants/usage-limits";
-
-function getStartOfDay(): Date {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
+import { RATE_LIMITS } from "@/lib/constants/usage-limits";
 
 export type UserTier = "FREE" | "BASIC" | "PREMIUM";
 
@@ -15,37 +9,91 @@ export function getUserTier(isPremium: boolean, credits: number = 0): UserTier {
   return "FREE";
 }
 
+function getRollingWindowStart(hours: number): Date {
+  return new Date(Date.now() - hours * 60 * 60 * 1000);
+}
+
+export async function checkRateLimit(
+  userId: string,
+  isPremium: boolean,
+  type: "chart" | "chat",
+  credits: number = 0
+): Promise<{
+  allowed: boolean;
+  tier: UserTier;
+  retryAfterMinutes?: number;
+  shouldUpgrade?: boolean;
+}> {
+  const tier = getUserTier(isPremium, credits);
+  const config = RATE_LIMITS[tier];
+  const limit = type === "chart" ? config.chartAnalysis : config.chat;
+  const windowStart = getRollingWindowStart(config.windowHours);
+
+  let used: number;
+  if (type === "chart") {
+    used = await prisma.chartAnalysis.count({
+      where: { userId, createdAt: { gte: windowStart } },
+    });
+  } else {
+    used = await prisma.chatMessage.count({
+      where: { userId, role: "user", createdAt: { gte: windowStart } },
+    });
+  }
+
+  if (used >= limit) {
+    // Find when the oldest message in the window will expire
+    let retryAfterMinutes = 30; // default
+    try {
+      const oldest = type === "chart"
+        ? await prisma.chartAnalysis.findFirst({
+            where: { userId, createdAt: { gte: windowStart } },
+            orderBy: { createdAt: "asc" },
+            select: { createdAt: true },
+          })
+        : await prisma.chatMessage.findFirst({
+            where: { userId, role: "user", createdAt: { gte: windowStart } },
+            orderBy: { createdAt: "asc" },
+            select: { createdAt: true },
+          });
+
+      if (oldest) {
+        const expiresAt = new Date(oldest.createdAt.getTime() + config.windowHours * 60 * 60 * 1000);
+        retryAfterMinutes = Math.max(1, Math.ceil((expiresAt.getTime() - Date.now()) / 60000));
+      }
+    } catch {}
+
+    return {
+      allowed: false,
+      tier,
+      retryAfterMinutes,
+      shouldUpgrade: tier === "FREE",
+    };
+  }
+
+  return { allowed: true, tier };
+}
+
+// Legacy compatibility
 export async function checkDailyLimit(
   userId: string,
   isPremium: boolean,
   type: "chart" | "chat",
   credits: number = 0
-): Promise<{ allowed: boolean; used: number; limit: number; tier: UserTier; resetMessage?: string }> {
-  const today = getStartOfDay();
-  const userTier = getUserTier(isPremium, credits);
-  const tierLimits = USAGE_LIMITS[userTier];
-  const limit = type === "chart" ? tierLimits.chartAnalysis : tierLimits.chat;
+) {
+  const result = await checkRateLimit(userId, isPremium, type, credits);
+  const tier = result.tier;
+  const config = RATE_LIMITS[tier];
+  const limit = type === "chart" ? config.chartAnalysis : config.chat;
 
-  let used: number;
-
-  if (type === "chart") {
-    used = await prisma.chartAnalysis.count({
-      where: { userId, createdAt: { gte: today } },
-    });
-  } else {
-    used = await prisma.chatMessage.count({
-      where: { userId, role: "user", createdAt: { gte: today } },
-    });
-  }
-
-  if (used >= limit) {
-    const resetMessage = userTier === "FREE"
-      ? "You've reached your daily limit. Upgrade to Basic ($25/month) for 25 messages/day."
-      : userTier === "BASIC"
-      ? "You've reached your daily limit. Upgrade to Premium ($99/month) for 100 messages/day."
-      : "You've reached your daily limit. Resets at midnight UTC.";
-    return { allowed: false, used, limit, tier: userTier, resetMessage };
-  }
-
-  return { allowed: true, used, limit, tier: userTier };
+  return {
+    allowed: result.allowed,
+    used: result.allowed ? 0 : limit,
+    limit,
+    tier,
+    resetMessage: result.shouldUpgrade
+      ? "Upgrade to continue using AI analysis."
+      : result.retryAfterMinutes
+        ? `Try again in ~${result.retryAfterMinutes} minutes.`
+        : undefined,
+  };
 }

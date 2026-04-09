@@ -75,9 +75,9 @@ export default function PricingPage({
               </p>
             </div>
             <div className="flex-1 border-t border-white/[0.06] pt-5 space-y-0.5">
-              <Feature included>{ko ? "AI 퀀트 채팅 1회/일" : "1 AI quant chat/day"}</Feature>
-              <Feature included>{ko ? "차트 분석 1회/일" : "1 chart analysis/day"}</Feature>
-              <Feature included>{ko ? "시장 데이터 (기본)" : "Market data (basic)"}</Feature>
+              <Feature included>{ko ? "AI 퀀트 채팅 (제한적)" : "AI Quant Chat (limited)"}</Feature>
+              <Feature included>{ko ? "차트 분석 (제한적)" : "Chart analysis (limited)"}</Feature>
+              <Feature included>{ko ? "시장 데이터" : "Market data"}</Feature>
               <Feature included>{ko ? "뉴스 피드" : "News feed"}</Feature>
               <Feature included={false}>{ko ? "고래 트래커" : "Whale tracker"}</Feature>
               <Feature included={false}>{ko ? "퀀트 시그널" : "Quant signals"}</Feature>
@@ -110,14 +110,14 @@ export default function PricingPage({
               </p>
             </div>
             <div className="flex-1 border-t border-emerald-500/10 pt-5 space-y-0.5">
-              <Feature included highlight>{ko ? "AI 퀀트 채팅 25회/일" : "25 AI quant chats/day"}</Feature>
-              <Feature included highlight>{ko ? "차트 분석 10회/일" : "10 chart analyses/day"}</Feature>
+              <Feature included highlight>{ko ? "AI 퀀트 채팅" : "AI Quant Chat"}</Feature>
+              <Feature included highlight>{ko ? "차트 분석" : "Chart analysis"}</Feature>
               <Feature included>{ko ? "시장 데이터 (전체)" : "Market data (full)"}</Feature>
               <Feature included>{ko ? "뉴스 피드" : "News feed"}</Feature>
               <Feature included>{ko ? "고래 트래커" : "Whale tracker"}</Feature>
               <Feature included>{ko ? "퀀트 시그널" : "Quant signals"}</Feature>
-              <Feature included={false}>{ko ? "업비트 + 김치 프리미엄" : "Upbit + Kimchi Premium"}</Feature>
-              <Feature included={false}>{ko ? "실시간 고래 알림" : "Real-time whale alerts"}</Feature>
+              <Feature included>{ko ? "업비트 + 김치 프리미엄" : "Upbit + Kimchi Premium"}</Feature>
+              <Feature included={false}>{ko ? "실시간 고래 알림 (텔레그램)" : "Real-time whale alerts (Telegram)"}</Feature>
               <Feature included={false}>{ko ? "텔레그램 프리미엄 채널" : "Telegram premium channel"}</Feature>
             </div>
             <div className="mt-6 pt-5 border-t border-emerald-500/10">
@@ -151,13 +151,13 @@ export default function PricingPage({
               </p>
             </div>
             <div className="flex-1 border-t border-blue-500/10 pt-5 space-y-0.5 relative">
-              <Feature included highlight>{ko ? "AI 퀀트 채팅 100회/일" : "100 AI quant chats/day"}</Feature>
-              <Feature included highlight>{ko ? "차트 분석 30회/일" : "30 chart analyses/day"}</Feature>
+              <Feature included highlight>{ko ? "AI 퀀트 채팅 (높은 빈도)" : "AI Quant Chat (high frequency)"}</Feature>
+              <Feature included highlight>{ko ? "차트 분석 (높은 빈도)" : "Chart analysis (high frequency)"}</Feature>
               <Feature included>{ko ? "시장 데이터 (전체)" : "Market data (full)"}</Feature>
               <Feature included>{ko ? "뉴스 피드" : "News feed"}</Feature>
               <Feature included>{ko ? "고래 트래커 (전체)" : "Whale tracker (full)"}</Feature>
               <Feature included>{ko ? "퀀트 시그널" : "Quant signals"}</Feature>
-              <Feature included highlight>{ko ? "업비트 + 김치 프리미엄 데이터" : "Upbit + Kimchi Premium data"}</Feature>
+              <Feature included>{ko ? "업비트 + 김치 프리미엄 데이터" : "Upbit + Kimchi Premium data"}</Feature>
               <Feature included highlight>{ko ? "실시간 고래 알림 (텔레그램)" : "Real-time whale alerts (Telegram)"}</Feature>
               <Feature included highlight>{ko ? "텔레그램 프리미엄 전용 채널" : "Telegram premium-only channel"}</Feature>
             </div>
@@ -190,18 +190,17 @@ export default function PricingPage({
                 </thead>
                 <tbody className="text-sm">
                   {[
-                    { feature: ko ? "AI 퀀트 채팅" : "AI Quant Chat", free: ko ? "1회/일" : "1/day", basic: ko ? "25회/일" : "25/day", premium: ko ? "100회/일" : "100/day" },
-                    { feature: ko ? "차트 분석" : "Chart Analysis", free: ko ? "1회/일" : "1/day", basic: ko ? "10회/일" : "10/day", premium: ko ? "30회/일" : "30/day" },
-                    { feature: ko ? "AI 모델" : "AI Model", free: "Gemini Flash", basic: "Gemini 2.5 Pro", premium: "Gemini 2.5 Pro" },
-                    { feature: ko ? "실시간 데이터 소스" : "Live Data Sources", free: "3", basic: "7", premium: ko ? "9 (전체)" : "9 (all)" },
+                    { feature: ko ? "AI 퀀트 채팅" : "AI Quant Chat", free: ko ? "제한적" : "Limited", basic: "✓", premium: ko ? "높은 빈도" : "High freq" },
+                    { feature: ko ? "차트 분석" : "Chart Analysis", free: ko ? "제한적" : "Limited", basic: "✓", premium: ko ? "높은 빈도" : "High freq" },
+                    { feature: ko ? "AI 모델" : "AI Model", free: "Gemini 2.5 Pro", basic: "Gemini 2.5 Pro", premium: "Gemini 2.5 Pro" },
+                    { feature: ko ? "실시간 데이터" : "Live Data", free: ko ? "기본" : "Basic", basic: ko ? "전체" : "Full", premium: ko ? "전체" : "Full" },
                     { feature: ko ? "바이낸스 가격" : "Binance Prices", free: "✓", basic: "✓", premium: "✓" },
-                    { feature: ko ? "업비트 + 김치 프리미엄" : "Upbit + Kimchi Premium", free: "—", basic: "—", premium: "✓" },
+                    { feature: ko ? "업비트 + 김치 프리미엄" : "Upbit + Kimchi Premium", free: "—", basic: "✓", premium: "✓" },
                     { feature: ko ? "기술적 분석 (RSI, MA)" : "Technicals (RSI, MA)", free: "—", basic: "✓", premium: "✓" },
-                    { feature: ko ? "고래 트래커" : "Whale Tracker", free: "—", basic: ko ? "상위 5명" : "Top 5", premium: ko ? "전체" : "Full" },
+                    { feature: ko ? "고래 트래커" : "Whale Tracker", free: "—", basic: "✓", premium: ko ? "전체" : "Full" },
                     { feature: ko ? "퀀트 시그널" : "Quant Signals", free: "—", basic: "✓", premium: "✓" },
-                    { feature: ko ? "뉴스 컨텍스트" : "News Context", free: ko ? "헤드라인" : "Headlines", basic: ko ? "5개 소스" : "5 sources", premium: ko ? "8개 + 트위터" : "8 + Twitter" },
                     { feature: ko ? "트레이딩뷰 차트" : "TradingView Charts", free: "✓", basic: "✓", premium: "✓" },
-                    { feature: ko ? "실시간 알림" : "Real-time Alerts", free: "—", basic: "—", premium: ko ? "텔레그램" : "Telegram" },
+                    { feature: ko ? "실시간 고래 알림" : "Real-time Whale Alerts", free: "—", basic: "—", premium: ko ? "텔레그램" : "Telegram" },
                     { feature: ko ? "프리미엄 텔레그램 채널" : "Premium Telegram Channel", free: "—", basic: "—", premium: "✓" },
                     { feature: ko ? "우선 지원" : "Priority Support", free: "—", basic: ko ? "이메일" : "Email", premium: ko ? "텔레그램 DM" : "Telegram DM" },
                   ].map((row, i) => (
@@ -239,8 +238,8 @@ export default function PricingPage({
               {
                 q: ko ? "Basic과 Premium의 차이는?" : "What's the difference between Basic and Premium?",
                 a: ko
-                  ? "Basic은 일일 AI 분석과 핵심 도구를 제공합니다. Premium은 업비트 김치 프리미엄 데이터, 실시간 고래 알림, 텔레그램 프리미엄 채널, 더 많은 데이터 소스(9개)를 포함합니다."
-                  : "Basic gives daily AI analysis and core tools. Premium adds Upbit Kimchi Premium data, real-time whale alerts, Telegram premium channel, and more data sources (9 total).",
+                  ? "Basic은 AI 채팅, 차트 분석, 업비트 김치 프리미엄 데이터를 포함합니다. Premium은 더 높은 사용 빈도와 함께 실시간 고래 알림, 텔레그램 프리미엄 전용 채널, 우선 지원을 제공합니다."
+                  : "Basic includes AI chat, chart analysis, and Upbit Kimchi Premium data. Premium offers higher usage frequency plus real-time whale alerts, Telegram premium channel, and priority support.",
               },
               {
                 q: ko ? "어떻게 결제하나요?" : "How do I pay?",

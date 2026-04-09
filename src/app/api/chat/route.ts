@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { buildCryptoContext, buildUSStockContext } from "@/lib/services/chat/chat-context.service";
-import { checkDailyLimit } from "@/lib/services/usage.service";
+import { checkRateLimit } from "@/lib/services/usage.service";
 
 const PERSONA_PROMPTS: Record<string, string> = {
   "crypto": `You are an elite crypto quantitative analyst at FuturesAI. You have deep expertise in blockchain technology, DeFi protocols, and crypto derivatives markets.
@@ -58,12 +58,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    // Daily chat limit (free: 5/day, basic: 25/day, premium: 100/day, admin: unlimited)
+    // Rolling rate limit (admin: unlimited)
     if (user.role !== "ADMIN") {
-      const { allowed, used, limit, tier, resetMessage } = await checkDailyLimit(user.id, user.isPremium, "chat", user.credits);
-      if (!allowed) {
+      const rateCheck = await checkRateLimit(user.id, user.isPremium, "chat", user.credits);
+      if (!rateCheck.allowed) {
         return NextResponse.json(
-          { error: resetMessage || "Daily message limit reached", used, limit, tier },
+          {
+            error: "rate_limit",
+            shouldUpgrade: rateCheck.shouldUpgrade,
+            retryAfterMinutes: rateCheck.retryAfterMinutes,
+            tier: rateCheck.tier,
+          },
           { status: 429 }
         );
       }

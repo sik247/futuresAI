@@ -766,7 +766,7 @@ function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: st
 }
 
 
-const FREE_MSG_LIMIT = 1;
+// No explicit limit shown — server controls rate limiting
 
 // Simple markdown renderer for AI responses
 function renderMarkdown(text: string) {
@@ -818,40 +818,20 @@ function renderMarkdown(text: string) {
 
 type ChatMsg = { role: "user" | "ai"; text: string; ticker?: { symbol: string; exchange: string }; news?: { title: string; url: string; source: string }[] };
 
-function getChatUsageKey() {
-  const d = new Date();
-  return `chat-usage-${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-}
-
 function ChatWidget({ lang }: { lang: string }) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [loading, setLoading] = useState(false);
+  const [rateLimited, setRateLimited] = useState(false);
+  const [shouldUpgrade, setShouldUpgrade] = useState(false);
   const ko = lang === "ko";
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Persist usage count in localStorage (survives refresh, different tabs)
-  const [msgCount, setMsgCount] = useState(() => {
-    if (typeof window === "undefined") return 0;
-    try {
-      const key = getChatUsageKey();
-      return parseInt(localStorage.getItem(key) || "0", 10);
-    } catch { return 0; }
-  });
-
-  // Sync to localStorage on change
-  useEffect(() => {
-    try {
-      const key = getChatUsageKey();
-      localStorage.setItem(key, String(msgCount));
-    } catch {}
-  }, [msgCount]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading]);
 
-  const atLimit = msgCount >= FREE_MSG_LIMIT;
+  const atLimit = rateLimited;
 
   const suggestions = ko
     ? ["BTC 지금 사도 될까요?", "ETH 분석해줘", "오늘 시장 전망은?"]
@@ -863,7 +843,6 @@ function ChatWidget({ lang }: { lang: string }) {
     setMessages((prev) => [...prev, { role: "user", text }]);
     setInput("");
     setLoading(true);
-    setMsgCount((c) => c + 1);
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -873,9 +852,14 @@ function ChatWidget({ lang }: { lang: string }) {
       const data = await res.json();
       if (res.status === 401 || data.error === "Unauthorized") {
         setMessages((prev) => [...prev, { role: "ai", text: ko ? "로그인 후 AI 채팅을 이용할 수 있습니다. 회원가입은 무료입니다!" : "Please sign in to use AI Chat. Signing up is free!" }]);
-      } else if (res.status === 429 || data.error?.includes("limit")) {
-        setMessages((prev) => [...prev, { role: "ai", text: ko ? "일일 무료 메시지 한도에 도달했습니다. 프리미엄으로 업그레이드하세요!" : "Daily free limit reached. Upgrade to Premium for more!" }]);
-        setMsgCount(FREE_MSG_LIMIT);
+      } else if (res.status === 429) {
+        setRateLimited(true);
+        if (data.shouldUpgrade) {
+          setShouldUpgrade(true);
+          setMessages((prev) => [...prev, { role: "ai", text: ko ? "더 많은 AI 분석이 필요하신가요? 프리미엄으로 업그레이드하면 제한 없이 이용할 수 있습니다." : "Need more AI analysis? Upgrade to Premium for unlimited access." }]);
+        } else {
+          setMessages((prev) => [...prev, { role: "ai", text: ko ? "잠시 후 다시 시도해 주세요." : "Please try again shortly." }]);
+        }
       } else {
         setMessages((prev) => [...prev, {
           role: "ai",
@@ -977,17 +961,23 @@ function ChatWidget({ lang }: { lang: string }) {
           </div>
         )}
       </div>
-      {/* Input area or premium lock */}
-      {atLimit ? (
-        <div className="border-t border-white/[0.06] p-4 text-center">
+      {/* Input area or upgrade prompt */}
+      {atLimit && shouldUpgrade ? (
+        <div className="border-t border-purple-500/20 p-4 text-center bg-gradient-to-t from-purple-950/20 to-transparent">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <svg className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" /></svg>
-            <span className="text-[12px] font-semibold text-amber-400">{ko ? "무료 메시지 소진" : "Free messages used"}</span>
+            <svg className="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+            </svg>
+            <span className="text-[13px] font-semibold text-purple-300">{ko ? "더 많은 AI 분석이 필요하신가요?" : "Need more AI analysis?"}</span>
           </div>
-          <p className="text-[11px] text-zinc-500 mb-3">{ko ? "프리미엄으로 업그레이드하여 무제한 AI 분석을 받으세요" : "Upgrade to Premium for unlimited AI analysis"}</p>
-          <Link href={`/${lang}/pricing`} className="inline-block px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg text-[11px] font-semibold hover:from-amber-400 hover:to-amber-500 transition-all cursor-pointer">
-            {ko ? "프리미엄 시작 →" : "Get Premium →"}
+          <p className="text-[12px] text-zinc-500 mb-3">{ko ? "프리미엄으로 업그레이드하면 제한 없이 이용하실 수 있습니다" : "Upgrade to Premium for unrestricted access"}</p>
+          <Link href={`/${lang}/pricing`} className="inline-block px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-[12px] font-semibold hover:from-purple-500 hover:to-indigo-500 transition-all cursor-pointer">
+            {ko ? "프리미엄 시작하기" : "Get Premium"}
           </Link>
+        </div>
+      ) : atLimit ? (
+        <div className="border-t border-white/[0.06] p-3 text-center">
+          <p className="text-[11px] text-zinc-500">{ko ? "잠시 후 다시 시도해 주세요" : "Please try again shortly"}</p>
         </div>
       ) : (
         <>
@@ -1009,7 +999,7 @@ function ChatWidget({ lang }: { lang: string }) {
             </button>
           </div>
           <div className="flex items-center justify-between px-3 py-1.5 border-t border-white/[0.04]">
-            <span className="text-[9px] text-zinc-600">{ko ? `무료 ${FREE_MSG_LIMIT - msgCount}/${FREE_MSG_LIMIT}` : `Free ${FREE_MSG_LIMIT - msgCount}/${FREE_MSG_LIMIT}`}</span>
+            <span className="text-[9px] text-zinc-600">Gemini 2.5 Pro</span>
             <Link href={`/${lang}/chat`} className="text-[10px] text-blue-400 hover:text-blue-300 font-medium transition-colors">
               {ko ? "전체 채팅 →" : "Full chat →"}
             </Link>
