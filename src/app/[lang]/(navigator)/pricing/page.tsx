@@ -4,16 +4,8 @@ import PaymentSection from "./payment-section";
 export const metadata: Metadata = {
   title: "Pricing - FuturesAI",
   description:
-    "Professional crypto intelligence plans. Free and Premium tiers with AI chat, chart analysis, whale tracking, and real-time market data.",
-  openGraph: {
-    title: "Pricing - FuturesAI",
-    description:
-      "Professional crypto intelligence plans. AI chat, chart analysis, whale tracking, and real-time market data.",
-    type: "website",
-  },
+    "Professional crypto intelligence plans. Free, Basic $25, and Premium $99 tiers with AI chat, chart analysis, whale tracking, and real-time market data.",
 };
-
-/* ── Helpers ── */
 
 function CheckIcon() {
   return (
@@ -25,26 +17,22 @@ function CheckIcon() {
 
 function XIcon() {
   return (
-    <svg className="w-4 h-4 text-zinc-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <svg className="w-4 h-4 text-zinc-700 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
     </svg>
   );
 }
 
-/* ── Feature Row ── */
-
-function Feature({ included, children }: { included: boolean; children: React.ReactNode }) {
+function Feature({ included, children, highlight }: { included: boolean; children: React.ReactNode; highlight?: boolean }) {
   return (
     <div className="flex items-center gap-3 py-2">
       {included ? <CheckIcon /> : <XIcon />}
-      <span className={`text-[12px] font-mono ${included ? "text-zinc-300" : "text-zinc-600"}`}>
+      <span className={`text-sm ${included ? (highlight ? "text-white font-semibold" : "text-zinc-300") : "text-zinc-600"}`}>
         {children}
       </span>
     </div>
   );
 }
-
-/* ── Page ── */
 
 export default function PricingPage({
   params: { lang },
@@ -56,168 +44,228 @@ export default function PricingPage({
   const walletAddressErc20 = process.env.PAYMENT_WALLET_ERC20 || "";
 
   return (
-    <div className="bg-zinc-950 font-mono min-h-screen">
-      {/* Stat Bar */}
-      <div className="flex items-center gap-3 px-4 py-3 bg-zinc-900/80 border-b border-white/[0.06] text-xs font-mono overflow-x-auto shrink-0">
-        <span className="text-zinc-500 shrink-0">{ko ? "요금제" : "Plans"}</span>
-        <span className="text-zinc-700 shrink-0">|</span>
-        <span className="text-zinc-500 shrink-0">{ko ? "결제" : "Payment"}</span>
-        <span className="text-white shrink-0">USDT</span>
-        <span className="text-zinc-700 shrink-0">|</span>
-        <span className="text-zinc-500 shrink-0">{ko ? "갱신" : "Billing"}</span>
-        <span className="text-white shrink-0">{ko ? "월간" : "Monthly"}</span>
-        <span className="text-zinc-700 shrink-0">|</span>
-        <span className="relative flex items-center gap-1.5 shrink-0">
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-          </span>
-          <span className="text-emerald-400 text-[10px] uppercase tracking-[0.15em]">
-            {ko ? "가입 가능" : "OPEN"}
-          </span>
-        </span>
-      </div>
-
-      {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 py-12 lg:py-20">
+    <div className="bg-zinc-950 min-h-screen">
+      <div className="max-w-6xl mx-auto px-4 py-12 lg:py-20">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">
+        <div className="text-center mb-14">
+          <h1 className="text-3xl lg:text-4xl font-bold text-white tracking-tight">
             {ko ? "요금제 선택" : "Choose Your Plan"}
           </h1>
-          <p className="text-sm text-zinc-500 mt-3 max-w-md mx-auto">
+          <p className="text-base text-zinc-400 mt-4 max-w-lg mx-auto">
             {ko
-              ? "프로페셔널 크립토 인텔리전스. 모든 플랜은 즉시 활성화됩니다."
-              : "Professional crypto intelligence. All plans activate instantly."}
+              ? "AI 크립토 퀀트 분석의 힘을 경험하세요. 실시간 데이터, 전문가급 인사이트."
+              : "Experience the power of AI crypto quant analysis. Real-time data, expert-level insights."}
           </p>
         </div>
 
-        {/* Pricing Cards - 2 tiers */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 max-w-3xl mx-auto">
-          {/* Basic Tier */}
-          <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-6 lg:p-8 flex flex-col">
+        {/* 3-Tier Pricing Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+
+          {/* ── FREE ── */}
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 lg:p-8 flex flex-col">
             <div className="mb-6">
-              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                Basic
+              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 bg-zinc-800 px-3 py-1 rounded-full">
+                Free
               </span>
-              <div className="flex items-baseline gap-1 mt-3">
-                <span className="text-3xl font-bold text-white">$25</span>
-                <span className="text-sm text-zinc-500">USDT / {ko ? "월" : "month"}</span>
+              <div className="flex items-baseline gap-1 mt-4">
+                <span className="text-4xl font-bold text-white">$0</span>
               </div>
-              <p className="text-[11px] text-zinc-500 mt-2">
-                {ko ? "일일 AI 분석과 기본 기능" : "Daily AI analysis and core features"}
+              <p className="text-sm text-zinc-500 mt-2">
+                {ko ? "체험용 · 가입만 하면 바로 시작" : "Try it out · Just sign up to start"}
               </p>
             </div>
             <div className="flex-1 border-t border-white/[0.06] pt-5 space-y-0.5">
-              <Feature included>{ko ? "AI 채팅 25회/일" : "25 AI chat messages/day"}</Feature>
-              <Feature included>{ko ? "차트 분석 10회/일" : "10 chart analyses/day"}</Feature>
-              <Feature included>{ko ? "고래 트래커" : "Whale tracker"}</Feature>
-              <Feature included>{ko ? "차트 & 시장 데이터" : "Charts & market data"}</Feature>
+              <Feature included>{ko ? "AI 퀀트 채팅 1회/일" : "1 AI quant chat/day"}</Feature>
+              <Feature included>{ko ? "차트 분석 1회/일" : "1 chart analysis/day"}</Feature>
+              <Feature included>{ko ? "시장 데이터 (기본)" : "Market data (basic)"}</Feature>
               <Feature included>{ko ? "뉴스 피드" : "News feed"}</Feature>
-              <Feature included>{ko ? "커뮤니티 포스트" : "Community posts"}</Feature>
-              <Feature included={false}>{ko ? "실시간 고래 알림" : "Real-time whale alerts"}</Feature>
+              <Feature included={false}>{ko ? "고래 트래커" : "Whale tracker"}</Feature>
+              <Feature included={false}>{ko ? "퀀트 시그널" : "Quant signals"}</Feature>
               <Feature included={false}>{ko ? "업비트 + 김치 프리미엄" : "Upbit + Kimchi Premium"}</Feature>
-              <Feature included={false}>{ko ? "텔레그램 프리미엄 알림" : "Telegram premium alerts"}</Feature>
+              <Feature included={false}>{ko ? "실시간 알림" : "Real-time alerts"}</Feature>
+              <Feature included={false}>{ko ? "텔레그램 프리미엄 채널" : "Telegram premium channel"}</Feature>
             </div>
             <div className="mt-6 pt-5 border-t border-white/[0.06]">
               <a
-                href="https://t.me/FuturesAIAdminbot?start=basic"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full text-center py-2.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[11px] font-mono uppercase tracking-[0.15em] hover:bg-emerald-500/20 transition-colors cursor-pointer"
+                href={`/${lang}/signup`}
+                className="block w-full text-center py-3 rounded-xl border border-white/[0.1] bg-white/[0.04] text-zinc-300 text-sm font-semibold hover:bg-white/[0.08] transition-colors"
               >
-                {ko ? "Basic 시작하기" : "Get Basic"}
+                {ko ? "무료로 시작하기" : "Start Free"}
               </a>
-              <p className="text-center text-[9px] text-zinc-600 mt-2">$25 USDT (TRC-20)</p>
             </div>
           </div>
 
-          {/* Premium Tier */}
-          <div className="rounded-xl border border-blue-500/30 bg-blue-500/[0.03] p-6 lg:p-8 flex flex-col relative overflow-hidden">
+          {/* ── BASIC $25 ── */}
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.03] p-6 lg:p-8 flex flex-col">
+            <div className="mb-6">
+              <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                Basic
+              </span>
+              <div className="flex items-baseline gap-1 mt-4">
+                <span className="text-4xl font-bold text-white">$25</span>
+                <span className="text-base text-zinc-500">/{ko ? "월" : "mo"}</span>
+              </div>
+              <p className="text-sm text-zinc-400 mt-2">
+                {ko ? "일일 AI 분석 + 핵심 트레이딩 도구" : "Daily AI analysis + core trading tools"}
+              </p>
+            </div>
+            <div className="flex-1 border-t border-emerald-500/10 pt-5 space-y-0.5">
+              <Feature included highlight>{ko ? "AI 퀀트 채팅 25회/일" : "25 AI quant chats/day"}</Feature>
+              <Feature included highlight>{ko ? "차트 분석 10회/일" : "10 chart analyses/day"}</Feature>
+              <Feature included>{ko ? "시장 데이터 (전체)" : "Market data (full)"}</Feature>
+              <Feature included>{ko ? "뉴스 피드" : "News feed"}</Feature>
+              <Feature included>{ko ? "고래 트래커" : "Whale tracker"}</Feature>
+              <Feature included>{ko ? "퀀트 시그널" : "Quant signals"}</Feature>
+              <Feature included={false}>{ko ? "업비트 + 김치 프리미엄" : "Upbit + Kimchi Premium"}</Feature>
+              <Feature included={false}>{ko ? "실시간 고래 알림" : "Real-time whale alerts"}</Feature>
+              <Feature included={false}>{ko ? "텔레그램 프리미엄 채널" : "Telegram premium channel"}</Feature>
+            </div>
+            <div className="mt-6 pt-5 border-t border-emerald-500/10">
+              <a
+                href={`/${lang}/pricing#payment`}
+                className="block w-full text-center py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition-colors"
+              >
+                {ko ? "Basic 시작 — $25/월" : "Get Basic — $25/mo"}
+              </a>
+            </div>
+          </div>
+
+          {/* ── PREMIUM $99 ── */}
+          <div className="rounded-2xl border border-blue-500/30 bg-blue-500/[0.03] p-6 lg:p-8 flex flex-col relative overflow-hidden">
             <div className="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="mb-6 relative">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
                   Premium
                 </span>
-                <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                  {ko ? "추천" : "Best Value"}
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                  {ko ? "추천" : "Best"}
                 </span>
               </div>
-              <div className="flex items-baseline gap-1 mt-3">
-                <span className="text-3xl font-bold text-white">$99</span>
-                <span className="text-sm text-zinc-500">USDT / {ko ? "월" : "month"}</span>
+              <div className="flex items-baseline gap-1 mt-4">
+                <span className="text-4xl font-bold text-white">$99</span>
+                <span className="text-base text-zinc-500">/{ko ? "월" : "mo"}</span>
               </div>
-              <p className="text-[11px] text-zinc-500 mt-2">
-                {ko ? "프로 트레이더를 위한 풀 액세스" : "Full access for professional traders"}
+              <p className="text-sm text-zinc-400 mt-2">
+                {ko ? "프로 트레이더를 위한 전체 액세스" : "Full access for pro traders"}
               </p>
             </div>
             <div className="flex-1 border-t border-blue-500/10 pt-5 space-y-0.5 relative">
-              <Feature included>{ko ? "AI 채팅 100회/일" : "100 AI chat messages/day"}</Feature>
-              <Feature included>{ko ? "차트 분석 30회/일" : "30 chart analyses/day"}</Feature>
-              <Feature included>{ko ? "고래 트래커 (전체)" : "Whale tracker (full access)"}</Feature>
-              <Feature included>{ko ? "차트 & 시장 데이터" : "Charts & market data"}</Feature>
+              <Feature included highlight>{ko ? "AI 퀀트 채팅 100회/일" : "100 AI quant chats/day"}</Feature>
+              <Feature included highlight>{ko ? "차트 분석 30회/일" : "30 chart analyses/day"}</Feature>
+              <Feature included>{ko ? "시장 데이터 (전체)" : "Market data (full)"}</Feature>
               <Feature included>{ko ? "뉴스 피드" : "News feed"}</Feature>
-              <Feature included>{ko ? "커뮤니티 포스트" : "Community posts"}</Feature>
-              <Feature included>{ko ? "실시간 고래 알림" : "Real-time whale alerts"}</Feature>
-              <Feature included>{ko ? "업비트 + 김치 프리미엄" : "Upbit + Kimchi Premium data"}</Feature>
-              <Feature included>{ko ? "텔레그램 프리미엄 알림" : "Telegram premium alerts"}</Feature>
+              <Feature included>{ko ? "고래 트래커 (전체)" : "Whale tracker (full)"}</Feature>
+              <Feature included>{ko ? "퀀트 시그널" : "Quant signals"}</Feature>
+              <Feature included highlight>{ko ? "업비트 + 김치 프리미엄 데이터" : "Upbit + Kimchi Premium data"}</Feature>
+              <Feature included highlight>{ko ? "실시간 고래 알림 (텔레그램)" : "Real-time whale alerts (Telegram)"}</Feature>
+              <Feature included highlight>{ko ? "텔레그램 프리미엄 전용 채널" : "Telegram premium-only channel"}</Feature>
             </div>
             <div className="mt-6 pt-5 border-t border-blue-500/10 relative">
-              <PaymentSection walletAddress={walletAddress} walletAddressErc20={walletAddressErc20} ko={ko} />
-              <p className="text-center text-[9px] text-zinc-600 mt-3">
-                {ko ? "USDT 결제 · 즉시 활성화 · 언제든 취소" : "USDT payment · Instant activation · Cancel anytime"}
-              </p>
+              <a
+                href={`/${lang}/pricing#payment`}
+                className="block w-full text-center py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition-colors"
+              >
+                {ko ? "Premium 시작 — $99/월" : "Get Premium — $99/mo"}
+              </a>
             </div>
           </div>
         </div>
 
-        {/* FAQ / Notes */}
-        <div className="mt-12 border-t border-white/[0.06] pt-8">
-          <h2 className="text-sm font-semibold text-zinc-400 mb-4">
+        {/* Feature Comparison Table */}
+        <div className="mt-16 max-w-5xl mx-auto">
+          <h2 className="text-xl font-bold text-white mb-6 text-center">
+            {ko ? "기능 비교" : "Feature Comparison"}
+          </h2>
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[600px]">
+                <thead>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="px-6 py-4 text-left text-sm text-zinc-400 font-medium">{ko ? "기능" : "Feature"}</th>
+                    <th className="px-4 py-4 text-center text-sm text-zinc-500 font-medium">Free</th>
+                    <th className="px-4 py-4 text-center text-sm text-emerald-400 font-medium">Basic $25</th>
+                    <th className="px-4 py-4 text-center text-sm text-blue-400 font-medium">Premium $99</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {[
+                    { feature: ko ? "AI 퀀트 채팅" : "AI Quant Chat", free: ko ? "1회/일" : "1/day", basic: ko ? "25회/일" : "25/day", premium: ko ? "100회/일" : "100/day" },
+                    { feature: ko ? "차트 분석" : "Chart Analysis", free: ko ? "1회/일" : "1/day", basic: ko ? "10회/일" : "10/day", premium: ko ? "30회/일" : "30/day" },
+                    { feature: ko ? "AI 모델" : "AI Model", free: "Gemini Flash", basic: "Gemini 2.5 Pro", premium: "Gemini 2.5 Pro" },
+                    { feature: ko ? "실시간 데이터 소스" : "Live Data Sources", free: "3", basic: "7", premium: ko ? "9 (전체)" : "9 (all)" },
+                    { feature: ko ? "바이낸스 가격" : "Binance Prices", free: "✓", basic: "✓", premium: "✓" },
+                    { feature: ko ? "업비트 + 김치 프리미엄" : "Upbit + Kimchi Premium", free: "—", basic: "—", premium: "✓" },
+                    { feature: ko ? "기술적 분석 (RSI, MA)" : "Technicals (RSI, MA)", free: "—", basic: "✓", premium: "✓" },
+                    { feature: ko ? "고래 트래커" : "Whale Tracker", free: "—", basic: ko ? "상위 5명" : "Top 5", premium: ko ? "전체" : "Full" },
+                    { feature: ko ? "퀀트 시그널" : "Quant Signals", free: "—", basic: "✓", premium: "✓" },
+                    { feature: ko ? "뉴스 컨텍스트" : "News Context", free: ko ? "헤드라인" : "Headlines", basic: ko ? "5개 소스" : "5 sources", premium: ko ? "8개 + 트위터" : "8 + Twitter" },
+                    { feature: ko ? "트레이딩뷰 차트" : "TradingView Charts", free: "✓", basic: "✓", premium: "✓" },
+                    { feature: ko ? "실시간 알림" : "Real-time Alerts", free: "—", basic: "—", premium: ko ? "텔레그램" : "Telegram" },
+                    { feature: ko ? "프리미엄 텔레그램 채널" : "Premium Telegram Channel", free: "—", basic: "—", premium: "✓" },
+                    { feature: ko ? "우선 지원" : "Priority Support", free: "—", basic: ko ? "이메일" : "Email", premium: ko ? "텔레그램 DM" : "Telegram DM" },
+                  ].map((row, i) => (
+                    <tr key={i} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
+                      <td className="px-6 py-3 text-zinc-300 font-medium">{row.feature}</td>
+                      <td className="px-4 py-3 text-center text-zinc-500">{row.free}</td>
+                      <td className="px-4 py-3 text-center text-zinc-300">{row.basic}</td>
+                      <td className="px-4 py-3 text-center text-white font-medium">{row.premium}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Section */}
+        <div id="payment" className="mt-16 max-w-2xl mx-auto">
+          <h2 className="text-xl font-bold text-white mb-2 text-center">
+            {ko ? "결제하기" : "Make Payment"}
+          </h2>
+          <p className="text-sm text-zinc-500 text-center mb-6">
+            {ko ? "USDT로 즉시 결제하고 바로 시작하세요" : "Pay with USDT and get started instantly"}
+          </p>
+          <PaymentSection walletAddress={walletAddress} walletAddressErc20={walletAddressErc20} ko={ko} />
+        </div>
+
+        {/* FAQ */}
+        <div className="mt-16 max-w-3xl mx-auto border-t border-white/[0.06] pt-10">
+          <h2 className="text-lg font-bold text-zinc-300 mb-6 text-center">
             {ko ? "자주 묻는 질문" : "FAQ"}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4">
-              <p className="text-[11px] font-semibold text-zinc-300 mb-1">
-                {ko ? "어떻게 결제하나요?" : "How do I pay?"}
-              </p>
-              <p className="text-[11px] text-zinc-500 leading-relaxed">
-                {ko
-                  ? "위 주소로 99 USDT (TRC20)를 전송한 후 거래 ID를 제출해 주세요. 자동으로 확인됩니다."
-                  : "Send 99 USDT (TRC20) to the address above, then submit your transaction ID. It auto-verifies instantly."}
-              </p>
-            </div>
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4">
-              <p className="text-[11px] font-semibold text-zinc-300 mb-1">
-                {ko ? "취소 정책은 어떻게 되나요?" : "What's the cancellation policy?"}
-              </p>
-              <p className="text-[11px] text-zinc-500 leading-relaxed">
-                {ko
-                  ? "언제든지 취소할 수 있습니다. 현재 결제 기간이 끝날 때까지 프리미엄 기능을 이용할 수 있습니다."
-                  : "Cancel anytime. You keep premium access until the end of your current billing period."}
-              </p>
-            </div>
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4">
-              <p className="text-[11px] font-semibold text-zinc-300 mb-1">
-                {ko ? "AI 채팅은 어떤 모델을 사용하나요?" : "What AI model powers the chat?"}
-              </p>
-              <p className="text-[11px] text-zinc-500 leading-relaxed">
-                {ko
-                  ? "Google Gemini 2.5 Pro를 사용하며, 바이낸스와 업비트의 실시간 데이터가 연동됩니다."
-                  : "Powered by Google Gemini 2.5 Pro with real-time data from Binance and Upbit exchanges."}
-              </p>
-            </div>
-            <div className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-4">
-              <p className="text-[11px] font-semibold text-zinc-300 mb-1">
-                {ko ? "무료 플랜의 제한은 무엇인가요?" : "What are Free plan limits?"}
-              </p>
-              <p className="text-[11px] text-zinc-500 leading-relaxed">
-                {ko
-                  ? "하루 AI 채팅 10회, 차트 분석 3회까지 무료입니다. 매일 자정(UTC)에 초기화됩니다."
-                  : "10 AI chats and 3 chart analyses per day. Limits reset daily at midnight UTC."}
-              </p>
-            </div>
+            {[
+              {
+                q: ko ? "Basic과 Premium의 차이는?" : "What's the difference between Basic and Premium?",
+                a: ko
+                  ? "Basic은 일일 AI 분석과 핵심 도구를 제공합니다. Premium은 업비트 김치 프리미엄 데이터, 실시간 고래 알림, 텔레그램 프리미엄 채널, 더 많은 데이터 소스(9개)를 포함합니다."
+                  : "Basic gives daily AI analysis and core tools. Premium adds Upbit Kimchi Premium data, real-time whale alerts, Telegram premium channel, and more data sources (9 total).",
+              },
+              {
+                q: ko ? "어떻게 결제하나요?" : "How do I pay?",
+                a: ko
+                  ? "ERC-20(이더리움) 또는 TRC-20(트론) 네트워크로 USDT를 전송한 후 TXID를 제출하면 즉시 활성화됩니다."
+                  : "Send USDT via ERC-20 (Ethereum) or TRC-20 (TRON), submit your TXID, and it activates instantly.",
+              },
+              {
+                q: ko ? "AI 모델은 무엇을 사용하나요?" : "What AI model is used?",
+                a: ko
+                  ? "Google Gemini 2.5 Pro를 사용하며, 바이낸스, 업비트, CoinGecko 등 9개 실시간 데이터 소스가 연동됩니다."
+                  : "Powered by Google Gemini 2.5 Pro with 9 real-time data sources including Binance, Upbit, and CoinGecko.",
+              },
+              {
+                q: ko ? "언제든 취소할 수 있나요?" : "Can I cancel anytime?",
+                a: ko
+                  ? "네, 언제든 취소 가능합니다. 현재 결제 기간이 끝날 때까지 모든 기능을 이용할 수 있습니다."
+                  : "Yes, cancel anytime. You keep access until the end of your current billing period.",
+              },
+            ].map((faq, i) => (
+              <div key={i} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-5">
+                <p className="text-sm font-semibold text-zinc-200 mb-2">{faq.q}</p>
+                <p className="text-sm text-zinc-500 leading-relaxed">{faq.a}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
