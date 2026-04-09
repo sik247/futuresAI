@@ -2942,4 +2942,922 @@ SWIFT x 체인링크 파일럿이 3월 2단계로 이동 — 이제 8개 주요 
     publishedAt: "2026-04-05T20:00:00.000Z",
     author: "FuturesAI Quant Desk",
   },
+  ] = [
+  {
+    id: "matic-4h-analysis-20260409",
+    slug: "polygon-matic-lower-highs-pattern-signals-continued-downside",
+    title: "Polygon (MATIC): Lower Highs Pattern Signals Continued Downside",
+    titleKo: "폴리곤(MATIC): 저고점 패턴, 지속적 하락 신호",
+    excerpt:
+      "MATIC has carved a textbook sequence of lower highs since the early-March peak near $0.114, with price now compressing near the $0.086 area. RSI sits at a non-oversold 42 while MACD hovers near zero with a bearish lean — momentum is not yet exhausted, favoring continuation short setups targeting $0.075.",
+    excerptKo:
+      "MATIC은 3월 초 $0.114 고점 이후 교과서적인 저고점 시퀀스를 형성하며 현재 $0.086 근방에서 압축 중입니다. RSI는 42로 과매도 구간이 아니며 MACD는 제로선 근방에서 약세 기울기를 유지해, 모멘텀이 아직 소진되지 않았음을 시사합니다. $0.075를 목표로 한 숏 포지션이 유효합니다.",
+    content: `## Structure
+
+The 4H chart for MATIC/POL prints a classic bearish structure: a descending series of lower highs from the early-March swing high near $0.114 down to the current trading range around $0.086. Each successive rally peak — $0.114, $0.105, $0.095 — has failed to recover the prior high before sellers reasserted control. The current price of $0.3794 on the broader pair reflects the denomination shift, but the pattern is identical in percentage terms. Price is now coiling just above the $0.08 demand zone, which has held on two prior tests but is thinning.
+
+## Key Levels
+
+**Resistance:** $0.095 (most recent lower high / prior breakdown level), $0.105 (February consolidation base), $0.114 (early-March swing high — invalidation level for the bear thesis)
+
+**Support:** $0.08 (immediate demand zone, double-bottom area), $0.075 (next major structural support from Q4 2025 accumulation range), $0.068 (longer-term horizontal support)
+
+## RSI / MACD
+
+RSI at 42 is notably informative here: it is mid-range, not oversold, meaning there is room for additional downside before any oversold bounce is triggered. Historically, MATIC enters genuine mean-reversion rallies only after RSI approaches 25–30; the 42 reading suggests the market is in a grind-down phase, not a capitulation. MACD is hovering near zero with the MACD line below the signal line — a soft bearish cross that aligns with the lower-highs pattern. No bullish histogram divergence is present, removing a key counterargument to the short thesis.
+
+## Volume Profile
+
+Volume analysis on the 4H chart shows the heaviest concentration of traded volume between $0.086 and $0.095, forming a high-volume node that now acts as overhead resistance. Below $0.080, volume thins considerably, which implies a relatively fast move to $0.075 if the $0.08 level gives way. There are no meaningful volume clusters to slow descent until the $0.068 zone, making a flush scenario plausible on any broad crypto market weakness.
+
+## Macro Context
+
+MATIC has been a consistent underperformer in the current altcoin drawdown cycle, declining sharply against both BTC and ETH on a relative basis. The broader L1/L2 landscape is facing fee-pressure headwinds as Ethereum's blob fee market compresses L2 revenue narratives. Polygon's zkEVM launch failed to catalyze a sustained premium; the market has re-rated the asset accordingly. The 24h change of -0.29% is deceptively calm — it masks the structural damage on higher timeframes where the 3-month drawdown exceeds 45%.
+
+## Risk / Reward
+
+**Bear case (primary):** Price rejects from the $0.092–$0.095 resistance band, confirming the lower-high pattern. Short entry near $0.091, stop above $0.098 (above prior lower high), take profit at $0.075. Estimated R/R approximately 2.3:1.
+
+**Bull case (invalidation):** A 4H close above $0.098 on expanding volume would break the lower-highs sequence and shift bias to neutral. A close above $0.114 would fully invalidate the bear structure.
+
+## Verdict
+
+**SHORT.** The lower-highs pattern is clean, RSI has room to fall before hitting oversold, MACD is bearishly configured, and volume structure confirms overhead supply at $0.092–$0.095. The trade is to short into any rally toward resistance with a stop above $0.098, targeting the $0.075 support. Reduce size if $0.08 holds as a double-bottom with bullish divergence.`,
+    contentKo: `## 구조
+
+MATIC/POL의 4시간봉 차트는 전형적인 약세 구조를 보여줍니다. 3월 초 $0.114 스윙 고점에서 현재 $0.086 근방까지 하락하는 저고점 시퀀스가 이어지고 있습니다. 각 연속 랠리 고점($0.114, $0.105, $0.095)은 매도세가 다시 우위를 점하기 전 이전 고점을 회복하지 못했습니다. 현재 가격 $0.3794는 더 넓은 페어 기준이지만, 퍼센트 관점에서 패턴은 동일합니다. 가격은 지금 $0.08 수요 구간 바로 위에서 압축되고 있으며, 이 레벨은 두 차례 테스트를 버텼지만 점점 약해지고 있습니다.
+
+## 핵심 레벨
+
+**저항선:** $0.095 (최근 저고점 / 이전 붕괴 레벨), $0.105 (2월 횡보 기반), $0.114 (3월 초 스윙 고점 — 약세 시나리오 무효화 레벨)
+
+**지지선:** $0.08 (직접적 수요 구간, 이중 바닥 영역), $0.075 (2025년 4분기 축적 레인지의 다음 주요 구조적 지지), $0.068 (장기 수평 지지)
+
+## RSI / MACD
+
+RSI 42는 중간 레인지로 과매도 구간이 아닙니다. 즉, 과매도 바운스가 발동되기 전에 추가 하락 여지가 있음을 의미합니다. 역사적으로 MATIC의 실질적인 평균회귀 랠리는 RSI가 25~30에 근접할 때 시작됐으며, 현재 42 수준은 시장이 급락이 아닌 완만한 하락 단계임을 시사합니다. MACD는 제로선 근방에서 MACD 라인이 시그널 라인 아래에 위치한 소프트 약세 크로스 상태로, 저고점 패턴과 일치합니다. 강세 히스토그램 다이버전스도 없어 숏 시나리오에 대한 주요 반론도 제거된 상태입니다.
+
+## 거래량 프로파일
+
+4시간봉 거래량 분석에서 $0.086~$0.095 구간에 가장 두꺼운 거래량 클러스터(고거래량 노드)가 집중되어 있으며, 현재 이 구간이 상단 저항으로 작용합니다. $0.080 아래에서는 거래량이 얇아 $0.08이 무너질 경우 $0.075까지 비교적 빠른 이동이 예상됩니다. $0.068 구간까지는 의미 있는 거래량 클러스터가 없어, 전반적인 암호화폐 시장 약세 시 플러시 시나리오도 가능합니다.
+
+## 거시 환경
+
+MATIC은 현재 알트코인 하락 사이클에서 BTC, ETH 대비 일관되게 언더퍼폼하고 있습니다. L1/L2 환경 전반은 이더리움의 블롭 수수료 시장이 L2 수익 내러티브를 압박하는 역풍에 직면해 있습니다. 폴리곤의 zkEVM 출시는 지속적인 프리미엄을 이끌어내지 못했으며 시장은 이에 맞게 자산을 재평가했습니다. 24시간 변동 -0.29%는 표면상 안정적으로 보이지만, 3개월 하락폭이 45%를 넘는 고타임프레임의 구조적 손상을 가립니다.
+
+## 리스크 / 리워드
+
+**약세 시나리오(주요):** $0.092~$0.095 저항 구간에서 거부 시 저고점 패턴 확인. $0.091 근방 숏 진입, 이전 저고점 위 $0.098 손절, $0.075 익절 목표. 예상 R/R 약 2.3:1.
+
+**강세 시나리오(무효화):** 거래량 확대와 함께 $0.098 위 4시간봉 종가 형성 시 저고점 시퀀스 이탈 및 중립 전환. $0.114 돌파 종가 시 약세 구조 완전 무효화.
+
+## 판단
+
+**숏.** 저고점 패턴이 명확하고, RSI는 과매도 이전까지 하락 여지가 있으며, MACD는 약세 구성이고, 거래량 구조가 $0.092~$0.095의 상단 공급을 확인합니다. 저항 구간으로의 랠리 시 $0.098 위 손절, $0.075 지지 목표 숏 전략을 취합니다. $0.08에서 강세 다이버전스를 동반한 이중 바닥이 형성될 경우 포지션 규모를 축소합니다.`,
+    coin: "Polygon",
+    symbol: "MATIC",
+    direction: "SHORT",
+    chartImage: "/images/blog/matic-4h-chart.png",
+    price: 0.3794,
+    change24h: -0.29,
+    rsi: 42,
+    tradeSetup: { entry: 0.091, stopLoss: 0.098, takeProfit: 0.075, riskReward: "1:2.3" },
+    supportLevels: [0.08, 0.075, 0.068],
+    resistanceLevels: [0.095, 0.105, 0.114],
+    publishedAt: "2026-04-09T08:00:00.000Z",
+    author: "FuturesAI Quant Desk",
+  },
+  {
+    id: "uni-4h-analysis-20260409",
+    slug: "uniswap-breaks-3-10-support-macd-deeply-negative-short-bias",
+    title: "Uniswap Breaks $3.10 Support: Deeply Negative MACD Confirms Short Bias",
+    titleKo: "유니스왑, $3.10 지지선 붕괴: 깊은 마이너스 MACD가 숏 바이어스 확인",
+    excerpt:
+      "UNI has broken below the key $3.10 support on the 4H chart after printing four consecutive lower highs from the $4.20 peak. With RSI approaching oversold at 35 and MACD deeply negative, any bounce toward $3.30–$3.40 is a sell-the-rally opportunity ahead of a likely test of the $2.80 structure.",
+    excerptKo:
+      "UNI는 $4.20 고점 이후 4회 연속 저고점을 형성한 뒤 4시간봉 기준 핵심 $3.10 지지선을 하향 이탈했습니다. RSI가 35로 과매도에 근접하고 MACD가 깊은 음권인 상황에서, $3.30~$3.40 구간으로의 반등은 $2.80 구조 테스트에 앞선 랠리 매도 기회입니다.",
+    content: `## Structure
+
+UNI's 4H chart is one of the cleaner bearish structures in the mid-cap DeFi space right now. From the mid-March high of $4.20, price has produced an unambiguous sequence of lower highs: $4.20 → $3.75 → $3.65 → $3.30, and has now broken below the $3.10 support level that had contained the prior corrective leg. The breakdown candle was impulsive, closing below $3.10 on above-average volume, which distinguishes it from a false breakdown. The current price of $3.09 effectively sits at the scene of the crime — the former $3.10 support, now flipped to resistance.
+
+## Key Levels
+
+**Resistance:** $3.10 (former support, now flipped resistance — most critical near-term level), $3.30 (prior lower high / 4H 20 EMA), $3.65 (prior lower high / 4H 50 EMA convergence zone)
+
+**Support:** $2.90 (minor horizontal support from early February), $2.80 (major structural support / Q4 2025 consolidation base), $2.50 (2025 yearly open — would represent full round-trip of the year)
+
+## RSI / MACD
+
+RSI at 35 is approaching the oversold boundary at 30 but has not yet reached it. Critically, there is no bullish divergence on RSI at this juncture — the oscillator is making lower lows in sync with price, confirming that momentum is aligned with the downtrend rather than diverging from it. This rules out a high-probability reversal setup at current levels. MACD is deeply negative, with the histogram printing its largest bearish bars since the $4.20 breakdown began. The signal line is descending steeply with no sign of a cross, indicating that bearish momentum is not just present but accelerating.
+
+## Volume Profile
+
+The $3.10–$3.30 band has historically been one of the highest volume concentration zones for UNI, built during the February rally. With price now below this band, that entire volume cluster acts as overhead resistance. Any attempt to recover into $3.10–$3.30 will face significant sell pressure from holders underwater in that range. Below $2.90, volume thins to pre-February levels, suggesting a relatively unimpeded path to $2.80 once $2.90 gives way. Short-term volume on the breakdown bar was 1.7x the 20-period average, lending credence to the move.
+
+## Macro Context
+
+UNI's -5.07% 24h decline outpaces the broader DeFi index and reflects sector-specific pressure as DEX fee revenue has stagnated relative to Q4 2025 highs. Uniswap Labs faces increasing competition from aggregators and intent-based protocols that route volume away from its on-chain pools. The protocol's token lacks a clear near-term catalyst — the fee-switch governance vote remains unresolved and UNI holders continue to receive no direct cash flows. This removes a fundamental floor that might otherwise arrest the technical slide.
+
+## Risk / Reward
+
+**Bear case (primary):** Dead-cat bounce toward $3.10 former support (now resistance) fails to reclaim on a closing basis. Short entry $3.08–$3.12 range, stop above $3.32 (above prior lower high at $3.30), take profit at $2.80. R/R approximately 2.0:1 on a $3.10 short.
+
+**Bull case (invalidation):** A strong 4H close above $3.32 with MACD histogram turning less negative would suggest a short-term relief rally is underway. Full bullish invalidation requires reclaim of $3.65.
+
+## Verdict
+
+**SHORT.** The combination of a clean lower-highs sequence, a confirmed $3.10 breakdown, deeply negative MACD with no divergence, and no fundamental catalyst creates a high-conviction short setup. The highest-probability entry is a retest of $3.10 from below, offering better risk definition than chasing the breakdown. Target $2.80, stop $3.32.`,
+    contentKo: `## 구조
+
+UNI의 4시간봉 차트는 현재 중형 DeFi 섹터에서 가장 명확한 약세 구조 중 하나입니다. 3월 중순 $4.20 고점에서 가격은 명확한 저고점 시퀀스를 이어가고 있습니다: $4.20 → $3.75 → $3.65 → $3.30, 그리고 이전 조정을 지지했던 $3.10 지지선을 이탈했습니다. 붕괴 캔들은 평균 이상의 거래량으로 $3.10 아래에서 종가를 형성하며 허위 이탈과 구별됩니다. 현재 가격 $3.09는 사실상 전 지지선인 $3.10 — 현재 저항으로 전환 — 바로 아래에 위치합니다.
+
+## 핵심 레벨
+
+**저항선:** $3.10 (전 지지선, 현재 저항으로 전환 — 단기 최중요 레벨), $3.30 (이전 저고점 / 4H 20 EMA), $3.65 (이전 저고점 / 4H 50 EMA 수렴 구간)
+
+**지지선:** $2.90 (2월 초 소규모 수평 지지), $2.80 (주요 구조적 지지 / 2025년 4분기 횡보 기반), $2.50 (2025년 연초 시가 — 연간 상승분 완전 반납 레벨)
+
+## RSI / MACD
+
+RSI 35는 과매도 경계인 30에 근접하고 있으나 아직 도달하지 않았습니다. 결정적으로, 현재 RSI에는 강세 다이버전스가 없습니다. 오실레이터가 가격과 동조하며 저점을 낮추고 있어 모멘텀이 하락 추세를 확인하는 쪽에 정렬되어 있습니다. 이는 현 레벨에서 고확률 반전 셋업 가능성을 배제합니다. MACD는 깊은 음권으로, $4.20 하락 시작 이후 가장 큰 약세 히스토그램 바를 출력하고 있습니다. 시그널 라인이 가파르게 하락 중이며 크로스 징후가 없어 약세 모멘텀이 존재할 뿐만 아니라 가속되고 있음을 나타냅니다.
+
+## 거래량 프로파일
+
+$3.10~$3.30 구간은 2월 랠리 당시 형성된 UNI의 역사적 고거래량 집중 구간입니다. 현재 가격이 이 구간 아래에 있어 전체 거래량 클러스터가 상단 저항으로 작용합니다. $3.10~$3.30 회복 시도 시 해당 구간에서 매수한 보유자들의 강한 매도 압력에 직면할 것입니다. $2.90 아래에서는 거래량이 2월 이전 수준으로 얇아져 $2.90 이탈 시 $2.80까지 비교적 빠른 이동이 예상됩니다. 붕괴 캔들의 단기 거래량은 20기간 평균의 1.7배로, 해당 움직임의 신뢰성을 높입니다.
+
+## 거시 환경
+
+UNI의 -5.07% 24시간 하락은 DeFi 섹터 전반을 웃도는 것으로, DEX 수수료 수익이 2025년 4분기 고점 대비 정체된 데 따른 섹터 특유의 압박을 반영합니다. 유니스왑 랩스는 온체인 풀에서 거래량을 분산시키는 어그리게이터와 인텐트 기반 프로토콜의 경쟁이 심화되고 있습니다. 프로토콜 토큰은 명확한 단기 촉매가 부재합니다 — 수수료 스위치 거버넌스 투표는 미결이며 UNI 보유자는 여전히 직접적인 현금 흐름을 받지 못합니다. 이는 기술적 하락을 저지할 수 있는 펀더멘털 바닥을 제거합니다.
+
+## 리스크 / 리워드
+
+**약세 시나리오(주요):** $3.10 전 지지선(현 저항) 데드캣 바운스가 종가 기준 회복에 실패. $3.08~$3.12 구간 숏 진입, 이전 저고점 $3.30 위 $3.32 손절, $2.80 익절 목표. $3.10 숏 기준 R/R 약 2.0:1.
+
+**강세 시나리오(무효화):** MACD 히스토그램이 덜 음적으로 전환되는 가운데 $3.32 위 강한 4시간봉 종가 형성 시 단기 구호 랠리 진행 시사. $3.65 회복 시 완전한 강세 무효화.
+
+## 판단
+
+**숏.** 명확한 저고점 시퀀스, $3.10 붕괴 확인, 다이버전스 없는 깊은 마이너스 MACD, 그리고 펀더멘털 촉매 부재의 조합이 고확신 숏 셋업을 형성합니다. 최고 확률 진입점은 $3.10의 아래에서 위로의 재테스트로, 붕괴를 추격하는 것보다 더 나은 리스크 정의를 제공합니다. $2.80 목표, $3.32 손절.`,
+    coin: "Uniswap",
+    symbol: "UNI",
+    direction: "SHORT",
+    chartImage: "/images/blog/uni-4h-chart.png",
+    price: 3.09,
+    change24h: -5.07,
+    rsi: 35,
+    tradeSetup: { entry: 3.10, stopLoss: 3.32, takeProfit: 2.80, riskReward: "1:2.0" },
+    supportLevels: [2.90, 2.80, 2.50],
+    resistanceLevels: [3.10, 3.30, 3.65],
+    publishedAt: "2026-04-09T10:00:00.000Z",
+    author: "FuturesAI Quant Desk",
+  },
+  {
+    id: "near-4h-analysis-20260409",
+    slug: "near-protocol-volatile-range-bearish-macd-cross-warrants-caution",
+    title: "NEAR Protocol: Volatile Range and Bearish MACD Cross Warrants Caution",
+    titleKo: "NEAR 프로토콜: 변동성 레인지와 약세 MACD 크로스, 신중함 요구",
+    excerpt:
+      "NEAR has been the most volatile major L1 in this correction cycle, swinging from $1.80 to $1.00 and back to $1.70 before the current leg down to $1.33. A fresh bearish MACD crossover and RSI at 43 suggest the bounce from $1.00 is exhausted, but the wide range makes directional conviction difficult — a neutral posture with defined triggers is appropriate.",
+    excerptKo:
+      "NEAR는 이번 조정 사이클에서 주요 L1 중 가장 변동성이 높았으며, $1.80에서 $1.00으로 하락 후 $1.70까지 반등했다가 현재 $1.33으로 재차 하락했습니다. 새로운 약세 MACD 크로스와 RSI 43은 $1.00에서의 반등이 소진됐음을 시사하지만, 넓은 레인지는 방향성 확신을 어렵게 만들어 명확한 트리거를 동반한 중립 포지션이 적절합니다.",
+    content: `## Structure
+
+NEAR's 4H chart is the definition of a volatile, ranging market without a clear intermediate trend. The asset spiked to $1.80 in mid-March, sold off aggressively to $1.00 — a 44% drawdown in under two weeks — then recovered sharply to $1.70 before the current leg down has taken it back to $1.33. This behavior produces a wide, jagged range rather than the orderly lower-highs progression seen in assets like UNI. The $1.00 low is a significant structural anchor: it was bought aggressively with large candles, suggesting genuine demand at that level. However, the failure to recover above $1.70 — the swing high of the bounce — now sets up the next test of the $1.00–$1.10 demand zone as the bear case.
+
+## Key Levels
+
+**Resistance:** $1.45 (4H 20 EMA, current declining ceiling), $1.60 (4H 50 EMA, prior support turned resistance), $1.70 (swing high of the bounce — bull/bear pivot level)
+
+**Support:** $1.25 (recent 4H swing low, minor), $1.10 (strong demand zone — base of the $1.00 bounce), $1.00 (major structural support, capitulation low — invalidation level for any bull thesis)
+
+## RSI / MACD
+
+RSI at 43 reflects the mid-range limbo that NEAR is in. The bounce from $1.00 pushed RSI to approximately 62, but the subsequent failure to break $1.70 saw RSI retrace to current levels without ever reaching overbought territory — a sign that buying interest in the bounce was weak. The fresh bearish MACD crossover is the most actionable signal: the MACD line has crossed below the signal line for the first time since the $1.00 bounce began, and the histogram has turned negative. This crossover occurred at a price level ($1.45–$1.50) well below the $1.70 high, indicating that distribution began before the price exhaustion was obvious.
+
+## Volume Profile
+
+Volume during the $1.00–$1.70 bounce was notable — the initial recovery candles from $1.00 were among the highest-volume bars in the past 30 days, confirming genuine demand at the lows. However, the volume profile on the descent from $1.70 to $1.33 has been characteristically low, suggesting this is a slow bleed rather than a panic exit. This pattern — strong buy volume at lows, weak sell volume on the way down — is consistent with a ranging environment where neither bulls nor bears are committing fully. The $1.30–$1.35 zone has moderate volume support; a move below $1.25 on elevated volume would be a decisive signal.
+
+## Macro Context
+
+NEAR has underperformed on a relative basis despite having one of the stronger developer ecosystems in the L1 landscape. The AI narrative that briefly re-rated NEAR (due to its AI agent infrastructure ambitions) has faded as the broader AI-crypto hype cycle cooled. On-chain metrics show transaction counts are stable but fee revenue is low, limiting the protocol's ability to generate fundamental demand for the token. The 24h change of -2.71% is moderate and consistent with the gradual drift-down thesis rather than a sharp trend move.
+
+## Risk / Reward
+
+**Bear case:** Price fails to reclaim $1.45 (4H 20 EMA), confirming the MACD crossover as a reliable signal. A move toward $1.10 opens as the next key test. Short entry $1.38, stop $1.48 (above 20 EMA), target $1.10. R/R approximately 2.8:1.
+
+**Bull case:** A strong close above $1.48 negates the MACD crossover and puts $1.60–$1.70 back in play. A close above $1.70 would restart the bull thesis and target $1.90–$2.00.
+
+## Verdict
+
+**NEUTRAL.** The volatile, non-trending structure makes a high-conviction directional trade inadvisable at current levels. The bearish MACD crossover and RSI at 43 lean bearish, but the strong demand shown at $1.00 argues against aggressive short entries far from that level. The framework is: short if $1.33 breaks with MACD confirmation, long if $1.50 is reclaimed on expanding volume. No trade without a defined trigger.`,
+    contentKo: `## 구조
+
+NEAR의 4시간봉 차트는 명확한 중기 추세 없이 변동성이 높은 레인지 장세의 전형입니다. 3월 중순 $1.80까지 급등 후 $1.00까지 공격적으로 하락 — 2주도 안 되어 44% 하락 — 했다가 $1.70까지 급반등한 뒤 현재 $1.33까지 재차 하락했습니다. 이러한 움직임은 UNI 같은 자산에서 볼 수 있는 질서 있는 저고점 흐름이 아닌, 넓고 들쭉날쭉한 레인지를 형성합니다. $1.00 저점은 중요한 구조적 기준점으로, 대형 캔들로 공격적으로 매수된 것은 해당 레벨에서의 실질적인 수요를 시사합니다. 다만 반등의 스윙 고점인 $1.70 위 회복에 실패했으며, 이는 약세 시나리오의 다음 테스트로 $1.00~$1.10 수요 구간을 설정합니다.
+
+## 핵심 레벨
+
+**저항선:** $1.45 (4H 20 EMA, 현재 하락 상단), $1.60 (4H 50 EMA, 이전 지지에서 저항으로 전환), $1.70 (반등 스윙 고점 — 강세/약세 피벗 레벨)
+
+**지지선:** $1.25 (최근 4H 스윙 저점, 소규모), $1.10 (강한 수요 구간 — $1.00 반등 기반), $1.00 (주요 구조적 지지, 투매 저점 — 강세 시나리오 무효화 레벨)
+
+## RSI / MACD
+
+RSI 43은 NEAR가 처한 중간 레인지 상태를 반영합니다. $1.00에서의 반등이 RSI를 약 62까지 끌어올렸으나, $1.70 돌파 실패 후 RSI는 과매수 영역에 도달하지 못한 채 현재 수준으로 후퇴했습니다 — 반등에서의 매수 관심이 약했음을 나타냅니다. 새로운 약세 MACD 크로스가 가장 실행 가능한 신호입니다: $1.00 반등 시작 이후 처음으로 MACD 라인이 시그널 라인 아래로 교차했으며 히스토그램이 음전했습니다. 이 크로스는 $1.70 고점 훨씬 아래인 $1.45~$1.50 수준에서 발생했으며, 이는 가격 소진이 명확해지기 전에 분배가 시작됐음을 시사합니다.
+
+## 거래량 프로파일
+
+$1.00~$1.70 반등 중 거래량은 주목할 만했습니다 — $1.00에서의 초기 회복 캔들은 지난 30일 중 거래량이 가장 많은 바 중 하나로, 저점에서의 실질적인 수요를 확인시켜 줍니다. 그러나 $1.70에서 $1.33으로의 하락 과정에서 거래량은 특징적으로 낮았으며, 이는 패닉 청산이 아닌 완만한 하락임을 시사합니다. 저점에서 강한 매수 거래량, 하락 중 약한 매도 거래량 — 이 패턴은 강세파와 약세파 모두 완전히 베팅하지 않는 레인지 환경과 일치합니다. $1.30~$1.35 구간에는 적절한 거래량 지지가 있으며, 거래량 증가와 함께 $1.25 아래로 이탈할 경우 결정적인 신호가 될 것입니다.
+
+## 거시 환경
+
+NEAR는 L1 환경에서 가장 강력한 개발자 생태계 중 하나를 보유하고 있음에도 상대적으로 언더퍼폼했습니다. NEAR를 잠시 재평가시켰던 AI 내러티브(AI 에이전트 인프라 야망 때문)는 전반적인 AI-암호화폐 하이프 사이클이 냉각되면서 퇴조했습니다. 온체인 지표에서 트랜잭션 수는 안정적이나 수수료 수익이 낮아 프로토콜이 토큰에 대한 펀더멘털 수요를 창출하는 데 한계가 있습니다. -2.71%의 24시간 변동은 급격한 추세 이동보다 완만한 하락 드리프트 시나리오와 일치하는 적당한 수준입니다.
+
+## 리스크 / 리워드
+
+**약세 시나리오:** $1.45 (4H 20 EMA) 회복 실패 시 MACD 크로스를 신뢰할 만한 신호로 확인, $1.10 테스트 열림. $1.38 숏 진입, $1.48 (20 EMA 위) 손절, $1.10 목표. R/R 약 2.8:1.
+
+**강세 시나리오:** $1.48 위 강한 종가 형성 시 MACD 크로스 무효화 및 $1.60~$1.70 재진입. $1.70 돌파 종가 시 강세 시나리오 재개 및 $1.90~$2.00 목표.
+
+## 판단
+
+**중립.** 변동성 높고 추세 없는 구조는 현재 레벨에서 고확신 방향성 트레이드를 비권장합니다. 약세 MACD 크로스와 RSI 43은 약세 쪽으로 기울지만, $1.00에서 보인 강한 수요는 해당 레벨에서 멀리 떨어진 공격적 숏 진입을 경계하게 합니다. 프레임워크: MACD 확인과 함께 $1.33 이탈 시 숏, 거래량 확대와 함께 $1.50 회복 시 롱. 명확한 트리거 없이 진입하지 않습니다.`,
+    coin: "NEAR Protocol",
+    symbol: "NEAR",
+    direction: "NEUTRAL",
+    chartImage: "/images/blog/near-4h-chart.png",
+    price: 1.33,
+    change24h: -2.71,
+    rsi: 43,
+    tradeSetup: { entry: 1.38, stopLoss: 1.48, takeProfit: 1.10, riskReward: "1:2.8" },
+    supportLevels: [1.25, 1.10, 1.00],
+    resistanceLevels: [1.45, 1.60, 1.70],
+    publishedAt: "2026-04-09T12:00:00.000Z",
+    author: "FuturesAI Quant Desk",
+  },
+  {
+    id: "apt-4h-analysis-20260409",
+    slug: "aptos-failed-breakout-at-1-40-now-in-sustained-downtrend-targeting-75-cents",
+    title: "Aptos Failed Breakout at $1.40 Now Targeting $0.75 in Sustained Downtrend",
+    titleKo: "에이프토스, $1.40 돌파 실패 후 지속적 하락 추세 — $0.75 목표",
+    excerpt:
+      "APT's spike to $1.40 was a textbook failed breakout — rejected immediately and followed by an accelerating downtrend to the current $0.825. RSI at 38 is approaching but not yet at oversold levels, while bearish MACD confirms the downtrend has momentum. The $0.75 structural support is the next logical target.",
+    excerptKo:
+      "APT의 $1.40 급등은 교과서적인 돌파 실패로, 즉각 거부된 뒤 현재 $0.825까지 가속 하락 추세가 이어졌습니다. RSI 38은 과매도 레벨에 근접하고 있으나 아직 도달하지 않았으며, 약세 MACD는 하락 추세에 모멘텀이 있음을 확인합니다. $0.75 구조적 지지가 다음 논리적 목표입니다.",
+    content: `## Structure
+
+The APT 4H chart tells a clear and damaging story. Price staged an aggressive spike to $1.40 — a level that represented a significant multi-week resistance — but the spike was rejected on the same session, producing a long upper wick and a bearish engulfing close. This failed breakout is the defining event: rather than confirming a new trend, the $1.40 spike acted as a bull trap that shook out late buyers and invited fresh shorts. Since that rejection, APT has been in a sustained, lower-momentum downtrend, making progressively lower highs and lower lows with no meaningful bounce attempts. The current price of $0.825 is approaching the lower range of the established correction.
+
+## Key Levels
+
+**Resistance:** $0.90 (4H 20 EMA, nearest declining resistance), $0.95 (prior consolidation cluster and 4H 50 EMA), $1.05 (prior structure and the origin point of the spike setup)
+
+**Support:** $0.75 (major structural support — Q4 2025 accumulation base, high-volume node), $0.65 (longer-term horizontal support / 2025 mid-year consolidation), $0.58 (52-week low zone — extreme scenario)
+
+## RSI / MACD
+
+RSI at 38 is one of the more informative readings in this analysis batch. It is approaching oversold (30) but has not yet reached it, which historically means APT can fall another 8–12% before triggering the reflexive bounce that oversold RSI induces in this asset. There is no bullish RSI divergence present — the oscillator is synchronised with price, confirming trend coherence. MACD is in bearish territory with the histogram printing consecutive negative bars. The MACD line is below the signal line by a widening margin, suggesting the downtrend is gaining rather than losing momentum. A MACD histogram reversal (bars becoming less negative) would be the first warning sign for shorts.
+
+## Volume Profile
+
+The failed $1.40 breakout spike produced an outsized volume bar — the highest single-session volume in over a month — which is a classic "volume climax" pattern at a failed high. This type of volume at a resistance rejection frequently marks a significant distribution event. Subsequently, volume has stepped down on the decline from $1.40, which at first glance might seem bullish (lower volume = less conviction). However, in a post-climax downtrend, low-volume declines are normal as the pool of motivated buyers has been exhausted; they don't require high volume to continue. The $0.75 zone carries significant historical volume support and is the most likely area to see a genuine buying response.
+
+## Macro Context
+
+Aptos is in a difficult position relative to the broader L1 narrative. Move-language ecosystems have struggled to differentiate in terms of real economic activity, and APT's DeFi TVL has remained range-bound while competing chains have grown. The $1.40 spike may have been driven by a short-lived narrative catalyst (Move VM ecosystem news or thin order book dynamics) that quickly proved unsustainable. The -5.17% 24h decline is the second-largest in this analysis batch, reflecting meaningful selling pressure. The broader market environment — risk-off sentiment with BTC struggling — provides no tailwind for recovery.
+
+## Risk / Reward
+
+**Bear case (primary):** Continuation of downtrend with resistance holding at $0.90 (4H 20 EMA). Short entry on bounce to $0.855–$0.870, stop $0.910, target $0.75. R/R approximately 2.5:1.
+
+**Bull case (contrarian):** RSI reaches 30 at or near the $0.75 support, triggering an oversold mean-reversion bounce. Any long would require RSI divergence plus a volume capitulation bar at $0.75 — do not preemptively long into the downtrend.
+
+## Verdict
+
+**SHORT.** The failed $1.40 breakout is the highest-conviction signal in this analysis — it is a distribution event masquerading as a breakout. RSI at 38 leaves room to fall, MACD is bearish and gaining momentum, and $0.75 is the target with $0.90 as the stop zone on counter-trend entries. Avoid aggressive longs until RSI approaches 30 at a known structural level.`,
+    contentKo: `## 구조
+
+APT 4시간봉 차트는 명확하고 손상된 그림을 보여줍니다. 가격은 수주간의 주요 저항선인 $1.40까지 공격적으로 급등했으나, 같은 세션에서 즉각 거부되며 긴 위꼬리와 약세 장악형 종가를 형성했습니다. 이 돌파 실패가 핵심 사건입니다: $1.40 급등은 새로운 추세를 확인하는 것이 아니라 후기 매수자를 흔들어내고 신규 숏을 유인하는 불 트랩으로 작용했습니다. 해당 거부 이후 APT는 의미 있는 반등 시도 없이 지속적으로 저고점과 저저점을 만들며 완만한 하락 추세에 있습니다. 현재 가격 $0.825는 조정의 하단 레인지에 근접하고 있습니다.
+
+## 핵심 레벨
+
+**저항선:** $0.90 (4H 20 EMA, 가장 가까운 하락 저항), $0.95 (이전 횡보 클러스터 및 4H 50 EMA), $1.05 (이전 구조 및 급등 셋업 기원점)
+
+**지지선:** $0.75 (주요 구조적 지지 — 2025년 4분기 축적 기반, 고거래량 노드), $0.65 (장기 수평 지지 / 2025년 중반 횡보), $0.58 (52주 저점 구간 — 극단 시나리오)
+
+## RSI / MACD
+
+RSI 38은 이 분석 배치에서 가장 정보가 풍부한 수치 중 하나입니다. 과매도(30)에 근접하고 있으나 아직 도달하지 않았으며, 역사적으로 이는 APT가 과매도 RSI가 이 자산에서 유도하는 반사적 반등을 트리거하기 전에 8~12% 추가 하락할 수 있음을 의미합니다. 강세 RSI 다이버전스는 없습니다 — 오실레이터가 가격과 동조해 추세 일관성을 확인합니다. MACD는 약세 영역에서 연속 음적 히스토그램 바를 출력 중입니다. MACD 라인이 시그널 라인 아래에서 간격이 벌어지고 있어, 하락 추세가 모멘텀을 잃는 것이 아니라 얻고 있음을 시사합니다. MACD 히스토그램 반전(바가 덜 음적으로 변화)이 숏에 대한 첫 번째 경고 신호가 될 것입니다.
+
+## 거래량 프로파일
+
+$1.40 돌파 실패 급등은 한 달 이상 중 가장 높은 단일 세션 거래량 바를 만들었습니다 — 돌파 실패 고점에서의 전형적인 "거래량 클라이맥스" 패턴입니다. 저항 거부에서 이러한 유형의 거래량은 흔히 중요한 분배 사건을 표시합니다. 이후 $1.40에서의 하락 중 거래량이 감소했는데, 처음에는 강세(낮은 거래량 = 낮은 확신)로 보일 수 있습니다. 그러나 클라이맥스 후 하락 추세에서 저거래량 하락은 정상적입니다 — 동기부여된 매수자 풀이 소진됐기 때문에 지속을 위해 높은 거래량이 필요하지 않습니다. $0.75 구간은 상당한 역사적 거래량 지지를 보유하며 실질적인 매수 반응이 나타날 가능성이 가장 높은 영역입니다.
+
+## 거시 환경
+
+에이프토스는 더 넓은 L1 내러티브 대비 어려운 위치에 있습니다. 무브 언어 생태계는 실질적인 경제 활동 측면에서 차별화에 어려움을 겪었으며, APT의 DeFi TVL은 경쟁 체인이 성장하는 동안 레인지 내에 머물렀습니다. $1.40 급등은 단기 내러티브 촉매(무브 VM 생태계 뉴스 또는 얇은 오더북 역학)에 의해 주도됐을 수 있으나 빠르게 지속 불가능함이 드러났습니다. -5.17% 24시간 하락은 이 분석 배치에서 두 번째로 큰 것으로, 의미 있는 매도 압력을 반영합니다. BTC가 고전하는 위험 회피 분위기의 전반적인 시장 환경은 회복을 위한 순풍을 제공하지 않습니다.
+
+## 리스크 / 리워드
+
+**약세 시나리오(주요):** $0.90 (4H 20 EMA)에서 저항 유지와 함께 하락 추세 지속. $0.855~$0.870 반등 시 숏 진입, $0.910 손절, $0.75 목표. R/R 약 2.5:1.
+
+**강세 시나리오(역방향):** $0.75 지지 근방에서 RSI가 30에 도달해 과매도 평균회귀 반등 트리거. 롱 진입은 $0.75에서 RSI 다이버전스 플러스 거래량 투매 바 확인이 필요 — 하락 추세에서 사전 롱 진입 금지.
+
+## 판단
+
+**숏.** $1.40 돌파 실패는 이 분석에서 가장 높은 확신의 신호입니다 — 돌파로 위장한 분배 사건입니다. RSI 38은 하락 여지를 남겨두고 있으며, MACD는 약세이고 모멘텀을 얻고 있습니다. $0.75가 목표이며, 반추세 진입 시 $0.90이 손절 구간입니다. RSI가 알려진 구조적 레벨에서 30에 근접하기 전까지 공격적인 롱을 피합니다.`,
+    coin: "Aptos",
+    symbol: "APT",
+    direction: "SHORT",
+    chartImage: "/images/blog/apt-4h-chart.png",
+    price: 0.825,
+    change24h: -5.17,
+    rsi: 38,
+    tradeSetup: { entry: 0.860, stopLoss: 0.910, takeProfit: 0.75, riskReward: "1:2.5" },
+    supportLevels: [0.75, 0.65, 0.58],
+    resistanceLevels: [0.90, 0.95, 1.05],
+    publishedAt: "2026-04-09T14:00:00.000Z",
+    author: "FuturesAI Quant Desk",
+  },
+  {
+    id: "sui-4h-analysis-20260409",
+    slug: "sui-macd-indecision-near-zero-large-green-candle-hints-at-buyer-interest",
+    title: "SUI: MACD Indecision Near Zero — Large Green Candle Hints at Buyer Interest",
+    titleKo: "SUI: MACD 제로선 근방 관망 — 대형 양봉이 매수자 관심 시사",
+    excerpt:
+      "SUI has been oscillating in a wide range between $0.83 and $1.08 since mid-March, with the current price at $0.911 sitting in the middle of that range. A recent large green candle suggests buyers are stepping in near $0.83–$0.85, but MACD near zero and RSI at 40–45 provide no clear directional signal — this is a defined-range trade, not a trend trade.",
+    excerptKo:
+      "SUI는 3월 중순 이후 $0.83~$1.08의 넓은 레인지에서 진동하고 있으며, 현재 가격 $0.911은 해당 레인지 중간에 위치합니다. 최근 대형 양봉은 $0.83~$0.85 근방에서 매수자들이 개입하고 있음을 시사하지만, 제로선 근방의 MACD와 RSI 40~45는 명확한 방향 신호를 제공하지 않습니다 — 이는 추세 트레이드가 아닌 레인지 트레이드입니다.",
+    content: `## Structure
+
+SUI's 4H chart shows a well-defined oscillating range since the mid-March peak at $1.08. The sequence has been: peak at $1.08 → downtrend to $0.83 low → bounce to $0.96 → current decline to $0.911. This is not a clean trending structure in either direction — it is a series of impulses and corrections within a $0.83–$1.08 range. The notable feature is the large green candle that appeared near the $0.83–$0.85 lows: it was a high-relative-volume bullish bar that absorbed selling pressure and drove a sharp recovery to $0.96. This type of candle at range lows is typically associated with institutional accumulation or short-covering, and it provides a meaningful data point for defining the risk parameters of any trade here.
+
+## Key Levels
+
+**Resistance:** $0.96 (recent bounce high — most critical near-term resistance), $1.00 (psychological resistance / 4H 50 EMA zone), $1.08 (mid-March range high — top of the defined range)
+
+**Support:** $0.88 (4H 20 EMA, current declining support), $0.83 (range low / large green candle origin — key demand zone), $0.78 (prior structure below the range — break here suggests range has failed to the downside)
+
+## RSI / MACD
+
+RSI oscillating between 40 and 45 is precisely the type of mid-range, directionless reading that characterises a ranging market. Neither bulls nor bears have enough conviction to push RSI into overbought or oversold territory — the oscillator is simply echoing price's indecision. Crucially, RSI has not made a new low despite price declining from $0.96 to $0.91, which is a mild form of bullish divergence but not yet significant enough to act on. MACD is near zero, as specified in the chart observations: the MACD line and signal line are essentially flat and intertwined, showing maximum indecision. This is the classic MACD profile for a range-bound asset. A MACD cross in either direction from these zero-bound levels will be the first momentum signal worth tracking.
+
+## Volume Profile
+
+The large green candle near the $0.83 lows is the most important volume event on SUI's recent chart. The buying volume on that candle was significantly above average, suggesting real demand materialized at that level rather than a slow, low-volume absorption. This is bullish for the $0.83 support holding on the next test. By contrast, the current decline from $0.96 to $0.911 has been on diminishing volume — consistent with profit-taking or light bearish pressure rather than a new distribution phase. If the range low at $0.83 is tested again with declining volume on the approach, the probability of another bounce increases.
+
+## Macro Context
+
+SUI has emerged as one of the more resilient L1s in this correction cycle on a relative basis, owing to its growing DeFi ecosystem and the high-profile gaming/NFT integrations that have driven user growth. The $0.83–$1.08 range has absorbed the broader market weakness reasonably well — there has been no capitulation below the range low despite significant BTC and ETH drawdowns. The -4.02% 24h decline is notable but fits within the normal volatility band for SUI. The protocol's TVL has been growing even during the price correction, which provides a modest fundamental support argument that is absent in other assets reviewed today.
+
+## Risk / Reward
+
+**Range long (preferred at range lows):** Enter long near $0.85–$0.87 (approaching range low), stop below $0.80 (below range low with buffer), target $0.96 (prior bounce high) or $1.05 (range top). R/R approximately 2.5:1 targeting $0.96.
+
+**Range short (at range highs):** If price recovers to $0.96–$1.00 without MACD confirmation, short with stop above $1.05, target $0.85. R/R approximately 2.0:1.
+
+**Breakout long:** A 4H close above $1.05 on strong volume would signal range expansion and open $1.20–$1.30. Wait for confirmation before entering.
+
+## Verdict
+
+**NEUTRAL.** SUI is a well-defined range trade, not a trending opportunity. The large green candle at the range lows is constructive and argues against aggressive shorts from current levels. MACD at zero provides no directional edge. The optimal strategy is patience: buy the range low near $0.83–$0.87 with a tight stop, sell the range high near $0.96–$1.05. Do not force a directional trade until MACD breaks away from zero with price confirming a range boundary hold or break.`,
+    contentKo: `## 구조
+
+SUI의 4시간봉 차트는 3월 중순 $1.08 고점 이후 잘 정의된 진동 레인지를 보여줍니다. 시퀀스는 $1.08 고점 → $0.83 저점으로 하락 → $0.96으로 반등 → 현재 $0.911로 재차 하락입니다. 이것은 어느 방향으로도 명확한 추세 구조가 아닙니다 — $0.83~$1.08 레인지 내의 일련의 충격과 조정입니다. 주목할 특징은 $0.83~$0.85 저점 근방에서 나타난 대형 양봉입니다: 상대적으로 높은 거래량의 강세 바로 매도 압력을 흡수하고 $0.96까지 급격한 회복을 이끌었습니다. 레인지 저점에서 이러한 유형의 캔들은 일반적으로 기관 축적 또는 숏 커버링과 관련되며, 여기서의 트레이드 리스크 파라미터를 정의하는 데 의미 있는 데이터 포인트를 제공합니다.
+
+## 핵심 레벨
+
+**저항선:** $0.96 (최근 반등 고점 — 가장 중요한 단기 저항), $1.00 (심리적 저항 / 4H 50 EMA 구간), $1.08 (3월 중순 레인지 고점 — 정의된 레인지 상단)
+
+**지지선:** $0.88 (4H 20 EMA, 현재 하락 지지), $0.83 (레인지 저점 / 대형 양봉 기원점 — 핵심 수요 구간), $0.78 (레인지 아래 이전 구조 — 이탈 시 레인지가 하방으로 실패했음을 시사)
+
+## RSI / MACD
+
+RSI 40~45 진동은 레인지 장세를 특징짓는 방향 없는 중간 레인지 수치입니다. 강세파와 약세파 모두 RSI를 과매수 또는 과매도 영역으로 밀어붙일 확신이 부족합니다 — 오실레이터는 단순히 가격의 관망을 메아리처럼 반영합니다. 결정적으로, RSI는 가격이 $0.96에서 $0.91로 하락했음에도 새로운 저점을 만들지 않았는데, 이는 약한 형태의 강세 다이버전스이나 아직 실행에 옮길 만큼 유의미하지는 않습니다. MACD는 차트 관찰에서 지정된 대로 제로선 근방에 있습니다: MACD 라인과 시그널 라인이 본질적으로 평평하고 얽혀 최대 관망을 보여줍니다. 이것은 레인지 바운드 자산의 전형적인 MACD 프로파일입니다. 이 제로 바운드 레벨에서 어느 방향으로든 MACD 크로스가 추적할 첫 번째 모멘텀 신호가 될 것입니다.
+
+## 거래량 프로파일
+
+$0.83 저점 근방의 대형 양봉이 SUI 최근 차트에서 가장 중요한 거래량 사건입니다. 해당 캔들의 매수 거래량은 평균을 크게 상회했으며, 느리고 저거래량 흡수가 아닌 실질적인 수요가 해당 레벨에서 구체화됐음을 시사합니다. 이는 다음 테스트에서 $0.83 지지가 유지되는 것에 대해 강세적입니다. 이와 대조적으로 $0.96에서 $0.911로의 현재 하락은 감소하는 거래량 — 새로운 분배 단계가 아닌 차익 실현 또는 가벼운 약세 압력과 일치 — 에서 진행되고 있습니다. $0.83 레인지 저점이 다가가는 과정에서 감소하는 거래량으로 재차 테스트된다면, 또 다른 반등 확률이 높아집니다.
+
+## 거시 환경
+
+SUI는 성장하는 DeFi 생태계와 사용자 성장을 이끈 고프로파일 게임/NFT 통합으로 인해 이번 조정 사이클에서 상대적으로 가장 탄력 있는 L1 중 하나로 부상했습니다. $0.83~$1.08 레인지는 상당한 BTC 및 ETH 하락에도 불구하고 레인지 저점 아래로 투매 없이 전반적인 시장 약세를 합리적으로 잘 흡수했습니다. -4.02% 24시간 하락은 주목할 만하지만 SUI의 정상적인 변동성 범위 내에 있습니다. 프로토콜의 TVL은 가격 조정 중에도 성장했으며, 이는 오늘 검토한 다른 자산에서는 없는 적절한 펀더멘털 지지 논거를 제공합니다.
+
+## 리스크 / 리워드
+
+**레인지 롱(레인지 저점에서 선호):** $0.85~$0.87 근방 롱 진입(레인지 저점 근접), 레인지 저점 아래 버퍼 포함 $0.80 손절, $0.96(이전 반등 고점) 또는 $1.05(레인지 상단) 목표. $0.96 목표 시 R/R 약 2.5:1.
+
+**레인지 숏(레인지 고점에서):** MACD 확인 없이 가격이 $0.96~$1.00 회복 시, $1.05 위 손절, $0.85 목표 숏. R/R 약 2.0:1.
+
+**돌파 롱:** 강한 거래량과 함께 $1.05 위 4시간봉 종가 시 레인지 확장 신호 및 $1.20~$1.30 개방. 진입 전 확인 대기.
+
+## 판단
+
+**중립.** SUI는 추세 기회가 아닌 잘 정의된 레인지 트레이드입니다. 레인지 저점에서의 대형 양봉은 건설적이며 현재 레벨에서의 공격적인 숏에 반론을 제기합니다. 제로선의 MACD는 방향적 우위를 제공하지 않습니다. 최적 전략은 인내입니다: $0.83~$0.87 레인지 저점 근방에서 타이트한 손절로 매수, $0.96~$1.05 레인지 고점 근방에서 매도. 가격이 레인지 경계 유지 또는 이탈을 확인하며 MACD가 제로선을 벗어날 때까지 방향성 트레이드를 강요하지 않습니다.`,
+    coin: "Sui",
+    symbol: "SUI",
+    direction: "NEUTRAL",
+    chartImage: "/images/blog/sui-4h-chart.png",
+    price: 0.911,
+    change24h: -4.02,
+    rsi: 42,
+    tradeSetup: { entry: 0.86, stopLoss: 0.80, takeProfit: 0.96, riskReward: "1:2.5" },
+    supportLevels: [0.88, 0.83, 0.78],
+    resistanceLevels: [0.96, 1.00, 1.08],
+    publishedAt: "2026-04-09T16:00:00.000Z",
+    author: "FuturesAI Quant Desk",
+  },
+  ] = [
+  {
+    id: "op-4h-analysis-20260409",
+    slug: "optimism-breaks-012-support-accelerating-downtrend",
+    title: "Optimism Breaks $0.12 Support: Accelerating Downtrend",
+    titleKo: "옵티미즘, $0.12 지지선 붕괴: 하락 추세 가속화",
+    excerpt:
+      "OP has broken down through the $0.12 support level on rising volume, confirming the existing downtrend from the $0.14 high. With RSI at 37 approaching oversold and MACD histograms widening bearishly, the $0.11 structural floor is now actively being tested.",
+    excerptKo:
+      "OP는 거래량 증가와 함께 $0.12 지지선을 하향 이탈하며 $0.14 고점 이후 지속된 하락 추세를 확인했습니다. RSI가 37로 과매도 근접, MACD 히스토그램이 약세 확장 중인 상황에서 $0.11 구조적 저점이 현재 적극 테스트받고 있습니다.",
+    content: `## Structure
+
+The 4H chart shows OP in a clear descending channel from the $0.14 high reached in early April. The price has printed a series of lower highs and lower lows, with the $0.12 support — previously a key battleground — giving way decisively. The current candle at $0.1131 represents a continuation of this breakdown, not a retest from below.
+
+The bearish structure is reinforced by the lack of any meaningful buying wick on the breakdown candle. Sellers are clearly in control, and the pattern is characteristic of a capitulation leg rather than an orderly pullback.
+
+## Key Levels
+
+**Resistance:** $0.120 (broken support, now flipped resistance), $0.128 (4H 50 EMA), $0.140 (swing high / channel ceiling)
+
+**Support:** $0.110 (current structural test), $0.105 (prior consolidation base), $0.095 (major demand zone from February)
+
+## RSI / MACD
+
+RSI at 37 is approaching the oversold threshold of 30 but has not reached it. Notably, the last time RSI dipped below 30 for OP was at the $0.095 lows — suggesting there may be additional downside before a technical bounce materializes. The current RSI level is in the "danger zone" where trend continuation is more likely than reversal.
+
+MACD histogram bars are red and widening, indicating increasing bearish momentum. The signal line remains firmly below the MACD line with no signs of convergence. This setup historically precedes an additional 10-15% move in the direction of the trend before exhaustion.
+
+## Volume Profile
+
+Volume on red candles has been notably higher than on green candles over the past five sessions — a textbook distribution signature. The breakdown through $0.12 occurred on above-average volume, confirming the move is not a fakeout. No significant volume cluster exists between $0.11 and $0.095, meaning a breakdown of the $0.11 floor could lead to rapid price discovery lower.
+
+## Macro Context
+
+Layer-2 tokens broadly are underperforming this week as ETH itself struggles below key resistance. OP's correlation to ETH is high (~0.85 on 30D rolling), and with ETH showing no strength catalyst, headwinds for OP remain structural. The broader L2 narrative has also cooled significantly from the Q1 highs as on-chain activity metrics have disappointed.
+
+## Risk / Reward
+
+**Bear case (primary):** A breakdown and close below $0.110 opens a measured move to $0.095. Entry on a retest of $0.120 (prior support, now resistance) with a stop above $0.128 offers R/R of approximately 1:2.5.
+
+**Bull case (secondary):** RSI hits 30 and prints a bullish divergence candle at $0.110, triggering a relief rally back to $0.120. This scenario requires a volume spike on the green candle to be credible.
+
+## Verdict
+
+**SHORT.** The breakdown of $0.12 on expanding volume with a bearish MACD and RSI trending toward oversold creates a high-probability short continuation setup. The optimal entry is a retest of the $0.120 level with a tight stop at $0.128, targeting $0.095 for a 1:2.5+ risk/reward.`,
+    contentKo: `## 구조
+
+4시간봉 차트에서 OP는 4월 초 $0.14 고점 이후 명확한 하락 채널 내에서 움직이고 있습니다. 가격은 연속적으로 낮은 고점과 낮은 저점을 형성하며, 이전 핵심 지지선이었던 $0.12가 결정적으로 무너졌습니다. 현재 $0.1131 캔들은 이 붕괴의 반등 테스트가 아닌 하락 지속을 나타냅니다.
+
+붕괴 캔들에서 의미 있는 매수 꼬리가 전혀 없다는 점이 약세 구조를 강화합니다. 매도세가 완전히 주도권을 잡고 있으며, 이 패턴은 질서 있는 조정이 아닌 항복 국면의 특징을 보입니다.
+
+## 핵심 레벨
+
+**저항선:** $0.120 (붕괴된 지지선, 현재 저항으로 전환), $0.128 (4H 50 EMA), $0.140 (스윙 고점 / 채널 상단)
+
+**지지선:** $0.110 (현재 구조적 테스트 중), $0.105 (이전 횡보 기반), $0.095 (2월 주요 수요 구간)
+
+## RSI / MACD
+
+RSI 37은 과매도 기준선 30에 근접하고 있으나 아직 도달하지 않았습니다. 눈에 띄는 점은 OP의 RSI가 마지막으로 30 아래로 내려간 시점이 $0.095 저점대였다는 것으로, 기술적 반등이 나타나기 전 추가 하락 여지가 있음을 시사합니다. 현재 RSI 수준은 반전보다 추세 지속이 더 가능성 높은 '위험 구간'에 있습니다.
+
+MACD 히스토그램 막대는 빨갛고 확장 중으로 약세 모멘텀이 강화되고 있음을 나타냅니다. 시그널선은 MACD선 아래에 단단히 자리 잡고 있으며 수렴 조짐이 없습니다. 이 설정은 역사적으로 소진 전 추세 방향으로 10~15% 추가 이동을 예고합니다.
+
+## 거래량 프로파일
+
+최근 5세션 동안 하락 캔들의 거래량이 상승 캔들보다 현저히 높아 교과서적인 분배 패턴을 보입니다. $0.12 붕괴는 평균 이상의 거래량에서 발생했으며, 이는 페이크아웃이 아님을 확인합니다. $0.11과 $0.095 사이에 유의미한 거래량 클러스터가 없어, $0.11 바닥 붕괴 시 빠른 가격 발견이 이루어질 수 있습니다.
+
+## 거시 환경
+
+이더리움이 핵심 저항선 아래에서 고전하면서 레이어-2 토큰들이 이번 주 전반적으로 부진합니다. OP의 ETH 상관관계는 높으며(30일 롤링 기준 ~0.85), ETH에 강세 촉매가 없는 상황에서 OP의 역풍은 구조적입니다. 온체인 활동 지표가 기대에 미치지 못하면서 Q1 고점 대비 L2 내러티브도 크게 냉각됐습니다.
+
+## 리스크 / 리워드
+
+**약세 시나리오(주요):** $0.110 아래 종가 붕괴 시 $0.095까지 측정된 이동이 열립니다. $0.120(이전 지지선, 현재 저항) 재테스트 진입, $0.128 위 손절 설정 시 R/R 약 1:2.5.
+
+**강세 시나리오(부차적):** RSI가 30에 도달하고 $0.110에서 강세 다이버전스 캔들이 형성되어 $0.120까지 반등. 이 시나리오는 신뢰성 확보를 위해 상승 캔들에서 거래량 급등이 필요합니다.
+
+## 판단
+
+**숏.** 거래량 확장을 동반한 $0.12 붕괴와 약세 MACD, 과매도 근접 RSI가 결합되어 고확률 숏 지속 설정을 만들어냅니다. 최적 진입은 $0.120 레벨 재테스트 시 타이트한 스탑 $0.128, 목표가 $0.095로 1:2.5 이상의 리스크/리워드를 추구합니다. **SHORT.**`,
+    coin: "Optimism",
+    symbol: "OP",
+    direction: "SHORT",
+    chartImage: "/images/blog/op-4h-chart.png",
+    price: 0.1131,
+    change24h: -4.88,
+    rsi: 37,
+    tradeSetup: { entry: 0.12, stopLoss: 0.128, takeProfit: 0.095, riskReward: "1:2.5" },
+    supportLevels: [0.11, 0.105, 0.095],
+    resistanceLevels: [0.12, 0.128, 0.14],
+    publishedAt: "2026-04-09T18:00:00.000Z",
+    author: "FuturesAI Quant Desk",
+  },
+  {
+    id: "arb-4h-analysis-20260409",
+    slug: "arbitrum-range-bound-between-008-and-011-watching-for-breakout",
+    title: "Arbitrum Range-Bound Between $0.08–$0.11: Watching for Breakout",
+    titleKo: "아비트럼, $0.08~$0.11 레인지 횡보: 돌파 여부 주목",
+    excerpt:
+      "ARB has spent most of March and April oscillating between $0.08 and $0.11, with repeated buyer interest confirming the $0.08 floor as a reliable demand zone. A pullback from $0.105 to $0.101 is occurring now, and MACD is showing a nascent bullish cross near zero — the quality of this retracement will determine the next directional move.",
+    excerptKo:
+      "ARB는 3월~4월 대부분을 $0.08~$0.11 사이에서 진동하며, 반복적인 매수세가 $0.08 바닥을 신뢰할 수 있는 수요 구간으로 확인했습니다. 현재 $0.105에서 $0.101로의 되돌림이 진행 중이며, MACD가 제로 근처에서 초기 강세 교차를 보이고 있어 이번 조정의 질이 다음 방향성 이동을 결정할 것입니다.",
+    content: `## Structure
+
+ARB's 4H chart presents a textbook range structure, with seven distinct bounces from the $0.08–$0.082 support zone since mid-March. Each bounce has reached progressively similar highs in the $0.105–$0.110 band, creating a flat-top rectangle pattern. The current price of $0.1017 sits in the mid-to-upper portion of this range, currently in a minor retracement after the latest bounce from $0.08 lows.
+
+The absence of any decisive range-breaking candle in either direction — combined with the consistent volume at the $0.08 base — suggests a coiling structure. Range resolutions of this duration and repetition tend to produce sharp moves, but direction cannot be confirmed from price structure alone at this stage.
+
+## Key Levels
+
+**Resistance:** $0.105 (intra-range recent high), $0.110 (range ceiling / repeated rejection zone), $0.125 (prior breakdown zone from February)
+
+**Support:** $0.095 (mid-range equilibrium), $0.082 (range floor / strong demand zone), $0.080 (absolute range bottom)
+
+## RSI / MACD
+
+RSI at 44 is below the neutral 50 line but notably is NOT making new lows despite price being near the lower half of its range — a subtle positive divergence that supports the range-continuation (rather than breakdown) thesis. In prior instances where ARB RSI held above 35 inside this range, price recovered to the $0.105 region within 48–72 hours.
+
+MACD is showing its first bullish cross above zero since late March, though the histogram remains thin. This nascent cross has not been confirmed by volume and should be treated as a tentative signal. If the MACD histogram expands green over the next 2–3 candles, a push back toward $0.105–$0.110 becomes the higher-probability path.
+
+## Volume Profile
+
+The $0.08 level has accumulated the highest density of buy-side volume in the past 30 days, validating it as a genuine accumulation zone rather than a temporary pause. Mid-range volume (at $0.093–$0.097) is thin, which explains the rapid transitions between range extremes. Volume at the $0.105–$0.110 ceiling is mixed — some sessions show selling absorption, while others show impulsive rejection, making the upper boundary ambiguous.
+
+## Macro Context
+
+ARB's utility narrative is tied to Arbitrum One's sequencer fees and DeFi activity. Recent weeks have seen TVL stabilize on Arbitrum after declining from January highs, which removes a negative catalyst but does not provide a positive one. In the current risk-off environment where ETH-correlated assets are broadly soft, ARB is outperforming on a relative basis by holding its $0.08 floor — a signal worth monitoring.
+
+## Risk / Reward
+
+**Long case:** Entry near $0.095–$0.098 (mid-range pullback area), stop below $0.080, target $0.108–$0.110. R/R approximately 1:2.0.
+
+**Short case:** Entry near $0.108–$0.110 (range ceiling), stop above $0.118, target $0.082. R/R approximately 1:2.0.
+
+**Breakout long (higher conviction):** A 4H close above $0.112 with volume expansion targeting $0.125. Stop at $0.105.
+
+## Verdict
+
+**NEUTRAL.** ARB is in a well-defined range with strong structural support at $0.08 and a clear ceiling at $0.110. Neither bulls nor bears have shown the conviction required to break the range. The MACD bullish cross is encouraging but unconfirmed. The optimal strategy is range-trading: buying proximity to $0.082 and reducing exposure near $0.108, with a breakout trigger set at $0.112 close. **NEUTRAL.**`,
+    contentKo: `## 구조
+
+ARB의 4시간봉 차트는 교과서적인 레인지 구조를 보여주고 있으며, 3월 중순 이후 $0.08~$0.082 지지 구간에서 7번의 뚜렷한 반등이 있었습니다. 각 반등은 $0.105~$0.110 밴드에서 유사한 고점에 도달해 플랫톱 직사각형 패턴을 형성했습니다. 현재 $0.1017는 이 레인지의 중상단에 위치하며, $0.08 저점에서의 최신 반등 후 소폭 되돌림 중입니다.
+
+어느 방향으로도 결정적인 레인지 돌파 캔들이 없고 $0.08 기반에서 지속적인 거래량이 유지된다는 점은 코일링 구조를 시사합니다. 이 기간과 반복성을 가진 레인지 해소는 급격한 이동을 만들어내는 경향이 있지만, 현 단계에서는 가격 구조만으로 방향을 확인할 수 없습니다.
+
+## 핵심 레벨
+
+**저항선:** $0.105 (레인지 내 최근 고점), $0.110 (레인지 상단 / 반복 거부 구간), $0.125 (2월 붕괴 이전 구간)
+
+**지지선:** $0.095 (레인지 중간 균형점), $0.082 (레인지 바닥 / 강력 수요 구간), $0.080 (레인지 절대 하단)
+
+## RSI / MACD
+
+RSI 44는 중립선 50 아래에 있지만, 가격이 레인지 하반부에 있음에도 새로운 저점을 만들지 않고 있어 레인지 지속(붕괴가 아닌) 테제를 지지하는 미묘한 양성 다이버전스를 보입니다. ARB RSI가 이 레인지 내에서 35 이상을 유지한 이전 사례들에서 가격은 48~72시간 내 $0.105 구간으로 회복됐습니다.
+
+MACD는 3월 말 이후 첫 번째 제로선 위 강세 교차를 보이고 있으나 히스토그램은 얇은 상태입니다. 이 초기 교차는 거래량으로 확인되지 않아 잠정 신호로 취급해야 합니다. 향후 2~3 캔들 동안 MACD 히스토그램이 초록색으로 확장된다면 $0.105~$0.110으로의 재상승이 더 높은 확률의 경로가 됩니다.
+
+## 거래량 프로파일
+
+$0.08 레벨은 지난 30일 기준 매수 측 거래량이 가장 밀집된 구간으로, 일시적 휴지가 아닌 진정한 축적 구간임을 확인합니다. 중간 레인지($0.093~$0.097)의 거래량은 얇아 레인지 극단 간 빠른 전환을 설명합니다. $0.105~$0.110 상단의 거래량은 혼재되어 있어 상단 경계의 해석이 모호합니다.
+
+## 거시 환경
+
+ARB의 유틸리티 내러티브는 Arbitrum One의 시퀀서 수수료와 DeFi 활동에 연결됩니다. 최근 몇 주간 1월 고점 이후 감소하던 Arbitrum TVL이 안정화되어 부정적 촉매는 제거됐지만 긍정적 촉매는 아직 없습니다. ETH 연동 자산이 전반적으로 약세인 현 리스크오프 환경에서 ARB는 $0.08 바닥을 유지하며 상대적으로 선방 중으로, 모니터링할 가치가 있는 신호입니다.
+
+## 리스크 / 리워드
+
+**롱 시나리오:** $0.095~$0.098(레인지 중간 조정 구간) 진입, $0.080 아래 손절, $0.108~$0.110 목표. R/R 약 1:2.0.
+
+**숏 시나리오:** $0.108~$0.110(레인지 상단) 진입, $0.118 위 손절, $0.082 목표. R/R 약 1:2.0.
+
+**돌파 롱(고확신):** $0.112 거래량 동반 4H 종가 돌파 시 $0.125 목표. 손절 $0.105.
+
+## 판단
+
+**중립.** ARB는 $0.08에 강력한 구조적 지지와 $0.110에 명확한 상단이 있는 잘 정의된 레인지 내에 있습니다. 강세파도 약세파도 레인지를 돌파하는 데 필요한 확신을 보여주지 못했습니다. MACD 강세 교차는 고무적이나 미확인 상태입니다. 최적 전략은 $0.082 근처 매수, $0.108 근처 비중 축소, $0.112 종가 돌파 시 돌파 트리거 설정의 레인지 트레이딩입니다. **NEUTRAL.**`,
+    coin: "Arbitrum",
+    symbol: "ARB",
+    direction: "NEUTRAL",
+    chartImage: "/images/blog/arb-4h-chart.png",
+    price: 0.1017,
+    change24h: -1.26,
+    rsi: 44,
+    tradeSetup: { entry: 0.097, stopLoss: 0.08, takeProfit: 0.11, riskReward: "1:2.0" },
+    supportLevels: [0.095, 0.082, 0.08],
+    resistanceLevels: [0.105, 0.11, 0.125],
+    publishedAt: "2026-04-09T20:00:00.000Z",
+    author: "FuturesAI Quant Desk",
+  },
+  {
+    id: "fil-4h-analysis-20260409",
+    slug: "filecoin-bounces-from-075-but-momentum-fading-near-double-support",
+    title: "Filecoin Bounces From $0.75 But Momentum Fading Near Double Support",
+    titleKo: "파일코인, $0.75에서 반등했으나 이중 지지선 근처서 모멘텀 약화",
+    excerpt:
+      "FIL staged a strong recovery from the $0.75 low with a series of large green candles, but the rally has stalled below the $1.06 prior high at $0.881 where two horizontal support-turned-resistance levels converge. MACD remains negative and RSI at 40 signals the recovery lacks institutional conviction.",
+    excerptKo:
+      "FIL은 $0.75 저점에서 대형 양봉을 연속으로 만들며 강한 회복을 보였으나, 두 개의 수평 지지-저항 전환선이 수렴하는 $0.881에서 이전 $1.06 고점 아래 랠리가 멈췄습니다. MACD는 여전히 음전이고 RSI 40은 회복세에 기관 확신이 부족함을 신호합니다.",
+    content: `## Structure
+
+FIL's 4H chart tells a two-chapter story. Chapter one: a sustained downtrend from $1.06 all-time range high to the $0.75 structural low, printing a sequence of lower highs and lower lows across approximately three weeks. Chapter two: a sharp V-shaped bounce from $0.75 with several oversized green candles that recovered approximately 17% in price before momentum began to fade.
+
+The current price of $0.881 now sits between two critical horizontal levels — $0.85 and $0.82 — that served as former support during the downtrend and are now acting as overhead context levels. The pattern is consistent with a bear market rally: powerful but ultimately fading without structural change.
+
+## Key Levels
+
+**Resistance:** $0.920 (4H 50 EMA, descending), $0.960 (prior consolidation base before the final drop), $1.060 (swing high / range top)
+
+**Support:** $0.850 (horizontal level, former support cluster), $0.820 (horizontal level, second support band), $0.750 (V-bounce origin / major demand low)
+
+## RSI / MACD
+
+RSI at 40 is in bearish territory — below 50 but not yet oversold. Critically, the bounce from $0.75 only pushed RSI to approximately 55 at its peak before rolling back over. In genuine trend reversals, the recovery RSI typically reaches 60–70 and holds above 50 on subsequent pullbacks. The failure to sustain above 50 on RSI suggests this remains a bear market rally rather than a trend change.
+
+MACD is still in negative territory despite the recovery. The histogram has moved from deeply red toward zero, showing reduced bearish momentum, but there is no bullish crossover. A MACD cross above zero would be the first credible technical signal of a potential reversal. Until that occurs, the MACD context argues for caution on long positions.
+
+## Volume Profile
+
+The $0.75 bounce was accompanied by the highest volume seen in several weeks — a genuine exhaustion signal at the lows. However, subsequent green candles in the rally have shown declining volume, a classic diminishing-momentum pattern. When recovery volume progressively shrinks, it indicates buyers are becoming less eager at higher prices, increasing the probability of a re-test of lower levels.
+
+The thickest volume node in the past 30 days sits at $0.82–$0.88, meaning price is currently in a contested zone where both buyers and sellers have been active.
+
+## Macro Context
+
+Filecoin's fundamentals are mixed: storage demand on the network remains modest relative to supply, and FIL emission dynamics create consistent sell pressure. The recent broader crypto risk-off environment has disproportionately impacted storage and infrastructure tokens. While the long-term decentralized storage narrative remains intact, it is not a near-term price catalyst.
+
+The 30-day change for FIL is approximately -28%, significantly underperforming BTC and ETH. This relative weakness argues against aggressive long positioning even at depressed levels.
+
+## Risk / Reward
+
+**Bull case:** Acceptance above $0.920 (4H 50 EMA) with a MACD crossover would signal trend rehabilitation. Target $0.960 then $1.06. Entry $0.895, stop $0.840, R/R approximately 1:2.1.
+
+**Bear case:** Failure to hold $0.850 opens re-test of $0.820 and potentially $0.750. A breakdown below $0.750 would be a new leg lower with no structural support until $0.65.
+
+## Verdict
+
+**NEUTRAL.** The $0.75 bounce was meaningful and the recovery has structural merit, but momentum is clearly fading and technicals (MACD negative, RSI below 50) do not yet confirm a trend reversal. The $0.85–$0.88 zone is the decisive battleground. Wait for either a confirmed MACD crossover with RSI reclaiming 50, or a clean rejection candle at $0.920 before committing directionally. **NEUTRAL.**`,
+    contentKo: `## 구조
+
+FIL의 4시간봉 차트는 두 챕터로 이루어져 있습니다. 챕터 1: 약 3주에 걸쳐 연속적인 낮은 고점과 낮은 저점을 형성하며 $1.06 고점에서 $0.75 구조적 저점까지 이어진 지속적인 하락 추세. 챕터 2: $0.75에서 여러 개의 대형 양봉을 동반한 급격한 V자 반등으로 모멘텀이 약해지기 전까지 약 17% 가격 회복.
+
+현재 $0.881는 하락 추세 중 이전 지지선으로 작동했다가 이제 상단 컨텍스트 레벨로 전환된 두 개의 수평선 $0.85와 $0.82 사이에 위치합니다. 이 패턴은 강하지만 구조적 변화 없이 결국 약해지는 베어마켓 랠리와 일치합니다.
+
+## 핵심 레벨
+
+**저항선:** $0.920 (4H 50 EMA, 하락 중), $0.960 (최종 하락 전 이전 횡보 기반), $1.060 (스윙 고점 / 레인지 상단)
+
+**지지선:** $0.850 (수평선, 이전 지지 클러스터), $0.820 (수평선, 두 번째 지지 밴드), $0.750 (V자 반등 기점 / 주요 수요 저점)
+
+## RSI / MACD
+
+RSI 40은 50 아래 약세 영역에 있으나 아직 과매도는 아닙니다. 중요한 점은 $0.75에서의 반등이 RSI를 최대 약 55까지만 끌어올린 뒤 되꺾였다는 것입니다. 진정한 추세 전환에서는 회복 RSI가 보통 60~70에 도달하고 이후 조정에서 50 위를 유지합니다. RSI가 50 위에서 지속되지 못한 것은 이것이 추세 변화가 아닌 베어마켓 랠리임을 시사합니다.
+
+MACD는 회복에도 불구하고 여전히 음전 영역에 있습니다. 히스토그램이 짙은 빨강에서 제로 방향으로 움직여 약세 모멘텀 감소를 보여주고 있으나, 강세 교차는 없습니다. 제로선 위 MACD 교차가 잠재적 반전의 첫 번째 신뢰할 만한 기술적 신호가 될 것입니다. 그 이전까지 MACD 컨텍스트는 롱 포지션에 신중함을 주장합니다.
+
+## 거래량 프로파일
+
+$0.75 반등은 몇 주 만에 가장 높은 거래량을 동반해 저점에서의 진정한 소진 신호였습니다. 그러나 이후 랠리의 양봉들은 점점 줄어드는 거래량을 보이고 있어 교과서적인 모멘텀 감소 패턴입니다. 회복 거래량이 점진적으로 줄어들면 매수자들이 더 높은 가격에서 덜 적극적이 되고 있음을 나타내어 낮은 레벨 재테스트 확률이 높아집니다.
+
+지난 30일 기준 가장 두꺼운 거래량 노드는 $0.82~$0.88에 위치하여, 현재 가격이 매수자와 매도자 모두 활발했던 경합 구간에 있음을 의미합니다.
+
+## 거시 환경
+
+파일코인의 펀더멘털은 혼재됩니다: 네트워크의 스토리지 수요는 공급 대비 미온적이고, FIL 발행 역학이 지속적인 매도 압력을 만들어냅니다. 최근 광범위한 크립토 리스크오프 환경이 스토리지 및 인프라 토큰에 비례 이상의 영향을 미쳤습니다. 탈중앙화 스토리지 장기 내러티브는 유효하나 단기 가격 촉매는 아닙니다.
+
+FIL의 30일 변동은 약 -28%로 BTC와 ETH를 크게 언더퍼폼하고 있습니다. 이 상대적 약세는 하락된 가격 수준에서도 적극적인 롱 포지셔닝에 반대 논거입니다.
+
+## 리스크 / 리워드
+
+**강세 시나리오:** MACD 교차와 함께 $0.920(4H 50 EMA) 위 안착 시 추세 회복 신호. 목표 $0.960 이후 $1.06. 진입 $0.895, 손절 $0.840, R/R 약 1:2.1.
+
+**약세 시나리오:** $0.850 유지 실패 시 $0.820 재테스트, 잠재적으로 $0.750까지. $0.750 아래 붕괴는 $0.65까지 구조적 지지 없는 새로운 하락 국면을 엽니다.
+
+## 판단
+
+**중립.** $0.75 반등은 의미 있었고 회복에 구조적 근거가 있으나, 모멘텀이 명확히 약화되고 있으며 기술적 지표(MACD 음전, RSI 50 이하)가 아직 추세 전환을 확인하지 않습니다. $0.85~$0.88 구간이 결정적 전투지입니다. MACD 교차 확인과 RSI 50 회복, 또는 $0.920에서 명확한 거부 캔들을 기다린 후 방향성 진입을 결정하세요. **NEUTRAL.**`,
+    coin: "Filecoin",
+    symbol: "FIL",
+    direction: "NEUTRAL",
+    chartImage: "/images/blog/fil-4h-chart.png",
+    price: 0.881,
+    change24h: -2.87,
+    rsi: 40,
+    tradeSetup: { entry: 0.895, stopLoss: 0.84, takeProfit: 0.96, riskReward: "1:2.1" },
+    supportLevels: [0.85, 0.82, 0.75],
+    resistanceLevels: [0.92, 0.96, 1.06],
+    publishedAt: "2026-04-09T22:00:00.000Z",
+    author: "FuturesAI Quant Desk",
+  },
+  {
+    id: "atom-4h-analysis-20260409",
+    slug: "cosmos-recovery-from-130-to-180-macd-bullish-cross-targets-200",
+    title: "Cosmos Recovery From $1.30 to $1.80: MACD Bullish Cross Targets $2.00",
+    titleKo: "코스모스, $1.30에서 $1.80 회복: MACD 강세 교차로 $2.00 목표",
+    excerpt:
+      "ATOM has staged one of the strongest recoveries in the altcoin space, bouncing sharply from the $1.30 structural low back to $1.795 — a 38% move. The MACD is crossing bullish from deeply negative territory and RSI at 46 is rising, making ATOM one of the few green coins on a broadly red day.",
+    excerptKo:
+      "ATOM은 알트코인 공간에서 가장 강한 회복 중 하나를 보이며 $1.30 구조적 저점에서 $1.795까지 급반등해 38% 이동을 기록했습니다. MACD가 깊은 음전 영역에서 강세 교차 중이고 RSI가 46에서 상승세를 보이며, 전반적으로 빨간 장에서 몇 안 되는 양봉 코인 중 하나입니다.",
+    content: `## Structure
+
+ATOM's 4H chart shows a dramatic V-shaped recovery following a sharp sell-off from $2.30 to $1.30 — a 43% drop that flushed out leveraged longs and weak hands. The recovery from $1.30 has been equally sharp, with the asset now reclaiming the $1.80 level. This type of sharp-down, sharp-up pattern is frequently seen in assets that have experienced forced liquidation cascades followed by aggressive dip buying.
+
+The critical question now is whether the $1.80 level represents a genuine recovery pivot or simply a technical bounce into a still-bearish structure. The fact that ATOM is trading green on a day when most of the market is red is a notable relative strength signal worth tracking.
+
+## Key Levels
+
+**Resistance:** $1.900 (descending 4H 50 EMA), $2.000 (psychological level / prior consolidation zone), $2.300 (swing high from which the drop originated)
+
+**Support:** $1.700 (short-term pullback support), $1.550 (mid-recovery support band), $1.300 (V-bounce low / structural demand floor)
+
+## RSI / MACD
+
+RSI at 46 is below the neutral 50 threshold but, critically, it is rising. More importantly, the trajectory from the sub-30 oversold reading at the $1.30 low to the current 46 represents a positive swing divergence — the velocity of the RSI recovery suggests genuine buying pressure, not just short-covering.
+
+MACD is showing a bullish crossover from deeply negative territory, which is one of the stronger reversal signals in momentum analysis. A MACD cross that occurs after extreme negative readings (not just mild ones) tends to have higher follow-through probability because it signals the exhaustion of seller momentum at a structural low. The histogram turning green, however thin, is the trigger this setup has been waiting for.
+
+## Volume Profile
+
+The $1.30 low was printed on exceptionally high volume — the highest in the past six weeks — indicating capitulation rather than orderly selling. This is a textbook exhaustion signal. The subsequent bounce has maintained above-average volume, which distinguishes it from weak technical recoveries. If volume remains elevated as price reclaims $1.80, the probability of a sustained move toward $2.00 increases meaningfully.
+
+Volume nodes are most dense in the $1.70–$1.90 zone, representing the prior distribution area before the sell-off. Working through this overhead volume will be the key test for bulls.
+
+## Macro Context
+
+Cosmos Hub's interchain security framework is gaining traction with several consumer chains now live, providing a tangible utility driver for ATOM. Staking yields remain competitive at approximately 15-18% APR, creating buy-and-stake demand that provides a price floor dynamic. Among Cosmos ecosystem tokens, ATOM has historically been the safest bet during recovery phases due to its staking demand and liquidity profile.
+
+In a broader context where institutional capital is selectively rotating into assets with genuine yield and utility narratives, ATOM's positioning is favorable compared to pure speculative tokens.
+
+## Risk / Reward
+
+**Bull case (primary):** RSI crosses 50 and holds while MACD histogram expands green. Entry at current $1.795 or on any pullback to $1.70, stop below $1.55, target $2.00 then $2.30. R/R approximately 1:2.3 to $2.30.
+
+**Bear case (secondary):** Failure to hold $1.70 on a pullback confirms the bounce as exhausted. Would open re-test of $1.30.
+
+## Verdict
+
+**LONG.** The combination of a capitulation low at $1.30 on extreme volume, a MACD bullish cross from deeply negative territory, rising RSI from oversold, and relative strength on a red market day creates a high-quality long setup. Entry near current levels with a stop below $1.55 and a target of $2.00–$2.30 offers a favorable asymmetry. Risk should be sized conservatively given the broader bearish market context. **LONG.**`,
+    contentKo: `## 구조
+
+ATOM의 4시간봉 차트는 $2.30에서 $1.30까지의 급격한 하락(43% 낙폭) 후 극적인 V자 회복을 보여줍니다. 이 낙폭은 레버리지 롱과 약한 손들을 청산시켰습니다. $1.30에서의 회복 또한 급격하여 현재 $1.80 레벨을 되찾았습니다. 이런 급하강-급반등 패턴은 강제 청산 캐스케이드 후 공격적인 저점 매수가 발생한 자산에서 자주 관찰됩니다.
+
+현재 핵심 질문은 $1.80 레벨이 진정한 회복 피벗인지 아니면 여전히 약세 구조로의 기술적 반등에 불과한지입니다. 대부분의 시장이 하락하는 날 ATOM이 양봉으로 거래된다는 사실은 주목할 만한 상대 강도 신호입니다.
+
+## 핵심 레벨
+
+**저항선:** $1.900 (하강 중 4H 50 EMA), $2.000 (심리적 레벨 / 이전 횡보 구간), $2.300 (하락이 시작된 스윙 고점)
+
+**지지선:** $1.700 (단기 조정 지지), $1.550 (중간 회복 지지 밴드), $1.300 (V자 반등 저점 / 구조적 수요 바닥)
+
+## RSI / MACD
+
+RSI 46은 중립선 50 아래에 있으나, 중요한 것은 상승 중이라는 점입니다. 더 중요하게, $1.30 저점에서의 30 이하 과매도 수치에서 현재 46까지의 궤적은 양성 스윙 다이버전스를 나타냅니다. RSI 회복 속도는 단순 숏 커버링이 아닌 실질적인 매수 압력을 시사합니다.
+
+MACD는 깊은 음전 영역에서 강세 교차를 보이고 있으며, 이는 모멘텀 분석에서 더 강한 반전 신호 중 하나입니다. 극단적 음전 수치(미약한 수치가 아닌) 후 발생하는 MACD 교차는 구조적 저점에서 매도 모멘텀의 소진을 신호하기 때문에 더 높은 추종 확률을 가집니다. 아무리 얇더라도 히스토그램이 초록색으로 전환된 것이 이 설정이 기다려온 트리거입니다.
+
+## 거래량 프로파일
+
+$1.30 저점은 지난 6주 중 가장 높은 거래량에서 형성됐으며, 이는 질서 있는 매도가 아닌 항복을 나타냅니다. 교과서적인 소진 신호입니다. 이후 반등은 평균 이상의 거래량을 유지하여 약한 기술적 회복과 구분됩니다. 가격이 $1.80을 회복하는 동안 거래량이 높게 유지된다면 $2.00을 향한 지속적인 이동 확률이 의미 있게 높아집니다.
+
+거래량 노드는 $1.70~$1.90 구간에 가장 밀집되어 있어 하락 전 이전 분배 구간을 나타냅니다. 이 상단 거래량을 통과하는 것이 강세파의 핵심 테스트가 될 것입니다.
+
+## 거시 환경
+
+코스모스 허브의 인터체인 보안 프레임워크는 현재 여러 컨슈머 체인이 라이브되면서 ATOM에 실질적인 유틸리티 동인을 제공하고 있습니다. 스테이킹 수익률은 약 15-18% APR로 경쟁력이 있어 가격 바닥 역학을 제공하는 매수-스테이킹 수요를 만들어냅니다. 코스모스 에코시스템 토큰 중 ATOM은 스테이킹 수요와 유동성 프로파일로 인해 역사적으로 회복 국면에서 가장 안전한 선택이었습니다.
+
+실질적인 수익률과 유틸리티 내러티브를 가진 자산으로 기관 자본이 선택적으로 로테이션하는 광범위한 맥락에서 ATOM의 포지셔닝은 순수 투기 토큰 대비 유리합니다.
+
+## 리스크 / 리워드
+
+**강세 시나리오(주요):** RSI가 50을 돌파하고 유지하며 MACD 히스토그램이 초록으로 확장. 현재 $1.795 또는 $1.70 조정 시 진입, $1.55 아래 손절, 목표 $2.00 이후 $2.30. $2.30 기준 R/R 약 1:2.3.
+
+**약세 시나리오(부차적):** 조정 시 $1.70 유지 실패 시 반등이 소진된 것을 확인하며 $1.30 재테스트가 열립니다.
+
+## 판단
+
+**롱.** 극단적 거래량에서의 $1.30 항복 저점, 깊은 음전 영역에서의 MACD 강세 교차, 과매도에서 상승하는 RSI, 하락장에서의 상대 강도가 결합되어 고품질 롱 설정을 만들어냅니다. 현재 수준 진입, $1.55 아래 손절, $2.00~$2.30 목표로 유리한 비대칭을 제공합니다. 광범위한 약세 시장 맥락을 고려하여 보수적으로 리스크를 설정하세요. **LONG.**`,
+    coin: "Cosmos",
+    symbol: "ATOM",
+    direction: "LONG",
+    chartImage: "/images/blog/atom-4h-chart.png",
+    price: 1.795,
+    change24h: 0.39,
+    rsi: 46,
+    tradeSetup: { entry: 1.795, stopLoss: 1.55, takeProfit: 2.30, riskReward: "1:2.3" },
+    supportLevels: [1.70, 1.55, 1.30],
+    resistanceLevels: [1.90, 2.00, 2.30],
+    publishedAt: "2026-04-10T00:00:00.000Z",
+    author: "FuturesAI Quant Desk",
+  },
+  {
+    id: "render-4h-analysis-20260409",
+    slug: "render-consolidates-at-200-after-spike-to-340-massive-overhead-resistance",
+    title: "Render Consolidates at $2.00 After Spike to $3.40: Massive Overhead Resistance",
+    titleKo: "렌더, $3.40 스파이크 후 $2.00 횡보: 거대한 상단 저항 형성",
+    excerpt:
+      "RENDER experienced a parabolic move from $1.20 to $3.40 in mid-March before a sharp retracement brought it back to the $2.00 zone. The spike has created a wall of overhead resistance from selling pressure between $2.50 and $3.40, while the base at $2.00 appears to be stabilizing. RSI at 48 and MACD near zero reflect the post-spike equilibrium.",
+    excerptKo:
+      "RENDER는 3월 중순 $1.20에서 $3.40까지 포물선 이동을 보인 뒤 급격한 되돌림으로 $2.00 구간으로 복귀했습니다. 이 스파이크는 $2.50~$3.40 사이에 매도 압력으로 인한 거대한 상단 저항 벽을 만들었고, $2.00 기반이 안정화되는 것으로 보입니다. RSI 48과 제로 근처 MACD는 스파이크 후 균형 상태를 반영합니다.",
+    content: `## Structure
+
+RENDER's 4H chart is defined by one extraordinary event: a violent spike from $1.20 to $3.40 over approximately 5 days in mid-March — a 183% move — followed by an equally dramatic retracement back to $2.00. This kind of parabolic extension and retracement is one of the most distinctive chart patterns in crypto, and it fundamentally alters the technical landscape.
+
+The current consolidation around $2.00 represents the market finding a post-spike equilibrium. The question is whether $2.00 becomes a launching pad for the next leg, or a temporary pause before another leg lower toward the spike origin at $1.20. The consolidation has lasted several weeks, which is constructive — time allows the euphoria to exhaust and informed buyers to accumulate at discounted levels.
+
+## Key Levels
+
+**Resistance:** $2.40 (post-spike consolidation high / first overhead cluster), $2.80 (mid-spike retracement level), $3.40 (spike peak / absolute ceiling — a zone saturated with bag-holders)
+
+**Support:** $1.90 (lower edge of current consolidation), $1.60 (mid-spike support on the way up), $1.20 (pre-spike base / ultimate structural support)
+
+## RSI / MACD
+
+RSI at 48 is essentially flat and neutral, perfectly reflecting a market in equilibrium after a major move. This is not a bearish reading in context — it means the euphoria from the spike has been entirely digested. From this neutral RSI base, a renewed impulse in either direction would be signaled by RSI moving decisively above 55 (bullish) or below 40 (bearish).
+
+MACD near zero after the spike-and-retrace is similarly neutral. The histogram has transitioned from deeply positive (spike phase) through deeply negative (retrace phase) and is now hovering near zero. This zero-line convergence is the MACD's way of saying "the big move is over; waiting for next catalyst." A fresh MACD cross above zero on improving volume would be the technical green light for bulls.
+
+## Volume Profile
+
+The spike from $1.20 to $3.40 was accompanied by enormous volume — the highest in RENDER's history — driven by a combination of retail FOMO and momentum-chasing algorithmic buyers. The subsequent retracement has shown declining volume, which is normal after a parabolic move as retail excitement fades.
+
+The current consolidation at $2.00 shows moderate, relatively stable volume — neither aggressively buying nor selling. This equilibrium volume profile is typically seen in accumulation phases when patient buyers slowly absorb the overhead supply from spike traders who are still underwater.
+
+## Macro Context
+
+RENDER's fundamental catalyst was the ongoing AI compute narrative — the network enables GPU compute rental for AI workloads, and it has attracted genuine developer interest. However, the $3.40 spike priced in a significant amount of future growth that has yet to materialize. At $2.00, the valuation is more reasonable, but the overhang from spike buyers (who entered between $2.40 and $3.40) creates persistent sell pressure whenever price rallies into that zone.
+
+The broader AI crypto sector has cooled from its March euphoria peak, with many tokens retracing 40–60% from highs. RENDER's 41% retracement from the spike peak is in line with sector norms, suggesting the correction may be largely complete at this level.
+
+## Risk / Reward
+
+**Bull case:** Consolidation above $1.90 with a MACD cross above zero targets $2.40 then $2.80. Entry at $2.00–$2.05, stop below $1.85, R/R approximately 1:2.2 to $2.80.
+
+**Bear case:** Loss of the $1.90 consolidation floor opens a measured move back toward the pre-spike base of $1.20. The "fill the gap" dynamic is a real risk for parabolic moves that retrace.
+
+**Long-term bull case:** If broader AI narrative re-accelerates, RENDER could attempt to retest $3.40 highs, but this requires a significant market catalyst and is not a near-term trade.
+
+## Verdict
+
+**NEUTRAL.** The consolidation at $2.00 is constructive but inconclusive. The massive overhead resistance from $2.50 to $3.40 will limit upside potential near-term, while the $1.90–$2.00 base has proven resilient. The optimal posture is to wait for a directional resolution: a MACD cross above zero with a hold above $2.00 for longs, or a breakdown below $1.85 for shorts. Do not anticipate direction — let price confirm it. **NEUTRAL.**`,
+    contentKo: `## 구조
+
+RENDER의 4시간봉 차트는 하나의 특별한 사건으로 정의됩니다: 3월 중순 약 5일 동안 $1.20에서 $3.40까지의 격렬한 스파이크(183% 이동), 이어 $2.00으로의 동일하게 극적인 되돌림. 이런 포물선 확장과 되돌림은 크립토에서 가장 독특한 차트 패턴 중 하나로, 기술적 지형을 근본적으로 바꿔놓습니다.
+
+현재 $2.00 근처의 횡보는 스파이크 후 시장이 균형점을 찾는 것을 나타냅니다. 핵심 질문은 $2.00이 다음 다리의 발사대가 될지, 아니면 $1.20의 스파이크 기점을 향한 추가 하락 전 일시적 정지가 될지입니다. 횡보가 몇 주간 지속됐다는 점은 건설적입니다. 시간이 지나며 열기가 식고 정보력 있는 매수자들이 할인된 수준에서 축적할 수 있습니다.
+
+## 핵심 레벨
+
+**저항선:** $2.40 (스파이크 후 횡보 고점 / 첫 번째 상단 클러스터), $2.80 (스파이크 중간 되돌림 레벨), $3.40 (스파이크 피크 / 절대 상단 — 물린 매수자들로 포화된 구간)
+
+**지지선:** $1.90 (현재 횡보의 하단 경계), $1.60 (상승 중 스파이크 중간 지지), $1.20 (스파이크 전 기반 / 최종 구조적 지지)
+
+## RSI / MACD
+
+RSI 48은 본질적으로 플랫하고 중립으로, 주요 이동 후 균형 상태의 시장을 완벽하게 반영합니다. 이것은 맥락상 약세 수치가 아닙니다. 스파이크의 열기가 완전히 소화됐음을 의미합니다. 이 중립 RSI 기반에서, RSI가 결정적으로 55 위로(강세) 또는 40 아래로(약세) 이동하면 어느 방향으로든 새로운 임펄스가 신호됩니다.
+
+스파이크-되돌림 후 제로 근처의 MACD도 유사하게 중립입니다. 히스토그램은 깊은 양전(스파이크 국면)에서 깊은 음전(되돌림 국면)을 거쳐 현재 제로 근처에서 맴돌고 있습니다. 이 제로선 수렴은 MACD의 방식으로 "큰 이동은 끝났다. 다음 촉매를 기다리는 중"을 말합니다. 거래량 개선을 동반한 새로운 제로선 위 MACD 교차가 강세파의 기술적 청신호가 될 것입니다.
+
+## 거래량 프로파일
+
+$1.20에서 $3.40까지의 스파이크는 RENDER 역사상 가장 높은 거래량을 동반했으며, 리테일 FOMO와 모멘텀 추격 알고리즘 매수자들이 결합한 결과였습니다. 이후 되돌림은 포물선 이동 후 리테일 흥분이 사라지면서 정상적으로 거래량이 감소했습니다.
+
+현재 $2.00 횡보는 공격적으로 매수하거나 매도하지 않는 보통의 안정적인 거래량을 보입니다. 이 균형 거래량 프로파일은 인내심 있는 매수자들이 $2.40~$3.40 사이에서 진입한 스파이크 트레이더들의 상단 공급을 천천히 흡수하는 축적 국면에서 전형적으로 나타납니다.
+
+## 거시 환경
+
+RENDER의 펀더멘털 촉매는 진행 중인 AI 컴퓨트 내러티브였습니다. 네트워크는 AI 워크로드를 위한 GPU 컴퓨트 임대를 가능하게 하며 실제 개발자 관심을 끌었습니다. 그러나 $3.40 스파이크는 아직 실현되지 않은 상당한 미래 성장을 가격에 반영했습니다. $2.00에서 밸류에이션은 더 합리적이지만, 스파이크 매수자들($2.40~$3.40 진입자)의 오버행이 가격이 그 구간으로 랠리할 때마다 지속적인 매도 압력을 만듭니다.
+
+광범위한 AI 크립토 섹터는 3월 열기 피크에서 냉각됐고, 많은 토큰들이 고점 대비 40~60% 되돌림을 겪었습니다. RENDER의 스파이크 피크 대비 41% 되돌림은 섹터 기준에 부합하여 이 수준에서 조정이 대체로 완료됐을 수 있음을 시사합니다.
+
+## 리스크 / 리워드
+
+**강세 시나리오:** $1.90 위에서의 횡보와 제로선 위 MACD 교차 시 $2.40 이후 $2.80 목표. $2.00~$2.05 진입, $1.85 아래 손절, $2.80 기준 R/R 약 1:2.2.
+
+**약세 시나리오:** $1.90 횡보 바닥 소실 시 스파이크 전 기반 $1.20을 향한 측정된 이동이 열립니다. "갭 메우기" 역학은 되돌리는 포물선 이동의 실제 리스크입니다.
+
+**장기 강세 시나리오:** 광범위한 AI 내러티브가 재가속된다면 RENDER가 $3.40 고점 재테스트를 시도할 수 있으나, 이는 상당한 시장 촉매가 필요하며 단기 트레이드가 아닙니다.
+
+## 판단
+
+**중립.** $2.00에서의 횡보는 건설적이지만 결론적이지 않습니다. $2.50~$3.40의 거대한 상단 저항이 단기 상승 잠재력을 제한할 것이고, $1.90~$2.00 기반은 탄력적임을 증명했습니다. 최적 포지션은 방향성 해소를 기다리는 것입니다: 제로선 위 MACD 교차와 $2.00 위 유지 시 롱, $1.85 아래 붕괴 시 숏. 방향을 예상하지 말고 가격이 확인하게 하세요. **NEUTRAL.**`,
+    coin: "Render",
+    symbol: "RENDER",
+    direction: "NEUTRAL",
+    chartImage: "/images/blog/render-4h-chart.png",
+    price: 2.036,
+    change24h: -3.87,
+    rsi: 48,
+    tradeSetup: { entry: 2.05, stopLoss: 1.85, takeProfit: 2.80, riskReward: "1:2.2" },
+    supportLevels: [1.90, 1.60, 1.20],
+    resistanceLevels: [2.40, 2.80, 3.40],
+    publishedAt: "2026-04-10T02:00:00.000Z",
+    author: "FuturesAI Quant Desk",
+  },
 ];
