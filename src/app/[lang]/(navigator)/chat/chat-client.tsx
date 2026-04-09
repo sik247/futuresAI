@@ -134,12 +134,23 @@ function TradingViewChart({ ticker }: { ticker: TickerInfo }) {
 /* -------------------------------------------------------------------------- */
 /*  Loading Dots                                                               */
 /* -------------------------------------------------------------------------- */
-function LoadingDots() {
+function LoadingDots({ ko }: { ko?: boolean }) {
   return (
-    <div className="flex items-center gap-1 px-3 py-2">
-      <span className="w-1 h-1 bg-zinc-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
-      <span className="w-1 h-1 bg-zinc-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-      <span className="w-1 h-1 bg-zinc-500 rounded-full animate-bounce" />
+    <div className="space-y-2 px-3 py-2">
+      <div className="flex items-center gap-2">
+        <svg className="w-4 h-4 text-purple-400 animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+        <span className="text-xs text-purple-300 font-medium animate-pulse">
+          {ko ? "시장 데이터 수집 & 분석 중..." : "Gathering market data & analyzing..."}
+        </span>
+      </div>
+      <div className="flex gap-1 pl-6">
+        <span className="w-1 h-1 bg-zinc-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
+        <span className="w-1 h-1 bg-zinc-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
+        <span className="w-1 h-1 bg-zinc-600 rounded-full animate-bounce" />
+      </div>
     </div>
   );
 }
@@ -596,7 +607,7 @@ export default function ChatClient({ lang, userName }: Props) {
                       {ko ? "김알렉스" : "Alex Kim"}
                     </span>
                     <div className="pl-2.5 border-l-2 border-white/[0.06]">
-                      <LoadingDots />
+                      <LoadingDots ko={ko} />
                     </div>
                   </div>
                 </div>

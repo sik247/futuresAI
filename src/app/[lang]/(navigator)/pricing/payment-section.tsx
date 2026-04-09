@@ -23,7 +23,7 @@ function StatusBadge({ status }: { status: Payment["status"] }) {
   };
   const { label, cls } = cfg[status] ?? { label: status, cls: "bg-zinc-500/10 text-zinc-400" };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider ${cls}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-mono uppercase tracking-wider ${cls}`}>
       {label}
     </span>
   );
@@ -127,7 +127,7 @@ export default function PaymentSection({
         <p className="text-sm text-zinc-400 mb-3">
           {ko ? "결제하려면 로그인이 필요합니다." : "Sign in to make a payment."}
         </p>
-        <a href="/ko/login" className="inline-block px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-mono uppercase tracking-[0.15em] transition-colors">
+        <a href="/ko/login" className="inline-block px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-mono uppercase tracking-[0.15em] transition-colors">
           {ko ? "로그인" : "Sign In"}
         </a>
       </div>
@@ -163,7 +163,7 @@ export default function PaymentSection({
 
       {/* Plan Selection */}
       <div>
-        <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 mb-3">
+        <p className="text-xs font-mono uppercase tracking-wider text-zinc-500 mb-3">
           {ko ? "플랜 선택" : "Select Plan"}
         </p>
         <div className="grid grid-cols-2 gap-3">
@@ -191,8 +191,8 @@ export default function PaymentSection({
                   </svg>
                 )}
               </div>
-              <p className="text-2xl font-bold text-white mb-1">${plan.amount}<span className="text-xs text-zinc-500 font-normal">/mo</span></p>
-              <div className="text-[10px] text-zinc-500 space-y-0.5">
+              <p className="text-3xl font-bold text-white mb-1">${plan.amount}<span className="text-xs text-zinc-500 font-normal">/mo</span></p>
+              <div className="text-sm text-zinc-400 space-y-0.5">
                 <p>{ko ? `AI 채팅 ${plan.chat}회/일` : `${plan.chat} AI chats/day`}</p>
                 <p>{ko ? `차트 분석 ${plan.chart}회/일` : `${plan.chart} chart analyses/day`}</p>
               </div>
@@ -203,14 +203,14 @@ export default function PaymentSection({
 
       {/* Wallet Addresses */}
       <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 space-y-4">
-        <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">
+        <p className="text-xs font-mono uppercase tracking-wider text-zinc-500">
           {ko ? "결제 주소" : "Payment Addresses"} — {ko ? `정확히 ${selectedPlan} USDT 전송` : `Send exactly ${selectedPlan} USDT`}
         </p>
 
         {/* ERC-20 */}
         {walletAddressErc20 && (
           <div>
-            <p className="text-[10px] font-mono text-amber-400 mb-1.5">USDT ERC-20 (Ethereum)</p>
+            <p className="text-xs font-mono text-amber-400 mb-1.5">USDT ERC-20 (Ethereum)</p>
             <div className="flex items-center gap-2">
               <code className="flex-1 text-xs font-mono text-blue-300 bg-blue-500/[0.06] border border-blue-500/20 rounded-lg px-3 py-2 break-all">
                 {walletAddressErc20}
@@ -225,7 +225,7 @@ export default function PaymentSection({
         {/* TRC-20 */}
         {walletAddress && (
           <div>
-            <p className="text-[10px] font-mono text-emerald-400 mb-1.5">USDT TRC-20 (TRON)</p>
+            <p className="text-xs font-mono text-emerald-400 mb-1.5">USDT TRC-20 (TRON)</p>
             <div className="flex items-center gap-2">
               <code className="flex-1 text-xs font-mono text-blue-300 bg-blue-500/[0.06] border border-blue-500/20 rounded-lg px-3 py-2 break-all">
                 {walletAddress}
@@ -237,7 +237,7 @@ export default function PaymentSection({
           </div>
         )}
 
-        <p className="text-[10px] text-zinc-600">
+        <p className="text-xs text-zinc-500">
           {ko
             ? `⚠ 정확히 ${selectedPlan} USDT를 전송해 주세요. 금액이 다르면 자동 인증이 실패할 수 있습니다.`
             : `⚠ Send exactly ${selectedPlan} USDT. Incorrect amounts may fail auto-verification.`}
@@ -246,7 +246,7 @@ export default function PaymentSection({
 
       {/* TXID Submission */}
       <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
-        <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 mb-3">
+        <p className="text-xs font-mono uppercase tracking-wider text-zinc-500 mb-3">
           {ko ? "거래 ID (TXID) 제출" : "Submit Transaction ID (TXID)"}
         </p>
         <form onSubmit={handleSubmit} className="space-y-3">
@@ -258,7 +258,7 @@ export default function PaymentSection({
             className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-4 py-2.5 text-xs font-mono text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all"
           />
           {message && (
-            <div className={`rounded-lg px-4 py-2.5 text-[11px] font-mono ${
+            <div className={`rounded-lg px-4 py-2.5 text-sm font-mono ${
               message.type === "success" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
               : message.type === "error" ? "bg-red-500/10 text-red-400 border border-red-500/20"
               : "bg-blue-500/10 text-blue-300 border border-blue-500/20"
@@ -269,7 +269,7 @@ export default function PaymentSection({
           <button
             type="submit"
             disabled={submitting || !txid.trim()}
-            className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[11px] font-mono uppercase tracking-[0.15em] transition-colors"
+            className="w-full py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-mono uppercase tracking-[0.15em] transition-colors"
           >
             {submitting
               ? (ko ? "확인 중..." : "Verifying...")
@@ -282,7 +282,7 @@ export default function PaymentSection({
       {(loadingPayments || payments.length > 0) && (
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
           <div className="px-5 py-3 border-b border-white/[0.06]">
-            <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500">
+            <p className="text-xs font-mono uppercase tracking-wider text-zinc-500">
               {ko ? "결제 내역" : "Payment History"}
             </p>
           </div>
@@ -304,7 +304,7 @@ export default function PaymentSection({
                     <span className="font-mono text-[11px] text-zinc-400">${p.amount} USDT</span>
                     <span className="text-[10px] font-mono text-zinc-600">{p.network}</span>
                     <StatusBadge status={p.status} />
-                    <span className="text-[10px] text-zinc-600 ml-auto">{new Date(p.createdAt).toLocaleDateString()}</span>
+                    <span className="text-xs text-zinc-500 ml-auto">{new Date(p.createdAt).toLocaleDateString()}</span>
                     {p.adminNote && <span className="w-full text-[10px] text-zinc-500">{p.adminNote}</span>}
                   </div>
                 );

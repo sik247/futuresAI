@@ -850,13 +850,15 @@ function ChatWidget({ lang }: { lang: string }) {
         body: JSON.stringify({ message: text, persona: "crypto", sessionId: "home-widget", lang }),
       });
       const data = await res.json();
-      if (data.error === "Daily message limit reached") {
-        setMessages((prev) => [...prev, { role: "ai", text: ko ? "일일 무료 메시지 한도에 도달했습니다. 프리미엄으로 업그레이드하세요." : "Free message limit reached. Upgrade to Premium for more." }]);
+      if (res.status === 401 || data.error === "Unauthorized") {
+        setMessages((prev) => [...prev, { role: "ai", text: ko ? "로그인 후 AI 채팅을 이용할 수 있습니다. 회원가입은 무료입니다!" : "Please sign in to use AI Chat. Signing up is free!" }]);
+      } else if (res.status === 429 || data.error?.includes("limit")) {
+        setMessages((prev) => [...prev, { role: "ai", text: ko ? "일일 무료 메시지 한도에 도달했습니다. 프리미엄으로 업그레이드하세요!" : "Daily free limit reached. Upgrade to Premium for more!" }]);
         setMsgCount(FREE_MSG_LIMIT);
       } else {
         setMessages((prev) => [...prev, {
           role: "ai",
-          text: data.response || data.error || "No response",
+          text: data.response || "No response",
           ticker: data.ticker ?? undefined,
           news: data.news ?? undefined,
         }]);
@@ -935,11 +937,20 @@ function ChatWidget({ lang }: { lang: string }) {
         )}
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2">
-              <div className="flex gap-1">
-                <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" />
+            <div className="bg-white/[0.04] border border-purple-500/20 rounded-xl px-3 py-2.5 space-y-1.5">
+              <div className="flex items-center gap-2">
+                <svg className="w-3.5 h-3.5 text-purple-400 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                <span className="text-[11px] text-purple-300 font-mono animate-pulse">
+                  {ko ? "시장 데이터 분석 중..." : "Analyzing market data..."}
+                </span>
+              </div>
+              <div className="flex gap-1 pl-5.5">
+                <span className="w-1 h-1 bg-zinc-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                <span className="w-1 h-1 bg-zinc-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                <span className="w-1 h-1 bg-zinc-600 rounded-full animate-bounce" />
               </div>
             </div>
           </div>
