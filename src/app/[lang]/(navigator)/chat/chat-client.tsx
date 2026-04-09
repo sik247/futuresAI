@@ -66,6 +66,16 @@ interface InternalLink {
   type: string;
 }
 
+interface DataSources {
+  binance?: boolean;
+  upbit?: boolean;
+  technicals?: boolean;
+  fearGreed?: boolean;
+  news?: boolean;
+  twitter?: boolean;
+  webSearch?: boolean;
+}
+
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -75,6 +85,8 @@ interface Message {
   tweets?: TweetItem[];
   followUps?: string[];
   internalLinks?: InternalLink[];
+  mentionedCoins?: string[];
+  dataSources?: DataSources;
 }
 
 interface Props {
@@ -134,23 +146,107 @@ function TradingViewChart({ ticker }: { ticker: TickerInfo }) {
 /* -------------------------------------------------------------------------- */
 /*  Loading Dots                                                               */
 /* -------------------------------------------------------------------------- */
-function LoadingDots({ ko }: { ko?: boolean }) {
+function ThinkingSteps({ step, ko }: { step: string; ko?: boolean }) {
+  const allSteps = ko
+    ? ["바이낸스 가격 데이터 수집 중", "업비트 + 김치 프리미엄 확인 중", "RSI, MA 기술적 분석 중", "뉴스 & 센티먼트 분석 중", "트레이딩 전략 생성 중"]
+    : ["Fetching Binance price data", "Checking Upbit + Kimchi Premium", "Analyzing RSI, MA technicals", "Scanning news & sentiment", "Generating trading strategy"];
+  const currentIdx = allSteps.findIndex((s) => step.startsWith(s));
+
   return (
-    <div className="space-y-2 px-3 py-2">
-      <div className="flex items-center gap-2">
-        <svg className="w-4 h-4 text-purple-400 animate-spin" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
-        <span className="text-xs text-purple-300 font-medium animate-pulse">
-          {ko ? "시장 데이터 수집 & 분석 중..." : "Gathering market data & analyzing..."}
+    <div className="px-3 py-3 space-y-1.5">
+      {allSteps.map((s, i) => {
+        const done = i < currentIdx;
+        const active = i === currentIdx;
+        return (
+          <div key={i} className={`flex items-center gap-2.5 transition-all ${active ? "opacity-100" : done ? "opacity-60" : "opacity-20"}`}>
+            {done ? (
+              <svg className="w-4 h-4 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            ) : active ? (
+              <svg className="w-4 h-4 text-purple-400 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            ) : (
+              <div className="w-4 h-4 rounded-full border border-zinc-700 shrink-0" />
+            )}
+            <span className={`text-xs font-medium ${active ? "text-purple-300" : done ? "text-zinc-500" : "text-zinc-700"}`}>
+              {s}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function SourcePills({ dataSources, ko }: { dataSources: DataSources; ko?: boolean }) {
+  const sources = [
+    { key: "binance", label: "Binance", color: "text-yellow-400 bg-yellow-500/10 border-yellow-500/20" },
+    { key: "upbit", label: ko ? "업비트" : "Upbit", color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
+    { key: "technicals", label: ko ? "기술적분석" : "Technicals", color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" },
+    { key: "fearGreed", label: "F&G Index", color: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
+    { key: "news", label: ko ? "뉴스" : "News", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
+    { key: "twitter", label: "X/Twitter", color: "text-sky-400 bg-sky-500/10 border-sky-500/20" },
+    { key: "webSearch", label: ko ? "웹검색" : "Web", color: "text-purple-400 bg-purple-500/10 border-purple-500/20" },
+  ];
+  const active = sources.filter((s) => dataSources[s.key as keyof DataSources]);
+  if (active.length === 0) return null;
+
+  return (
+    <div className="flex flex-wrap gap-1.5 mb-2">
+      <span className="text-[10px] text-zinc-600 self-center mr-1">{ko ? "출처" : "Sources"}:</span>
+      {active.map((s) => (
+        <span key={s.key} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${s.color}`}>
+          <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60" />
+          {s.label}
         </span>
-      </div>
-      <div className="flex gap-1 pl-6">
-        <span className="w-1 h-1 bg-zinc-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
-        <span className="w-1 h-1 bg-zinc-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
-        <span className="w-1 h-1 bg-zinc-600 rounded-full animate-bounce" />
-      </div>
+      ))}
+    </div>
+  );
+}
+
+function CoinPriceCards({ coins, ko }: { coins: string[]; ko?: boolean }) {
+  const [prices, setPrices] = useState<Record<string, { price: number; change: number }>>({});
+
+  useEffect(() => {
+    if (coins.length === 0) return;
+    const cgIds: Record<string, string> = { BTC: "bitcoin", ETH: "ethereum", SOL: "solana", XRP: "ripple", BNB: "binancecoin", DOGE: "dogecoin", ADA: "cardano", AVAX: "avalanche-2", DOT: "polkadot", LINK: "chainlink" };
+    const ids = coins.map((c) => cgIds[c]).filter(Boolean).join(",");
+    if (!ids) return;
+    fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`)
+      .then((r) => r.json())
+      .then((data) => {
+        const map: Record<string, { price: number; change: number }> = {};
+        for (const coin of coins) {
+          const id = cgIds[coin];
+          if (id && data[id]) {
+            map[coin] = { price: data[id].usd, change: data[id].usd_24h_change || 0 };
+          }
+        }
+        setPrices(map);
+      })
+      .catch(() => {});
+  }, [coins]);
+
+  if (Object.keys(prices).length === 0) return null;
+
+  return (
+    <div className="flex flex-wrap gap-2 my-2">
+      {coins.map((coin) => {
+        const p = prices[coin];
+        if (!p) return null;
+        return (
+          <div key={coin} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+            <span className="text-xs font-bold text-white">{coin}</span>
+            <span className="text-xs font-mono text-zinc-300 tabular-nums">${p.price.toLocaleString(undefined, { maximumFractionDigits: p.price > 100 ? 0 : 2 })}</span>
+            <span className={`text-[11px] font-mono font-semibold tabular-nums ${p.change >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+              {p.change >= 0 ? "+" : ""}{p.change.toFixed(2)}%
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -175,6 +271,7 @@ export default function ChatClient({ lang, userName }: Props) {
   const [persona] = useState<Persona>("crypto");
   const [sessionId, setSessionId] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [thinkingStep, setThinkingStep] = useState("");
   const [sessions, setSessions] = useState<{ sessionId: string; content: string; createdAt: string }[]>([]);
   const [showSidebar, setShowSidebar] = useState(true);
 
@@ -232,6 +329,17 @@ export default function ChatClient({ lang, userName }: Props) {
     setInput("");
     setLoading(true);
 
+    // Thinking steps animation
+    const steps = ko
+      ? ["바이낸스 가격 데이터 수집 중...", "업비트 + 김치 프리미엄 확인 중...", "RSI, MA 기술적 분석 중...", "뉴스 & 센티먼트 분석 중...", "트레이딩 전략 생성 중..."]
+      : ["Fetching Binance price data...", "Checking Upbit + Kimchi Premium...", "Analyzing RSI, MA technicals...", "Scanning news & sentiment...", "Generating trading strategy..."];
+    let stepIdx = 0;
+    setThinkingStep(steps[0]);
+    const stepTimer = setInterval(() => {
+      stepIdx = Math.min(stepIdx + 1, steps.length - 1);
+      setThinkingStep(steps[stepIdx]);
+    }, 1500);
+
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -250,6 +358,8 @@ export default function ChatClient({ lang, userName }: Props) {
         tweets: data.tweets ?? undefined,
         followUps: data.followUps ?? undefined,
         internalLinks: data.internalLinks ?? undefined,
+        mentionedCoins: data.mentionedCoins ?? undefined,
+        dataSources: data.dataSources ?? undefined,
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch {
@@ -258,6 +368,8 @@ export default function ChatClient({ lang, userName }: Props) {
         { role: "assistant", content: ko ? "오류가 발생했습니다. 다시 시도해 주세요." : "An error occurred. Please try again.", timestamp: Date.now() },
       ]);
     } finally {
+      clearInterval(stepTimer);
+      setThinkingStep("");
       setLoading(false);
       inputRef.current?.focus();
     }
@@ -460,34 +572,46 @@ export default function ChatClient({ lang, userName }: Props) {
                           <span className="text-[8px] text-zinc-700 tabular-nums">{fmtTime(msg.timestamp)}</span>
                         </div>
 
-                        {/* Sources bar (if news exists) */}
+                        {/* Data source pills (Perplexity-style) */}
+                        {msg.dataSources && <SourcePills dataSources={msg.dataSources} ko={ko} />}
+
+                        {/* News source cards */}
                         {msg.news && msg.news.length > 0 && (
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[8px] text-zinc-600 uppercase tracking-wider">{ko ? "출처" : "Sources"}</span>
-                            {msg.news.map((n, ni) => (
+                          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                            {msg.news.slice(0, 6).map((n, ni) => (
                               <a
                                 key={ni}
                                 href={n.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.06] transition-colors cursor-pointer"
+                                className="shrink-0 flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:border-blue-500/20 hover:bg-white/[0.06] transition-all cursor-pointer max-w-[200px]"
                               >
-                                <span className="w-3.5 h-3.5 rounded-sm bg-blue-500/20 flex items-center justify-center text-[7px] font-bold text-blue-400 shrink-0">{ni + 1}</span>
-                                <span className="text-[9px] text-zinc-400 truncate max-w-[100px]">{n.source}</span>
+                                <span className="w-5 h-5 rounded bg-blue-500/20 flex items-center justify-center text-[9px] font-bold text-blue-400 shrink-0">{ni + 1}</span>
+                                <span className="text-[11px] text-zinc-400 truncate">{n.source}</span>
                               </a>
                             ))}
                           </div>
                         )}
 
+                        {/* Inline coin price cards */}
+                        {msg.mentionedCoins && msg.mentionedCoins.length > 0 && (
+                          <CoinPriceCards coins={msg.mentionedCoins} ko={ko} />
+                        )}
+
                         {/* Main AI response — rendered markdown */}
                         <div
-                          className="text-[13px] text-zinc-200 leading-relaxed pl-2.5 border-l-2 border-white/[0.06] chat-markdown"
+                          className="text-[13px] text-zinc-200 leading-relaxed chat-markdown"
                           dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
                         />
 
-                        {/* TradingView chart */}
+                        {/* Inline TradingView chart */}
                         {msg.ticker && (
-                          <div className="mt-1">
+                          <div className="mt-3 rounded-xl overflow-hidden border border-white/[0.08]">
+                            <div className="flex items-center gap-2 px-3 py-2 bg-zinc-900/80 border-b border-white/[0.06]">
+                              <span className="relative flex h-2 w-2"><span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" /><span className="relative rounded-full h-2 w-2 bg-emerald-500" /></span>
+                              <span className="text-xs font-mono text-emerald-400">{msg.ticker.exchange}:{msg.ticker.symbol}</span>
+                              <span className="text-[10px] text-zinc-600 ml-auto">LIVE</span>
+                            </div>
                             <TradingViewChart ticker={msg.ticker} />
                           </div>
                         )}
@@ -606,8 +730,8 @@ export default function ChatClient({ lang, userName }: Props) {
                     <span className="text-[9px] font-semibold text-zinc-500 uppercase tracking-wide block mb-1">
                       {ko ? "김알렉스" : "Alex Kim"}
                     </span>
-                    <div className="pl-2.5 border-l-2 border-white/[0.06]">
-                      <LoadingDots ko={ko} />
+                    <div className="pl-2.5 border-l-2 border-purple-500/20">
+                      <ThinkingSteps step={thinkingStep} ko={ko} />
                     </div>
                   </div>
                 </div>

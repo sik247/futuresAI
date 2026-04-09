@@ -213,13 +213,30 @@ IMPORTANT: After your analysis, add a line "---FOLLOWUPS---" followed by exactly
       },
     });
 
+    // Detect all coin tickers mentioned in the response for inline price cards
+    const mentionedCoins: string[] = [];
+    const coinPatterns = ["BTC", "ETH", "SOL", "XRP", "BNB", "DOGE", "ADA", "AVAX", "DOT", "LINK", "NEAR", "SUI", "APT", "ARB"];
+    for (const coin of coinPatterns) {
+      if (new RegExp(`\\b${coin}\\b`).test(mainResponse)) mentionedCoins.push(coin);
+    }
+
     return NextResponse.json({
       response: mainResponse,
       ticker: tickerInfo ? { symbol: tickerInfo.symbol, exchange: tickerInfo.exchange } : null,
+      mentionedCoins,
       news: newsArticles,
       tweets,
       followUps,
       internalLinks,
+      dataSources: {
+        binance: context.includes("BINANCE") || context.includes("/USD"),
+        upbit: context.includes("UPBIT"),
+        technicals: context.includes("TECHNICALS"),
+        fearGreed: context.includes("FEAR & GREED"),
+        news: newsArticles.length > 0,
+        twitter: tweets.length > 0,
+        webSearch: context.includes("WEB SEARCH"),
+      },
     });
   } catch (error) {
     console.error("[Chat API]", error);

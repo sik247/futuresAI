@@ -105,9 +105,9 @@ const CONTENT = `
 <li><strong>Monitoring:</strong> Automated price validation cron (every 4 hours)</li>
 </ul>
 
-<h2>Rate Limiting: Fair Access for Everyone</h2>
+<h2>Pricing: Access for Everyone</h2>
 
-<p>We use a rolling window rate limit system (similar to Claude and ChatGPT) rather than hard daily caps. Free users get a taste of our analysis quality, while Basic ($25/month) and Premium ($99/month) subscribers enjoy higher frequency access.</p>
+<p>Free users can experience our analysis quality firsthand. Basic ($25/month) and Premium ($99/month) subscribers enjoy higher frequency access with additional features like real-time whale alerts and a premium Telegram channel.</p>
 
 <h2>What's Next</h2>
 
@@ -218,9 +218,9 @@ const CONTENT_KO = `
 <li><strong>모니터링:</strong> 4시간마다 자동 가격 검증 크론</li>
 </ul>
 
-<h2>요금제: 모든 사용자를 위한 공정한 접근</h2>
+<h2>요금제: 모든 사용자를 위한 접근</h2>
 
-<p>Claude와 ChatGPT와 유사한 롤링 윈도우 속도 제한 시스템을 사용합니다. 무료 사용자는 분석 품질을 체험할 수 있고, Basic($25/월)과 Premium($99/월) 구독자는 더 높은 빈도로 이용할 수 있습니다.</p>
+<p>무료 사용자도 분석 품질을 직접 체험할 수 있습니다. Basic($25/월)과 Premium($99/월) 구독자는 더 높은 빈도와 함께 실시간 고래 알림, 프리미엄 텔레그램 채널 등 추가 기능을 이용할 수 있습니다.</p>
 
 <h2>앞으로의 계획</h2>
 
