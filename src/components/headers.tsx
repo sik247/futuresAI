@@ -47,7 +47,7 @@ const NAV_ITEMS = [
   { path: "sns", key: "sns" as const, icon: ChatBubbleLeftRightIcon, group: 2 },
   { path: "guides", key: "guides" as const, icon: BookOpenIcon, group: 3 },
   { path: "payback", key: "payback" as const, icon: CalculatorIcon, group: 3 },
-  { path: "pricing", key: "pricing" as const, icon: TagIcon, group: 3 },
+  { path: "pricing", key: "pricing" as const, icon: TagIcon, group: 4 },
 ] as const;
 
 const Headers: React.FC<THeaders> = ({ lang, translations }) => {
