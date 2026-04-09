@@ -32,10 +32,10 @@ function renderMarkdown(text: string): string {
 }
 
 const PERSONA_AVATARS: Record<string, string> = {
-  crypto: "/images/personas/crypto-analyst.png",
+  crypto: "/logo.png",
 };
 const PERSONA_NAMES: Record<string, Record<string, string>> = {
-  crypto: { en: "Alex Kim — Crypto Analyst", ko: "김알렉스 — 크립토 애널리스트" },
+  crypto: { en: "FuturesAI Quant", ko: "FuturesAI 퀀트" },
 };
 
 /* -------------------------------------------------------------------------- */
@@ -509,7 +509,7 @@ export default function ChatClient({ lang, userName }: Props) {
                   />
                   <div>
                     <p className="text-sm font-semibold text-zinc-100">
-                      {ko ? "김알렉스" : "Alex Kim"}
+                      {ko ? "FuturesAI 퀀트" : "FuturesAI Quant"}
                     </p>
                     <p className="text-[10px] text-zinc-500 mt-0.5">
                       {ko
@@ -567,7 +567,7 @@ export default function ChatClient({ lang, userName }: Props) {
                       <div className="flex-1 min-w-0 space-y-2.5">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-[9px] font-semibold text-zinc-500 uppercase tracking-wide">
-                            {ko ? "김알렉스" : "Alex Kim"}
+                            {ko ? "FuturesAI 퀀트" : "FuturesAI Quant"}
                           </span>
                           <span className="text-[8px] text-zinc-700 tabular-nums">{fmtTime(msg.timestamp)}</span>
                         </div>
@@ -728,7 +728,7 @@ export default function ChatClient({ lang, userName }: Props) {
                   />
                   <div>
                     <span className="text-[9px] font-semibold text-zinc-500 uppercase tracking-wide block mb-1">
-                      {ko ? "김알렉스" : "Alex Kim"}
+                      {ko ? "FuturesAI 퀀트" : "FuturesAI Quant"}
                     </span>
                     <div className="pl-2.5 border-l-2 border-purple-500/20">
                       <ThinkingSteps step={thinkingStep} ko={ko} />
