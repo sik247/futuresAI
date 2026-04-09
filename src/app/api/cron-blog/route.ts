@@ -94,7 +94,7 @@ async function generateBlogPost(
   tags: string[];
 }> {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-preview-04-17" });
 
   const prompt = `You are a professional crypto finance writer for FuturesAI (futuresai.io), an AI-powered crypto trading intelligence platform. Write a high-quality, original blog article that meets Google AdSense content quality guidelines.
 
