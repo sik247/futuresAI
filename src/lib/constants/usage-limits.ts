@@ -1,7 +1,7 @@
 export const USAGE_LIMITS = {
   FREE: {
-    chartAnalysis: 3,
-    chat: 5,
+    chartAnalysis: 1,
+    chat: 1,
   },
   BASIC: {
     chartAnalysis: 10,

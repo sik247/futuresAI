@@ -766,7 +766,7 @@ function PredictionCards({ events, lang }: { events: PolymarketEvent[]; lang: st
 }
 
 
-const FREE_MSG_LIMIT = 5;
+const FREE_MSG_LIMIT = 1;
 
 // Simple markdown renderer for AI responses
 function renderMarkdown(text: string) {
@@ -818,13 +818,34 @@ function renderMarkdown(text: string) {
 
 type ChatMsg = { role: "user" | "ai"; text: string; ticker?: { symbol: string; exchange: string }; news?: { title: string; url: string; source: string }[] };
 
+function getChatUsageKey() {
+  const d = new Date();
+  return `chat-usage-${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
 function ChatWidget({ lang }: { lang: string }) {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [loading, setLoading] = useState(false);
-  const [msgCount, setMsgCount] = useState(0);
   const ko = lang === "ko";
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Persist usage count in localStorage (survives refresh, different tabs)
+  const [msgCount, setMsgCount] = useState(() => {
+    if (typeof window === "undefined") return 0;
+    try {
+      const key = getChatUsageKey();
+      return parseInt(localStorage.getItem(key) || "0", 10);
+    } catch { return 0; }
+  });
+
+  // Sync to localStorage on change
+  useEffect(() => {
+    try {
+      const key = getChatUsageKey();
+      localStorage.setItem(key, String(msgCount));
+    } catch {}
+  }, [msgCount]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
