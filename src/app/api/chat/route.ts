@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 import { buildCryptoContext, buildUSStockContext } from "@/lib/services/chat/chat-context.service";
 import { checkRateLimit } from "@/lib/services/usage.service";
 
@@ -157,14 +158,54 @@ Deliver a COMPREHENSIVE, premium-quality analysis (300-500 words). Use markdown 
 
 IMPORTANT: After your analysis, add a line "---FOLLOWUPS---" followed by exactly 3 short follow-up questions the user might want to ask next (one per line). These should be relevant to the conversation and encourage deeper analysis. Keep each under 40 characters.`;
 
-    // Call Gemini
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) return NextResponse.json({ error: "AI not configured" }, { status: 500 });
+    // Call AI — Gemini primary, GPT-5.4 fallback
+    let response = "";
+    let usedModel = "gemini-2.5-pro";
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
-    const result = await model.generateContent(fullPrompt);
-    const response = result.response.text();
+    const geminiKey = process.env.GEMINI_API_KEY;
+    const openaiKey = process.env.OPENAI_API_KEY;
+
+    if (!geminiKey && !openaiKey) {
+      return NextResponse.json({ error: "AI not configured" }, { status: 500 });
+    }
+
+    // Try Gemini first
+    if (geminiKey) {
+      try {
+        const genAI = new GoogleGenerativeAI(geminiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+        const result = await model.generateContent(fullPrompt);
+        response = result.response.text();
+      } catch (geminiErr) {
+        console.warn("[Chat] Gemini failed, trying GPT-5.4 fallback:", geminiErr instanceof Error ? geminiErr.message : geminiErr);
+        response = ""; // Reset to trigger fallback
+      }
+    }
+
+    // Fallback to GPT-5.4 if Gemini failed or unavailable
+    if (!response && openaiKey) {
+      try {
+        const openai = new OpenAI({ apiKey: openaiKey });
+        const completion = await openai.chat.completions.create({
+          model: "gpt-5.4",
+          messages: [
+            { role: "system", content: `${systemPrompt}${langNote}` },
+            { role: "user", content: `REAL-TIME MARKET DATA:\n${context || "No specific data fetched."}\n\nCONVERSATION HISTORY:\n${historyText}\n\nUser: ${message}\n\nDeliver a COMPREHENSIVE, premium-quality analysis (300-500 words). Use markdown formatting with ### headers, **bold** for key numbers, and * bullet points. Include specific entry/exit strategy with stop loss and take profit levels. Translate all news headlines to the user's language.\n\nIMPORTANT: After your analysis, add a line "---FOLLOWUPS---" followed by exactly 3 short follow-up questions (one per line, under 40 chars each).` },
+          ],
+          max_tokens: 2000,
+          temperature: 0.7,
+        });
+        response = completion.choices[0]?.message?.content || "";
+        usedModel = "gpt-5.4";
+      } catch (gptErr) {
+        console.error("[Chat] GPT-5.4 also failed:", gptErr instanceof Error ? gptErr.message : gptErr);
+        return NextResponse.json({ error: "AI service temporarily unavailable" }, { status: 503 });
+      }
+    }
+
+    if (!response) {
+      return NextResponse.json({ error: "AI service temporarily unavailable" }, { status: 503 });
+    }
 
     // Parse follow-up questions from response
     let mainResponse = response;
