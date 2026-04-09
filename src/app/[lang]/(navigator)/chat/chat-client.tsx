@@ -1,7 +1,35 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
+
+/** Lightweight markdown → HTML for chat responses */
+function renderMarkdown(text: string): string {
+  return text
+    // Code blocks (```...```)
+    .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-white/[0.04] border border-white/[0.06] rounded-lg p-3 my-2 overflow-x-auto text-[11px] font-mono text-zinc-300"><code>$2</code></pre>')
+    // Inline code
+    .replace(/`([^`]+)`/g, '<code class="bg-white/[0.06] px-1 py-0.5 rounded text-blue-300 text-[11px]">$1</code>')
+    // Headers
+    .replace(/^### (.+)$/gm, '<h3 class="text-sm font-bold text-white mt-3 mb-1.5">$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2 class="text-base font-bold text-white mt-4 mb-2">$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1 class="text-lg font-bold text-white mt-4 mb-2">$1</h1>')
+    // Bold
+    .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-white">$1</strong>')
+    // Italic
+    .replace(/\*(.+?)\*/g, '<em class="text-zinc-300 italic">$1</em>')
+    // Bullet lists
+    .replace(/^\* (.+)$/gm, '<li class="flex gap-2 text-zinc-300 ml-1"><span class="text-zinc-500 shrink-0">•</span><span>$1</span></li>')
+    .replace(/^- (.+)$/gm, '<li class="flex gap-2 text-zinc-300 ml-1"><span class="text-zinc-500 shrink-0">•</span><span>$1</span></li>')
+    // Numbered lists
+    .replace(/^(\d+)\. (.+)$/gm, '<li class="flex gap-2 text-zinc-300 ml-1"><span class="text-zinc-500 font-mono shrink-0">$1.</span><span>$2</span></li>')
+    // Wrap consecutive <li> in <ul>
+    .replace(/((?:<li[^>]*>.*<\/li>\s*)+)/g, '<ul class="space-y-1 my-1.5">$1</ul>')
+    // Paragraphs (double newline)
+    .replace(/\n\n/g, '</p><p class="my-1.5">')
+    // Single newlines within paragraphs
+    .replace(/\n/g, '<br/>');
+}
 
 const PERSONA_AVATARS: Record<string, string> = {
   crypto: "/images/personas/crypto-analyst.png",
@@ -440,10 +468,11 @@ export default function ChatClient({ lang, userName }: Props) {
                           </div>
                         )}
 
-                        {/* Main AI response */}
-                        <div className="text-[12px] text-zinc-200 leading-relaxed whitespace-pre-wrap pl-2.5 border-l-2 border-white/[0.06]">
-                          {msg.content}
-                        </div>
+                        {/* Main AI response — rendered markdown */}
+                        <div
+                          className="text-[13px] text-zinc-200 leading-relaxed pl-2.5 border-l-2 border-white/[0.06] chat-markdown"
+                          dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
+                        />
 
                         {/* TradingView chart */}
                         {msg.ticker && (

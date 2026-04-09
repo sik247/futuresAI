@@ -774,25 +774,45 @@ function renderMarkdown(text: string) {
     .split("\n")
     .map((line, i) => {
       // Headers
+      if (line.startsWith("### ")) return <h4 key={i} className="text-[12px] font-bold text-white mt-2.5 mb-1">{line.slice(4)}</h4>;
       if (line.startsWith("## ")) return <h3 key={i} className="text-[13px] font-bold text-white mt-3 mb-1">{line.slice(3)}</h3>;
       if (line.startsWith("# ")) return <h2 key={i} className="text-[14px] font-bold text-white mt-3 mb-1">{line.slice(2)}</h2>;
-      // Bold
+      // Numbered list
+      const numMatch = line.match(/^(\d+)\. (.+)/);
+      if (numMatch) {
+        const inner = numMatch[2].split(/\*\*(.*?)\*\*/g);
+        return (
+          <li key={i} className="text-[11px] leading-relaxed ml-2 flex gap-1.5">
+            <span className="text-zinc-500 font-mono shrink-0">{numMatch[1]}.</span>
+            <span>{inner.length > 1 ? inner.map((p, j) => j % 2 === 1 ? <strong key={j} className="text-white font-semibold">{p}</strong> : <span key={j}>{p}</span>) : numMatch[2]}</span>
+          </li>
+        );
+      }
+      // Bold inline
       const boldParts = line.split(/\*\*(.*?)\*\*/g);
       if (boldParts.length > 1) {
         return (
-          <p key={i} className="text-[12px] leading-relaxed">
+          <p key={i} className="text-[11px] leading-relaxed">
             {boldParts.map((part, j) =>
               j % 2 === 1 ? <strong key={j} className="text-white font-semibold">{part}</strong> : <span key={j}>{part}</span>
             )}
           </p>
         );
       }
-      // List items
-      if (line.startsWith("* ") || line.startsWith("- ")) return <li key={i} className="text-[12px] leading-relaxed ml-3 list-disc">{line.slice(2)}</li>;
+      // Bullet list items
+      if (line.startsWith("* ") || line.startsWith("- ")) {
+        const inner = line.slice(2).split(/\*\*(.*?)\*\*/g);
+        return (
+          <li key={i} className="text-[11px] leading-relaxed ml-2 flex gap-1.5">
+            <span className="text-zinc-500 shrink-0">•</span>
+            <span>{inner.length > 1 ? inner.map((p, j) => j % 2 === 1 ? <strong key={j} className="text-white font-semibold">{p}</strong> : <span key={j}>{p}</span>) : line.slice(2)}</span>
+          </li>
+        );
+      }
       // Empty line
-      if (line.trim() === "") return <div key={i} className="h-1.5" />;
+      if (line.trim() === "") return <div key={i} className="h-1" />;
       // Normal text
-      return <p key={i} className="text-[12px] leading-relaxed">{line}</p>;
+      return <p key={i} className="text-[11px] leading-relaxed">{line}</p>;
     });
 }
 
