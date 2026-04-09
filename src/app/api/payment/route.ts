@@ -2,11 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { verifyTronTransaction } from "@/lib/services/payment/tron-verify.service";
+import { verifyEthTransaction } from "@/lib/services/payment/eth-verify.service";
 
 export const dynamic = "force-dynamic";
 
-const PAYMENT_AMOUNT = 99;
-const TXID_REGEX = /^[0-9a-fA-F]{64}$/;
+const TIERS = {
+  25: { tier: "BASIC", isPremium: false, credits: 25, chatEnabled: true },
+  99: { tier: "PREMIUM", isPremium: true, credits: 99, chatEnabled: true },
+} as const;
+
+// Accept both ERC-20 (0x...) and TRC-20 (64 hex) tx hashes
+const TXID_ERC20_REGEX = /^0x[0-9a-fA-F]{64}$/;
+const TXID_TRC20_REGEX = /^[0-9a-fA-F]{64}$/;
+
+function detectNetwork(txid: string): "ERC20" | "TRC20" | null {
+  if (TXID_ERC20_REGEX.test(txid)) return "ERC20";
+  if (TXID_TRC20_REGEX.test(txid)) return "TRC20";
+  return null;
+}
 
 /* ------------------------------------------------------------------ */
 /*  POST /api/payment  — submit TXID for verification                  */
@@ -20,15 +33,24 @@ export async function POST(req: NextRequest) {
   const userId = (session.user as { id: string }).id;
 
   let txid: string;
+  let planAmount: number;
   try {
     const body = await req.json();
     txid = (body.txid ?? "").trim();
+    planAmount = body.amount ?? 99;
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  if (!TXID_REGEX.test(txid)) {
-    return NextResponse.json({ error: "Invalid TXID format (must be 64 hex characters)" }, { status: 400 });
+  // Validate plan amount
+  if (planAmount !== 25 && planAmount !== 99) {
+    return NextResponse.json({ error: "Invalid plan amount. Choose $25 or $99." }, { status: 400 });
+  }
+
+  // Detect network from TXID format
+  const network = detectNetwork(txid);
+  if (!network) {
+    return NextResponse.json({ error: "Invalid TXID format" }, { status: 400 });
   }
 
   // Check if TXID already used
@@ -37,27 +59,35 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "TXID already submitted" }, { status: 409 });
   }
 
-  const walletAddress = process.env.PAYMENT_WALLET_ADDRESS;
+  // Get wallet addresses
+  const erc20Wallet = process.env.PAYMENT_WALLET_ERC20 || process.env.PAYMENT_WALLET_ADDRESS || "";
+  const trc20Wallet = process.env.PAYMENT_WALLET_TRC20 || process.env.PAYMENT_WALLET_ADDRESS || "";
+  const walletAddress = network === "ERC20" ? erc20Wallet : trc20Wallet;
+
   if (!walletAddress) {
-    return NextResponse.json({ error: "Payment wallet not configured" }, { status: 500 });
+    return NextResponse.json({ error: `${network} payment wallet not configured` }, { status: 500 });
   }
 
-  // Create PENDING record first
+  // Create PENDING record
   const payment = await prisma.payment.create({
     data: {
       userId,
       txid,
-      amount: PAYMENT_AMOUNT,
-      network: "TRC20",
+      amount: planAmount,
+      network,
       status: "PENDING",
     },
   });
 
-  // Attempt auto-verification via TronScan
-  const result = await verifyTronTransaction(txid, walletAddress, PAYMENT_AMOUNT);
+  // Verify transaction based on network
+  const result = network === "ERC20"
+    ? await verifyEthTransaction(txid, walletAddress, planAmount)
+    : await verifyTronTransaction(txid, walletAddress, planAmount);
 
   if (result.verified) {
-    // Atomically verify payment + activate premium
+    const tierConfig = TIERS[planAmount as 25 | 99];
+
+    // Atomically verify payment + activate subscription
     await prisma.$transaction([
       prisma.payment.update({
         where: { id: payment.id },
@@ -69,8 +99,9 @@ export async function POST(req: NextRequest) {
       prisma.user.update({
         where: { id: userId },
         data: {
-          isPremium: true,
-          chatEnabled: true,
+          isPremium: tierConfig.isPremium,
+          credits: tierConfig.credits,
+          chatEnabled: tierConfig.chatEnabled,
         },
       }),
     ]);
@@ -78,8 +109,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       status: "VERIFIED",
-      message: "Payment verified! Premium activated.",
+      tier: tierConfig.tier,
+      message: `Payment verified! ${tierConfig.tier} plan activated.`,
       amount: result.amount,
+      network,
     });
   }
 
@@ -91,6 +124,7 @@ export async function POST(req: NextRequest) {
       ? `Payment submitted. Auto-verification failed: ${result.error}. An admin will review manually.`
       : "Payment submitted and pending verification.",
     paymentId: payment.id,
+    network,
   });
 }
 

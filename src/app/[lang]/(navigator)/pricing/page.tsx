@@ -52,7 +52,8 @@ export default function PricingPage({
   params: { lang: string };
 }) {
   const ko = lang === "ko";
-  const walletAddress = process.env.PAYMENT_WALLET_ADDRESS ?? "";
+  const walletAddress = process.env.PAYMENT_WALLET_TRC20 || process.env.PAYMENT_WALLET_ADDRESS || "";
+  const walletAddressErc20 = process.env.PAYMENT_WALLET_ERC20 || "";
 
   return (
     <div className="bg-zinc-950 font-mono min-h-screen">
@@ -163,7 +164,7 @@ export default function PricingPage({
               <Feature included>{ko ? "텔레그램 프리미엄 알림" : "Telegram premium alerts"}</Feature>
             </div>
             <div className="mt-6 pt-5 border-t border-blue-500/10 relative">
-              <PaymentSection walletAddress={walletAddress} ko={ko} />
+              <PaymentSection walletAddress={walletAddress} walletAddressErc20={walletAddressErc20} ko={ko} />
               <p className="text-center text-[9px] text-zinc-600 mt-3">
                 {ko ? "USDT 결제 · 즉시 활성화 · 언제든 취소" : "USDT payment · Instant activation · Cancel anytime"}
               </p>
