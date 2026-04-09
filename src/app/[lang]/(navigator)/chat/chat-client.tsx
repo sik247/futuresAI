@@ -73,6 +73,7 @@ interface DataSources {
   fearGreed?: boolean;
   news?: boolean;
   twitter?: boolean;
+  polymarket?: boolean;
   webSearch?: boolean;
 }
 
@@ -189,6 +190,7 @@ function SourcePills({ dataSources, ko }: { dataSources: DataSources; ko?: boole
     { key: "fearGreed", label: "F&G Index", color: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
     { key: "news", label: ko ? "뉴스" : "News", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
     { key: "twitter", label: "X/Twitter", color: "text-sky-400 bg-sky-500/10 border-sky-500/20" },
+    { key: "polymarket", label: "Polymarket", color: "text-orange-400 bg-orange-500/10 border-orange-500/20" },
     { key: "webSearch", label: ko ? "웹검색" : "Web", color: "text-purple-400 bg-purple-500/10 border-purple-500/20" },
   ];
   const active = sources.filter((s) => dataSources[s.key as keyof DataSources]);

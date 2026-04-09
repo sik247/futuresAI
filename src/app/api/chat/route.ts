@@ -35,11 +35,14 @@ YOUR ANALYSIS MUST BE COMPREHENSIVE AND PREMIUM-QUALITY:
 - **Position sizing recommendation:** % of portfolio
 - **Direction:** LONG / SHORT / WAIT with confidence level
 
-### 4. News & Sentiment Context
+### 4. News, Sentiment & Prediction Markets
 - Summarize the most relevant news headlines affecting this asset
 - Translate news titles to the user's language
 - Explain HOW the news impacts price action
 - Fear & Greed Index interpretation
+- When PREDICTION MARKETS (Polymarket) data is available, cite specific prediction probabilities
+  Example: "Polymarket shows 36% probability BTC hits $100K by 2026, supporting a cautious long bias"
+- Use prediction market odds to validate or challenge your technical analysis
 
 ### 5. Risk Assessment
 - Key risks to watch (liquidation levels, funding rates, regulatory news)
@@ -276,6 +279,7 @@ IMPORTANT: After your analysis, add a line "---FOLLOWUPS---" followed by exactly
         fearGreed: context.includes("FEAR & GREED"),
         news: newsArticles.length > 0,
         twitter: tweets.length > 0,
+        polymarket: context.includes("PREDICTION MARKETS"),
         webSearch: context.includes("WEB SEARCH"),
       },
     });

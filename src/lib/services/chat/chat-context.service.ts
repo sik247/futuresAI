@@ -212,6 +212,36 @@ async function fetchTopMarketPrices(): Promise<string> {
   } catch { return ""; }
 }
 
+// Polymarket prediction data for sentiment and trade recommendations
+async function fetchPolymarketContext(): Promise<string> {
+  try {
+    const res = await fetch(
+      "https://gamma-api.polymarket.com/events?closed=false&tag=crypto&limit=10&order=volume&ascending=false",
+      { signal: AbortSignal.timeout(5000) }
+    );
+    const events = await res.json();
+    if (!Array.isArray(events) || events.length === 0) return "";
+
+    const lines: string[] = [];
+    for (const event of events.slice(0, 8)) {
+      if (!event.markets || event.markets.length === 0) continue;
+      const market = event.markets[0];
+      try {
+        const outcomes = JSON.parse(market.outcomes || "[]");
+        const prices = JSON.parse(market.outcomePrices || "[]");
+        const vol = parseFloat(market.volume || event.volume || "0");
+        const change = market.oneDayPriceChange ? parseFloat(market.oneDayPriceChange) : null;
+
+        const yesPrice = prices[0] ? (parseFloat(prices[0]) * 100).toFixed(0) : "?";
+        const line = `"${event.title}": ${yesPrice}% ${outcomes[0] || "Yes"} | Vol: $${(vol / 1e6).toFixed(1)}M${change ? ` | 24h: ${change > 0 ? "+" : ""}${(change * 100).toFixed(1)}%` : ""}`;
+        lines.push(line);
+      } catch { continue; }
+    }
+
+    return lines.length > 0 ? `PREDICTION MARKETS (Polymarket):\n${lines.join("\n")}` : "";
+  } catch { return ""; }
+}
+
 // Web search for latest info (DuckDuckGo Instant Answer API — no key needed)
 async function webSearchContext(query: string): Promise<string> {
   try {
@@ -238,7 +268,7 @@ export async function buildCryptoContext(query: string): Promise<ChatContextResu
   const baseSymbol = ticker ? ticker.ticker.replace("USDT", "") : null;
 
   // Fetch ALL data sources in parallel (including fallbacks)
-  const [binanceRes, upbitData, technicals, fngRes, cryptoPanicRes, rssNewsResult, xFeedResult, topPricesRes, webSearchRes] = await Promise.allSettled([
+  const [binanceRes, upbitData, technicals, fngRes, cryptoPanicRes, rssNewsResult, xFeedResult, topPricesRes, webSearchRes, polymarketRes] = await Promise.allSettled([
     ticker ? fetchBinancePrice(ticker.ticker) : Promise.resolve(null),
     baseSymbol ? fetchUpbitPrice(baseSymbol) : Promise.resolve(null),
     baseSymbol ? fetchBinanceKlines(baseSymbol) : Promise.resolve(null),
@@ -248,6 +278,7 @@ export async function buildCryptoContext(query: string): Promise<ChatContextResu
     fetchCryptoFeed(3).catch(() => []),
     fetchTopMarketPrices(),
     webSearchContext(query),
+    fetchPolymarketContext(),
   ]);
 
   // ── Always include top market prices as baseline ──
@@ -361,6 +392,10 @@ export async function buildCryptoContext(query: string): Promise<ChatContextResu
     const tweetContext = selection.map(t => `@${t.username} (${t.category})`).join(", ");
     if (tweetContext) parts.push(`ACTIVE ANALYSTS: ${tweetContext}`);
   }
+
+  // ── Prediction markets (Polymarket) ──
+  const polymarket = polymarketRes.status === "fulfilled" ? polymarketRes.value : "";
+  if (polymarket) parts.push(polymarket);
 
   // ── Web search results (additional context for general queries) ──
   const webSearch = webSearchRes.status === "fulfilled" ? webSearchRes.value : "";
