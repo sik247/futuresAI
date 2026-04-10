@@ -21,16 +21,15 @@ export const runtime = "nodejs";
 
 async function welcomeNewMembers(msg: TelegramMessage) {
   if (!msg.new_chat_members) return;
+
+  // Upsert minimal DB records so we can track new members
   for (const member of msg.new_chat_members) {
     if (member.is_bot) continue;
-
-    // Upsert a minimal record so we can track them
     try {
       const existing = await prisma.user.findUnique({
         where: { telegramId: String(member.id) },
       });
       if (!existing) {
-        // Only create if we have enough info; otherwise just skip and let /info handle it later
         const syntheticEmail = `tg_${member.id}@telegram.user`;
         await prisma.user.upsert({
           where: { email: syntheticEmail },
@@ -48,11 +47,10 @@ async function welcomeNewMembers(msg: TelegramMessage) {
     } catch (error) {
       console.error("[telegram-bot] welcome upsert failed:", error);
     }
-
-    const name = member.first_name || member.username || "newcomer";
-    const welcomeText = `👋 Welcome <b>${escapeHtml(name)}</b> to FuturesAI!\n\nType /rules to see the group rules. Enjoy the alpha 📈`;
-    await replyToChat(msg.chat.id, welcomeText, msg.message_id);
   }
+
+  // Hide the Telegram "X joined the chat" system message
+  await deleteMessage(msg.chat.id, msg.message_id);
 }
 
 /* ================================================================== */
@@ -65,9 +63,21 @@ export async function POST(req: NextRequest) {
     const msg: TelegramMessage | undefined = update.message || update.edited_message;
     if (!msg) return NextResponse.json({ ok: true });
 
-    // 1. Welcome new members
+    // 1. Hide service messages (join/leave/pin/title change)
     if (msg.new_chat_members && msg.new_chat_members.length > 0) {
       await welcomeNewMembers(msg);
+      return NextResponse.json({ ok: true });
+    }
+    const isServiceMessage =
+      msg.left_chat_member ||
+      (msg as any).new_chat_title ||
+      (msg as any).new_chat_photo ||
+      (msg as any).delete_chat_photo ||
+      (msg as any).pinned_message ||
+      (msg as any).group_chat_created ||
+      (msg as any).supergroup_chat_created;
+    if (isServiceMessage) {
+      await deleteMessage(msg.chat.id, msg.message_id);
       return NextResponse.json({ ok: true });
     }
 

@@ -21,6 +21,7 @@ export type TelegramMessage = {
   text?: string;
   reply_to_message?: TelegramMessage;
   new_chat_members?: TelegramUser[];
+  left_chat_member?: TelegramUser;
   entities?: { type: string; offset: number; length: number; user?: TelegramUser }[];
 };
 
