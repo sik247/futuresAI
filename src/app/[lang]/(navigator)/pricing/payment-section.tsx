@@ -55,7 +55,7 @@ export default function PaymentSection({
   const isLoggedIn = status === "authenticated";
   const isPremium = (user as any)?.isPremium === true;
   const credits = (user as any)?.credits || 0;
-  const currentTier = isPremium && credits >= 99 ? "PREMIUM" : credits >= 25 ? "BASIC" : "FREE";
+  const currentTier = isPremium && credits >= 99 ? "PREMIUM" : credits >= 25 ? "BASIC" : "NONE";
 
   async function loadPayments() {
     if (!isLoggedIn) return;
@@ -133,30 +133,29 @@ export default function PaymentSection({
 
   return (
     <div className="mt-8 space-y-6">
-      {/* Current Tier Badge */}
-      <div className={`rounded-xl border p-4 text-center ${
-        currentTier === "PREMIUM" ? "border-purple-500/30 bg-purple-500/[0.04]"
-        : currentTier === "BASIC" ? "border-blue-500/30 bg-blue-500/[0.04]"
-        : "border-white/[0.06] bg-white/[0.02]"
-      }`}>
-        <div className="flex items-center justify-center gap-2 mb-1">
-          {currentTier !== "FREE" && (
+      {/* Current Tier Badge — only shown if user has an active subscription */}
+      {currentTier !== "NONE" && (
+        <div className={`rounded-xl border p-4 text-center ${
+          currentTier === "PREMIUM" ? "border-purple-500/30 bg-purple-500/[0.04]"
+          : "border-blue-500/30 bg-blue-500/[0.04]"
+        }`}>
+          <div className="flex items-center justify-center gap-2 mb-1">
             <svg className={`w-5 h-5 ${currentTier === "PREMIUM" ? "text-purple-400" : "text-blue-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
+            <span className={`font-semibold text-sm ${currentTier === "PREMIUM" ? "text-purple-400" : "text-blue-400"}`}>
+              {ko
+                ? currentTier === "PREMIUM" ? "프리미엄 활성화됨" : "베이직 활성화됨"
+                : `${currentTier} Plan Active`}
+            </span>
+          </div>
+          {currentTier === "BASIC" && (
+            <p className="text-[11px] text-zinc-500">
+              {ko ? "프리미엄으로 업그레이드하면 더 많은 기능을 이용하실 수 있습니다." : "Upgrade to Premium for more features."}
+            </p>
           )}
-          <span className={`font-semibold text-sm ${currentTier === "PREMIUM" ? "text-purple-400" : currentTier === "BASIC" ? "text-blue-400" : "text-zinc-400"}`}>
-            {ko
-              ? currentTier === "PREMIUM" ? "프리미엄 활성화됨" : currentTier === "BASIC" ? "베이직 활성화됨" : "무료 플랜"
-              : `${currentTier} Plan Active`}
-          </span>
         </div>
-        {currentTier === "BASIC" && (
-          <p className="text-[11px] text-zinc-500">
-            {ko ? "프리미엄으로 업그레이드하면 더 많은 기능을 이용하실 수 있습니다." : "Upgrade to Premium for more features."}
-          </p>
-        )}
-      </div>
+      )}
 
       {/* Plan Selection */}
       <div>

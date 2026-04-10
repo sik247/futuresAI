@@ -57,42 +57,8 @@ export default function PricingPage({
           </p>
         </div>
 
-        {/* 3-Tier Pricing Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-
-          {/* ── FREE ── */}
-          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 lg:p-8 flex flex-col">
-            <div className="mb-6">
-              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400 bg-zinc-800 px-3 py-1 rounded-full">
-                Free
-              </span>
-              <div className="flex items-baseline gap-1 mt-4">
-                <span className="text-4xl font-bold text-white">$0</span>
-              </div>
-              <p className="text-sm text-zinc-500 mt-2">
-                {ko ? "체험용 · 가입만 하면 바로 시작" : "Try it out · Just sign up to start"}
-              </p>
-            </div>
-            <div className="flex-1 border-t border-white/[0.06] pt-5 space-y-0.5">
-              <Feature included>{ko ? "AI 퀀트 채팅" : "AI Quant Chat"}</Feature>
-              <Feature included>{ko ? "기본 차트 분석" : "Basic chart analysis"}</Feature>
-              <Feature included>{ko ? "시장 데이터" : "Market data"}</Feature>
-              <Feature included>{ko ? "뉴스 피드" : "News feed"}</Feature>
-              <Feature included={false}>{ko ? "고래 트래커" : "Whale tracker"}</Feature>
-              <Feature included={false}>{ko ? "퀀트 시그널" : "Quant signals"}</Feature>
-              <Feature included={false}>{ko ? "업비트 + 김치 프리미엄" : "Upbit + Kimchi Premium"}</Feature>
-              <Feature included={false}>{ko ? "멀티 에이전트 매크로 리서치" : "Multi-agent macro research"}</Feature>
-              <Feature included={false}>{ko ? "텔레그램 프리미엄 채널" : "Telegram premium channel"}</Feature>
-            </div>
-            <div className="mt-6 pt-5 border-t border-white/[0.06]">
-              <a
-                href={`/${lang}/signup`}
-                className="block w-full text-center py-3 rounded-xl border border-white/[0.1] bg-white/[0.04] text-zinc-300 text-sm font-semibold hover:bg-white/[0.08] transition-colors"
-              >
-                {ko ? "무료로 시작하기" : "Start Free"}
-              </a>
-            </div>
-          </div>
+        {/* 2-Tier Pricing Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
 
           {/* ── BASIC $25 ── */}
           <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.03] p-6 lg:p-8 flex flex-col">
@@ -178,34 +144,32 @@ export default function PricingPage({
           </h2>
           <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[600px]">
+              <table className="w-full min-w-[500px]">
                 <thead>
                   <tr className="border-b border-white/[0.08]">
                     <th className="px-6 py-4 text-left text-sm text-zinc-400 font-medium">{ko ? "기능" : "Feature"}</th>
-                    <th className="px-4 py-4 text-center text-sm text-zinc-500 font-medium">Free</th>
                     <th className="px-4 py-4 text-center text-sm text-emerald-400 font-medium">Basic $25</th>
                     <th className="px-4 py-4 text-center text-sm text-blue-400 font-medium">Premium $99</th>
                   </tr>
                 </thead>
                 <tbody className="text-sm">
                   {[
-                    { feature: ko ? "AI 퀀트 채팅" : "AI Quant Chat", free: "✓", basic: "✓", premium: "✓" },
-                    { feature: ko ? "차트 분석" : "Chart Analysis", free: "✓", basic: "✓", premium: ko ? "고급" : "Advanced" },
-                    { feature: ko ? "데이터 소스 & API" : "Data Sources & APIs", free: "3", basic: "5", premium: "10+" },
-                    { feature: ko ? "매크로 리서치 에이전트" : "Macro Research Agents", free: "—", basic: "—", premium: ko ? "8개 에이전트" : "8 agents" },
-                    { feature: ko ? "바이낸스 가격" : "Binance Prices", free: "✓", basic: "✓", premium: "✓" },
-                    { feature: ko ? "업비트 + 김치 프리미엄" : "Upbit + Kimchi Premium", free: "—", basic: "✓", premium: "✓" },
-                    { feature: ko ? "기술적 분석 (RSI, MA)" : "Technicals (RSI, MA)", free: "—", basic: "✓", premium: "✓" },
-                    { feature: ko ? "고래 트래커" : "Whale Tracker", free: "—", basic: "✓", premium: ko ? "전체" : "Full" },
-                    { feature: ko ? "퀀트 시그널" : "Quant Signals", free: "—", basic: "✓", premium: "✓" },
-                    { feature: ko ? "트레이딩뷰 차트" : "TradingView Charts", free: "✓", basic: "✓", premium: "✓" },
-                    { feature: ko ? "실시간 고래 알림" : "Real-time Whale Alerts", free: "—", basic: "—", premium: ko ? "텔레그램" : "Telegram" },
-                    { feature: ko ? "프리미엄 텔레그램 채널" : "Premium Telegram Channel", free: "—", basic: "—", premium: "✓" },
-                    { feature: ko ? "우선 지원" : "Priority Support", free: "—", basic: ko ? "이메일" : "Email", premium: ko ? "텔레그램 DM" : "Telegram DM" },
+                    { feature: ko ? "AI 퀀트 채팅" : "AI Quant Chat", basic: "✓", premium: "✓" },
+                    { feature: ko ? "차트 분석" : "Chart Analysis", basic: "✓", premium: ko ? "고급" : "Advanced" },
+                    { feature: ko ? "데이터 소스 & API" : "Data Sources & APIs", basic: "5", premium: "10+" },
+                    { feature: ko ? "매크로 리서치 에이전트" : "Macro Research Agents", basic: "—", premium: ko ? "8개 에이전트" : "8 agents" },
+                    { feature: ko ? "바이낸스 가격" : "Binance Prices", basic: "✓", premium: "✓" },
+                    { feature: ko ? "업비트 + 김치 프리미엄" : "Upbit + Kimchi Premium", basic: "✓", premium: "✓" },
+                    { feature: ko ? "기술적 분석 (RSI, MA)" : "Technicals (RSI, MA)", basic: "✓", premium: "✓" },
+                    { feature: ko ? "고래 트래커" : "Whale Tracker", basic: "✓", premium: ko ? "전체" : "Full" },
+                    { feature: ko ? "퀀트 시그널" : "Quant Signals", basic: "✓", premium: "✓" },
+                    { feature: ko ? "트레이딩뷰 차트" : "TradingView Charts", basic: "✓", premium: "✓" },
+                    { feature: ko ? "실시간 고래 알림" : "Real-time Whale Alerts", basic: "—", premium: ko ? "텔레그램" : "Telegram" },
+                    { feature: ko ? "프리미엄 텔레그램 채널" : "Premium Telegram Channel", basic: "—", premium: "✓" },
+                    { feature: ko ? "우선 지원" : "Priority Support", basic: ko ? "이메일" : "Email", premium: ko ? "텔레그램 DM" : "Telegram DM" },
                   ].map((row, i) => (
                     <tr key={i} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
                       <td className="px-6 py-3 text-zinc-300 font-medium">{row.feature}</td>
-                      <td className="px-4 py-3 text-center text-zinc-500">{row.free}</td>
                       <td className="px-4 py-3 text-center text-zinc-300">{row.basic}</td>
                       <td className="px-4 py-3 text-center text-white font-medium">{row.premium}</td>
                     </tr>
@@ -249,14 +213,8 @@ export default function PricingPage({
               {
                 q: ko ? "어떻게 결제하나요?" : "How do I pay?",
                 a: ko
-                  ? "ERC-20(이더리움) 또는 TRC-20(트론) 네트워크로 USDT를 전송한 후 TXID를 제출하면 즉시 활성화됩니다."
-                  : "Send USDT via ERC-20 (Ethereum) or TRC-20 (TRON), submit your TXID, and it activates instantly.",
-              },
-              {
-                q: ko ? "어떤 AI 기술을 사용하나요?" : "What AI technology powers this?",
-                a: ko
-                  ? "최신 대형 언어 모델(LLM)과 바이낸스, 업비트, CoinGecko, Polymarket 등 10개 이상의 실시간 데이터 소스를 결합한 에이전틱 프레임워크를 사용합니다."
-                  : "An agentic framework combining cutting-edge large language models with 10+ real-time data sources including Binance, Upbit, CoinGecko, and Polymarket.",
+                  ? "TRC-20(트론) 네트워크로 USDT를 정확한 금액만큼 전송한 후 TXID를 제출하면 즉시 활성화됩니다."
+                  : "Send exact USDT amount via TRC-20 (TRON) network, submit your TXID, and it activates instantly.",
               },
               {
                 q: ko ? "언제든 취소할 수 있나요?" : "Can I cancel anytime?",
