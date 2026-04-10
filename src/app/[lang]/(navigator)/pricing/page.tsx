@@ -191,7 +191,6 @@ export default function PricingPage({
                   {[
                     { feature: ko ? "AI 퀀트 채팅" : "AI Quant Chat", free: "✓", basic: "✓", premium: "✓" },
                     { feature: ko ? "차트 분석" : "Chart Analysis", free: "✓", basic: "✓", premium: ko ? "고급" : "Advanced" },
-                    { feature: ko ? "AI 모델" : "AI Model", free: "Gemini 2.5 Pro", basic: "Gemini 2.5 Pro", premium: "Gemini 2.5 Pro" },
                     { feature: ko ? "데이터 소스 & API" : "Data Sources & APIs", free: "3", basic: "5", premium: "10+" },
                     { feature: ko ? "매크로 리서치 에이전트" : "Macro Research Agents", free: "—", basic: "—", premium: ko ? "8개 에이전트" : "8 agents" },
                     { feature: ko ? "바이낸스 가격" : "Binance Prices", free: "✓", basic: "✓", premium: "✓" },
@@ -254,10 +253,10 @@ export default function PricingPage({
                   : "Send USDT via ERC-20 (Ethereum) or TRC-20 (TRON), submit your TXID, and it activates instantly.",
               },
               {
-                q: ko ? "AI 모델은 무엇을 사용하나요?" : "What AI model is used?",
+                q: ko ? "어떤 AI 기술을 사용하나요?" : "What AI technology powers this?",
                 a: ko
-                  ? "Google Gemini 2.5 Pro를 사용하며, 바이낸스, 업비트, CoinGecko, Polymarket 등 10개 이상의 실시간 데이터 소스가 연동됩니다."
-                  : "Powered by Google Gemini 2.5 Pro with 10+ real-time data sources including Binance, Upbit, CoinGecko, and Polymarket.",
+                  ? "최신 대형 언어 모델(LLM)과 바이낸스, 업비트, CoinGecko, Polymarket 등 10개 이상의 실시간 데이터 소스를 결합한 에이전틱 프레임워크를 사용합니다."
+                  : "An agentic framework combining cutting-edge large language models with 10+ real-time data sources including Binance, Upbit, CoinGecko, and Polymarket.",
               },
               {
                 q: ko ? "언제든 취소할 수 있나요?" : "Can I cancel anytime?",
