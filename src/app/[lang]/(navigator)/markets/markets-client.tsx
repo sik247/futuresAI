@@ -94,6 +94,110 @@ function getEventCoins(event: Event): string[] {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   Korean Translation — pattern-based for Polymarket titles
+   ═══════════════════════════════════════════════════════════ */
+
+const COIN_KO: Record<string, string> = {
+  Bitcoin: "비트코인", BTC: "BTC",
+  Ethereum: "이더리움", ETH: "ETH",
+  Solana: "솔라나", SOL: "SOL",
+  XRP: "XRP", Dogecoin: "도지코인", DOGE: "도지",
+  BNB: "BNB", MicroStrategy: "마이크로스트래티지", MSTR: "MSTR",
+  "Bitcoin Cash": "비트코인캐시", Cardano: "카르다노", ADA: "ADA",
+  Avalanche: "아발란체", AVAX: "AVAX", Polkadot: "폴카닷", DOT: "DOT",
+  Chainlink: "체인링크", LINK: "LINK",
+};
+
+function localizeCoin(text: string): string {
+  let result = text;
+  for (const [en, ko] of Object.entries(COIN_KO)) {
+    const regex = new RegExp(`\\b${en}\\b`, "gi");
+    result = result.replace(regex, ko);
+  }
+  return result;
+}
+
+function translateToKo(title: string): string {
+  const t = title.trim();
+  const lower = t.toLowerCase();
+
+  // "What price will X hit in YYYY?"
+  const hitYearMatch = t.match(/What price will (\w+) hit in (\d{4})\??/i);
+  if (hitYearMatch) return `${localizeCoin(hitYearMatch[1])}이(가) ${hitYearMatch[2]}년에 도달할 가격은?`;
+
+  // "What price will X hit in Month?"
+  const hitMonthMatch = t.match(/What price will (\w+) hit in (\w+)\??/i);
+  if (hitMonthMatch) return `${localizeCoin(hitMonthMatch[1])}이(가) ${hitMonthMatch[2]}에 도달할 가격은?`;
+
+  // "Will X hit $Y by DATE?"
+  const willHitMatch = t.match(/Will (\w+) hit \$?([\d,]+[KkMm]?) by (.+?)\??$/i);
+  if (willHitMatch) return `${localizeCoin(willHitMatch[1])}이(가) ${willHitMatch[3]}까지 $${willHitMatch[2]}에 도달할까?`;
+
+  // "Will X reach $Y ..."
+  const willReachMatch = t.match(/Will (\w+) reach \$?([\d,]+[KkMm]?)/i);
+  if (willReachMatch) return `${localizeCoin(willReachMatch[1])}이(가) $${willReachMatch[2]}에 도달할까?`;
+
+  // "X all time high by DATE?"
+  const athMatch = t.match(/(\w+) all[- ]?time high by (.+?)\??$/i);
+  if (athMatch) return `${localizeCoin(athMatch[1])} ${athMatch[2]}까지 역대 최고가 경신?`;
+
+  // "Will X launch a token by DATE?"
+  const launchMatch = t.match(/Will (.+?) launch a token by (.+?)\??$/i);
+  if (launchMatch) return `${localizeCoin(launchMatch[1])}이(가) ${launchMatch[2]}까지 토큰 출시?`;
+
+  // "X market cap (FDV) one day after launch?"
+  const fdvMatch = t.match(/(.+?) market cap \(FDV\) one day after launch\??$/i);
+  if (fdvMatch) return `${localizeCoin(fdvMatch[1])} 출시 1일 후 시가총액(FDV)은?`;
+
+  // "X FDV above ___ one day after launch?"
+  const fdvAboveMatch = t.match(/(.+?) FDV above (.+?) one day after launch\??$/i);
+  if (fdvAboveMatch) return `${localizeCoin(fdvAboveMatch[1])} 출시 1일 후 FDV ${fdvAboveMatch[2]} 이상?`;
+
+  // "X sells any Bitcoin by DATE?"
+  const sellsMatch = t.match(/(.+?) sells any Bitcoin by (.+?)\??$/i);
+  if (sellsMatch) return `${localizeCoin(sellsMatch[1])}이(가) ${sellsMatch[2]}까지 비트코인을 매도할까?`;
+
+  // "Bitcoin Up or Down", "ETH Up or Down on DATE?"
+  const upDownMatch = t.match(/(\w+) Up or Down( on (.+?))?\??$/i);
+  if (upDownMatch) {
+    const coinKo = localizeCoin(upDownMatch[1]);
+    return upDownMatch[3] ? `${coinKo} ${upDownMatch[3]} 상승 또는 하락?` : `${coinKo} 상승 또는 하락?`;
+  }
+
+  // "Bitcoin above $X on DATE?"
+  const aboveMatch = t.match(/(\w+) above \$?([\d,]+[KkMm]?)( on (.+?))?\??$/i);
+  if (aboveMatch) {
+    const coinKo = localizeCoin(aboveMatch[1]);
+    return aboveMatch[4] ? `${coinKo} ${aboveMatch[4]} $${aboveMatch[2]} 이상?` : `${coinKo} $${aboveMatch[2]} 이상?`;
+  }
+
+  // "Bitcoin price on DATE?"
+  const priceOnMatch = t.match(/(\w+) price on (.+?)\??$/i);
+  if (priceOnMatch) return `${localizeCoin(priceOnMatch[1])} ${priceOnMatch[2]} 가격은?`;
+
+  // "Bitcoin ETF approved by DATE?"
+  const etfMatch = t.match(/(\w+) ETF (.+?) by (.+?)\??$/i);
+  if (etfMatch) return `${localizeCoin(etfMatch[1])} ETF ${etfMatch[3]}까지 ${etfMatch[2]}?`;
+
+  // Fallback — translate coin names but leave structure
+  if (/what price will|will .+ hit|will .+ reach|above \$|below \$|market cap|FDV/i.test(t)) {
+    return localizeCoin(t);
+  }
+
+  // Default — return original with coin localization
+  return localizeCoin(t);
+}
+
+function translateLabel(label: string): string {
+  const map: Record<string, string> = {
+    "Yes": "예", "No": "아니오",
+    "Up": "상승", "Down": "하락",
+    "chance": "확률",
+  };
+  return map[label] || label;
+}
+
+/* ═══════════════════════════════════════════════════════════
    Signal Helpers
    ═══════════════════════════════════════════════════════════ */
 
@@ -276,14 +380,23 @@ export default function MarketsClient({
   const bearCount = sigData.signals.filter((s) => s.signal === "Strong Sell" || s.signal === "Sell").length;
   const neutralCount = sigData.signals.filter((s) => s.signal === "Neutral").length;
 
-  const sidebarItems: { key: TimeCategory; label: string }[] = [
+  const sidebarItems: { key: TimeCategory; label: string }[] = isKo ? [
+    { key: "all", label: "전체" }, { key: "5min", label: "5분" }, { key: "15min", label: "15분" },
+    { key: "1h", label: "1시간" }, { key: "4h", label: "4시간" }, { key: "daily", label: "일간" },
+    { key: "weekly", label: "주간" }, { key: "monthly", label: "월간" }, { key: "yearly", label: "연간" },
+    { key: "premarket", label: "프리마켓" }, { key: "etf", label: "ETF" },
+  ] : [
     { key: "all", label: "All" }, { key: "5min", label: "5 Min" }, { key: "15min", label: "15 Min" },
     { key: "1h", label: "1 Hour" }, { key: "4h", label: "4 Hours" }, { key: "daily", label: "Daily" },
     { key: "weekly", label: "Weekly" }, { key: "monthly", label: "Monthly" }, { key: "yearly", label: "Yearly" },
     { key: "premarket", label: "Pre-Market" }, { key: "etf", label: "ETF" },
   ];
 
-  const typeFilters: { key: TypeFilter; label: string }[] = [
+  const typeFilters: { key: TypeFilter; label: string }[] = isKo ? [
+    { key: "all", label: "전체" }, { key: "updown", label: "상승 / 하락" },
+    { key: "abovebelow", label: "이상 / 이하" }, { key: "pricerange", label: "가격 범위" },
+    { key: "hitprice", label: "목표가 도달" },
+  ] : [
     { key: "all", label: "All" }, { key: "updown", label: "Up / Down" },
     { key: "abovebelow", label: "Above / Below" }, { key: "pricerange", label: "Price Range" },
     { key: "hitprice", label: "Hit Price" },
@@ -331,7 +444,7 @@ export default function MarketsClient({
             <div className="hidden lg:block w-[200px] shrink-0" />
             <div className="flex-1 px-4 sm:px-6 pb-4">
               <div className="flex items-center gap-4 flex-wrap">
-                <h1 className="text-[22px] font-bold text-white tracking-tight">Crypto</h1>
+                <h1 className="text-[22px] font-bold text-white tracking-tight">{isKo ? "크립토" : "Crypto"}</h1>
                 <div className="flex items-center gap-1">
                   {typeFilters.map((f) => (
                     <button key={f.key} onClick={() => { setTypeFil(f.key); setCoinFilter(null); }}
@@ -409,7 +522,7 @@ export default function MarketsClient({
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 pb-24 lg:pb-0">
-                  {filteredEvents.map((event) => <EventCard key={event.id} event={event} />)}
+                  {filteredEvents.map((event) => <EventCard key={event.id} event={event} isKo={isKo} />)}
                 </div>
               )}
             </div>
@@ -674,11 +787,17 @@ function SignalDetail({ s, isKo }: { s: SignalItem; isKo: boolean }) {
    Prediction Card Components
    ═══════════════════════════════════════════════════════════ */
 
-function EventCard({ event }: { event: Event }) {
+function EventCard({ event, isKo }: { event: Event; isKo: boolean }) {
   const vol = parseFloat(String(event.volume || 0));
   const volLabel = formatVol(vol);
   const isUpDown = event.title.toLowerCase().includes("up or down") || event.title.toLowerCase().includes("up/down");
   const isBinary = !isUpDown && event.markets.length === 1 && event.markets[0].outcomes?.length === 2;
+  const title = isKo ? translateToKo(event.title) : event.title;
+  const yesLabel = isKo ? "예" : "Yes";
+  const noLabel = isKo ? "아니오" : "No";
+  const upLabel = isKo ? "상승" : "Up";
+  const downLabel = isKo ? "하락" : "Down";
+  const chanceLabel = isKo ? "확률" : "chance";
 
   if (isUpDown && event.markets.length >= 1) {
     const m = event.markets[0];
@@ -689,12 +808,12 @@ function EventCard({ event }: { event: Event }) {
       <a href={`https://polymarket.com/event/${event.slug || event.id}`} target="_blank" rel="noopener noreferrer" className="block group">
         <div className="rounded-xl bg-[#171923] border border-[#1e2030] p-4 flex flex-col h-full transition-all duration-200 hover:border-[#2e3050] hover:bg-[#1c1e2e]">
           <div className="flex items-start justify-between gap-3 mb-3">
-            <div className="flex items-start gap-3 min-w-0">{event.image && <img src={event.image} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" />}<h3 className="text-[14px] font-semibold text-white leading-snug line-clamp-2">{event.title}</h3></div>
-            <DonutChart pct={yesPct} label={isUp ? "Up" : "Down"} color={isUp ? "#22c55e" : "#ef4444"} />
+            <div className="flex items-start gap-3 min-w-0">{event.image && <img src={event.image} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" />}<h3 className="text-[14px] font-semibold text-white leading-snug line-clamp-2">{title}</h3></div>
+            <DonutChart pct={yesPct} label={isUp ? upLabel : downLabel} color={isUp ? "#22c55e" : "#ef4444"} />
           </div>
           <div className="flex gap-2 mt-auto">
-            <button className="flex-1 py-2 rounded-lg text-[13px] font-semibold bg-[#132b1f] text-emerald-400 hover:bg-[#1a3d2a] transition-colors text-center cursor-pointer">Up</button>
-            <button className="flex-1 py-2 rounded-lg text-[13px] font-semibold bg-[#2d1219] text-rose-400 hover:bg-[#3d1a24] transition-colors text-center cursor-pointer">Down</button>
+            <button className="flex-1 py-2 rounded-lg text-[13px] font-semibold bg-[#132b1f] text-emerald-400 hover:bg-[#1a3d2a] transition-colors text-center cursor-pointer">{upLabel}</button>
+            <button className="flex-1 py-2 rounded-lg text-[13px] font-semibold bg-[#2d1219] text-rose-400 hover:bg-[#3d1a24] transition-colors text-center cursor-pointer">{downLabel}</button>
           </div>
           <CardFooter volLabel={volLabel} hasGift={false} />
         </div>
@@ -710,12 +829,12 @@ function EventCard({ event }: { event: Event }) {
       <a href={`https://polymarket.com/event/${event.slug || event.id}`} target="_blank" rel="noopener noreferrer" className="block group">
         <div className="rounded-xl bg-[#171923] border border-[#1e2030] p-4 flex flex-col h-full transition-all duration-200 hover:border-[#2e3050] hover:bg-[#1c1e2e]">
           <div className="flex items-start justify-between gap-3 mb-3">
-            <div className="flex items-start gap-3 min-w-0">{event.image && <img src={event.image} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" />}<h3 className="text-[14px] font-semibold text-white leading-snug line-clamp-2">{event.title}</h3></div>
-            <DonutChart pct={yesPct} label="chance" color="#22c55e" />
+            <div className="flex items-start gap-3 min-w-0">{event.image && <img src={event.image} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" />}<h3 className="text-[14px] font-semibold text-white leading-snug line-clamp-2">{title}</h3></div>
+            <DonutChart pct={yesPct} label={chanceLabel} color="#22c55e" />
           </div>
           <div className="flex gap-2 mt-auto">
-            <button className="flex-1 py-2 rounded-lg text-[13px] font-semibold bg-[#132b1f] text-emerald-400 hover:bg-[#1a3d2a] transition-colors text-center cursor-pointer">Yes</button>
-            <button className="flex-1 py-2 rounded-lg text-[13px] font-semibold bg-[#2d1219] text-rose-400 hover:bg-[#3d1a24] transition-colors text-center cursor-pointer">No</button>
+            <button className="flex-1 py-2 rounded-lg text-[13px] font-semibold bg-[#132b1f] text-emerald-400 hover:bg-[#1a3d2a] transition-colors text-center cursor-pointer">{yesLabel}</button>
+            <button className="flex-1 py-2 rounded-lg text-[13px] font-semibold bg-[#2d1219] text-rose-400 hover:bg-[#3d1a24] transition-colors text-center cursor-pointer">{noLabel}</button>
           </div>
           <CardFooter volLabel={volLabel} hasGift={volLabel !== ""} />
         </div>
@@ -726,19 +845,20 @@ function EventCard({ event }: { event: Event }) {
   return (
     <a href={`https://polymarket.com/event/${event.slug || event.id}`} target="_blank" rel="noopener noreferrer" className="block group">
       <div className="rounded-xl bg-[#171923] border border-[#1e2030] p-4 flex flex-col h-full transition-all duration-200 hover:border-[#2e3050] hover:bg-[#1c1e2e]">
-        <div className="flex items-start gap-3 mb-3">{event.image && <img src={event.image} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" />}<h3 className="text-[14px] font-semibold text-white leading-snug line-clamp-2">{event.title}</h3></div>
+        <div className="flex items-start gap-3 mb-3">{event.image && <img src={event.image} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" />}<h3 className="text-[14px] font-semibold text-white leading-snug line-clamp-2">{title}</h3></div>
         <div className="space-y-1 flex-1">
           {event.markets.slice(0, 3).map((market, i) => {
             const yesRaw = market.outcomePrices?.[0] ? parseFloat(String(market.outcomePrices[0])) : 0.5;
             const yesPct = Math.round(yesRaw * 100);
             let lbl = market.groupItemTitle || (event.markets.length > 1 ? (market.question || market.outcomes?.[0] || "Yes") : (market.outcomes?.[0] || "Yes"));
+            if (isKo) lbl = translateToKo(lbl);
             if (lbl.length > 40) lbl = lbl.slice(0, 37) + "...";
             return (
               <div key={i} className="flex items-center gap-2 py-1">
                 <span className="text-[13px] text-[#c5cad3] flex-1 min-w-0 truncate">{lbl}</span>
                 <span className="text-[13px] font-bold text-white tabular-nums shrink-0 mr-1.5">{yesPct}%</span>
-                <span className="px-2 py-[3px] rounded text-[11px] font-semibold bg-[#132b1f] text-emerald-400 hover:bg-[#1a3d2a] transition-colors cursor-pointer">Yes</span>
-                <span className="px-2 py-[3px] rounded text-[11px] font-semibold bg-[#2d1219] text-rose-400 hover:bg-[#3d1a24] transition-colors cursor-pointer">No</span>
+                <span className="px-2 py-[3px] rounded text-[11px] font-semibold bg-[#132b1f] text-emerald-400 hover:bg-[#1a3d2a] transition-colors cursor-pointer">{yesLabel}</span>
+                <span className="px-2 py-[3px] rounded text-[11px] font-semibold bg-[#2d1219] text-rose-400 hover:bg-[#3d1a24] transition-colors cursor-pointer">{noLabel}</span>
               </div>
             );
           })}
