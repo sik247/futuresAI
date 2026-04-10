@@ -62,22 +62,39 @@ CRITICAL RULES:
 - Make the analysis so good that users want to upgrade for more`,
 };
 
-function extractTickerFromResponse(
-  response: string,
+function extractTickerFromText(
+  text: string,
   persona: string
 ): { symbol: string; exchange: string } | null {
-  const cryptoTickers = ["BTC", "ETH", "SOL", "XRP", "BNB", "DOGE", "ADA", "AVAX", "DOT", "LINK"];
+  // Crypto tickers — ordered by priority (most-mentioned first)
+  const cryptoTickers = [
+    "BTC", "ETH", "SOL", "XRP", "BNB", "DOGE", "ADA", "AVAX", "DOT", "LINK",
+    "NEAR", "SUI", "APT", "ARB", "OP", "MATIC", "ATOM", "LTC", "BCH", "TRX",
+    "SHIB", "PEPE", "WIF", "BONK", "JUP", "TIA", "INJ", "RNDR", "FET", "IMX",
+  ];
   const stockTickers = ["AAPL", "GOOGL", "AMZN", "MSFT", "TSLA", "NVDA", "META", "NFLX", "SPY", "QQQ"];
 
   const tickers = persona === "crypto" ? cryptoTickers : stockTickers;
   const exchange = persona === "crypto" ? "BINANCE" : "NASDAQ";
 
+  // Count mentions of each ticker and return the most-referenced one
+  const counts: Record<string, number> = {};
   for (const t of tickers) {
-    if (new RegExp(`\\b${t}\\b`, "i").test(response)) {
-      return { symbol: persona === "crypto" ? t + "USDT" : t, exchange };
-    }
+    const matches = text.match(new RegExp(`\\b${t}\\b`, "gi"));
+    if (matches) counts[t] = matches.length;
   }
-  return null;
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  if (sorted.length === 0) return null;
+
+  const top = sorted[0][0];
+  return { symbol: persona === "crypto" ? top + "USDT" : top, exchange };
+}
+
+function extractTickerFromResponse(
+  response: string,
+  persona: string
+): { symbol: string; exchange: string } | null {
+  return extractTickerFromText(response, persona);
 }
 
 export async function POST(req: NextRequest) {
@@ -228,8 +245,10 @@ IMPORTANT: After your analysis, add a line "---FOLLOWUPS---" followed by exactly
         .slice(0, 3);
     }
 
-    // Detect ticker from AI response
-    const tickerInfo = extractTickerFromResponse(mainResponse, persona);
+    // Detect ticker — prioritize user's question, fall back to AI response
+    const tickerInfo =
+      extractTickerFromText(message, persona) ||
+      extractTickerFromResponse(mainResponse, persona);
 
     // Build internal page links based on detected symbol and query content
     const internalLinks: { label: string; path: string; type: string }[] = [];

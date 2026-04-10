@@ -116,27 +116,93 @@ function ChartBarIcon({ className }: { className?: string }) {
 }
 
 /* -------------------------------------------------------------------------- */
-/*  TradingView Chart Widget                                                   */
+/*  TradingView Chart Widget — with live price header + timeframe toggle       */
 /* -------------------------------------------------------------------------- */
+const TV_INTERVALS = [
+  { key: "15", label: "15m" },
+  { key: "60", label: "1h" },
+  { key: "240", label: "4h" },
+  { key: "D", label: "1D" },
+  { key: "W", label: "1W" },
+];
+
 function TradingViewChart({ ticker }: { ticker: TickerInfo }) {
   const { symbol, exchange } = ticker;
-  const src = `https://s.tradingview.com/widgetembed/?frameElementId=tv_chart&symbol=${exchange}:${symbol}&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=0a0a0f&studies=[]&theme=dark&style=1&timezone=exchange&withdateranges=1&showpopupbutton=0&studies_overrides=%7B%7D&overrides=%7B%7D&enabled_features=[]&disabled_features=[]&locale=en&width=100%25&height=400`;
+  const [interval, setInterval] = useState("240"); // default 4H — matches quant analysis
+  const [livePrice, setLivePrice] = useState<{ price: number; change: number } | null>(null);
+
+  // Live price from Binance — refresh every 5s
+  useEffect(() => {
+    if (!symbol.endsWith("USDT")) return;
+    async function fetchPrice() {
+      try {
+        const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        setLivePrice({
+          price: parseFloat(data.lastPrice),
+          change: parseFloat(data.priceChangePercent),
+        });
+      } catch {}
+    }
+    fetchPrice();
+    const id = window.setInterval(fetchPrice, 5_000);
+    return () => window.clearInterval(id);
+  }, [symbol]);
+
+  const src = `https://s.tradingview.com/widgetembed/?frameElementId=tv_chart&symbol=${exchange}:${symbol}&interval=${interval}&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=0a0a0f&studies=%5B%22RSI%40tv-basicstudies%22%5D&theme=dark&style=1&timezone=exchange&withdateranges=1&showpopupbutton=0&locale=en&width=100%25&height=420`;
+
+  const coinOnly = symbol.replace("USDT", "");
 
   return (
-    <div className="mt-2 w-full rounded-lg overflow-hidden border border-white/[0.06] bg-zinc-900/60">
-      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-white/[0.06]">
-        <ChartBarIcon className="w-3.5 h-3.5 text-blue-400" />
-        <span className="text-[10px] font-mono text-zinc-300 font-semibold">
-          {exchange}:{symbol}
+    <div className="mt-2 w-full rounded-lg overflow-hidden border border-white/[0.08] bg-zinc-900/60">
+      {/* Header with live price + timeframe toggles */}
+      <div className="flex items-center flex-wrap gap-2 px-3 py-2 border-b border-white/[0.06]">
+        <ChartBarIcon className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+        <span className="text-xs font-mono text-white font-bold">
+          {coinOnly}/USDT
         </span>
-        <span className="ml-auto text-[8px] text-zinc-600 uppercase tracking-widest font-mono">
-          TradingView
-        </span>
+
+        {livePrice && (
+          <>
+            <span className="text-xs font-mono text-zinc-200 tabular-nums">
+              ${livePrice.price.toLocaleString(undefined, { maximumFractionDigits: livePrice.price > 100 ? 0 : livePrice.price > 1 ? 2 : 4 })}
+            </span>
+            <span className={`text-[11px] font-mono font-semibold tabular-nums ${livePrice.change >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+              {livePrice.change >= 0 ? "+" : ""}{livePrice.change.toFixed(2)}%
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+              </span>
+              <span className="text-[8px] font-mono text-emerald-400 uppercase tracking-[0.12em]">Live</span>
+            </span>
+          </>
+        )}
+
+        {/* Timeframe toggles */}
+        <div className="ml-auto flex items-center gap-0.5">
+          {TV_INTERVALS.map((tf) => (
+            <button
+              key={tf.key}
+              onClick={() => setInterval(tf.key)}
+              className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold transition-colors ${
+                interval === tf.key
+                  ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                  : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+              }`}
+            >
+              {tf.label}
+            </button>
+          ))}
+        </div>
       </div>
       <iframe
+        key={`${symbol}-${interval}`}
         src={src}
         className="w-full"
-        style={{ height: 400 }}
+        style={{ height: 420 }}
         frameBorder="0"
         allowFullScreen
         title={`${exchange}:${symbol} Chart`}
