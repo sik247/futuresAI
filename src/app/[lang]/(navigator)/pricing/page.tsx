@@ -4,7 +4,7 @@ import PaymentSection from "./payment-section";
 export const metadata: Metadata = {
   title: "Pricing - FuturesAI",
   description:
-    "Professional crypto intelligence plans. Free, Basic $25, and Premium $99 tiers with AI chat, chart analysis, whale tracking, and real-time market data.",
+    "Professional crypto intelligence plans. Free, Basic $25, and Premium $99 tiers with AI quant analysis, 10+ data sources, agentic macro research agents, and real-time market data.",
 };
 
 function CheckIcon() {
@@ -75,14 +75,14 @@ export default function PricingPage({
               </p>
             </div>
             <div className="flex-1 border-t border-white/[0.06] pt-5 space-y-0.5">
-              <Feature included>{ko ? "AI 퀀트 채팅 (제한적)" : "AI Quant Chat (limited)"}</Feature>
-              <Feature included>{ko ? "차트 분석 (제한적)" : "Chart analysis (limited)"}</Feature>
+              <Feature included>{ko ? "AI 퀀트 채팅" : "AI Quant Chat"}</Feature>
+              <Feature included>{ko ? "기본 차트 분석" : "Basic chart analysis"}</Feature>
               <Feature included>{ko ? "시장 데이터" : "Market data"}</Feature>
               <Feature included>{ko ? "뉴스 피드" : "News feed"}</Feature>
               <Feature included={false}>{ko ? "고래 트래커" : "Whale tracker"}</Feature>
               <Feature included={false}>{ko ? "퀀트 시그널" : "Quant signals"}</Feature>
               <Feature included={false}>{ko ? "업비트 + 김치 프리미엄" : "Upbit + Kimchi Premium"}</Feature>
-              <Feature included={false}>{ko ? "실시간 알림" : "Real-time alerts"}</Feature>
+              <Feature included={false}>{ko ? "멀티 에이전트 매크로 리서치" : "Multi-agent macro research"}</Feature>
               <Feature included={false}>{ko ? "텔레그램 프리미엄 채널" : "Telegram premium channel"}</Feature>
             </div>
             <div className="mt-6 pt-5 border-t border-white/[0.06]">
@@ -117,7 +117,7 @@ export default function PricingPage({
               <Feature included>{ko ? "고래 트래커" : "Whale tracker"}</Feature>
               <Feature included>{ko ? "퀀트 시그널" : "Quant signals"}</Feature>
               <Feature included>{ko ? "업비트 + 김치 프리미엄" : "Upbit + Kimchi Premium"}</Feature>
-              <Feature included={false}>{ko ? "실시간 고래 알림 (텔레그램)" : "Real-time whale alerts (Telegram)"}</Feature>
+              <Feature included={false}>{ko ? "멀티 에이전트 매크로 리서치" : "Multi-agent macro research"}</Feature>
               <Feature included={false}>{ko ? "텔레그램 프리미엄 채널" : "Telegram premium channel"}</Feature>
             </div>
             <div className="mt-6 pt-5 border-t border-emerald-500/10">
@@ -147,14 +147,14 @@ export default function PricingPage({
                 <span className="text-base text-zinc-500">/{ko ? "월" : "mo"}</span>
               </div>
               <p className="text-sm text-zinc-400 mt-2">
-                {ko ? "프로 트레이더를 위한 전체 액세스" : "Full access for pro traders"}
+                {ko ? "에이전트 팀 기반 매크로 리서치 + 전체 액세스" : "Agentic macro research team + full access"}
               </p>
             </div>
             <div className="flex-1 border-t border-blue-500/10 pt-5 space-y-0.5 relative">
-              <Feature included highlight>{ko ? "AI 퀀트 채팅 (높은 빈도)" : "AI Quant Chat (high frequency)"}</Feature>
-              <Feature included highlight>{ko ? "차트 분석 (높은 빈도)" : "Chart analysis (high frequency)"}</Feature>
-              <Feature included>{ko ? "시장 데이터 (전체)" : "Market data (full)"}</Feature>
-              <Feature included>{ko ? "뉴스 피드" : "News feed"}</Feature>
+              <Feature included highlight>{ko ? "AI 퀀트 채팅" : "AI Quant Chat"}</Feature>
+              <Feature included highlight>{ko ? "고급 차트 분석" : "Advanced chart analysis"}</Feature>
+              <Feature included highlight>{ko ? "10+ 실시간 데이터 소스 & API" : "10+ real-time data sources & APIs"}</Feature>
+              <Feature included highlight>{ko ? "8인 매크로 리서치 에이전트 팀" : "Team of 8 macro research agents"}</Feature>
               <Feature included>{ko ? "고래 트래커 (전체)" : "Whale tracker (full)"}</Feature>
               <Feature included>{ko ? "퀀트 시그널" : "Quant signals"}</Feature>
               <Feature included>{ko ? "업비트 + 김치 프리미엄 데이터" : "Upbit + Kimchi Premium data"}</Feature>
@@ -190,10 +190,11 @@ export default function PricingPage({
                 </thead>
                 <tbody className="text-sm">
                   {[
-                    { feature: ko ? "AI 퀀트 채팅" : "AI Quant Chat", free: ko ? "제한적" : "Limited", basic: "✓", premium: ko ? "높은 빈도" : "High freq" },
-                    { feature: ko ? "차트 분석" : "Chart Analysis", free: ko ? "제한적" : "Limited", basic: "✓", premium: ko ? "높은 빈도" : "High freq" },
+                    { feature: ko ? "AI 퀀트 채팅" : "AI Quant Chat", free: "✓", basic: "✓", premium: "✓" },
+                    { feature: ko ? "차트 분석" : "Chart Analysis", free: "✓", basic: "✓", premium: ko ? "고급" : "Advanced" },
                     { feature: ko ? "AI 모델" : "AI Model", free: "Gemini 2.5 Pro", basic: "Gemini 2.5 Pro", premium: "Gemini 2.5 Pro" },
-                    { feature: ko ? "실시간 데이터" : "Live Data", free: ko ? "기본" : "Basic", basic: ko ? "전체" : "Full", premium: ko ? "전체" : "Full" },
+                    { feature: ko ? "데이터 소스 & API" : "Data Sources & APIs", free: "3", basic: "5", premium: "10+" },
+                    { feature: ko ? "매크로 리서치 에이전트" : "Macro Research Agents", free: "—", basic: "—", premium: ko ? "8개 에이전트" : "8 agents" },
                     { feature: ko ? "바이낸스 가격" : "Binance Prices", free: "✓", basic: "✓", premium: "✓" },
                     { feature: ko ? "업비트 + 김치 프리미엄" : "Upbit + Kimchi Premium", free: "—", basic: "✓", premium: "✓" },
                     { feature: ko ? "기술적 분석 (RSI, MA)" : "Technicals (RSI, MA)", free: "—", basic: "✓", premium: "✓" },
@@ -238,8 +239,14 @@ export default function PricingPage({
               {
                 q: ko ? "Basic과 Premium의 차이는?" : "What's the difference between Basic and Premium?",
                 a: ko
-                  ? "Basic은 AI 채팅, 차트 분석, 업비트 김치 프리미엄 데이터를 포함합니다. Premium은 더 높은 사용 빈도와 함께 실시간 고래 알림, 텔레그램 프리미엄 전용 채널, 우선 지원을 제공합니다."
-                  : "Basic includes AI chat, chart analysis, and Upbit Kimchi Premium data. Premium offers higher usage frequency plus real-time whale alerts, Telegram premium channel, and priority support.",
+                  ? "Basic은 AI 퀀트 채팅, 차트 분석, 업비트 김치 프리미엄 등 핵심 트레이딩 도구를 제공합니다. Premium은 10개 이상의 실시간 데이터 소스와 8개의 매크로 리서치 에이전트가 협업하는 에이전틱 프레임워크를 통해 최적의 트레이딩 의사결정을 지원하며, 실시간 고래 알림과 텔레그램 프리미엄 채널을 포함합니다."
+                  : "Basic provides core trading tools including AI Quant Chat, chart analysis, and Upbit Kimchi Premium data. Premium unlocks 10+ real-time data sources and an agentic framework with a team of 8 macro research agents that collaborate to find the best trading decisions, plus real-time whale alerts and a Telegram premium channel.",
+              },
+              {
+                q: ko ? "매크로 리서치 에이전트란?" : "What are macro research agents?",
+                a: ko
+                  ? "Premium의 에이전틱 프레임워크는 거시경제, 온체인 데이터, 기술적 분석, 뉴스 센티먼트 등 각 전문 분야를 담당하는 8개의 AI 에이전트가 서로 소통하며 종합적인 트레이딩 인사이트를 도출합니다."
+                  : "Premium's agentic framework deploys 8 specialized AI agents covering macro economics, on-chain data, technical analysis, news sentiment, and more. They communicate with each other to produce comprehensive trading insights.",
               },
               {
                 q: ko ? "어떻게 결제하나요?" : "How do I pay?",
@@ -250,8 +257,8 @@ export default function PricingPage({
               {
                 q: ko ? "AI 모델은 무엇을 사용하나요?" : "What AI model is used?",
                 a: ko
-                  ? "Google Gemini 2.5 Pro를 사용하며, 바이낸스, 업비트, CoinGecko 등 9개 실시간 데이터 소스가 연동됩니다."
-                  : "Powered by Google Gemini 2.5 Pro with 9 real-time data sources including Binance, Upbit, and CoinGecko.",
+                  ? "Google Gemini 2.5 Pro를 사용하며, 바이낸스, 업비트, CoinGecko, Polymarket 등 10개 이상의 실시간 데이터 소스가 연동됩니다."
+                  : "Powered by Google Gemini 2.5 Pro with 10+ real-time data sources including Binance, Upbit, CoinGecko, and Polymarket.",
               },
               {
                 q: ko ? "언제든 취소할 수 있나요?" : "Can I cancel anytime?",

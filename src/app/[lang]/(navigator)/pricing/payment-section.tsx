@@ -30,8 +30,8 @@ function StatusBadge({ status }: { status: Payment["status"] }) {
 }
 
 const PLANS = [
-  { amount: 25, name: "Basic", nameKo: "베이직", color: "blue", chat: 25, chart: 10 },
-  { amount: 99, name: "Premium", nameKo: "프리미엄", color: "purple", chat: 100, chart: 30 },
+  { amount: 25, name: "Basic", nameKo: "베이직", color: "blue", description: "Core AI analysis + trading tools", descriptionKo: "핵심 AI 분석 + 트레이딩 도구" },
+  { amount: 99, name: "Premium", nameKo: "프리미엄", color: "purple", description: "10+ data sources + 8 research agents", descriptionKo: "10+ 데이터 소스 + 8개 리서치 에이전트" },
 ];
 
 export default function PaymentSection({
@@ -193,8 +193,11 @@ export default function PaymentSection({
               </div>
               <p className="text-3xl font-bold text-white mb-1">${plan.amount}<span className="text-xs text-zinc-500 font-normal">/mo</span></p>
               <div className="text-sm text-zinc-400 space-y-0.5">
-                <p>{ko ? "AI 퀀트 채팅 + 차트 분석" : "AI Quant Chat + Chart analysis"}</p>
-                <p>{ko ? "고래 트래커 + 퀀트 시그널" : "Whale tracker + Quant signals"}</p>
+                <p>{ko ? plan.descriptionKo : plan.description}</p>
+                <p>{plan.amount === 99
+                  ? (ko ? "에이전틱 매크로 리서치 프레임워크" : "Agentic macro research framework")
+                  : (ko ? "고래 트래커 + 퀀트 시그널" : "Whale tracker + Quant signals")
+                }</p>
               </div>
             </button>
           ))}
