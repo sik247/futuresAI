@@ -50,6 +50,45 @@ model User {
   realEmail        String?
   inviteNumber     Int?              @unique
   isFounding100    Boolean           @default(false)
+  // Group moderation state (MissRose-style bot)
+  warnCount        Int               @default(0)
+  isBanned         Boolean           @default(false)
+  banReason        String?
+  bannedAt         DateTime?
+  mutedUntil       DateTime?
+  modActionsByMe   ModAction[]       @relation("ModActor")
+  modActionsOnMe   ModAction[]       @relation("ModTarget")
+}
+
+/// Audit log for every moderation action (ban/kick/mute/warn/etc.)
+model ModAction {
+  id         String   @id @default(cuid())
+  actorId    String
+  actor      User     @relation("ModActor", fields: [actorId], references: [id], onDelete: Cascade)
+  targetId   String?
+  target     User?    @relation("ModTarget", fields: [targetId], references: [id], onDelete: SetNull)
+  targetTgId String?  // for users not in our DB (Telegram ID only)
+  chatId     String   // Telegram chat where action happened
+  action     String   // "ban" | "unban" | "kick" | "mute" | "unmute" | "warn" | "unwarn" | "purge" | "delete" | "pin" | "unpin" | "promote" | "demote" | "autodelete"
+  reason     String?
+  metadata   Json?    @db.JsonB
+  createdAt  DateTime @default(now()) @db.Timestamptz()
+
+  @@index([actorId])
+  @@index([targetId])
+  @@index([chatId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+/// Per-group settings (rules, welcome message, etc.)
+model GroupSettings {
+  id         String   @id @default(cuid())
+  chatId     String   @unique
+  rules      String?  @db.Text
+  welcomeMsg String?  @db.Text
+  createdAt  DateTime @default(now()) @db.Timestamptz()
+  updatedAt  DateTime @updatedAt @db.Timestamptz()
 }
 
 model Account {
