@@ -60,16 +60,30 @@ export const authOptions: NextAuthOptions = {
 
         const telegramId = credentials.id;
         const name = credentials.first_name || credentials.username || `User ${telegramId}`;
-        const email = `tg_${telegramId}@telegram.user`;
+        const telegramUsername = credentials.username || "";
+        const syntheticEmail = `tg_${telegramId}@telegram.user`;
 
-        // Find or create user
-        let user = await prisma.user.findUnique({ where: { email } });
+        // Prefer lookup by telegramId (new field); fallback to synthetic email for legacy users
+        let user = await prisma.user.findUnique({ where: { telegramId } });
+        if (!user) {
+          user = await prisma.user.findUnique({ where: { email: syntheticEmail } });
+          // Backfill telegramId for legacy users signing in again
+          if (user && !user.telegramId) {
+            user = await prisma.user.update({
+              where: { id: user.id },
+              data: { telegramId, telegramUsername },
+            });
+          }
+        }
+
         if (!user) {
           user = await prisma.user.create({
             data: {
-              email,
+              email: syntheticEmail,
               name,
-              nickname: credentials.username || "",
+              nickname: telegramUsername,
+              telegramId,
+              telegramUsername,
               role: "USER",
             },
           });

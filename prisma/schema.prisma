@@ -44,6 +44,12 @@ model User {
   payments         Payment[]
   // Trading profile — user tendencies, risk appetite used as agentic memory/context
   tradingProfile   Json?             @db.JsonB
+  // Contact linking for invite/post program
+  telegramId       String?           @unique
+  telegramUsername String?
+  realEmail        String?
+  inviteNumber     Int?              @unique
+  isFounding100    Boolean           @default(false)
 }
 
 model Account {

@@ -212,44 +212,70 @@ function SourcePills({ dataSources, ko }: { dataSources: DataSources; ko?: boole
 
 function CoinPriceCards({ coins, ko }: { coins: string[]; ko?: boolean }) {
   const [prices, setPrices] = useState<Record<string, { price: number; change: number }>>({});
+  const [lastUpdate, setLastUpdate] = useState<number>(0);
 
   useEffect(() => {
     if (coins.length === 0) return;
-    const cgIds: Record<string, string> = { BTC: "bitcoin", ETH: "ethereum", SOL: "solana", XRP: "ripple", BNB: "binancecoin", DOGE: "dogecoin", ADA: "cardano", AVAX: "avalanche-2", DOT: "polkadot", LINK: "chainlink" };
-    const ids = coins.map((c) => cgIds[c]).filter(Boolean).join(",");
-    if (!ids) return;
-    fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`)
-      .then((r) => r.json())
-      .then((data) => {
+
+    // Fetch live prices directly from Binance — faster & more accurate than CoinGecko
+    async function fetchPrices() {
+      try {
+        const symbols = coins.map((c) => `${c}USDT`);
+        const symbolParam = encodeURIComponent(JSON.stringify(symbols));
+        const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=${symbolParam}`);
+        if (!res.ok) return;
+        const data: { symbol: string; lastPrice: string; priceChangePercent: string }[] = await res.json();
         const map: Record<string, { price: number; change: number }> = {};
-        for (const coin of coins) {
-          const id = cgIds[coin];
-          if (id && data[id]) {
-            map[coin] = { price: data[id].usd, change: data[id].usd_24h_change || 0 };
+        for (const t of data) {
+          const coin = t.symbol.replace("USDT", "");
+          if (coins.includes(coin)) {
+            map[coin] = {
+              price: parseFloat(t.lastPrice),
+              change: parseFloat(t.priceChangePercent),
+            };
           }
         }
         setPrices(map);
-      })
-      .catch(() => {});
+        setLastUpdate(Date.now());
+      } catch {}
+    }
+
+    fetchPrices();
+    const interval = setInterval(fetchPrices, 10_000); // refresh every 10s
+    return () => clearInterval(interval);
   }, [coins]);
 
   if (Object.keys(prices).length === 0) return null;
 
   return (
-    <div className="flex flex-wrap gap-2 my-2">
-      {coins.map((coin) => {
-        const p = prices[coin];
-        if (!p) return null;
-        return (
-          <div key={coin} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
-            <span className="text-xs font-bold text-white">{coin}</span>
-            <span className="text-xs font-mono text-zinc-300 tabular-nums">${p.price.toLocaleString(undefined, { maximumFractionDigits: p.price > 100 ? 0 : 2 })}</span>
-            <span className={`text-[11px] font-mono font-semibold tabular-nums ${p.change >= 0 ? "text-emerald-400" : "text-red-400"}`}>
-              {p.change >= 0 ? "+" : ""}{p.change.toFixed(2)}%
-            </span>
-          </div>
-        );
-      })}
+    <div className="my-2">
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <span className="relative flex h-1.5 w-1.5">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+        </span>
+        <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-[0.12em]">
+          {ko ? "실시간" : "Live"}
+        </span>
+        <span className="text-[9px] font-mono text-zinc-600 uppercase tracking-wider">Binance</span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {coins.map((coin) => {
+          const p = prices[coin];
+          if (!p) return null;
+          return (
+            <div key={coin} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.12] transition-colors">
+              <span className="text-xs font-bold text-white">{coin}</span>
+              <span className="text-xs font-mono text-zinc-200 tabular-nums">
+                ${p.price.toLocaleString(undefined, { maximumFractionDigits: p.price > 100 ? 0 : p.price > 1 ? 2 : 4 })}
+              </span>
+              <span className={`text-[11px] font-mono font-semibold tabular-nums ${p.change >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                {p.change >= 0 ? "+" : ""}{p.change.toFixed(2)}%
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
