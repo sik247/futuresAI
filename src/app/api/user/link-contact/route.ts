@@ -64,9 +64,9 @@ export async function POST(req: NextRequest) {
 
   // Check if user now has both contact methods and is eligible for founding 200
   let foundingAssigned = false;
-  if (updated.telegramId && updated.realEmail && !updated.isFounding200) {
+  if (updated.telegramId && updated.realEmail && !updated.isFounding100) {
     try {
-      const foundingCount = await prisma.user.count({ where: { isFounding200: true } });
+      const foundingCount = await prisma.user.count({ where: { isFounding100: true } });
       if (foundingCount < 200) {
         // Atomically assign inviteNumber and mark as founding member
         const nextNumber = foundingCount + 1;
@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
           where: { id: userId },
           data: {
             inviteNumber: nextNumber,
-            isFounding200: true,
+            isFounding100: true,
           },
         });
         foundingAssigned = true;
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
     telegramId: updated.telegramId,
     telegramUsername: updated.telegramUsername,
     realEmail: updated.realEmail,
-    isFounding200: foundingAssigned || updated.isFounding200,
+    isFounding100: foundingAssigned || updated.isFounding100,
     inviteNumber: updated.inviteNumber,
     foundingAssignedJustNow: foundingAssigned,
   });
@@ -115,12 +115,12 @@ export async function GET() {
       telegramUsername: true,
       realEmail: true,
       inviteNumber: true,
-      isFounding200: true,
+      isFounding100: true,
     },
   });
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-  const foundingCount = await prisma.user.count({ where: { isFounding200: true } });
+  const foundingCount = await prisma.user.count({ where: { isFounding100: true } });
 
   // A user is "email-based" if their login email is NOT a synthetic tg_*@telegram.user
   const isTelegramLogin = user.email.startsWith("tg_") && user.email.endsWith("@telegram.user");
@@ -132,7 +132,7 @@ export async function GET() {
     telegramUsername: user.telegramUsername,
     realEmail: user.realEmail || (isTelegramLogin ? null : user.email),
     inviteNumber: user.inviteNumber,
-    isFounding200: user.isFounding200,
+    isFounding100: user.isFounding100,
     foundingCount,
     foundingSlotsLeft: Math.max(0, 200 - foundingCount),
     needsTelegram,
