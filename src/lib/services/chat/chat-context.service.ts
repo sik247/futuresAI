@@ -289,7 +289,7 @@ export async function buildCryptoContext(query: string): Promise<ChatContextResu
   let gotPrice = false;
   let usdPrice = 0;
 
-  // Tier 1: Binance
+  // Tier 1: Binance — LIVE FETCHED PRICE (authoritative, refreshes every 5s on client)
   if (ticker && binanceRes.status === "fulfilled" && binanceRes.value && "ok" in binanceRes.value && binanceRes.value.ok) {
     try {
       const data = await binanceRes.value.json();
@@ -298,7 +298,10 @@ export async function buildCryptoContext(query: string): Promise<ChatContextResu
       if (price > 0) {
         gotPrice = true;
         usdPrice = price;
-        parts.push(`BINANCE ${ticker.ticker}: $${price.toLocaleString()} | 24h: ${pct >= 0 ? "+" : ""}${pct.toFixed(2)}% | Vol: $${(parseFloat(data.quoteVolume) / 1e6).toFixed(1)}M | High: $${parseFloat(data.highPrice).toLocaleString()} | Low: $${parseFloat(data.lowPrice).toLocaleString()}`);
+        const fetchedAt = new Date().toISOString();
+        parts.push(`[LIVE FETCHED PRICE — AUTHORITATIVE GROUND TRUTH, fetched at ${fetchedAt}]
+BINANCE ${ticker.ticker}: $${price.toLocaleString()} | 24h: ${pct >= 0 ? "+" : ""}${pct.toFixed(2)}% | Vol: $${(parseFloat(data.quoteVolume) / 1e6).toFixed(1)}M | High: $${parseFloat(data.highPrice).toLocaleString()} | Low: $${parseFloat(data.lowPrice).toLocaleString()}
+[NOTE: The user sees a LIVE chart that refreshes this price every 5s. Anchor ALL your analysis to this exact live price — re-assess support/resistance/entry/stop levels as distances from $${price.toLocaleString()}.]`);
       }
     } catch {}
   }
