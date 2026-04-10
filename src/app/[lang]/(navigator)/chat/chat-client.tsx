@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
+import TradingProfileModal from "./trading-profile-modal";
 
 /** Lightweight markdown → HTML for chat responses */
 function renderMarkdown(text: string): string {
@@ -32,7 +33,7 @@ function renderMarkdown(text: string): string {
 }
 
 const PERSONA_AVATARS: Record<string, string> = {
-  crypto: "/logo.png",
+  crypto: "/images/personas/quant-citadel.svg",
 };
 const PERSONA_NAMES: Record<string, Record<string, string>> = {
   crypto: { en: "FuturesAI Quant", ko: "FuturesAI 퀀트" },
@@ -276,6 +277,7 @@ export default function ChatClient({ lang, userName }: Props) {
   const [thinkingStep, setThinkingStep] = useState("");
   const [sessions, setSessions] = useState<{ sessionId: string; content: string; createdAt: string }[]>([]);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -486,6 +488,14 @@ export default function ChatClient({ lang, userName }: Props) {
               {messages.length > 0 ? `${messages.length} msgs` : ""}
             </span>
             <button
+              onClick={() => setShowProfileModal(true)}
+              title={ko ? "트레이딩 프로필" : "Trading Profile"}
+              className="text-[10px] font-mono text-zinc-500 hover:text-blue-400 transition-colors cursor-pointer px-2 py-1 rounded border border-white/[0.06] hover:border-blue-500/30 hover:bg-blue-500/[0.06] flex items-center gap-1"
+            >
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+              <span className="hidden sm:inline">{ko ? "프로필" : "Profile"}</span>
+            </button>
+            <button
               onClick={handleNewChat}
               className="text-[10px] font-mono text-zinc-500 hover:text-white transition-colors cursor-pointer px-2 py-1 rounded border border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.04]"
             >
@@ -493,6 +503,7 @@ export default function ChatClient({ lang, userName }: Props) {
             </button>
           </div>
         </div>
+        <TradingProfileModal open={showProfileModal} onClose={() => setShowProfileModal(false)} ko={ko} />
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto">

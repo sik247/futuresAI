@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="towerGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="centerGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#93c5fd"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="50" fill="url(#bg)"/>
+
+  <!-- Outer glow ring -->
+  <circle cx="50" cy="50" r="46" fill="none" stroke="#1e40af" stroke-width="0.5" opacity="0.6"/>
+
+  <!-- Citadel base platform -->
+  <rect x="18" y="68" width="64" height="6" fill="#0b1220" stroke="#1e3a8a" stroke-width="0.5"/>
+
+  <!-- Left tower -->
+  <rect x="20" y="42" width="14" height="32" fill="url(#towerGrad)" opacity="0.85"/>
+  <!-- Left tower battlements -->
+  <rect x="20" y="38" width="3" height="4" fill="#2563eb"/>
+  <rect x="25.5" y="38" width="3" height="4" fill="#2563eb"/>
+  <rect x="31" y="38" width="3" height="4" fill="#2563eb"/>
+  <!-- Left tower window -->
+  <rect x="25" y="52" width="4" height="6" fill="#0b1220"/>
+
+  <!-- Right tower -->
+  <rect x="66" y="42" width="14" height="32" fill="url(#towerGrad)" opacity="0.85"/>
+  <!-- Right tower battlements -->
+  <rect x="66" y="38" width="3" height="4" fill="#2563eb"/>
+  <rect x="71.5" y="38" width="3" height="4" fill="#2563eb"/>
+  <rect x="77" y="38" width="3" height="4" fill="#2563eb"/>
+  <!-- Right tower window -->
+  <rect x="71" y="52" width="4" height="6" fill="#0b1220"/>
+
+  <!-- Center tower (tallest) -->
+  <rect x="37" y="28" width="26" height="46" fill="url(#centerGrad)"/>
+  <!-- Center tower battlements -->
+  <rect x="37" y="23" width="4" height="5" fill="#3b82f6"/>
+  <rect x="44" y="23" width="4" height="5" fill="#3b82f6"/>
+  <rect x="51" y="23" width="4" height="5" fill="#3b82f6"/>
+  <rect x="58" y="23" width="4" height="5" fill="#3b82f6"/>
+  <!-- Center spire -->
+  <polygon points="50,10 46,23 54,23" fill="#60a5fa"/>
+  <circle cx="50" cy="8" r="1.5" fill="#bfdbfe"/>
+  <!-- Center tower main window -->
+  <rect x="45" y="38" width="10" height="14" fill="#0b1220"/>
+  <line x1="50" y1="38" x2="50" y2="52" stroke="#1e40af" stroke-width="0.5"/>
+  <line x1="45" y1="45" x2="55" y2="45" stroke="#1e40af" stroke-width="0.5"/>
+  <!-- Center tower bottom door -->
+  <path d="M 46 74 L 46 62 Q 46 58 50 58 Q 54 58 54 62 L 54 74 Z" fill="#0b1220"/>
+
+  <!-- Bull/Bear ticker arrows flanking -->
+  <path d="M 12 55 L 16 50 L 16 53 L 18 53 L 18 57 L 16 57 L 16 60 Z" fill="#10b981" opacity="0.7"/>
+  <path d="M 88 50 L 84 55 L 84 52 L 82 52 L 82 48 L 84 48 L 84 45 Z" fill="#ef4444" opacity="0.7"/>
+</svg>
