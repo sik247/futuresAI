@@ -4,9 +4,9 @@ import { sendGroupMessage } from "./telegram.service";
 import { cachedAI } from "@/lib/services/ai-cache";
 
 const PAIRS = [
-  { pair: "BTCUSDT", symbol: "BTC", name: "비트코인" },
-  { pair: "ETHUSDT", symbol: "ETH", name: "이더리움" },
-  { pair: "SOLUSDT", symbol: "SOL", name: "솔라나" },
+  { pair: "BTCUSDT", symbol: "BTC", nameKo: "비트코인", nameEn: "Bitcoin" },
+  { pair: "ETHUSDT", symbol: "ETH", nameKo: "이더리움", nameEn: "Ethereum" },
+  { pair: "SOLUSDT", symbol: "SOL", nameKo: "솔라나", nameEn: "Solana" },
 ];
 
 const BINANCE_FUTURES = "https://fapi.binance.com";
@@ -21,8 +21,8 @@ function kstNow(): string {
   });
 }
 
-async function geminiKorean(prompt: string): Promise<string> {
-  const cacheKey = `gemini-ko:${prompt.slice(0, 80)}`;
+async function geminiBilingual(prompt: string): Promise<string> {
+  const cacheKey = `gemini-bi:${prompt.slice(0, 80)}`;
   return cachedAI(cacheKey, async () => {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return "";
@@ -50,16 +50,26 @@ export async function checkPriceMovementAlert(): Promise<number> {
 
       if (Math.abs(pctChange) < 3) continue;
 
-      const direction = pctChange > 0 ? "급등" : "급락";
-      const analysis = await geminiKorean(
-        `${p.name}(${p.symbol})이 4시간 동안 ${pctChange.toFixed(1)}% ${direction}했습니다. 현재가 $${curr.close.toLocaleString()}. 이 움직임의 원인과 향후 전망을 한국어 2문장으로 분석하세요. 이모지 사용 금지.`
+      const dirKo = pctChange > 0 ? "급등" : "급락";
+      const dirEn = pctChange > 0 ? "Surge" : "Drop";
+      const analysis = await geminiBilingual(
+        `${p.nameEn} (${p.symbol}) moved ${pctChange.toFixed(1)}% in 4 hours. Current price $${curr.close.toLocaleString()}.
+
+You are a quant strategist explaining what this move means for the market.
+
+Write bilingual analysis:
+[Korean: 2-3 sentences — what caused this move, what it means for market structure (liquidations, OI shift, funding rate pressure), and what to watch next. Be specific about levels.]
+---
+[English: 2-3 sentences — same depth. "This move suggests..." Explain positioning implications, second-order effects on correlated assets, and the key level that determines if this continues or reverses.]
+
+No emojis. Quant desk style — causal, precise, actionable.`
       );
 
-      let msg = `<b>가격 ${direction} 알림</b> · ${kstNow()}\n\n`;
+      let msg = `<b>Price ${dirEn} | 가격 ${dirKo}</b> · ${kstNow()} KST\n\n`;
       msg += `<b>${p.symbol}/USDT</b>  $${prev.close.toLocaleString()} → $${curr.close.toLocaleString()}\n`;
-      msg += `4시간 변동: <b>${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(2)}%</b>\n\n`;
+      msg += `4H Change: <b>${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(2)}%</b>\n\n`;
       if (analysis) msg += `${analysis}\n\n`;
-      msg += `<i>— FuturesAI</i>`;
+      msg += `<i>— FuturesAI Quant Desk</i>`;
 
       await sendGroupMessage(msg);
       sent++;
@@ -73,7 +83,7 @@ export async function checkPriceMovementAlert(): Promise<number> {
 /* ================================================================== */
 export async function checkFundingRateAlert(): Promise<boolean> {
   try {
-    const rates: { symbol: string; name: string; rate: number; extreme: boolean }[] = [];
+    const rates: { symbol: string; nameKo: string; rate: number; extreme: boolean }[] = [];
 
     for (const p of PAIRS) {
       try {
@@ -82,30 +92,34 @@ export async function checkFundingRateAlert(): Promise<boolean> {
         const data = await res.json();
         const rate = parseFloat(data.lastFundingRate) * 100; // Convert to percentage
         const extreme = Math.abs(rate) > 0.05;
-        rates.push({ symbol: p.symbol, name: p.name, rate, extreme });
+        rates.push({ symbol: p.symbol, nameKo: p.nameKo, rate, extreme });
       } catch { /* skip */ }
     }
 
     const extremeRates = rates.filter((r) => r.extreme);
     if (extremeRates.length === 0) return false;
 
-    let msg = `<b>펀딩비 경고</b> · ${kstNow()}\n\n`;
+    let msg = `<b>Funding Rate Warning | 펀딩비 경고</b> · ${kstNow()} KST\n\n`;
 
     for (const r of rates) {
       const emoji = r.extreme ? (r.rate > 0 ? "🔴" : "🟢") : "⚪";
-      const label = r.rate > 0
-        ? "롱이 숏에 지불 중"
-        : "숏이 롱에 지불 중";
-      const warning = r.extreme
-        ? r.rate > 0 ? " (롱 과열 주의)" : " (숏 과열 주의)"
+      const labelKo = r.rate > 0 ? "롱이 숏에 지불 중" : "숏이 롱에 지불 중";
+      const labelEn = r.rate > 0 ? "Longs paying shorts" : "Shorts paying longs";
+      const warningKo = r.extreme
+        ? r.rate > 0 ? " (롱 과열)" : " (숏 과열)"
+        : "";
+      const warningEn = r.extreme
+        ? r.rate > 0 ? " (Long overheated)" : " (Short overheated)"
         : "";
 
-      msg += `${emoji} <b>${r.symbol}</b> 펀딩비: ${r.rate >= 0 ? "+" : ""}${r.rate.toFixed(4)}%\n`;
-      msg += `   ${label}${warning}\n\n`;
+      msg += `${emoji} <b>${r.symbol}</b> Funding: ${r.rate >= 0 ? "+" : ""}${r.rate.toFixed(4)}%\n`;
+      msg += `   ${labelKo}${warningKo}\n`;
+      msg += `   ${labelEn}${warningEn}\n\n`;
     }
 
-    msg += `펀딩비가 극단적 수준입니다. 포지션 청산 위험에 유의하세요.\n\n`;
-    msg += `<i>— FuturesAI</i>`;
+    msg += `극단적 펀딩비 — 포지션 청산 위험 주의\n`;
+    msg += `Extreme funding rates — watch for position liquidation risk.\n\n`;
+    msg += `<i>— FuturesAI Quant Desk</i>`;
 
     return await sendGroupMessage(msg);
   } catch (error) {
@@ -157,25 +171,33 @@ export async function checkLiquidationAlert(): Promise<boolean> {
 
     if (totalLiq < 10_000_000) return false; // Only alert if >$10M
 
-    let msg = `<b>대규모 청산 알림</b> · ${kstNow()}\n\n`;
-    msg += `최근 4시간 주요 청산 현황:\n\n`;
+    let msg = `<b>Mass Liquidation | 대규모 청산</b> · ${kstNow()} KST\n\n`;
+    msg += `4H liquidation summary:\n\n`;
 
     for (const l of liquidations) {
       const longStr = `$${(l.longTotal / 1e6).toFixed(1)}M`;
       const shortStr = `$${(l.shortTotal / 1e6).toFixed(1)}M`;
-      const bias = l.longTotal > l.shortTotal * 2
-        ? "롱 집중 청산 (하락 압력)"
-        : l.shortTotal > l.longTotal * 2
-        ? "숏 집중 청산 (상승 압력)"
-        : "양방향 청산";
+
+      let biasKo: string;
+      let biasEn: string;
+      if (l.longTotal > l.shortTotal * 2) {
+        biasKo = "롱 집중 청산 (하락 압력)";
+        biasEn = "Long-heavy liquidation (bearish pressure)";
+      } else if (l.shortTotal > l.longTotal * 2) {
+        biasKo = "숏 집중 청산 (상승 압력)";
+        biasEn = "Short-heavy liquidation (bullish pressure)";
+      } else {
+        biasKo = "양방향 청산";
+        biasEn = "Bilateral liquidation";
+      }
 
       msg += `<b>${l.symbol}USDT</b>\n`;
-      msg += `   롱 청산: ${longStr} | 숏 청산: ${shortStr}\n`;
-      msg += `   → ${bias}\n\n`;
+      msg += `   Longs: ${longStr} | Shorts: ${shortStr}\n`;
+      msg += `   ${biasKo} | ${biasEn}\n\n`;
     }
 
-    msg += `총 청산 규모: <b>$${(totalLiq / 1e6).toFixed(1)}M</b>\n\n`;
-    msg += `<i>— FuturesAI</i>`;
+    msg += `Total: <b>$${(totalLiq / 1e6).toFixed(1)}M</b> liquidated\n\n`;
+    msg += `<i>— FuturesAI Quant Desk</i>`;
 
     return await sendGroupMessage(msg);
   } catch (error) {
@@ -201,12 +223,13 @@ export async function checkVolumeSpikeAlert(): Promise<number> {
 
       if (ratio < 2.0) continue;
 
-      let msg = `<b>거래량 급증 알림</b> · ${kstNow()}\n\n`;
+      let msg = `<b>Volume Spike | 거래량 급증</b> · ${kstNow()} KST\n\n`;
       msg += `<b>${p.symbol}/USDT</b>\n`;
-      msg += `현재 4H 거래량: ${formatVol(latest)} (평균 대비 <b>${ratio.toFixed(1)}배</b>)\n`;
-      msg += `20기간 평균: ${formatVol(avg20)}\n\n`;
-      msg += `이례적인 거래량 급증은 큰 방향성 움직임의 전조일 수 있습니다.\n\n`;
-      msg += `<i>— FuturesAI</i>`;
+      msg += `Current 4H Vol: ${formatVol(latest)} (<b>${ratio.toFixed(1)}x</b> avg)\n`;
+      msg += `20-period avg: ${formatVol(avg20)}\n\n`;
+      msg += `이례적 거래량 급증 — 방향성 움직임의 전조 가능성.\n`;
+      msg += `Abnormal volume spike — potential precursor to directional move.\n\n`;
+      msg += `<i>— FuturesAI Quant Desk</i>`;
 
       await sendGroupMessage(msg);
       sent++;
@@ -225,7 +248,8 @@ export async function checkOpenInterestAlert(): Promise<boolean> {
       currentOI: number;
       change4h: number;
       priceChange: number;
-      interpretation: string;
+      interpretationKo: string;
+      interpretationEn: string;
     }[] = [];
 
     for (const p of PAIRS) {
@@ -247,25 +271,36 @@ export async function checkOpenInterestAlert(): Promise<boolean> {
         const priceData = await runPriceAgent(p.pair);
         const priceChange = priceData.changePercent24h;
 
-        let interpretation: string;
-        if (change4h > 0 && priceChange > 0) interpretation = "신규 롱 포지션 유입 (상승 베팅 증가)";
-        else if (change4h > 0 && priceChange < 0) interpretation = "신규 숏 포지션 유입 (하락 베팅 증가)";
-        else if (change4h < 0 && priceChange > 0) interpretation = "숏 청산 진행 중 (숏 스퀴즈)";
-        else interpretation = "롱 청산 진행 중 (롱 언와인드)";
+        let interpretationKo: string;
+        let interpretationEn: string;
+        if (change4h > 0 && priceChange > 0) {
+          interpretationKo = "신규 롱 포지션 유입 (상승 베팅 증가)";
+          interpretationEn = "New long positions opening (bullish bets increasing)";
+        } else if (change4h > 0 && priceChange < 0) {
+          interpretationKo = "신규 숏 포지션 유입 (하락 베팅 증가)";
+          interpretationEn = "New short positions opening (bearish bets increasing)";
+        } else if (change4h < 0 && priceChange > 0) {
+          interpretationKo = "숏 청산 진행 중 (숏 스퀴즈)";
+          interpretationEn = "Short covering underway (short squeeze)";
+        } else {
+          interpretationKo = "롱 청산 진행 중 (롱 언와인드)";
+          interpretationEn = "Long unwinding in progress";
+        }
 
         alerts.push({
           symbol: p.symbol,
           currentOI: latest,
           change4h,
           priceChange,
-          interpretation,
+          interpretationKo,
+          interpretationEn,
         });
       } catch { /* skip */ }
     }
 
     if (alerts.length === 0) return false;
 
-    let msg = `<b>미결제약정 변동</b> · ${kstNow()}\n\n`;
+    let msg = `<b>Open Interest Shift | 미결제약정 변동</b> · ${kstNow()} KST\n\n`;
 
     for (const a of alerts) {
       const oiStr = a.currentOI >= 1e9
@@ -274,10 +309,11 @@ export async function checkOpenInterestAlert(): Promise<boolean> {
 
       msg += `<b>${a.symbol}USDT</b>\n`;
       msg += `   OI: ${oiStr} (${a.change4h >= 0 ? "+" : ""}${a.change4h.toFixed(1)}% / 4H)\n`;
-      msg += `   → ${a.interpretation}\n\n`;
+      msg += `   ${a.interpretationKo}\n`;
+      msg += `   ${a.interpretationEn}\n\n`;
     }
 
-    msg += `<i>— FuturesAI</i>`;
+    msg += `<i>— FuturesAI Quant Desk</i>`;
     return await sendGroupMessage(msg);
   } catch (error) {
     console.error("[open-interest]", error);
@@ -290,7 +326,7 @@ export async function checkOpenInterestAlert(): Promise<boolean> {
 /* ================================================================== */
 export async function checkExchangeFlowAlert(): Promise<boolean> {
   try {
-    let msg = `<b>거래소 자금 흐름</b> · ${kstNow()}\n\n`;
+    let msg = `<b>Exchange Flow | 거래소 자금 흐름</b> · ${kstNow()} KST\n\n`;
     let hasData = false;
 
     for (const p of PAIRS) {
@@ -306,18 +342,20 @@ export async function checkExchangeFlowAlert(): Promise<boolean> {
         const trend = data.slice(0, 3).map(
           (d: any) => parseFloat(d.buyVol) / parseFloat(d.sellVol)
         );
-        const trendDir = trend[0] > trend[trend.length - 1] ? "상승 중" : "하락 중";
-        const bias = latest > 1.2 ? "매수 우위" : latest < 0.8 ? "매도 우위" : "균형";
+        const trendDirKo = trend[0] > trend[trend.length - 1] ? "상승 중" : "하락 중";
+        const trendDirEn = trend[0] > trend[trend.length - 1] ? "Rising" : "Declining";
+        const biasKo = latest > 1.2 ? "매수 우위" : latest < 0.8 ? "매도 우위" : "균형";
+        const biasEn = latest > 1.2 ? "Buy dominant" : latest < 0.8 ? "Sell dominant" : "Balanced";
 
-        msg += `<b>${p.symbol}</b> Taker 매수/매도 비율: ${latest.toFixed(2)} (${bias})\n`;
-        msg += `   추세: ${trendDir}\n\n`;
+        msg += `<b>${p.symbol}</b> Taker Buy/Sell: ${latest.toFixed(2)} (${biasKo} | ${biasEn})\n`;
+        msg += `   Trend: ${trendDirKo} | ${trendDirEn}\n\n`;
         hasData = true;
       } catch { /* skip */ }
     }
 
     if (!hasData) return false;
 
-    msg += `<i>— FuturesAI</i>`;
+    msg += `<i>— FuturesAI Quant Desk</i>`;
     return await sendGroupMessage(msg);
   } catch (error) {
     console.error("[exchange-flow]", error);

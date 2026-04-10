@@ -41,7 +41,6 @@ export default function PricingPage({
 }) {
   const ko = lang === "ko";
   const walletAddress = process.env.PAYMENT_WALLET_TRC20 || process.env.PAYMENT_WALLET_ADDRESS || "";
-  const walletAddressErc20 = process.env.PAYMENT_WALLET_ERC20 || "";
 
   return (
     <div className="bg-zinc-950 min-h-screen">
@@ -226,7 +225,7 @@ export default function PricingPage({
           <p className="text-sm text-zinc-500 text-center mb-6">
             {ko ? "USDT로 즉시 결제하고 바로 시작하세요" : "Pay with USDT and get started instantly"}
           </p>
-          <PaymentSection walletAddress={walletAddress} walletAddressErc20={walletAddressErc20} ko={ko} />
+          <PaymentSection walletAddress={walletAddress} ko={ko} />
         </div>
 
         {/* FAQ */}

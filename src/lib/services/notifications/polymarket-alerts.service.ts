@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { sendGroupMessage } from "./telegram.service";
+import { translateBatch } from "@/lib/services/social/korean-translator.service";
 
 type PolymarketEvent = {
   id: string;
@@ -16,33 +17,49 @@ type PolymarketEvent = {
   }[];
 };
 
+// Only show markets related to these topics
+const RELEVANT_KEYWORDS = [
+  "bitcoin", "btc", "ethereum", "eth", "solana", "sol", "crypto",
+  "fed", "federal reserve", "interest rate", "inflation", "cpi",
+  "recession", "gdp", "s&p", "nasdaq", "stock market", "tariff",
+  "sec", "etf", "stablecoin", "defi", "trump", "trade war",
+  "china", "war", "oil", "gold", "dollar", "treasury",
+];
+
+function isRelevantMarket(title: string, question: string): boolean {
+  const text = `${title} ${question}`.toLowerCase();
+  return RELEVANT_KEYWORDS.some((kw) => text.includes(kw));
+}
+
 /**
- * Fetch crypto polymarket events, find the most interesting/funny ones,
- * and send a Korean alert with AI commentary.
+ * Fetch polymarket events relevant to crypto/US markets/geopolitics,
+ * translate titles, add AI commentary with market impact, and send.
  */
 export async function sendPolymarketAlert(): Promise<boolean> {
   try {
-    // Fetch crypto prediction markets
-    const res = await fetch(
-      "https://gamma-api.polymarket.com/events?closed=false&tag=crypto&limit=20",
-      { cache: "no-store" }
-    );
-    if (!res.ok) return false;
-    const events: PolymarketEvent[] = await res.json();
+    // Fetch multiple categories in parallel
+    const [cryptoRes, politicsRes] = await Promise.all([
+      fetch("https://gamma-api.polymarket.com/events?closed=false&tag=crypto&limit=20", { cache: "no-store" }),
+      fetch("https://gamma-api.polymarket.com/events?closed=false&tag=politics&limit=20", { cache: "no-store" }),
+    ]);
 
-    if (events.length === 0) return false;
+    const allEvents: PolymarketEvent[] = [];
+    if (cryptoRes.ok) allEvents.push(...(await cryptoRes.json()));
+    if (politicsRes.ok) allEvents.push(...(await politicsRes.json()));
 
-    // Parse and find interesting markets
-    const parsed = events.map((e) => {
+    if (allEvents.length === 0) return false;
+
+    // Parse and filter to relevant markets only
+    const parsed = allEvents.map((e) => {
       const markets = (e.markets || []).map((m: any) => {
         const prices = m.outcomePrices ? JSON.parse(m.outcomePrices) : [];
         const outcomes = m.outcomes ? JSON.parse(m.outcomes) : ["Yes", "No"];
-        const yesPct = prices[0] ? (parseFloat(prices[0]) * 100).toFixed(0) : "50";
+        const yesPct = prices[0] ? (parseFloat(prices[0]) * 100).toFixed(1) : "50.0";
         const change = m.oneDayPriceChange ? parseFloat(m.oneDayPriceChange) : 0;
         return {
           question: m.question,
           yesPct,
-          noPct: prices[1] ? (parseFloat(prices[1]) * 100).toFixed(0) : "50",
+          noPct: prices[1] ? (parseFloat(prices[1]) * 100).toFixed(1) : "50.0",
           outcomes,
           change24h: change,
           volume: parseFloat(m.volume || "0"),
@@ -58,14 +75,18 @@ export async function sendPolymarketAlert(): Promise<boolean> {
       };
     });
 
-    // Pick top 3 most interesting: biggest 24h changes + highest volume
+    // Flatten and filter to relevant topics only
     const allMarkets = parsed.flatMap((e) =>
-      e.markets.map((m) => ({
-        eventTitle: e.title,
-        eventId: e.id,
-        ...m,
-      }))
+      e.markets
+        .filter((m) => isRelevantMarket(e.title, m.question))
+        .map((m) => ({
+          eventTitle: e.title,
+          eventId: e.id,
+          ...m,
+        }))
     );
+
+    if (allMarkets.length === 0) return false;
 
     // Sort by absolute 24h change (biggest movers first)
     const bigMovers = allMarkets
@@ -85,7 +106,11 @@ export async function sendPolymarketAlert(): Promise<boolean> {
 
     if (selected.length === 0) return false;
 
-    // Generate AI Korean commentary
+    // Translate event titles to Korean
+    const titles = selected.map((m) => m.question);
+    const translated = await translateBatch(titles);
+
+    // Generate bilingual AI commentary with market impact
     const commentary = await generatePolymarketCommentary(selected);
 
     const now = new Date().toLocaleString("ko-KR", {
@@ -96,9 +121,11 @@ export async function sendPolymarketAlert(): Promise<boolean> {
       minute: "2-digit",
     });
 
-    let msg = `<b>예측 시장 동향</b> · ${now}\n\n`;
+    let msg = `<b>예측 시장 동향 | Prediction Markets</b> · ${now} KST\n\n`;
 
-    for (const m of selected) {
+    for (let i = 0; i < selected.length; i++) {
+      const m = selected[i];
+      const koTitle = translated[i]?.translated || m.eventTitle;
       const changeStr = m.change24h !== 0
         ? ` (${m.change24h > 0 ? "+" : ""}${(m.change24h * 100).toFixed(1)}%)`
         : "";
@@ -108,20 +135,23 @@ export async function sendPolymarketAlert(): Promise<boolean> {
         ? `$${(m.volume / 1e3).toFixed(0)}K`
         : `$${m.volume.toFixed(0)}`;
 
-      msg += `<b>${m.eventTitle}</b>\n`;
+      msg += `<b>${koTitle}</b>\n`;
       if (m.question !== m.eventTitle) {
-        msg += `${m.question}\n`;
+        msg += `<i>${m.question}</i>\n`;
+      } else {
+        msg += `<i>${m.eventTitle}</i>\n`;
       }
       msg += `${m.outcomes[0]}: <b>${m.yesPct}%</b>${changeStr} | ${m.outcomes[1]}: ${m.noPct}%\n`;
-      msg += `거래량: ${volStr}\n\n`;
+      msg += `Volume: ${volStr}\n\n`;
     }
 
     if (commentary) {
-      msg += `<b>AI 코멘트</b>\n${commentary}\n\n`;
+      msg += `${commentary}\n\n`;
     }
 
-    msg += `<a href="https://polymarket.com">Polymarket에서 더보기</a>\n`;
-    msg += `<i>— FuturesAI</i>`;
+    msg += `이 예측에 동의하시나요? 의견을 남겨주세요!\nDo you agree with these odds? Share your prediction!\n\n`;
+    msg += `<a href="https://futuresai.io/ko/markets">FuturesAI 예측 시장 | Prediction Markets</a>\n`;
+    msg += `<i>— FuturesAI Quant Desk</i>`;
 
     return await sendGroupMessage(msg);
   } catch (error) {
@@ -138,23 +168,28 @@ async function generatePolymarketCommentary(
     if (!apiKey) return "";
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const list = markets
-      .map((m) => `"${m.eventTitle}" — ${m.question}: Yes ${m.yesPct}% (24h 변동: ${(m.change24h * 100).toFixed(1)}%)`)
+      .map((m) => `"${m.eventTitle}" — ${m.question}: Yes ${m.yesPct}% (24h change: ${(m.change24h * 100).toFixed(1)}%)`)
       .join("\n");
 
-    const prompt = `당신은 크립토 예측 시장 전문 해설자입니다. Polymarket의 최신 예측 시장 데이터를 재미있고 통찰력 있게 한국어로 해설하세요.
+    const prompt = `Analyze these prediction market events for a Korean crypto trading Telegram group.
 
-현재 주목할 만한 마켓:
+Events:
 ${list}
 
-2-3문장으로 작성하세요:
-- 가장 흥미로운 확률 변동과 그 의미
-- 시장 참여자들이 무엇에 베팅하고 있는지
-- 재미있거나 의외인 포인트가 있으면 언급
-- 자연스럽고 캐주얼한 톤 (딱딱하지 않게)
-이모지 사용 금지.`;
+Write EXACTLY in this format (keep the bold HTML tags):
+
+<b>이건 → 이런 의미 | What This Means</b>
+
+[Korean 3-4 sentences]: 각 이벤트가 크립토/주식 시장에 미치는 구체적 영향을 설명. "X 확률이 Y%라는 건 → BTC/ETH에 [구체적 영향]을 의미합니다" 형식. 매수/매도 의견을 명확히. 마지막에 대담한 예측 하나.
+
+---
+
+[English 3-4 sentences]: "X at Y% probability means → [specific impact] for crypto." Connect each prediction to a concrete trading implication. Give a bold opinion on positioning. End with a specific call.
+
+Rules: No emojis. Every sentence = concrete claim. "This means X" format, never vague. Strong opinions.`;
 
     const result = await model.generateContent(prompt);
     return result.response.text().trim();

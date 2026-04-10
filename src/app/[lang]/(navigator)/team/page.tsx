@@ -164,7 +164,7 @@ export default async function TeamPage({
             community leaders to join us.
           </p>
           <a
-            href="mailto:crypto-x@gmail.com"
+            href="mailto:admin@futuresai.io"
             className="inline-block px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors"
           >
             Get in Touch

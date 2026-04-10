@@ -51,7 +51,7 @@ export default async function LanguageLayout({
     <>
       <PriceTicker />
       <Headers lang={lang} translations={dictionary} />
-      <div className="pt-[92px]">
+      <div className="pt-16 sm:pt-[92px]">
         <PaybackAlertBanner lang={lang} />
       </div>
       <main className="min-h-screen pb-16 lg:pb-0">{children}</main>

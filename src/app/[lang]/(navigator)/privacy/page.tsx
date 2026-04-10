@@ -29,11 +29,11 @@ const content = {
       },
       {
         heading: "5. 사용자 권리",
-        body: `사용자는 다음과 같은 권리를 가집니다:\n\n• 데이터 열람: 본인의 개인정보에 대한 열람을 요청할 수 있습니다\n• 데이터 수정: 부정확한 정보의 수정을 요청할 수 있습니다\n• 데이터 삭제: 계정 삭제 및 관련 데이터의 완전한 삭제를 요청할 수 있습니다\n• 데이터 내보내기: 본인의 데이터를 일반적인 형식으로 내보내기를 요청할 수 있습니다\n• 동의 철회: 데이터 수집 및 처리에 대한 동의를 언제든지 철회할 수 있습니다\n\n위 권리 행사를 위해 support@futures-ai.com으로 연락해 주시기 바랍니다.`,
+        body: `사용자는 다음과 같은 권리를 가집니다:\n\n• 데이터 열람: 본인의 개인정보에 대한 열람을 요청할 수 있습니다\n• 데이터 수정: 부정확한 정보의 수정을 요청할 수 있습니다\n• 데이터 삭제: 계정 삭제 및 관련 데이터의 완전한 삭제를 요청할 수 있습니다\n• 데이터 내보내기: 본인의 데이터를 일반적인 형식으로 내보내기를 요청할 수 있습니다\n• 동의 철회: 데이터 수집 및 처리에 대한 동의를 언제든지 철회할 수 있습니다\n\n위 권리 행사를 위해 admin@futuresai.io으로 연락해 주시기 바랍니다.`,
       },
       {
         heading: "6. 문의",
-        body: `개인정보 처리방침에 대한 문의사항은 아래로 연락해 주시기 바랍니다.\n\n이메일: support@futures-ai.com\nTelegram: @FuturesAI_Official`,
+        body: `개인정보 처리방침에 대한 문의사항은 아래로 연락해 주시기 바랍니다.\n\n이메일: admin@futuresai.io\nTelegram: @FuturesAI_Official`,
       },
     ],
   },
@@ -59,11 +59,11 @@ const content = {
       },
       {
         heading: "5. User Rights",
-        body: `Users have the following rights:\n\n• Data Access: Request to view your personal information\n• Data Correction: Request correction of inaccurate information\n• Data Deletion: Request complete deletion of your account and related data\n• Data Export: Request export of your data in a common format\n• Withdrawal of Consent: Withdraw consent for data collection and processing at any time\n\nTo exercise these rights, please contact support@futures-ai.com.`,
+        body: `Users have the following rights:\n\n• Data Access: Request to view your personal information\n• Data Correction: Request correction of inaccurate information\n• Data Deletion: Request complete deletion of your account and related data\n• Data Export: Request export of your data in a common format\n• Withdrawal of Consent: Withdraw consent for data collection and processing at any time\n\nTo exercise these rights, please contact admin@futuresai.io.`,
       },
       {
         heading: "6. Contact",
-        body: `For questions regarding this Privacy Policy, please contact us at:\n\nEmail: support@futures-ai.com\nTelegram: @FuturesAI_Official`,
+        body: `For questions regarding this Privacy Policy, please contact us at:\n\nEmail: admin@futuresai.io\nTelegram: @FuturesAI_Official`,
       },
     ],
   },

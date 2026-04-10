@@ -141,15 +141,20 @@ export const authOptions: NextAuthOptions = {
           });
           if (pendingPayments.length > 0) {
             const { verifyTronTransaction } = await import("@/lib/services/payment/tron-verify.service");
-            const walletAddress = process.env.PAYMENT_WALLET_ADDRESS || "";
+            const walletAddress = process.env.PAYMENT_WALLET_TRC20 || process.env.PAYMENT_WALLET_ADDRESS || "";
             for (const payment of pendingPayments) {
               const result = await verifyTronTransaction(payment.txid, walletAddress, payment.amount);
               if (result.verified) {
+                // Activate subscription based on payment amount
+                const tierData = payment.amount >= 99
+                  ? { isPremium: true, credits: 99, chatEnabled: true }
+                  : { isPremium: false, credits: 25, chatEnabled: true };
+
                 await prisma.$transaction([
                   prisma.payment.update({ where: { id: payment.id }, data: { status: "VERIFIED", verifiedAt: new Date() } }),
-                  prisma.user.update({ where: { id: token.id as string }, data: { isPremium: true } }),
+                  prisma.user.update({ where: { id: token.id as string }, data: tierData }),
                 ]);
-                token.isPremium = true;
+                token.isPremium = tierData.isPremium;
                 break;
               }
             }

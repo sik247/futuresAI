@@ -15,6 +15,7 @@ import {
   sendDailySentiment,
 } from "@/lib/services/notifications/telegram-group.service";
 import { sendQuantReport } from "@/lib/services/notifications/quant-report.service";
+import { sendPolymarketAlert } from "@/lib/services/notifications/polymarket-alerts.service";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -239,6 +240,22 @@ export async function GET(req: NextRequest) {
         };
       } catch (error) {
         results.sendSentiment = { status: "FAIL", error: String(error), duration: `${Date.now() - start}ms` };
+      }
+    }
+
+    // ─── Test 9: LIVE SEND — polymarket ────────────────────────
+    if (test === "send-polymarket") {
+      console.log("[test-bot] SENDING POLYMARKET ALERT...");
+      const start = Date.now();
+      try {
+        const success = await sendPolymarketAlert();
+        results.sendPolymarket = {
+          status: success ? "SENT" : "SKIP",
+          duration: `${Date.now() - start}ms`,
+          message: success ? "Polymarket alert sent!" : "No interesting markets found",
+        };
+      } catch (error) {
+        results.sendPolymarket = { status: "FAIL", error: String(error), duration: `${Date.now() - start}ms` };
       }
     }
 

@@ -45,7 +45,7 @@ const content = {
       },
       {
         heading: "9. 문의",
-        body: `본 약관에 대한 문의사항은 아래로 연락해 주시기 바랍니다.\n\n이메일: support@futures-ai.com\nTelegram: @FuturesAI_Official`,
+        body: `본 약관에 대한 문의사항은 아래로 연락해 주시기 바랍니다.\n\n이메일: admin@futuresai.io\nTelegram: @FuturesAI_Official`,
       },
     ],
   },
@@ -87,7 +87,7 @@ const content = {
       },
       {
         heading: "9. Contact",
-        body: `For questions regarding these Terms, please contact us at:\n\nEmail: support@futures-ai.com\nTelegram: @FuturesAI_Official`,
+        body: `For questions regarding these Terms, please contact us at:\n\nEmail: admin@futuresai.io\nTelegram: @FuturesAI_Official`,
       },
     ],
   },

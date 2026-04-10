@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect } from "react";
 import {
   createChart,
   CandlestickSeries,
@@ -66,13 +66,21 @@ export default function TradingChart({
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
 
-  const initChart = useCallback(async () => {
+  // Serialize levels/zones to stabilize dependency comparison
+  // (callers often pass new array references with identical values)
+  const levelsKey = JSON.stringify(levels);
+  const zonesKey = JSON.stringify(zones);
+
+  useEffect(() => {
     if (!containerRef.current) return;
 
     if (chartRef.current) {
       chartRef.current.remove();
       chartRef.current = null;
     }
+
+    const parsedLevels: ChartLevel[] = JSON.parse(levelsKey);
+    const parsedZones: ChartZone[] = JSON.parse(zonesKey);
 
     const chart = createChart(containerRef.current, {
       width: containerRef.current.clientWidth,
@@ -115,38 +123,39 @@ export default function TradingChart({
     });
     seriesRef.current = series;
 
-    try {
-      const data = await fetchKlines(pair, interval);
-      series.setData(data);
+    fetchKlines(pair, interval)
+      .then((data) => {
+        series.setData(data);
 
-      // Draw colored zones (behind candlesticks)
-      zones.forEach((zone) => {
-        const primitive = new RectangleZone(zone);
-        series.attachPrimitive(primitive);
-      });
-
-      // Sort levels by price (desc) to minimize Y-axis label overlap
-      const sortedLevels = [...levels].sort((a, b) => b.price - a.price);
-
-      // Only show axis labels for strategy lines (ENTRY/SL/TP) to avoid crowding
-      const strategyLabels = new Set(["ENTRY", "STOP LOSS", "TAKE PROFIT"]);
-
-      sortedLevels.forEach((level) => {
-        series.createPriceLine({
-          price: level.price,
-          color: level.color,
-          lineWidth: (level.lineWidth || 2) as 1 | 2 | 3 | 4,
-          lineStyle: LINE_STYLE_MAP[level.lineStyle || "solid"],
-          axisLabelVisible: strategyLabels.has(level.label),
-          title: level.label,
-          lineVisible: true,
+        // Draw colored zones (behind candlesticks)
+        parsedZones.forEach((zone) => {
+          const primitive = new RectangleZone(zone);
+          series.attachPrimitive(primitive);
         });
-      });
 
-      chart.timeScale().fitContent();
-    } catch (err) {
-      console.error("Chart data error:", err);
-    }
+        // Sort levels by price (desc) to minimize Y-axis label overlap
+        const sortedLevels = [...parsedLevels].sort((a, b) => b.price - a.price);
+
+        // Only show axis labels for strategy lines (ENTRY/SL/TP) to avoid crowding
+        const strategyLabels = new Set(["ENTRY", "STOP LOSS", "TAKE PROFIT"]);
+
+        sortedLevels.forEach((level) => {
+          series.createPriceLine({
+            price: level.price,
+            color: level.color,
+            lineWidth: (level.lineWidth || 2) as 1 | 2 | 3 | 4,
+            lineStyle: LINE_STYLE_MAP[level.lineStyle || "solid"],
+            axisLabelVisible: strategyLabels.has(level.label),
+            title: level.label,
+            lineVisible: true,
+          });
+        });
+
+        chart.timeScale().fitContent();
+      })
+      .catch((err) => {
+        console.error("Chart data error:", err);
+      });
 
     const handleResize = () => {
       if (containerRef.current && chartRef.current) {
@@ -156,19 +165,15 @@ export default function TradingChart({
       }
     };
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [pair, interval, levels, zones, height]);
-
-  useEffect(() => {
-    const cleanup = initChart();
     return () => {
-      cleanup?.then((fn) => fn?.());
+      window.removeEventListener("resize", handleResize);
       if (chartRef.current) {
         chartRef.current.remove();
         chartRef.current = null;
       }
     };
-  }, [initChart]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pair, interval, height, levelsKey, zonesKey]);
 
   return (
     <div

@@ -15,11 +15,11 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const PARTNER_LOGOS: { src: string; name: string }[] = [
-  { src: "/icons/footer-icons/bybit-logo.png", name: "Bybit" },
-  { src: "/icons/footer-icons/bitget.svg", name: "Bitget" },
-  { src: "/icons/footer-icons/bingX.webp", name: "BingX" },
-  { src: "/icons/footer-icons/okx.svg", name: "OKX" },
+const PARTNER_LOGOS: { src: string; name: string; href: string }[] = [
+  { src: "/icons/footer-icons/bybit-logo.png", name: "Bybit", href: "https://partner.bybit.com/b/FUTURESAI" },
+  { src: "/icons/footer-icons/bitget.svg", name: "Bitget", href: "https://partner.bitget.com/bg/FuturesAI" },
+  { src: "/icons/footer-icons/bingX.webp", name: "BingX", href: "https://bingx.com/en/invite/FCC9QDJK" },
+  { src: "/icons/footer-icons/okx.svg", name: "OKX", href: "https://www.okx.com/join/futuresai" },
 ];
 
 type TIntroSection = {
@@ -240,8 +240,11 @@ const IntroSection = React.forwardRef<
         <div ref={marqueeInnerRef} className="flex items-center gap-12 w-max">
           {/* Duplicate logos for seamless loop */}
           {[...PARTNER_LOGOS, ...PARTNER_LOGOS, ...PARTNER_LOGOS, ...PARTNER_LOGOS].map((logo, i) => (
-            <div
+            <a
               key={`${logo.name}-${i}`}
+              href={logo.href}
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex flex-col items-center gap-2 shrink-0"
             >
               <div className="w-10 h-10 relative grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300">
@@ -255,7 +258,7 @@ const IntroSection = React.forwardRef<
               <span className="text-xs font-mono text-zinc-500">
                 {logo.name}
               </span>
-            </div>
+            </a>
           ))}
         </div>
       </div>

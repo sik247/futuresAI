@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { verifyTronTransaction } from "@/lib/services/payment/tron-verify.service";
-import { verifyEthTransaction } from "@/lib/services/payment/eth-verify.service";
 
 export const dynamic = "force-dynamic";
 
@@ -11,18 +10,11 @@ const TIERS = {
   99: { tier: "PREMIUM", isPremium: true, credits: 99, chatEnabled: true },
 } as const;
 
-// Accept both ERC-20 (0x...) and TRC-20 (64 hex) tx hashes
-const TXID_ERC20_REGEX = /^0x[0-9a-fA-F]{64}$/;
+// TRC-20 TXID: 64 hex characters
 const TXID_TRC20_REGEX = /^[0-9a-fA-F]{64}$/;
 
-function detectNetwork(txid: string): "ERC20" | "TRC20" | null {
-  if (TXID_ERC20_REGEX.test(txid)) return "ERC20";
-  if (TXID_TRC20_REGEX.test(txid)) return "TRC20";
-  return null;
-}
-
 /* ------------------------------------------------------------------ */
-/*  POST /api/payment  — submit TXID for verification                  */
+/*  POST /api/payment  — submit TXID for verification (TRC-20 only)    */
 /* ------------------------------------------------------------------ */
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -47,10 +39,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid plan amount. Choose $25 or $99." }, { status: 400 });
   }
 
-  // Detect network from TXID format
-  const network = detectNetwork(txid);
-  if (!network) {
-    return NextResponse.json({ error: "Invalid TXID format" }, { status: 400 });
+  // Validate TRC-20 TXID format
+  if (!TXID_TRC20_REGEX.test(txid)) {
+    return NextResponse.json({ error: "Invalid TXID format. Must be 64-character hex (TRC-20)." }, { status: 400 });
   }
 
   // Check if TXID already used
@@ -59,13 +50,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "TXID already submitted" }, { status: 409 });
   }
 
-  // Get wallet addresses
-  const erc20Wallet = process.env.PAYMENT_WALLET_ERC20 || process.env.PAYMENT_WALLET_ADDRESS || "";
-  const trc20Wallet = process.env.PAYMENT_WALLET_TRC20 || process.env.PAYMENT_WALLET_ADDRESS || "";
-  const walletAddress = network === "ERC20" ? erc20Wallet : trc20Wallet;
-
+  // Get TRC-20 wallet address
+  const walletAddress = process.env.PAYMENT_WALLET_TRC20 || process.env.PAYMENT_WALLET_ADDRESS || "";
   if (!walletAddress) {
-    return NextResponse.json({ error: `${network} payment wallet not configured` }, { status: 500 });
+    return NextResponse.json({ error: "Payment wallet not configured" }, { status: 500 });
   }
 
   // Create PENDING record
@@ -74,15 +62,13 @@ export async function POST(req: NextRequest) {
       userId,
       txid,
       amount: planAmount,
-      network,
+      network: "TRC20",
       status: "PENDING",
     },
   });
 
-  // Verify transaction based on network
-  const result = network === "ERC20"
-    ? await verifyEthTransaction(txid, walletAddress, planAmount)
-    : await verifyTronTransaction(txid, walletAddress, planAmount);
+  // Verify transaction on TRON blockchain
+  const result = await verifyTronTransaction(txid, walletAddress, planAmount);
 
   if (result.verified) {
     const tierConfig = TIERS[planAmount as 25 | 99];
@@ -112,7 +98,7 @@ export async function POST(req: NextRequest) {
       tier: tierConfig.tier,
       message: `Payment verified! ${tierConfig.tier} plan activated.`,
       amount: result.amount,
-      network,
+      network: "TRC20",
     });
   }
 
@@ -124,7 +110,7 @@ export async function POST(req: NextRequest) {
       ? `Payment submitted. Auto-verification failed: ${result.error}. An admin will review manually.`
       : "Payment submitted and pending verification.",
     paymentId: payment.id,
-    network,
+    network: "TRC20",
   });
 }
 

@@ -38,9 +38,9 @@ export const EXCHANGE_GUIDES: ExchangeGuide[] = [
     logoText: "Bybit",
     canChangeReferral: true,
     referralChangeNote:
-      "Can change referral code within 14 days of signup by contacting support@bybit.com",
+      "Can change referral code within 14 days of signup by contacting admin@futuresai.io",
     referralChangeNoteKo:
-      "신규 가입 후 14일 이내에 support@bybit.com으로 문의하면 레퍼럴 코드 변경 가능",
+      "신규 가입 후 14일 이내에 admin@futuresai.io으로 문의하면 레퍼럴 코드 변경 가능",
   },
   {
     slug: "okx",

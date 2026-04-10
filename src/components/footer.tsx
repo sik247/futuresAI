@@ -9,12 +9,12 @@ type TFooter = {
 };
 
 const PartnerExchanges = [
-  { item: "/icons/exchange/bitget.svg", alt: "Bitget" },
-  { item: "/icons/exchange/bybit.svg", alt: "Bybit" },
-  { item: "/icons/exchange/bingx.svg", alt: "BingX" },
-  { item: "/icons/exchange/gate.svg", alt: "Gate.io" },
-  { item: "/icons/exchange/htx.svg", alt: "HTX" },
-  { item: "/icons/exchange/okx.svg", alt: "OKX" },
+  { item: "/icons/exchange/bitget.svg", alt: "Bitget", href: "https://partner.bitget.com/bg/FuturesAI" },
+  { item: "/icons/exchange/bybit.svg", alt: "Bybit", href: "https://partner.bybit.com/b/FUTURESAI" },
+  { item: "/icons/exchange/bingx.svg", alt: "BingX", href: "https://bingx.com/en/invite/FCC9QDJK" },
+  { item: "/icons/exchange/gate.svg", alt: "Gate.io", href: "https://www.gate.com/share/FuturesAI" },
+  { item: "/icons/exchange/htx.svg", alt: "HTX", href: "https://www.htx.com.gt/invite/en-us/1h?invite_code=miqkc223" },
+  { item: "/icons/exchange/okx.svg", alt: "OKX", href: "https://www.okx.com/join/futuresai" },
 ];
 
 const CommunityIconsPathList = [
@@ -67,7 +67,7 @@ const Footer: React.FC<TFooter> = ({ lang = "en", translations }) => {
                 : "AI-powered crypto trading signals, whale tracking, market analytics, and trading rebates."}
             </p>
             <div className="text-zinc-600 text-sm space-y-1.5 mt-1">
-              <a href="mailto:support@futuresai.io" className="hover:text-zinc-400 transition-colors duration-300">support@futuresai.io</a>
+              <a href="mailto:admin@futuresai.io" className="hover:text-zinc-400 transition-colors duration-300">admin@futuresai.io</a>
               <p>{ko ? "24시간 실시간 지원" : "Live Chat Support (24/7)"}</p>
             </div>
           </div>
@@ -131,8 +131,10 @@ const Footer: React.FC<TFooter> = ({ lang = "en", translations }) => {
             <ul className="flex flex-wrap gap-6 items-center">
               {PartnerExchanges.map((ex, idx) => (
                 <li key={idx} className="group">
-                  <Image src={ex.item} alt={ex.alt} width={28} height={28}
-                    className="grayscale opacity-30 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500" />
+                  <a href={ex.href} target="_blank" rel="noopener noreferrer" title={`${ex.alt} — Sign up with referral`}>
+                    <Image src={ex.item} alt={ex.alt} width={28} height={28}
+                      className="grayscale opacity-30 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500 cursor-pointer" />
+                  </a>
                 </li>
               ))}
             </ul>

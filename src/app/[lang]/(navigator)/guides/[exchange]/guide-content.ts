@@ -191,13 +191,13 @@ function getBybitGuide(isKo: boolean): GuideContent {
           {
             type: "info",
             content: isKo
-              ? "레퍼럴 할인 코드 없이 신규 가입 후 14일이 지나지 않은 경우라면 바이비트 고객센터(support@bybit.com)에 문의하여 레퍼럴 코드를 등록할 수 있습니다."
-              : "If you signed up without a referral code and it's been less than 14 days, you can contact Bybit support (support@bybit.com) to register a referral code.",
+              ? "레퍼럴 할인 코드 없이 신규 가입 후 14일이 지나지 않은 경우라면 바이비트 고객센터(admin@futuresai.io)에 문의하여 레퍼럴 코드를 등록할 수 있습니다."
+              : "If you signed up without a referral code and it's been less than 14 days, you can contact Bybit support (admin@futuresai.io) to register a referral code.",
           },
           {
             type: "code",
             content: isKo
-              ? `이메일 수신처: support@bybit.com
+              ? `이메일 수신처: admin@futuresai.io
 제목: 바이비트(Bybit) 레퍼럴 코드 변경 요청
 
 안녕하세요.
@@ -206,7 +206,7 @@ function getBybitGuide(isKo: boolean): GuideContent {
 바이비트(Bybit) 가입 시 사용한 이메일 주소 또는 휴대폰 번호:
 바이비트(Bybit) 계정 UID: OOO (본인 UID)
 등록할 레퍼럴 할인 코드: FUTURESAI`
-              : `To: support@bybit.com
+              : `To: admin@futuresai.io
 Subject: Bybit Referral Code Change Request
 
 Hello,

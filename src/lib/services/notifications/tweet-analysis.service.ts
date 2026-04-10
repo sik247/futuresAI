@@ -148,19 +148,20 @@ async function analyzeMarketInfluence(
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-    const prompt = `당신은 한국어로 작성하는 크립토 시장 전문 분석가입니다.
+    const prompt = `You are a senior quant strategist. Analyze what this tweet means for the market — not just sentiment, but the transmission mechanism.
 
-다음 트윗의 시장 영향을 분석하세요:
+Author: ${displayName} (@${username})
+Content: "${tweetText}"
 
-작성자: ${displayName} (@${username})
-내용: "${tweetText}"
+Write bilingual commentary:
 
-2-3문장으로 한국어 분석을 작성하세요:
-- 이 트윗이 시장에 미치는 영향 (호재/악재/중립)
-- 어떤 코인/섹터에 영향을 줄 수 있는지
-- 트레이더가 주의할 점
+[Korean: 2-3 sentences. What does this mean for market structure? Which assets see direct flow impact? What's the positioning read — are longs/shorts exposed? Give a specific scenario or level to watch.]
 
-이모지 사용하지 마세요. 전문적이고 간결하게 작성하세요.`;
+---
+
+[English: 2-3 sentences. Same depth — explain the second-order effects. "This suggests..." not "This is bullish." Which pairs, what timeframe, what confirms or invalidates.]
+
+No emojis. Quant desk note style — precise, causal, actionable.`;
 
     const result = await model.generateContent(prompt);
     return result.response.text().trim();
@@ -177,7 +178,7 @@ export function formatTweetAnalysisSection(
 ): string {
   if (tweets.length === 0) return "";
 
-  let msg = "<b>주요 트윗 분석</b>\n\n";
+  let msg = "<b>Key Tweet Analysis | 주요 트윗 분석</b>\n\n";
 
   for (const t of tweets) {
     msg += `<b>${t.displayName}</b> (@${t.username})\n`;
@@ -187,7 +188,7 @@ export function formatTweetAnalysisSection(
       msg += `<i>${t.marketAnalysis}</i>\n`;
     }
 
-    msg += `<a href="${t.tweetUrl}">원문 보기</a>\n\n`;
+    msg += `<a href="${t.tweetUrl}">View Original</a>\n\n`;
   }
 
   return msg;

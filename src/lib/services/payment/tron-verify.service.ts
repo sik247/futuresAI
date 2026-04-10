@@ -29,7 +29,7 @@ export async function verifyTronTransaction(
       if (data.contractData?.contract_address === USDT_CONTRACT) {
         const toAddr = data.contractData?.to_address || "";
         const amount = parseInt(data.contractData?.amount || "0") / 1e6;
-        if (toAddr.toLowerCase() === expectedAddress.toLowerCase() && amount >= expectedAmount * 0.99) {
+        if (toAddr.toLowerCase() === expectedAddress.toLowerCase() && amount >= expectedAmount) {
           return { verified: true, from: data.ownerAddress || "", amount, timestamp: data.timestamp || 0 };
         }
       }
@@ -37,7 +37,7 @@ export async function verifyTronTransaction(
     }
 
     const amount = parseInt(usdtTransfer.amount_str || "0") / 1e6;
-    if (amount < expectedAmount * 0.99) {
+    if (amount < expectedAmount) {
       return { verified: false, from: usdtTransfer.from_address || "", amount, timestamp: data.timestamp || 0, error: `Amount too low: ${amount} USDT (expected ${expectedAmount})` };
     }
 

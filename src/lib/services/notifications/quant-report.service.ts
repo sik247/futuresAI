@@ -7,9 +7,9 @@ import { cachedAI } from "@/lib/services/ai-cache";
 /*  Pairs to analyze — rotates through these                           */
 /* ------------------------------------------------------------------ */
 const REPORT_PAIRS = [
-  { pair: "BTCUSDT", symbol: "BTC", name: "비트코인", tvSymbol: "BINANCE:BTCUSDT" },
-  { pair: "ETHUSDT", symbol: "ETH", name: "이더리움", tvSymbol: "BINANCE:ETHUSDT" },
-  { pair: "SOLUSDT", symbol: "SOL", name: "솔라나", tvSymbol: "BINANCE:SOLUSDT" },
+  { pair: "BTCUSDT", symbol: "BTC", nameKo: "비트코인", nameEn: "Bitcoin", tvSymbol: "BINANCE:BTCUSDT" },
+  { pair: "ETHUSDT", symbol: "ETH", nameKo: "이더리움", nameEn: "Ethereum", tvSymbol: "BINANCE:ETHUSDT" },
+  { pair: "SOLUSDT", symbol: "SOL", nameKo: "솔라나", nameEn: "Solana", tvSymbol: "BINANCE:SOLUSDT" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -79,7 +79,7 @@ function calcSupportsResistances(candles: PriceAgentResult["recentCandles"]): { 
 }
 
 /* ------------------------------------------------------------------ */
-/*  Generate the 300-500 word Korean quant report via Gemini            */
+/*  Generate bilingual quant report via Gemini                         */
 /* ------------------------------------------------------------------ */
 async function generateQuantReport(
   pairInfo: typeof REPORT_PAIRS[0],
@@ -96,7 +96,7 @@ async function generateQuantReport(
 ): Promise<string> {
   // Cache key based on pair + current price bucket (rounds to nearest $100 for BTC)
   const priceBucket = Math.round(priceData.currentPrice / 100) * 100;
-  const cacheKey = `quant:${pairInfo.symbol}:${priceBucket}`;
+  const cacheKey = `quant-bi:${pairInfo.symbol}:${priceBucket}`;
 
   return cachedAI(cacheKey, async () => {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -110,51 +110,48 @@ async function generateQuantReport(
     `O:${c.open.toFixed(1)} H:${c.high.toFixed(1)} L:${c.low.toFixed(1)} C:${c.close.toFixed(1)} V:${(c.volume).toFixed(0)}`
   ).join("\n");
 
-  const bbPosition = priceData.currentPrice > indicators.bb.upper ? "상단 밴드 돌파 (과매수)" :
-    priceData.currentPrice < indicators.bb.lower ? "하단 밴드 이탈 (과매도)" :
-    priceData.currentPrice > indicators.bb.middle ? "중심선 위 (상승 우위)" : "중심선 아래 (하락 우위)";
+  const bbPosition = priceData.currentPrice > indicators.bb.upper ? "Above upper band (overbought)" :
+    priceData.currentPrice < indicators.bb.lower ? "Below lower band (oversold)" :
+    priceData.currentPrice > indicators.bb.middle ? "Above midline (bullish bias)" : "Below midline (bearish bias)";
 
-  const emaCross = indicators.ema9 > indicators.ema21 ? "골든크로스 (단기>장기)" : "데드크로스 (단기<장기)";
+  const emaCross = indicators.ema9 > indicators.ema21 ? "Golden cross (short > long)" : "Death cross (short < long)";
 
   const bidAskRatio = priceData.orderBook.bidDepthTotal / (priceData.orderBook.askDepthTotal || 1);
-  const orderBookBias = bidAskRatio > 1.3 ? "매수 우위" : bidAskRatio < 0.7 ? "매도 우위" : "균형";
+  const orderBookBias = bidAskRatio > 1.3 ? "Buy dominant" : bidAskRatio < 0.7 ? "Sell dominant" : "Balanced";
 
-  const prompt = `당신은 한국 최고의 크립토 퀀트 트레이더입니다. ${pairInfo.name}(${pairInfo.symbol}) 4시간봉 차트 분석 리포트를 작성하세요.
+  const prompt = `You are a top-tier crypto quant trader. Write a bilingual ${pairInfo.nameEn} (${pairInfo.symbol}) 4H chart analysis.
 
-=== 실시간 데이터 ===
-현재가: $${priceData.currentPrice.toLocaleString()}
-24시간 변동: ${priceData.changePercent24h > 0 ? "+" : ""}${priceData.changePercent24h.toFixed(2)}%
-24시간 거래량: $${(priceData.volume24h / 1e6).toFixed(1)}M
-24시간 고가: $${priceData.high24h.toLocaleString()} / 저가: $${priceData.low24h.toLocaleString()}
+=== LIVE DATA ===
+Price: $${priceData.currentPrice.toLocaleString()}
+24H Change: ${priceData.changePercent24h > 0 ? "+" : ""}${priceData.changePercent24h.toFixed(2)}%
+24H Volume: $${(priceData.volume24h / 1e6).toFixed(1)}M
+24H High: $${priceData.high24h.toLocaleString()} / Low: $${priceData.low24h.toLocaleString()}
 
-=== 기술적 지표 ===
+=== TECHNICALS ===
 RSI(14): ${indicators.rsi.toFixed(1)}
 EMA 9/21: ${emaCross} (EMA9: $${indicators.ema9.toFixed(1)}, EMA21: $${indicators.ema21.toFixed(1)})
 SMA 20: $${indicators.sma20.toFixed(1)}
-볼린저 밴드: ${bbPosition} (상단: $${indicators.bb.upper.toFixed(1)}, 하단: $${indicators.bb.lower.toFixed(1)}, 폭: ${indicators.bb.width.toFixed(1)}%)
-지지선: ${indicators.supports.map((s) => `$${s.toLocaleString()}`).join(", ") || "미확인"}
-저항선: ${indicators.resistances.map((r) => `$${r.toLocaleString()}`).join(", ") || "미확인"}
+Bollinger: ${bbPosition} (Upper: $${indicators.bb.upper.toFixed(1)}, Lower: $${indicators.bb.lower.toFixed(1)}, Width: ${indicators.bb.width.toFixed(1)}%)
+Support: ${indicators.supports.map((s) => `$${s.toLocaleString()}`).join(", ") || "Unconfirmed"}
+Resistance: ${indicators.resistances.map((r) => `$${r.toLocaleString()}`).join(", ") || "Unconfirmed"}
 
-=== 오더북 ===
-매수/매도 비율: ${bidAskRatio.toFixed(2)} (${orderBookBias})
-스프레드: $${priceData.orderBook.bidAskSpread.toFixed(2)}
+=== ORDER BOOK ===
+Bid/Ask Ratio: ${bidAskRatio.toFixed(2)} (${orderBookBias})
+Spread: $${priceData.orderBook.bidAskSpread.toFixed(2)}
 
-=== 최근 10개 4H 캔들 ===
+=== RECENT 10x 4H CANDLES ===
 ${candleStr}
 
-=== 리포트 작성 지침 ===
-300-500자 한국어 리포트를 작성하세요:
+=== OUTPUT FORMAT ===
+Write a bilingual report:
 
-1. 현재 추세 판단 (상승/하락/횡보)과 근거
-2. 주요 기술적 지표 해석 (RSI, EMA, 볼린저 밴드)
-3. 핵심 지지/저항 레벨과 의미
-4. 오더북 분석 (매수/매도 압력)
-5. 구체적인 트레이딩 시나리오 (진입가, 손절가, 목표가)
-6. 리스크 요인
+[Korean section: 200-300 characters covering trend, key indicators, support/resistance, trading scenarios with specific levels, risks]
 
-실제 트레이더가 쓰는 것처럼 자연스럽고 전문적으로 작성하세요.
-숫자는 정확하게, 판단은 명확하게.
-이모지 사용하지 마세요.`;
+---
+
+[English section: 200-300 words covering the same — trend assessment, indicator interpretation, key levels, concrete trading scenarios (entry/stop/target), risk factors]
+
+TONE: Professional quant desk note. Precise numbers, clear directional bias, no hedging language, no emojis. Write like you're briefing a prop trading desk.`;
 
   const result = await model.generateContent(prompt);
   return result.response.text().trim();
@@ -189,10 +186,13 @@ export async function sendQuantReport(): Promise<boolean> {
         rsi, sma20, ema9, ema21, bb, supports, resistances,
       });
 
-      // Format header with key stats (send even if AI report fails)
+      // Format header with key stats
       const changeStr = `${priceData.changePercent24h >= 0 ? "+" : ""}${priceData.changePercent24h.toFixed(2)}%`;
-      const rsiLabel = rsi > 70 ? "과매수" : rsi < 30 ? "과매도" : rsi > 55 ? "강세" : rsi < 45 ? "약세" : "중립";
-      const trendLabel = ema9 > ema21 ? "상승 추세" : "하락 추세";
+
+      const rsiLabelKo = rsi > 70 ? "과매수" : rsi < 30 ? "과매도" : rsi > 55 ? "강세" : rsi < 45 ? "약세" : "중립";
+      const rsiLabelEn = rsi > 70 ? "Overbought" : rsi < 30 ? "Oversold" : rsi > 55 ? "Bullish" : rsi < 45 ? "Bearish" : "Neutral";
+      const trendKo = ema9 > ema21 ? "상승 추세" : "하락 추세";
+      const trendEn = ema9 > ema21 ? "Uptrend" : "Downtrend";
 
       const now = new Date().toLocaleString("ko-KR", {
         timeZone: "Asia/Seoul",
@@ -202,49 +202,60 @@ export async function sendQuantReport(): Promise<boolean> {
         minute: "2-digit",
       });
 
-      let msg = `<b>${pairInfo.name} 차트 분석</b> · ${now}\n\n`;
+      let msg = `<b>${pairInfo.nameEn} Chart Analysis | ${pairInfo.nameKo} 차트 분석</b> · ${now} KST\n\n`;
 
       // Key stats bar
       msg += `<b>${pairInfo.symbol}/USDT</b>  $${priceData.currentPrice.toLocaleString()}\n`;
-      msg += `${changeStr} | RSI ${rsi.toFixed(0)} (${rsiLabel}) | ${trendLabel}\n`;
-      msg += `고가 $${priceData.high24h.toLocaleString()} · 저가 $${priceData.low24h.toLocaleString()}\n\n`;
+      msg += `${changeStr} | RSI ${rsi.toFixed(0)} (${rsiLabelKo}/${rsiLabelEn}) | ${trendKo}/${trendEn}\n`;
+      msg += `H $${priceData.high24h.toLocaleString()} · L $${priceData.low24h.toLocaleString()}\n\n`;
 
       // Supports & Resistances
       if (supports.length > 0) {
-        msg += `<b>지지선:</b> ${supports.map((s) => `$${s.toLocaleString()}`).join(" / ")}\n`;
+        msg += `<b>Support:</b> ${supports.map((s) => `$${s.toLocaleString()}`).join(" / ")}\n`;
       }
       if (resistances.length > 0) {
-        msg += `<b>저항선:</b> ${resistances.map((r) => `$${r.toLocaleString()}`).join(" / ")}\n`;
+        msg += `<b>Resistance:</b> ${resistances.map((r) => `$${r.toLocaleString()}`).join(" / ")}\n`;
       }
       msg += `\n`;
 
-      // AI Report (may be empty if Gemini rate limited)
+      // AI Report (bilingual, may be empty if Gemini rate limited)
       if (report) {
         msg += report;
         msg += `\n\n`;
       }
 
-      // Chart link
-      msg += `<a href="https://www.tradingview.com/chart/?symbol=${pairInfo.tvSymbol}&interval=240">TradingView 차트 열기</a>\n\n`;
-      msg += `<i>— FuturesAI 퀀트 분석</i>`;
+      // Conclusive recommendation based on technicals
+      let verdictKo: string;
+      let verdictEn: string;
+      if (rsi > 70 && ema9 > ema21) {
+        verdictKo = `과매수 구간 진입 — 추격 매수보다 $${supports[0]?.toLocaleString() || "지지선"} 부근 눌림 대기 권장.`;
+        verdictEn = `Overbought territory — avoid chasing, wait for pullback to ${supports[0] ? `$${supports[0].toLocaleString()}` : "support"} region.`;
+      } else if (rsi < 30 && ema9 < ema21) {
+        verdictKo = `과매도 구간 — 반등 가능성 있으나 $${resistances[0]?.toLocaleString() || "저항선"} 돌파 확인 후 진입 권장.`;
+        verdictEn = `Oversold — bounce likely but wait for confirmation above ${resistances[0] ? `$${resistances[0].toLocaleString()}` : "resistance"} before entry.`;
+      } else if (ema9 > ema21 && rsi > 50) {
+        verdictKo = `상승 추세 유지 중 — 눌림 시 매수 전략 유효. 손절 $${supports[0]?.toLocaleString() || "지지선"}.`;
+        verdictEn = `Uptrend intact — buy-the-dip strategy valid. Stop below $${supports[0]?.toLocaleString() || "support"}.`;
+      } else if (ema9 < ema21 && rsi < 50) {
+        verdictKo = `하락 추세 지속 — 반등 시 매도 전략 유효. $${resistances[0]?.toLocaleString() || "저항선"} 돌파 시 전략 재검토.`;
+        verdictEn = `Downtrend persists — sell rallies. Reassess if price reclaims $${resistances[0]?.toLocaleString() || "resistance"}.`;
+      } else {
+        verdictKo = `방향성 불명확 — 레인지 바운드 대응. 핵심 레벨 이탈 시까지 관망 권장.`;
+        verdictEn = `No clear direction — range-bound. Wait for a decisive break of key levels before committing.`;
+      }
+
+      msg += `<b>Verdict | 결론</b>\n`;
+      msg += `${verdictKo}\n${verdictEn}\n\n`;
+
+      msg += `<a href="https://futuresai.io/ko/chart-ideas">Free AI Chart Analysis | 무료 AI 차트 분석</a>\n`;
+      msg += `<i>— FuturesAI Quant Analysis</i>`;
 
       await sendGroupMessage(msg);
-
-      // Send chart image
-      try {
-        const chartImgUrl = `https://www.tradingview.com/x/snapshot/?symbol=${pairInfo.tvSymbol}&interval=240&theme=dark`;
-        await sendGroupPhoto(
-          chartImgUrl,
-          `<b>${pairInfo.symbol}/USDT 4H</b> · $${priceData.currentPrice.toLocaleString()} (${changeStr})`,
-        );
-      } catch {
-        // Chart image optional
-      }
     }
 
     return true;
   } catch (error: any) {
-    console.error("[quant-report] 퀀트 리포트 전송 실패:", error?.message || error);
+    console.error("[quant-report] Quant report failed:", error?.message || error);
     return false;
   }
 }

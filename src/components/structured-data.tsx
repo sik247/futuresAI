@@ -19,7 +19,7 @@ export function OrganizationJsonLd() {
     ],
     contactPoint: {
       '@type': 'ContactPoint',
-      email: 'support@futuresai.io',
+      email: 'admin@futuresai.io',
       contactType: 'customer support',
       availableLanguage: ['English', 'Korean'],
     },

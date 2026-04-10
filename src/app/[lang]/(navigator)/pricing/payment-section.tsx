@@ -36,11 +36,9 @@ const PLANS = [
 
 export default function PaymentSection({
   walletAddress,
-  walletAddressErc20,
   ko,
 }: {
   walletAddress: string;
-  walletAddressErc20: string;
   ko: boolean;
 }) {
   const { data: session, status } = useSession();
@@ -52,8 +50,7 @@ export default function PaymentSection({
   const [message, setMessage] = useState<{ type: "success" | "error" | "info"; text: string } | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loadingPayments, setLoadingPayments] = useState(false);
-  const [copiedErc, setCopiedErc] = useState(false);
-  const [copiedTrc, setCopiedTrc] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const isLoggedIn = status === "authenticated";
   const isPremium = (user as any)?.isPremium === true;
@@ -79,11 +76,11 @@ export default function PaymentSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn]);
 
-  async function copyAddr(addr: string, type: "erc" | "trc") {
+  async function copyAddr() {
     try {
-      await navigator.clipboard.writeText(addr);
-      if (type === "erc") { setCopiedErc(true); setTimeout(() => setCopiedErc(false), 2000); }
-      else { setCopiedTrc(true); setTimeout(() => setCopiedTrc(false), 2000); }
+      await navigator.clipboard.writeText(walletAddress);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch {}
   }
 
@@ -204,28 +201,12 @@ export default function PaymentSection({
         </div>
       </div>
 
-      {/* Wallet Addresses */}
+      {/* Wallet Address — TRC-20 Only */}
       <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 space-y-4">
         <p className="text-xs font-mono uppercase tracking-wider text-zinc-500">
-          {ko ? "결제 주소" : "Payment Addresses"} — {ko ? `정확히 ${selectedPlan} USDT 전송` : `Send exactly ${selectedPlan} USDT`}
+          {ko ? "결제 주소" : "Payment Address"} — {ko ? `정확히 ${selectedPlan} USDT 전송` : `Send exactly ${selectedPlan} USDT`}
         </p>
 
-        {/* ERC-20 */}
-        {walletAddressErc20 && (
-          <div>
-            <p className="text-xs font-mono text-amber-400 mb-1.5">USDT ERC-20 (Ethereum)</p>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 text-xs font-mono text-blue-300 bg-blue-500/[0.06] border border-blue-500/20 rounded-lg px-3 py-2 break-all">
-                {walletAddressErc20}
-              </code>
-              <button onClick={() => copyAddr(walletAddressErc20, "erc")} className="shrink-0 px-3 py-2 rounded-lg bg-white/[0.05] border border-white/[0.08] text-zinc-400 hover:text-white text-xs font-mono transition-all">
-                {copiedErc ? (ko ? "복사됨" : "Copied!") : (ko ? "복사" : "Copy")}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* TRC-20 */}
         {walletAddress && (
           <div>
             <p className="text-xs font-mono text-emerald-400 mb-1.5">USDT TRC-20 (TRON)</p>
@@ -233,8 +214,8 @@ export default function PaymentSection({
               <code className="flex-1 text-xs font-mono text-blue-300 bg-blue-500/[0.06] border border-blue-500/20 rounded-lg px-3 py-2 break-all">
                 {walletAddress}
               </code>
-              <button onClick={() => copyAddr(walletAddress, "trc")} className="shrink-0 px-3 py-2 rounded-lg bg-white/[0.05] border border-white/[0.08] text-zinc-400 hover:text-white text-xs font-mono transition-all">
-                {copiedTrc ? (ko ? "복사됨" : "Copied!") : (ko ? "복사" : "Copy")}
+              <button onClick={copyAddr} className="shrink-0 px-3 py-2 rounded-lg bg-white/[0.05] border border-white/[0.08] text-zinc-400 hover:text-white text-xs font-mono transition-all">
+                {copied ? (ko ? "복사됨" : "Copied!") : (ko ? "복사" : "Copy")}
               </button>
             </div>
           </div>
@@ -242,8 +223,8 @@ export default function PaymentSection({
 
         <p className="text-xs text-zinc-500">
           {ko
-            ? `⚠ 정확히 ${selectedPlan} USDT를 전송해 주세요. 금액이 다르면 자동 인증이 실패할 수 있습니다.`
-            : `⚠ Send exactly ${selectedPlan} USDT. Incorrect amounts may fail auto-verification.`}
+            ? `⚠ 정확히 ${selectedPlan} USDT를 TRC-20 네트워크로 전송해 주세요. 금액이 다르면 자동 인증이 실패합니다.`
+            : `⚠ Send exactly ${selectedPlan} USDT via TRC-20 network. Incorrect amounts will fail verification.`}
         </p>
       </div>
 
@@ -257,7 +238,7 @@ export default function PaymentSection({
             type="text"
             value={txid}
             onChange={(e) => setTxid(e.target.value)}
-            placeholder={ko ? "트랜잭션 해시 입력 (0x... 또는 64자리 hex)" : "Enter tx hash (0x... for ERC-20 or 64-char hex for TRC-20)"}
+            placeholder={ko ? "TRC-20 트랜잭션 해시 입력 (64자리 hex)" : "Enter TRC-20 tx hash (64-char hex)"}
             className="w-full bg-zinc-900 border border-white/[0.08] rounded-lg px-4 py-2.5 text-xs font-mono text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all"
           />
           {message && (
@@ -296,16 +277,13 @@ export default function PaymentSection({
           ) : (
             <div className="divide-y divide-white/[0.04]">
               {payments.map((p) => {
-                const explorer = p.network === "ERC20"
-                  ? `https://etherscan.io/tx/${p.txid}`
-                  : `https://tronscan.org/#/transaction/${p.txid}`;
+                const explorer = `https://tronscan.org/#/transaction/${p.txid}`;
                 return (
                   <div key={p.id} className="px-5 py-3 flex flex-wrap items-center gap-3">
                     <a href={explorer} target="_blank" rel="noopener noreferrer" className="font-mono text-[11px] text-blue-400 hover:text-blue-300 transition-colors truncate max-w-[200px]" title={p.txid}>
                       {p.txid.slice(0, 16)}...{p.txid.slice(-8)}
                     </a>
                     <span className="font-mono text-[11px] text-zinc-400">${p.amount} USDT</span>
-                    <span className="text-[10px] font-mono text-zinc-600">{p.network}</span>
                     <StatusBadge status={p.status} />
                     <span className="text-xs text-zinc-500 ml-auto">{new Date(p.createdAt).toLocaleDateString()}</span>
                     {p.adminNote && <span className="w-full text-[10px] text-zinc-500">{p.adminNote}</span>}
