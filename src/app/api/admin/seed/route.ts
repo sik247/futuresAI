@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
 
     if (existing) {
       // Always reset password and ensure ADMIN role
-      const hashedPw = await bcrypt.hash("admin69!", 10);
+      const hashedPw = await bcrypt.hash("FuturesAI2026!Quant", 10);
       await prisma.user.update({
         where: { email },
         data: { role: "ADMIN", password: hashedPw },
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: "Admin password reset and role confirmed", id: existing.id });
     }
 
-    const hashedPassword = await bcrypt.hash("admin69!", 10);
+    const hashedPassword = await bcrypt.hash("FuturesAI2026!Quant", 10);
 
     const user = await prisma.user.create({
       data: {
