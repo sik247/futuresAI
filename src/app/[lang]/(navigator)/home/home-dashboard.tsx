@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 const RGL = require("react-grid-layout");
 const ResponsiveGridLayout = RGL.ResponsiveGridLayout as React.ComponentType<any>;
@@ -816,9 +817,11 @@ function renderMarkdown(text: string) {
     });
 }
 
-type ChatMsg = { role: "user" | "ai"; text: string; ticker?: { symbol: string; exchange: string }; news?: { title: string; url: string; source: string }[] };
+type ChatMsg = { role: "user" | "ai"; text: string; ticker?: { symbol: string; exchange: string }; news?: { title: string; url: string; source: string }[]; showAuthActions?: boolean };
 
 function ChatWidget({ lang }: { lang: string }) {
+  const { status } = useSession();
+  const isLoggedIn = status === "authenticated";
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [loading, setLoading] = useState(false);
@@ -840,6 +843,15 @@ function ChatWidget({ lang }: { lang: string }) {
   const handleSend = async (msg?: string) => {
     const text = (msg || input).trim();
     if (!text || loading || atLimit) return;
+    // If not logged in, show CTAs immediately without even hitting the API
+    if (!isLoggedIn) {
+      setMessages((prev) => [...prev,
+        { role: "user", text },
+        { role: "ai", text: ko ? "로그인 후 AI 채팅을 이용할 수 있습니다. 회원가입은 무료입니다!" : "Please sign in to use AI Chat. Signing up is free!", showAuthActions: true }
+      ]);
+      setInput("");
+      return;
+    }
     setMessages((prev) => [...prev, { role: "user", text }]);
     setInput("");
     setLoading(true);
@@ -851,7 +863,7 @@ function ChatWidget({ lang }: { lang: string }) {
       });
       const data = await res.json();
       if (res.status === 401 || data.error === "Unauthorized") {
-        setMessages((prev) => [...prev, { role: "ai", text: ko ? "로그인 후 AI 채팅을 이용할 수 있습니다. 회원가입은 무료입니다!" : "Please sign in to use AI Chat. Signing up is free!" }]);
+        setMessages((prev) => [...prev, { role: "ai", text: ko ? "로그인 후 AI 채팅을 이용할 수 있습니다. 회원가입은 무료입니다!" : "Please sign in to use AI Chat. Signing up is free!", showAuthActions: true }]);
       } else if (res.status === 429) {
         setRateLimited(true);
         if (data.shouldUpgrade) {
@@ -909,6 +921,33 @@ function ChatWidget({ lang }: { lang: string }) {
                 <div className="text-[12px] leading-relaxed text-zinc-300">
                   {m.role === "ai" ? renderMarkdown(m.text) : <p className="whitespace-pre-wrap">{m.text}</p>}
                 </div>
+                {/* Auth CTA buttons — shown when user hits sign-in wall */}
+                {m.showAuthActions && (
+                  <div className="mt-2.5 flex flex-col gap-1.5">
+                    <a
+                      href={`/${lang}/signup`}
+                      className="flex items-center justify-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold px-3 py-1.5 transition-colors"
+                    >
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="8.5" cy="7" r="4" /><path d="M20 8v6M23 11h-6" /></svg>
+                      {ko ? "무료 회원가입" : "Sign Up Free"}
+                    </a>
+                    <a
+                      href={`/${lang}/login`}
+                      className="flex items-center justify-center gap-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] text-zinc-200 text-[11px] font-semibold px-3 py-1.5 transition-colors"
+                    >
+                      {ko ? "로그인" : "Sign In"}
+                    </a>
+                    <a
+                      href="https://t.me/FuturesAIOfficial"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-1.5 rounded-lg bg-[#229ED9]/15 hover:bg-[#229ED9]/25 border border-[#229ED9]/30 text-[#5bc0f5] text-[11px] font-semibold px-3 py-1.5 transition-colors"
+                    >
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z" /></svg>
+                      {ko ? "텔레그램 참여" : "Join Telegram"}
+                    </a>
+                  </div>
+                )}
                 {/* TradingView chart if ticker detected */}
                 {m.ticker && (
                   <div className="mt-2 rounded-lg overflow-hidden border border-white/[0.06]">

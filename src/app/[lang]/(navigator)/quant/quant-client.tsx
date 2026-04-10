@@ -366,28 +366,27 @@ export default function QuantClient({
       {/* ============================================================ */}
       {/*  HERO                                                        */}
       {/* ============================================================ */}
-      <section ref={heroRef} className="relative pt-24 sm:pt-28 pb-20 overflow-hidden">
-        {/* Background gradient orbs */}
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-950/25 via-zinc-950 to-zinc-950" />
-        <div className="absolute top-[-80px] left-1/4 w-[500px] h-[500px] bg-blue-500/[0.12] rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute top-[-40px] right-1/4 w-[400px] h-[400px] bg-cyan-500/[0.10] rounded-full blur-[100px] animate-pulse [animation-delay:2s]" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-indigo-500/[0.06] rounded-full blur-[80px]" />
+      <section ref={heroRef} className="relative pt-20 sm:pt-24 pb-8 overflow-hidden">
+        {/* Background gradient orbs — slimmer */}
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-950/20 via-zinc-950 to-zinc-950" />
+        <div className="absolute top-[-60px] left-1/4 w-[400px] h-[300px] bg-blue-500/[0.10] rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute top-[-30px] right-1/4 w-[300px] h-[250px] bg-cyan-500/[0.08] rounded-full blur-[90px] animate-pulse [animation-delay:2s]" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6">
-          <p className="font-mono text-[11px] tracking-[0.3em] text-zinc-500 uppercase mb-3 flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
+          <p className="font-mono text-[10px] tracking-[0.3em] text-zinc-500 uppercase mb-1.5 flex items-center gap-2">
+            <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-500" />
             </span>
             {t.quant_subtitle}
           </p>
-          <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[0.95] mb-6">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter leading-[0.95] mb-2">
             <span className="text-white">AI </span>
             <span className="bg-gradient-to-r from-white via-blue-400 to-cyan-400 bg-clip-text text-transparent">
               Quant Terminal
             </span>
           </h1>
-          <p className="text-base md:text-lg text-zinc-400 max-w-2xl leading-relaxed mb-8">
+          <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed mb-3">
             {t.quant_description}
           </p>
 
