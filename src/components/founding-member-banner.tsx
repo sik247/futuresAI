@@ -118,8 +118,8 @@ export default function FoundingMemberBanner({ ko }: { ko: boolean }) {
                 <>
                   <span className="font-semibold text-white">
                     {ko
-                      ? `첫 100명 Founding Members · ${status.foundingSlotsLeft}자리 남음`
-                      : `First 100 Founding Members · ${status.foundingSlotsLeft} slots left`}
+                      ? `첫 200명 Founding Members · ${status.foundingSlotsLeft}자리 남음`
+                      : `First 200 Founding Members · ${status.foundingSlotsLeft} slots left`}
                   </span>
                   {" · "}
                   {ko ? "초대 & 독점 리서치 받기" : "Get invites & exclusive research"}
@@ -159,7 +159,7 @@ export default function FoundingMemberBanner({ ko }: { ko: boolean }) {
           >
             <div className="mb-5">
               <h2 className="text-lg font-bold text-white">
-                {ko ? "Founding 100 멤버 가입" : "Join Founding 100"}
+                {ko ? "Founding 200 멤버 가입" : "Join Founding 200"}
               </h2>
               <p className="text-sm text-zinc-400 mt-1">
                 {ko
@@ -167,7 +167,7 @@ export default function FoundingMemberBanner({ ko }: { ko: boolean }) {
                   : "Link your contacts to receive exclusive research posts, invites, and premium perks."}
               </p>
               <p className="text-xs text-amber-400 mt-2">
-                {status.foundingSlotsLeft}/{100} {ko ? "자리 남음" : "slots remaining"}
+                {status.foundingSlotsLeft}/{200} {ko ? "자리 남음" : "slots remaining"}
               </p>
             </div>
 

@@ -3,8 +3,8 @@ import { requireAdmin } from "@/lib/utils/admin";
 import prisma from "@/lib/prisma";
 
 export const metadata: Metadata = {
-  title: "Founding 100 Members",
-  description: "Admin view of the first 100 founding members.",
+  title: "Founding 200 Members",
+  description: "Admin view of the first 200 founding members.",
   robots: { index: false, follow: false },
 };
 
@@ -46,9 +46,9 @@ export default async function FoundingMembersPage() {
     <div className="min-h-screen bg-zinc-950 text-white p-6">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold">Founding 100 Members</h1>
+          <h1 className="text-2xl font-bold">Founding 200 Members</h1>
           <p className="text-sm text-zinc-400 mt-1">
-            First 100 users with both Telegram and email linked — receive exclusive research posts and invites.
+            First 200 users with both Telegram and email linked — receive exclusive research posts and invites.
           </p>
         </div>
 
@@ -60,10 +60,10 @@ export default async function FoundingMembersPage() {
             </p>
             <p className="text-3xl font-bold mt-1">
               {linkedCount}
-              <span className="text-lg text-zinc-500">/100</span>
+              <span className="text-lg text-zinc-500">/200</span>
             </p>
             <p className="text-xs text-zinc-500 mt-1">
-              {100 - linkedCount} slots remaining
+              {200 - linkedCount} slots remaining
             </p>
           </div>
           <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-5">
@@ -114,7 +114,7 @@ export default async function FoundingMembersPage() {
                 {foundingMembers.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-4 py-8 text-center text-sm text-zinc-500">
-                      No founding members yet. The first 100 users to link both Telegram and email will appear here.
+                      No founding members yet. The first 200 users to link both Telegram and email will appear here.
                     </td>
                   </tr>
                 ) : (

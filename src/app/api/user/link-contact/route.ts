@@ -12,7 +12,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * Body: { telegramId?: string, telegramUsername?: string, realEmail?: string }
  *
  * Links missing contact info to the signed-in user. If the user ends up with
- * BOTH a telegramId and realEmail AND we haven't hit 100 founding members yet,
+ * BOTH a telegramId and realEmail AND we haven't hit 200 founding members yet,
  * assigns the next inviteNumber atomically.
  */
 export async function POST(req: NextRequest) {
@@ -62,19 +62,19 @@ export async function POST(req: NextRequest) {
     data: updateData,
   });
 
-  // Check if user now has both contact methods and is eligible for founding 100
+  // Check if user now has both contact methods and is eligible for founding 200
   let foundingAssigned = false;
-  if (updated.telegramId && updated.realEmail && !updated.isFounding100) {
+  if (updated.telegramId && updated.realEmail && !updated.isFounding200) {
     try {
-      const foundingCount = await prisma.user.count({ where: { isFounding100: true } });
-      if (foundingCount < 100) {
+      const foundingCount = await prisma.user.count({ where: { isFounding200: true } });
+      if (foundingCount < 200) {
         // Atomically assign inviteNumber and mark as founding member
         const nextNumber = foundingCount + 1;
         await prisma.user.update({
           where: { id: userId },
           data: {
             inviteNumber: nextNumber,
-            isFounding100: true,
+            isFounding200: true,
           },
         });
         foundingAssigned = true;
@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
     telegramId: updated.telegramId,
     telegramUsername: updated.telegramUsername,
     realEmail: updated.realEmail,
-    isFounding100: foundingAssigned || updated.isFounding100,
+    isFounding200: foundingAssigned || updated.isFounding200,
     inviteNumber: updated.inviteNumber,
     foundingAssignedJustNow: foundingAssigned,
   });
@@ -115,12 +115,12 @@ export async function GET() {
       telegramUsername: true,
       realEmail: true,
       inviteNumber: true,
-      isFounding100: true,
+      isFounding200: true,
     },
   });
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-  const foundingCount = await prisma.user.count({ where: { isFounding100: true } });
+  const foundingCount = await prisma.user.count({ where: { isFounding200: true } });
 
   // A user is "email-based" if their login email is NOT a synthetic tg_*@telegram.user
   const isTelegramLogin = user.email.startsWith("tg_") && user.email.endsWith("@telegram.user");
@@ -132,9 +132,9 @@ export async function GET() {
     telegramUsername: user.telegramUsername,
     realEmail: user.realEmail || (isTelegramLogin ? null : user.email),
     inviteNumber: user.inviteNumber,
-    isFounding100: user.isFounding100,
+    isFounding200: user.isFounding200,
     foundingCount,
-    foundingSlotsLeft: Math.max(0, 100 - foundingCount),
+    foundingSlotsLeft: Math.max(0, 200 - foundingCount),
     needsTelegram,
     needsEmail,
   });
