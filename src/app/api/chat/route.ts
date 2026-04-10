@@ -173,7 +173,7 @@ export async function POST(req: NextRequest) {
         : "";
 
     // Inject user trading profile as agentic memory/context
-    const { formatProfileForPrompt } = await import("@/app/api/user/trading-profile/route");
+    const { formatProfileForPrompt } = await import("@/lib/services/user/trading-profile");
     const profileContext = formatProfileForPrompt((user as any).tradingProfile, lang === "ko" ? "ko" : "en");
 
     const fullPrompt = `${systemPrompt}${langNote}${profileContext}
