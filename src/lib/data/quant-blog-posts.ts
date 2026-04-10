@@ -2942,7 +2942,6 @@ SWIFT x 체인링크 파일럿이 3월 2단계로 이동 — 이제 8개 주요 
     publishedAt: "2026-04-05T20:00:00.000Z",
     author: "FuturesAI Quant Desk",
   },
-  ] = [
   {
     id: "matic-4h-analysis-20260409",
     slug: "polygon-matic-lower-highs-pattern-signals-continued-downside",
@@ -3367,7 +3366,6 @@ SUI는 성장하는 DeFi 생태계와 사용자 성장을 이끈 고프로파일
     publishedAt: "2026-04-09T16:00:00.000Z",
     author: "FuturesAI Quant Desk",
   },
-  ] = [
   {
     id: "op-4h-analysis-20260409",
     slug: "optimism-breaks-012-support-accelerating-downtrend",
