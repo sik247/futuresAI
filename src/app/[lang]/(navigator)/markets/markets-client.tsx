@@ -26,10 +26,12 @@ type Event = {
   endDate: string;
   startDate: string;
   volume24hr: number;
+  category: string;
   markets: Market[];
 };
 
 type ViewMode = "predictions" | "signals";
+type CategoryFilter = "all" | "crypto" | "politics" | "business" | "korea";
 type TimeCategory = "all" | "5min" | "15min" | "1h" | "4h" | "daily" | "weekly" | "monthly" | "yearly" | "premarket" | "etf";
 type TypeFilter = "all" | "updown" | "abovebelow" | "pricerange" | "hitprice";
 type SignalFilter = "all" | "bullish" | "bearish";
@@ -92,6 +94,24 @@ function getEventCoins(event: Event): string[] {
   const t = event.title.toLowerCase();
   return COINS.filter((c) => c.patterns.some((p) => t.includes(p))).map((c) => c.name);
 }
+
+const KOREA_ASIA_KEYWORDS = [
+  "korea", "korean", "south korea", "north korea", "dprk",
+  "kim jong", "samsung", "hyundai", "kpop", "k-pop",
+  "asia", "asian", "japan", "japanese", "china", "chinese", "taiwan",
+  "won", "krw", "kospi", "nikkei", "hang seng",
+  "tariff", "trade war",
+];
+
+function isKoreaAsiaRelevant(event: Event): boolean {
+  const text = `${event.title} ${event.markets.map((m) => m.question).join(" ")}`.toLowerCase();
+  return KOREA_ASIA_KEYWORDS.some((kw) => text.includes(kw));
+}
+
+const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
+  politics: { bg: "bg-violet-500/15", text: "text-violet-400" },
+  business: { bg: "bg-amber-500/15", text: "text-amber-400" },
+};
 
 /* ═══════════════════════════════════════════════════════════
    Korean Translation — pattern-based for Polymarket titles
@@ -178,6 +198,18 @@ function translateToKo(title: string): string {
   // "Bitcoin ETF approved by DATE?"
   const etfMatch = t.match(/(\w+) ETF (.+?) by (.+?)\??$/i);
   if (etfMatch) return `${localizeCoin(etfMatch[1])} ETF ${etfMatch[3]}까지 ${etfMatch[2]}?`;
+
+  // "Will X win Y?"
+  const winMatch = t.match(/Will (.+?) win (.+?)\??$/i);
+  if (winMatch) return `${winMatch[1]}이(가) ${winMatch[2]} 승리할까?`;
+
+  // "Will X be Y by DATE?"
+  const willBeMatch = t.match(/Will (.+?) be (.+?) by (.+?)\??$/i);
+  if (willBeMatch) return `${willBeMatch[1]}이(가) ${willBeMatch[3]}까지 ${willBeMatch[2]}?`;
+
+  // "Will X happen by DATE?"
+  const willHappenMatch = t.match(/Will (.+?) by (.+?)\??$/i);
+  if (willHappenMatch) return `${willHappenMatch[2]}까지 ${willHappenMatch[1]}?`;
 
   // Fallback — translate coin names but leave structure
   if (/what price will|will .+ hit|will .+ reach|above \$|below \$|market cap|FDV/i.test(t)) {
@@ -311,6 +343,7 @@ export default function MarketsClient({
   const [view, setView] = useState<ViewMode>(events.length > 0 ? "predictions" : "signals");
 
   // ─── Prediction state ──────────────────────
+  const [categoryCat, setCategoryCat] = useState<CategoryFilter>("all");
   const [timeCat, setTimeCat] = useState<TimeCategory>("all");
   const [typeFil, setTypeFil] = useState<TypeFilter>("all");
   const [coinFilter, setCoinFilter] = useState<string | null>(null);
@@ -345,27 +378,44 @@ export default function MarketsClient({
   }, [sigData.signals.length, sigLoading, view, refreshSignals]);
 
   // ─── Prediction filters ────────────────────
-  const predCounts = useMemo(() => {
-    const tc: Record<string, number> = { all: events.length, "5min": 0, "15min": 0, "1h": 0, "4h": 0, daily: 0, weekly: 0, monthly: 0, yearly: 0, premarket: 0, etf: 0 };
-    const coins: Record<string, number> = {};
+  const categoryEvents = useMemo(() => {
+    if (categoryCat === "korea") return events.filter(isKoreaAsiaRelevant);
+    if (categoryCat !== "all") return events.filter((e) => e.category === categoryCat);
+    return events;
+  }, [events, categoryCat]);
+
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: events.length, crypto: 0, politics: 0, business: 0, korea: 0 };
     for (const ev of events) {
+      counts[ev.category] = (counts[ev.category] || 0) + 1;
+      if (isKoreaAsiaRelevant(ev)) counts.korea++;
+    }
+    return counts;
+  }, [events]);
+
+  const predCounts = useMemo(() => {
+    const tc: Record<string, number> = { all: categoryEvents.length, "5min": 0, "15min": 0, "1h": 0, "4h": 0, daily: 0, weekly: 0, monthly: 0, yearly: 0, premarket: 0, etf: 0 };
+    const coins: Record<string, number> = {};
+    for (const ev of categoryEvents) {
       tc[getTimeCategory(ev)]++;
       if (isPremarketEvent(ev)) tc.premarket++;
       if (isEtfEvent(ev)) tc.etf++;
       for (const c of getEventCoins(ev)) coins[c] = (coins[c] || 0) + 1;
     }
     return { tc, coins };
-  }, [events]);
+  }, [categoryEvents]);
+
+  const showCryptoFilters = categoryCat === "all" || categoryCat === "crypto";
 
   const filteredEvents = useMemo(() => {
-    let result = events;
+    let result = categoryEvents;
     if (timeCat === "premarket") result = result.filter(isPremarketEvent);
     else if (timeCat === "etf") result = result.filter(isEtfEvent);
     else if (timeCat !== "all") result = result.filter((e) => getTimeCategory(e) === timeCat);
-    if (typeFil !== "all") result = result.filter((e) => getEventType(e) === typeFil);
+    if (showCryptoFilters && typeFil !== "all") result = result.filter((e) => getEventType(e) === typeFil);
     if (coinFilter) result = result.filter((e) => getEventCoins(e).includes(coinFilter));
     return result.sort((a, b) => parseFloat(String(b.volume || 0)) - parseFloat(String(a.volume || 0)));
-  }, [events, timeCat, typeFil, coinFilter]);
+  }, [categoryEvents, timeCat, typeFil, coinFilter, showCryptoFilters]);
 
   const coinEntries = useMemo(() => Object.entries(predCounts.coins).sort((a, b) => b[1] - a[1]), [predCounts.coins]);
 
@@ -390,6 +440,16 @@ export default function MarketsClient({
     { key: "1h", label: "1 Hour" }, { key: "4h", label: "4 Hours" }, { key: "daily", label: "Daily" },
     { key: "weekly", label: "Weekly" }, { key: "monthly", label: "Monthly" }, { key: "yearly", label: "Yearly" },
     { key: "premarket", label: "Pre-Market" }, { key: "etf", label: "ETF" },
+  ];
+
+  const categoryFilters: { key: CategoryFilter; label: string }[] = isKo ? [
+    { key: "all", label: "전체" }, { key: "crypto", label: "크립토" },
+    { key: "politics", label: "정치" }, { key: "business", label: "경제" },
+    { key: "korea", label: "한국/아시아" },
+  ] : [
+    { key: "all", label: "All" }, { key: "crypto", label: "Crypto" },
+    { key: "politics", label: "Politics" }, { key: "business", label: "Business" },
+    { key: "korea", label: "Korea/Asia" },
   ];
 
   const typeFilters: { key: TypeFilter; label: string }[] = isKo ? [
@@ -439,28 +499,29 @@ export default function MarketsClient({
       {/* ═══ PREDICTIONS VIEW ══════════════════════════════ */}
       {view === "predictions" && (
         <>
-          {/* Title + Type Tabs */}
+          {/* Category Tabs + Type Tabs */}
           <div className="max-w-[1440px] mx-auto flex">
             <div className="hidden lg:block w-[200px] shrink-0" />
-            <div className="flex-1 px-4 sm:px-6 pb-4">
-              <div className="flex items-center gap-4 flex-wrap">
-                <h1 className="text-[22px] font-bold text-white tracking-tight">{isKo ? "크립토" : "Crypto"}</h1>
+            <div className="flex-1 px-4 sm:px-6 pb-4 space-y-3">
+              {/* Category row */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {categoryFilters.map((f) => (
+                  <button key={f.key} onClick={() => { setCategoryCat(f.key); setCoinFilter(null); setTypeFil("all"); setTimeCat("all"); }}
+                    className={`px-3.5 py-1.5 rounded-lg text-[13px] font-semibold transition-all cursor-pointer ${categoryCat === f.key ? "bg-[#2563eb] text-white shadow-lg shadow-blue-500/20" : "bg-white/[0.05] text-[#858d9a] hover:text-white hover:bg-white/[0.08]"}`}>
+                    {f.label}
+                    <span className="ml-1.5 text-[11px] opacity-60">{categoryCounts[f.key] || 0}</span>
+                  </button>
+                ))}
+              </div>
+              {/* Type filter row (crypto-specific) */}
+              {showCryptoFilters && (
                 <div className="flex items-center gap-1">
                   {typeFilters.map((f) => (
                     <button key={f.key} onClick={() => { setTypeFil(f.key); setCoinFilter(null); }}
-                      className={`px-3 py-1 rounded-full text-[13px] font-medium transition-colors cursor-pointer ${typeFil === f.key ? "bg-[#2563eb] text-white" : "text-[#858d9a] hover:text-white hover:bg-white/[0.06]"}`}>{f.label}</button>
+                      className={`px-3 py-1 rounded-full text-[13px] font-medium transition-colors cursor-pointer ${typeFil === f.key ? "bg-white/[0.10] text-white" : "text-[#555c69] hover:text-white hover:bg-white/[0.06]"}`}>{f.label}</button>
                   ))}
                 </div>
-                <div className="flex-1" />
-                <div className="flex items-center gap-2">
-                  <button className="p-1.5 rounded-md text-[#858d9a] hover:text-white hover:bg-white/[0.06] transition-colors">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35" strokeLinecap="round"/></svg>
-                  </button>
-                  <button className="p-1.5 rounded-md text-[#858d9a] hover:text-white hover:bg-white/[0.06] transition-colors">
-                    <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  </button>
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -480,6 +541,7 @@ export default function MarketsClient({
                     </button>
                   );
                 })}
+                {showCryptoFilters && coinEntries.length > 0 && <>
                 <div className="!my-3 h-px bg-white/[0.06]" />
                 {coinEntries.map(([coin, count]) => {
                   const c = COINS.find((x) => x.name === coin);
@@ -492,16 +554,22 @@ export default function MarketsClient({
                     </button>
                   );
                 })}
+                </>}
               </nav>
             </aside>
 
             {/* Mobile bottom filter */}
             <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0d0e14]/95 backdrop-blur-md border-t border-white/[0.06] px-3 py-2.5 flex gap-2 overflow-x-auto no-scrollbar">
-              {sidebarItems.slice(0, 8).map((item) => (
-                <button key={item.key} onClick={() => { setTimeCat(item.key); setCoinFilter(null); setTypeFil("all"); }}
-                  className={`shrink-0 px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors cursor-pointer ${timeCat === item.key && !coinFilter ? "bg-[#2563eb] text-white" : "bg-white/[0.06] text-[#858d9a]"}`}>{item.label}</button>
+              {categoryFilters.map((f) => (
+                <button key={f.key} onClick={() => { setCategoryCat(f.key); setCoinFilter(null); setTypeFil("all"); setTimeCat("all"); }}
+                  className={`shrink-0 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors cursor-pointer ${categoryCat === f.key ? "bg-[#2563eb] text-white" : "bg-white/[0.08] text-[#858d9a]"}`}>{f.label}</button>
               ))}
-              {coinEntries.map(([coin]) => {
+              <span className="shrink-0 w-px h-5 bg-white/[0.08] self-center" />
+              {sidebarItems.slice(0, 6).map((item) => (
+                <button key={item.key} onClick={() => { setTimeCat(item.key); setCoinFilter(null); setTypeFil("all"); }}
+                  className={`shrink-0 px-3 py-1.5 rounded-full text-[12px] font-medium transition-colors cursor-pointer ${timeCat === item.key && !coinFilter ? "bg-white/[0.10] text-white" : "bg-white/[0.06] text-[#858d9a]"}`}>{item.label}</button>
+              ))}
+              {showCryptoFilters && coinEntries.map(([coin]) => {
                 const c = COINS.find((x) => x.name === coin);
                 return (
                   <button key={coin} onClick={() => { setCoinFilter(coinFilter === coin ? null : coin); setTimeCat("all"); }}
@@ -518,7 +586,7 @@ export default function MarketsClient({
               {filteredEvents.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-32 text-center">
                   <svg className="w-12 h-12 text-[#2a2d3a] mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-                  <p className="text-[#858d9a] text-sm">{isKo ? "해당 필터에 맞는 마켓이 없습니다" : "No markets match this filter"}</p>
+                  <p className="text-[#858d9a] text-sm">{categoryCat === "korea" ? (isKo ? "현재 한국/아시아 관련 예측이 없습니다" : "No Korea/Asia predictions currently available") : (isKo ? "해당 필터에 맞는 마켓이 없습니다" : "No markets match this filter")}</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 pb-24 lg:pb-0">
@@ -787,6 +855,13 @@ function SignalDetail({ s, isKo }: { s: SignalItem; isKo: boolean }) {
    Prediction Card Components
    ═══════════════════════════════════════════════════════════ */
 
+function CategoryBadge({ category, isKo }: { category: string; isKo: boolean }) {
+  if (category === "crypto") return null;
+  const colors = CATEGORY_COLORS[category] || { bg: "bg-zinc-500/15", text: "text-zinc-400" };
+  const label = category === "politics" ? (isKo ? "정치" : "Politics") : category === "business" ? (isKo ? "경제" : "Business") : category;
+  return <span className={`px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider ${colors.bg} ${colors.text}`}>{label}</span>;
+}
+
 function EventCard({ event, isKo }: { event: Event; isKo: boolean }) {
   const vol = parseFloat(String(event.volume || 0));
   const volLabel = formatVol(vol);
@@ -828,6 +903,7 @@ function EventCard({ event, isKo }: { event: Event; isKo: boolean }) {
     return (
       <a href={`https://polymarket.com/event/${event.slug || event.id}`} target="_blank" rel="noopener noreferrer" className="block group">
         <div className="rounded-xl bg-[#171923] border border-[#1e2030] p-4 flex flex-col h-full transition-all duration-200 hover:border-[#2e3050] hover:bg-[#1c1e2e]">
+          {event.category !== "crypto" && <div className="mb-2"><CategoryBadge category={event.category} isKo={isKo} /></div>}
           <div className="flex items-start justify-between gap-3 mb-3">
             <div className="flex items-start gap-3 min-w-0">{event.image && <img src={event.image} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" />}<h3 className="text-[14px] font-semibold text-white leading-snug line-clamp-2">{title}</h3></div>
             <DonutChart pct={yesPct} label={chanceLabel} color="#22c55e" />
@@ -845,6 +921,7 @@ function EventCard({ event, isKo }: { event: Event; isKo: boolean }) {
   return (
     <a href={`https://polymarket.com/event/${event.slug || event.id}`} target="_blank" rel="noopener noreferrer" className="block group">
       <div className="rounded-xl bg-[#171923] border border-[#1e2030] p-4 flex flex-col h-full transition-all duration-200 hover:border-[#2e3050] hover:bg-[#1c1e2e]">
+        {event.category !== "crypto" && <div className="mb-2"><CategoryBadge category={event.category} isKo={isKo} /></div>}
         <div className="flex items-start gap-3 mb-3">{event.image && <img src={event.image} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" />}<h3 className="text-[14px] font-semibold text-white leading-snug line-clamp-2">{title}</h3></div>
         <div className="space-y-1 flex-1">
           {event.markets.slice(0, 3).map((market, i) => {

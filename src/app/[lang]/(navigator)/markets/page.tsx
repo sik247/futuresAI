@@ -3,27 +3,27 @@ import MarketsClient from "./markets-client";
 import { fetchMarketSignals } from "@/lib/services/signals/signals.service";
 
 export const metadata: Metadata = {
-  title: "Crypto Markets - Prediction Markets & Quant Signals",
+  title: "Prediction Markets & Quant Signals",
   description:
-    "Live prediction markets from Polymarket and real-time quant signals (RSI, MACD) for top cryptocurrencies.",
+    "Live prediction markets for crypto, politics, and business from Polymarket, plus real-time quant signals.",
   keywords: [
-    "crypto prediction markets",
+    "prediction markets",
     "Polymarket",
-    "RSI MACD signals",
     "crypto trading signals",
+    "politics predictions",
     "bitcoin price prediction",
   ],
   openGraph: {
-    title: "Crypto Markets - Predictions & Quant Signals | Futures AI",
+    title: "Prediction Markets & Quant Signals | Futures AI",
     description:
-      "Toggle between live Polymarket predictions and real-time quant analysis for crypto markets.",
+      "Crypto, politics, and business prediction markets with real-time quant analysis.",
     type: "website",
   },
 };
 
 export const revalidate = 300;
 
-function parseEvent(e: any) {
+function parseEvent(e: any, category: string) {
   return {
     id: e.id,
     title: e.title,
@@ -34,6 +34,7 @@ function parseEvent(e: any) {
     endDate: e.endDate,
     startDate: e.startDate,
     volume24hr: e.volume24hr,
+    category,
     markets: (e.markets || []).map((m: any) => ({
       question: m.question,
       outcomePrices:
@@ -51,17 +52,47 @@ function parseEvent(e: any) {
   };
 }
 
-async function getCryptoEvents() {
+function isCompetitive(event: { category: string; markets: { outcomePrices: number[] }[] }): boolean {
+  if (event.category === "crypto") return true;
+  return event.markets.some((m) => {
+    if (!m.outcomePrices || m.outcomePrices.length < 2) return true;
+    const yes = parseFloat(String(m.outcomePrices[0]));
+    return yes >= 0.15 && yes <= 0.85;
+  });
+}
+
+async function fetchTagEvents(tag: string, category: string, limit: number) {
   try {
     const res = await fetch(
-      "https://gamma-api.polymarket.com/events?closed=false&tag_slug=crypto&limit=200&order=volume&ascending=false",
+      `https://gamma-api.polymarket.com/events?closed=false&tag_slug=${tag}&limit=${limit}&order=volume&ascending=false`,
       { next: { revalidate: 300 } }
     );
     const events = await res.json();
-    return events.map(parseEvent);
+    return (events as any[]).map((e) => parseEvent(e, category));
   } catch {
     return [];
   }
+}
+
+async function getAllEvents() {
+  const [crypto, politics, business] = await Promise.all([
+    fetchTagEvents("crypto", "crypto", 200),
+    fetchTagEvents("politics", "politics", 100),
+    fetchTagEvents("business", "business", 100),
+  ]);
+
+  // Deduplicate by event id
+  const seen = new Set<string>();
+  const merged = [];
+  for (const event of [...crypto, ...politics, ...business]) {
+    if (!seen.has(event.id)) {
+      seen.add(event.id);
+      merged.push(event);
+    }
+  }
+
+  // Filter non-crypto for competitive ratios
+  return merged.filter(isCompetitive);
 }
 
 async function getSignals() {
@@ -84,7 +115,7 @@ export default async function MarketsPage({
   params: { lang: string };
 }) {
   const [cryptoEvents, signalsData] = await Promise.all([
-    getCryptoEvents(),
+    getAllEvents(),
     getSignals(),
   ]);
   return (
