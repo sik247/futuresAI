@@ -199,6 +199,34 @@ function translateToKo(title: string): string {
   const etfMatch = t.match(/(\w+) ETF (.+?) by (.+?)\??$/i);
   if (etfMatch) return `${localizeCoin(etfMatch[1])} ETF ${etfMatch[3]}까지 ${etfMatch[2]}?`;
 
+  // ─── Political / News patterns ─────────────
+
+  // "Democratic Presidential Nominee 2028"
+  const nomineeMatch = t.match(/^(Democratic|Republican) Presidential Nominee (\d{4})\??$/i);
+  if (nomineeMatch) {
+    const party = nomineeMatch[1].toLowerCase() === "democratic" ? "민주당" : "공화당";
+    return `${nomineeMatch[2]}년 ${party} 대선후보는?`;
+  }
+
+  // "Presidential Election Winner YYYY"
+  const electionWinnerMatch = t.match(/Presidential Election Winner (\d{4})\??$/i);
+  if (electionWinnerMatch) return `${electionWinnerMatch[1]}년 대통령 선거 승자는?`;
+
+  // "X out by...?" / "X out by DATE?"
+  const outByMatch = t.match(/(.+?) out by\.{0,3}\??\s*$/i);
+  if (outByMatch && lower.includes("out by")) return `${outByMatch[1]} 퇴임할까?`;
+
+  // "Next Prime Minister of X" / "Next President of X"
+  const nextLeaderMatch = t.match(/Next (Prime Minister|President|Leader|Chancellor) of (.+?)\??$/i);
+  if (nextLeaderMatch) {
+    const role: Record<string, string> = { "prime minister": "총리", "president": "대통령", "leader": "지도자", "chancellor": "총리" };
+    return `${nextLeaderMatch[2]}의 차기 ${role[nextLeaderMatch[1].toLowerCase()] || nextLeaderMatch[1]}는?`;
+  }
+
+  // "X leader end of YYYY?" / "X leader at end of YYYY?"
+  const leaderEndMatch = t.match(/(.+?) leader (?:at )?end of (\d{4})\??$/i);
+  if (leaderEndMatch) return `${leaderEndMatch[2]}년 말 ${leaderEndMatch[1]} 지도자는?`;
+
   // "Will X win Y?"
   const winMatch = t.match(/Will (.+?) win (.+?)\??$/i);
   if (winMatch) return `${winMatch[1]}이(가) ${winMatch[2]} 승리할까?`;
@@ -210,6 +238,21 @@ function translateToKo(title: string): string {
   // "Will X happen by DATE?"
   const willHappenMatch = t.match(/Will (.+?) by (.+?)\??$/i);
   if (willHappenMatch) return `${willHappenMatch[2]}까지 ${willHappenMatch[1]}?`;
+
+  // "X approval rating above/below Y%?"
+  const approvalMatch = t.match(/(.+?) approval rating (above|below) (\d+%?)/i);
+  if (approvalMatch) {
+    const dir = approvalMatch[2].toLowerCase() === "above" ? "이상" : "이하";
+    return `${approvalMatch[1]} 지지율 ${approvalMatch[3]}% ${dir}?`;
+  }
+
+  // "Will X resign?"
+  const resignMatch = t.match(/Will (.+?) resign\??$/i);
+  if (resignMatch) return `${resignMatch[1]} 사임할까?`;
+
+  // "Will X be impeached?"
+  const impeachMatch = t.match(/Will (.+?) be impeached\??$/i);
+  if (impeachMatch) return `${impeachMatch[1]} 탄핵될까?`;
 
   // Fallback — translate coin names but leave structure
   if (/what price will|will .+ hit|will .+ reach|above \$|below \$|market cap|FDV/i.test(t)) {
@@ -225,6 +268,7 @@ function translateLabel(label: string): string {
     "Yes": "예", "No": "아니오",
     "Up": "상승", "Down": "하락",
     "chance": "확률",
+    "Other": "기타",
   };
   return map[label] || label;
 }
