@@ -9,7 +9,7 @@ type TMePage = {};
 const MePage: React.FC<TMePage> = async ({}) => {
   return (
     <div className="bg-muted w-full">
-      <Container className="bg-background h-screen px-6 md:px-0 w-full flex flex-col">
+      <Container className="bg-background min-h-screen pb-20 lg:pb-0 px-6 md:px-0 w-full flex flex-col">
         <MeHeaderSection />
         <Separator />
         <MeMenuSection />

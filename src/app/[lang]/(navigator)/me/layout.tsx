@@ -11,7 +11,7 @@ export default function MyPageLayout({
   return (
     <>
       <Container className="w-full flex max-w-6xl gap-8">
-        <div className="w-[200px] overflow-scroll py-4 bg-background h-screen relative max-md:hidden shrink-0">
+        <div className="w-[200px] overflow-scroll py-4 bg-background min-h-screen relative max-md:hidden shrink-0">
           <NavigationMenuSection />
         </div>
         <div className="w-full">{children}</div>

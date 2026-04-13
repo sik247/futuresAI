@@ -603,7 +603,7 @@ export default function MarketsClient({
             </aside>
 
             {/* Mobile bottom filter */}
-            <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0d0e14]/95 backdrop-blur-md border-t border-white/[0.06] px-3 py-2.5 flex gap-2 overflow-x-auto no-scrollbar">
+            <div className="lg:hidden fixed bottom-[56px] left-0 right-0 z-30 bg-[#0d0e14]/95 backdrop-blur-md border-t border-white/[0.06] px-3 py-2.5 flex gap-2 overflow-x-auto no-scrollbar">
               {categoryFilters.map((f) => (
                 <button key={f.key} onClick={() => { setCategoryCat(f.key); setCoinFilter(null); setTypeFil("all"); setTimeCat("all"); }}
                   className={`shrink-0 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-colors cursor-pointer ${categoryCat === f.key ? "bg-[#2563eb] text-white" : "bg-white/[0.08] text-[#858d9a]"}`}>{f.label}</button>
@@ -633,7 +633,7 @@ export default function MarketsClient({
                   <p className="text-[#858d9a] text-sm">{categoryCat === "korea" ? (isKo ? "현재 한국/아시아 관련 예측이 없습니다" : "No Korea/Asia predictions currently available") : (isKo ? "해당 필터에 맞는 마켓이 없습니다" : "No markets match this filter")}</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 pb-24 lg:pb-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 pb-32 lg:pb-0">
                   {filteredEvents.map((event) => <EventCard key={event.id} event={event} isKo={isKo} />)}
                 </div>
               )}
