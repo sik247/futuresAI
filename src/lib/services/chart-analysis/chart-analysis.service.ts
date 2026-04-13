@@ -311,7 +311,7 @@ export async function analyzeChart(
   const liveBlock = buildLiveContextBlock(priceData || null, webResults || null);
   const langInstruction = lang === "ko"
     ? "\n\nIMPORTANT: Write ALL text fields (summary, professionalSummary, patterns, indicators values, volumeProfile, bollingerPosition, rsiDivergence, statisticalTargets timeframe, fibonacciLevels significance) in Korean (한국어). Keep technical terms (LONG, SHORT, BUY, SELL, NEUTRAL, BULLISH, BEARISH) in English. Price numbers stay as numbers."
-    : "";
+    : "\n\nIMPORTANT: Write ALL text fields (summary, professionalSummary, patterns, indicators values, volumeProfile, bollingerPosition, rsiDivergence, statisticalTargets timeframe, fibonacciLevels significance) ENTIRELY in English. Do NOT include any Korean text, Korean characters, or mixed-language content anywhere in the response.";
   const fullPrompt = CHART_ANALYSIS_PROMPT + (liveBlock || "") + langInstruction;
 
   const result = await model.generateContent([

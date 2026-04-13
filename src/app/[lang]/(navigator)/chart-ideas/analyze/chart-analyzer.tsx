@@ -29,45 +29,46 @@ const TradingChart = dynamic(() => import("@/components/trading-chart"), {
 /* ------------------------------------------------------------------ */
 /*  Post generator + Grok-style AI commentary                          */
 /* ------------------------------------------------------------------ */
-function generateSharePost(pair: string, a: ChartAnalysisResult): string {
+function generateSharePost(pair: string, a: ChartAnalysisResult, lang: string): string {
+  const ko = lang === "ko";
   const trendEmoji =
     a.trend === "BULLISH" ? "\u{1F7E2}" :
     a.trend === "BEARISH" ? "\u{1F534}" :
     a.trend === "CONSOLIDATING" ? "\u{1F7E1}" : "\u26AA";
   const dir = a.tradeSetup.direction === "LONG" ? "\u{1F4C8}" : a.tradeSetup.direction === "SHORT" ? "\u{1F4C9}" : "\u2194\uFE0F";
-  const pairFmt = pair.replace("USDT", "/USDT");
 
   const lines = [
-    `${trendEmoji} $${pair.replace("USDT", "")} AI Analysis \u2014 ${a.trend}`,
+    `${trendEmoji} $${pair.replace("USDT", "")} ${ko ? "AI 분석" : "AI Analysis"} \u2014 ${a.trend}`,
     ``,
-    `${dir} Direction: ${a.tradeSetup.direction}`,
-    `\u{1F3AF} Entry: $${a.tradeSetup.entry?.toLocaleString()}`,
-    `\u{1F6D1} Stop Loss: $${a.tradeSetup.stopLoss?.toLocaleString()}`,
-    `\u2705 Take Profit: $${a.tradeSetup.takeProfit?.toLocaleString()}`,
-    `\u{1F4CA} R:R ${a.tradeSetup.riskReward} | Confidence: ${a.confidence}%`,
+    `${dir} ${ko ? "방향" : "Direction"}: ${a.tradeSetup.direction}`,
+    `\u{1F3AF} ${ko ? "진입가" : "Entry"}: $${a.tradeSetup.entry?.toLocaleString()}`,
+    `\u{1F6D1} ${ko ? "손절가" : "Stop Loss"}: $${a.tradeSetup.stopLoss?.toLocaleString()}`,
+    `\u2705 ${ko ? "목표가" : "Take Profit"}: $${a.tradeSetup.takeProfit?.toLocaleString()}`,
+    `\u{1F4CA} R:R ${a.tradeSetup.riskReward} | ${ko ? "신뢰도" : "Confidence"}: ${a.confidence}%`,
     ``,
-    `Key Levels:`,
-    `\u{1F7E2} Support: ${a.supportLevels.slice(0, 2).map(l => `$${l?.toLocaleString()}`).join(" / ")}`,
-    `\u{1F534} Resistance: ${a.resistanceLevels.slice(0, 2).map(l => `$${l?.toLocaleString()}`).join(" / ")}`,
+    `${ko ? "핵심 레벨" : "Key Levels"}:`,
+    `\u{1F7E2} ${ko ? "지지선" : "Support"}: ${a.supportLevels.slice(0, 2).map(l => `$${l?.toLocaleString()}`).join(" / ")}`,
+    `\u{1F534} ${ko ? "저항선" : "Resistance"}: ${a.resistanceLevels.slice(0, 2).map(l => `$${l?.toLocaleString()}`).join(" / ")}`,
   ];
 
   if (a.patterns.length > 0) {
-    lines.push(`\u{1F50D} Patterns: ${a.patterns.slice(0, 3).join(", ")}`);
+    lines.push(`\u{1F50D} ${ko ? "패턴" : "Patterns"}: ${a.patterns.slice(0, 3).join(", ")}`);
   }
 
   lines.push(``);
-  lines.push(`Analyzed by CryptoX AI \u2014 Free at cryptox.co`);
+  lines.push(`${ko ? "CryptoX AI 분석" : "Analyzed by CryptoX AI"} \u2014 Free at cryptox.co`);
   lines.push(`#${pair.replace("USDT", "")} #Crypto #Trading`);
 
   return lines.join("\n");
 }
 
-function generateAICommentary(pair: string, a: ChartAnalysisResult): {
+function generateAICommentary(pair: string, a: ChartAnalysisResult, lang: string): {
   verdict: string;
   details: string[];
   sentiment: "bullish" | "bearish" | "neutral";
   conviction: "high" | "medium" | "low";
 } {
+  const ko = lang === "ko";
   const coin = pair.replace("USDT", "");
   const rr = parseFloat(a.tradeSetup.riskReward?.replace("1:", "") || "0");
   const buySignals = a.indicators.filter(i => i.signal === "BUY").length;
@@ -86,15 +87,25 @@ function generateAICommentary(pair: string, a: ChartAnalysisResult): {
   // Generate verdict
   let verdict = "";
   if (sentiment === "bullish" && conviction === "high") {
-    verdict = `Strong setup on ${coin}. ${buySignals} of ${a.indicators.length} indicators flashing buy with ${a.confidence}% AI confidence. The R:R at ${a.tradeSetup.riskReward} makes this worth watching.`;
+    verdict = ko
+      ? `${coin} 강한 매수 셋업입니다. ${a.indicators.length}개 지표 중 ${buySignals}개가 매수 신호를 보이며 AI 신뢰도 ${a.confidence}%입니다. R:R ${a.tradeSetup.riskReward}로 주목할 만합니다.`
+      : `Strong setup on ${coin}. ${buySignals} of ${a.indicators.length} indicators flashing buy with ${a.confidence}% AI confidence. The R:R at ${a.tradeSetup.riskReward} makes this worth watching.`;
   } else if (sentiment === "bullish") {
-    verdict = `${coin} is showing bullish structure but conviction isn't overwhelming at ${a.confidence}%. ${buySignals} buy signals out of ${a.indicators.length} indicators. Proceed with caution.`;
+    verdict = ko
+      ? `${coin} 상승 구조를 보이고 있지만 신뢰도가 ${a.confidence}%로 압도적이지 않습니다. ${a.indicators.length}개 지표 중 ${buySignals}개 매수 신호. 신중하게 접근하세요.`
+      : `${coin} is showing bullish structure but conviction isn't overwhelming at ${a.confidence}%. ${buySignals} buy signals out of ${a.indicators.length} indicators. Proceed with caution.`;
   } else if (sentiment === "bearish" && conviction === "high") {
-    verdict = `${coin} looks weak. ${sellSignals} sell signals firing with ${a.confidence}% confidence. If you're long, the $${a.tradeSetup.stopLoss?.toLocaleString()} stop loss level is critical.`;
+    verdict = ko
+      ? `${coin} 약세 신호가 강합니다. ${sellSignals}개 매도 신호가 발생하며 신뢰도 ${a.confidence}%. 롱 포지션이라면 $${a.tradeSetup.stopLoss?.toLocaleString()} 손절 레벨이 중요합니다.`
+      : `${coin} looks weak. ${sellSignals} sell signals firing with ${a.confidence}% confidence. If you're long, the $${a.tradeSetup.stopLoss?.toLocaleString()} stop loss level is critical.`;
   } else if (sentiment === "bearish") {
-    verdict = `Bearish pressure building on ${coin} but it's not decisive yet. ${a.confidence}% confidence with mixed signals across indicators.`;
+    verdict = ko
+      ? `${coin}에 하락 압력이 형성되고 있지만 아직 결정적이지 않습니다. 신뢰도 ${a.confidence}%, 지표 신호가 혼재합니다.`
+      : `Bearish pressure building on ${coin} but it's not decisive yet. ${a.confidence}% confidence with mixed signals across indicators.`;
   } else {
-    verdict = `${coin} is in no-man's land. ${a.confidence}% confidence with indicators split ${buySignals}/${sellSignals} buy/sell. Wait for a clearer setup or trade the range.`;
+    verdict = ko
+      ? `${coin} 방향성이 불분명합니다. 신뢰도 ${a.confidence}%, 지표가 매수/매도 ${buySignals}/${sellSignals}로 분산되어 있습니다. 명확한 셋업을 기다리거나 레인지 매매를 고려하세요.`
+      : `${coin} is in no-man's land. ${a.confidence}% confidence with indicators split ${buySignals}/${sellSignals} buy/sell. Wait for a clearer setup or trade the range.`;
   }
 
   // Generate detail bullets
@@ -102,33 +113,39 @@ function generateAICommentary(pair: string, a: ChartAnalysisResult): {
 
   if (a.quantAnalysis?.rsiValue) {
     const rsi = a.quantAnalysis.rsiValue;
-    if (rsi > 70) details.push(`RSI at ${rsi} \u2014 overbought territory. Pullback risk is elevated.`);
-    else if (rsi < 30) details.push(`RSI at ${rsi} \u2014 oversold. Watch for a bounce off support.`);
-    else if (rsi > 55) details.push(`RSI at ${rsi} \u2014 healthy bullish momentum, room to run.`);
-    else if (rsi < 45) details.push(`RSI at ${rsi} \u2014 momentum favors bears, not oversold yet.`);
-    else details.push(`RSI at ${rsi} \u2014 right in the middle. Waiting for direction.`);
+    if (rsi > 70) details.push(ko ? `RSI ${rsi} \u2014 과매수 구간. 조정 위험이 높습니다.` : `RSI at ${rsi} \u2014 overbought territory. Pullback risk is elevated.`);
+    else if (rsi < 30) details.push(ko ? `RSI ${rsi} \u2014 과매도 구간. 지지선 반등 가능성에 주목하세요.` : `RSI at ${rsi} \u2014 oversold. Watch for a bounce off support.`);
+    else if (rsi > 55) details.push(ko ? `RSI ${rsi} \u2014 건강한 상승 모멘텀, 추가 상승 여력 있음.` : `RSI at ${rsi} \u2014 healthy bullish momentum, room to run.`);
+    else if (rsi < 45) details.push(ko ? `RSI ${rsi} \u2014 하락 모멘텀 우세, 아직 과매도는 아님.` : `RSI at ${rsi} \u2014 momentum favors bears, not oversold yet.`);
+    else details.push(ko ? `RSI ${rsi} \u2014 중립 구간. 방향성 확인 대기.` : `RSI at ${rsi} \u2014 right in the middle. Waiting for direction.`);
   }
 
-  if (rr >= 3) details.push(`${a.tradeSetup.riskReward} risk-reward is excellent. High-quality setup if entry hits.`);
-  else if (rr >= 2) details.push(`${a.tradeSetup.riskReward} risk-reward is solid. Favorable for the trade.`);
-  else if (rr > 0) details.push(`${a.tradeSetup.riskReward} risk-reward is tight. Size your position accordingly.`);
+  if (rr >= 3) details.push(ko ? `R:R ${a.tradeSetup.riskReward} \u2014 우수한 손익비. 진입 시 고품질 셋업.` : `${a.tradeSetup.riskReward} risk-reward is excellent. High-quality setup if entry hits.`);
+  else if (rr >= 2) details.push(ko ? `R:R ${a.tradeSetup.riskReward} \u2014 양호한 손익비. 유리한 조건.` : `${a.tradeSetup.riskReward} risk-reward is solid. Favorable for the trade.`);
+  else if (rr > 0) details.push(ko ? `R:R ${a.tradeSetup.riskReward} \u2014 손익비가 타이트합니다. 포지션 사이즈를 조절하세요.` : `${a.tradeSetup.riskReward} risk-reward is tight. Size your position accordingly.`);
 
-  if (a.liveContext?.sentiment === "BULLISH") details.push(`News sentiment is bullish \u2014 market narrative supports the trade.`);
-  else if (a.liveContext?.sentiment === "BEARISH") details.push(`News sentiment is bearish \u2014 headwinds from market narrative.`);
+  if (a.liveContext?.sentiment === "BULLISH") details.push(ko ? `뉴스 심리가 긍정적 \u2014 시장 내러티브가 매매를 뒷받침합니다.` : `News sentiment is bullish \u2014 market narrative supports the trade.`);
+  else if (a.liveContext?.sentiment === "BEARISH") details.push(ko ? `뉴스 심리가 부정적 \u2014 시장 내러티브가 역풍입니다.` : `News sentiment is bearish \u2014 headwinds from market narrative.`);
 
-  if (a.liveContext?.orderBookBias === "BUY_PRESSURE") details.push(`Order book shows buy pressure \u2014 bids stacking up.`);
-  else if (a.liveContext?.orderBookBias === "SELL_PRESSURE") details.push(`Order book shows sell pressure \u2014 walls above.`);
+  if (a.liveContext?.orderBookBias === "BUY_PRESSURE") details.push(ko ? `오더북 매수 압력 \u2014 매수 벽이 쌓이고 있습니다.` : `Order book shows buy pressure \u2014 bids stacking up.`);
+  else if (a.liveContext?.orderBookBias === "SELL_PRESSURE") details.push(ko ? `오더북 매도 압력 \u2014 위에 매도 벽이 있습니다.` : `Order book shows sell pressure \u2014 walls above.`);
 
   if (a.patterns.length > 0) {
-    details.push(`${a.patterns[0]} pattern detected \u2014 ${
-      a.trend === "BULLISH" ? "historically a continuation signal" :
-      a.trend === "BEARISH" ? "watch for breakdown confirmation" :
-      "could break either way"
-    }.`);
+    details.push(ko
+      ? `${a.patterns[0]} 패턴 감지 \u2014 ${
+          a.trend === "BULLISH" ? "역사적으로 추세 지속 신호" :
+          a.trend === "BEARISH" ? "하방 이탈 확인 필요" :
+          "양방향 가능성"
+        }.`
+      : `${a.patterns[0]} pattern detected \u2014 ${
+          a.trend === "BULLISH" ? "historically a continuation signal" :
+          a.trend === "BEARISH" ? "watch for breakdown confirmation" :
+          "could break either way"
+        }.`);
   }
 
-  if (a.riskScore >= 7) details.push(`Risk score ${a.riskScore}/10 \u2014 high risk. Don't oversize.`);
-  else if (a.riskScore <= 3) details.push(`Risk score ${a.riskScore}/10 \u2014 relatively low risk setup.`);
+  if (a.riskScore >= 7) details.push(ko ? `리스크 점수 ${a.riskScore}/10 \u2014 고위험. 포지션을 과도하게 잡지 마세요.` : `Risk score ${a.riskScore}/10 \u2014 high risk. Don't oversize.`);
+  else if (a.riskScore <= 3) details.push(ko ? `리스크 점수 ${a.riskScore}/10 \u2014 비교적 낮은 위험 셋업.` : `Risk score ${a.riskScore}/10 \u2014 relatively low risk setup.`);
 
   return { verdict, details: details.slice(0, 4), sentiment, conviction };
 }
@@ -899,7 +916,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
             const borderColor = isLong ? "border-l-green-500" : isShort ? "border-l-red-500" : "border-l-amber-500";
             const directionBg = isLong ? "bg-green-500/10 text-green-400" : isShort ? "bg-red-500/10 text-red-400" : "bg-amber-500/10 text-amber-400";
             const dirArrow = isLong ? "\u25B2" : isShort ? "\u25BC" : "\u25C6";
-            const riskLabel = analysis.riskScore <= 3 ? "Low Risk" : analysis.riskScore <= 6 ? "Medium Risk" : "High Risk";
+            const riskLabel = analysis.riskScore <= 3 ? (lang === "ko" ? "낮은 위험" : "Low Risk") : analysis.riskScore <= 6 ? (lang === "ko" ? "중간 위험" : "Medium Risk") : (lang === "ko" ? "높은 위험" : "High Risk");
             const riskColor = analysis.riskScore <= 3 ? "text-green-400" : analysis.riskScore <= 6 ? "text-amber-400" : "text-red-400";
             return (
               <Card className={`col-span-full p-0 overflow-hidden bg-zinc-950/50 backdrop-blur-sm border-white/10 border-l-4 ${borderColor}`}>
@@ -927,17 +944,17 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
                 <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/[0.06]">
                   {/* Entry */}
                   <div className="px-5 py-4 flex flex-col gap-1">
-                    <span className="text-[10px] font-mono text-blue-400 uppercase tracking-[0.15em]">Entry</span>
+                    <span className="text-[10px] font-mono text-blue-400 uppercase tracking-[0.15em]">{lang === "ko" ? "진입가" : "Entry"}</span>
                     <span className="text-2xl font-bold font-mono text-zinc-100">${ep.toLocaleString()}</span>
                     <div className="flex items-center gap-2 mt-1">
                       <div className="h-1.5 flex-1 rounded-full bg-zinc-800" />
-                      <span className="text-[10px] text-zinc-600 font-mono">at market</span>
+                      <span className="text-[10px] text-zinc-600 font-mono">{lang === "ko" ? "시장가" : "at market"}</span>
                     </div>
                   </div>
 
                   {/* Stop Loss */}
                   <div className="px-5 py-4 flex flex-col gap-1">
-                    <span className="text-[10px] font-mono text-red-400 uppercase tracking-[0.15em]">Stop Loss</span>
+                    <span className="text-[10px] font-mono text-red-400 uppercase tracking-[0.15em]">{lang === "ko" ? "손절가" : "Stop Loss"}</span>
                     <span className="text-2xl font-bold font-mono text-zinc-100">${ts.stopLoss?.toLocaleString()}</span>
                     <div className="flex items-center gap-2 mt-1">
                       <span className={`text-xs font-mono ${Number(slPct) > 0 ? "text-red-400" : "text-green-400"}`}>
@@ -956,7 +973,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
 
                   {/* Take Profit */}
                   <div className="px-5 py-4 flex flex-col gap-1">
-                    <span className="text-[10px] font-mono text-green-400 uppercase tracking-[0.15em]">Take Profit</span>
+                    <span className="text-[10px] font-mono text-green-400 uppercase tracking-[0.15em]">{lang === "ko" ? "목표가" : "Take Profit"}</span>
                     <span className="text-2xl font-bold font-mono text-zinc-100">${ts.takeProfit?.toLocaleString()}</span>
                     <div className="flex items-center gap-2 mt-1">
                       <span className={`text-xs font-mono ${Number(tpPct) > 0 ? "text-green-400" : "text-red-400"}`}>
@@ -1185,7 +1202,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
               <summary className="flex items-center justify-between px-5 py-3.5 cursor-pointer hover:bg-white/[0.02] transition-colors list-none">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse flex-shrink-0" />
-                  <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">Live Market Data</span>
+                  <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">{lang === "ko" ? "실시간 시장 데이터" : "Live Market Data"}</span>
                   <span className="text-[10px] text-zinc-600 font-mono ml-1">
                     ${analysis.liveContext.currentPrice?.toLocaleString()} &nbsp;&bull;&nbsp;
                     <span className={analysis.liveContext.change24h >= 0 ? "text-green-400" : "text-red-400"}>
@@ -1198,27 +1215,27 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
               <div className="px-5 pb-5 pt-1 border-t border-white/[0.06]">
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4 mt-3">
                   <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
-                    <p className="text-xs text-zinc-500 mb-1">Live Price</p>
+                    <p className="text-xs text-zinc-500 mb-1">{lang === "ko" ? "실시간 가격" : "Live Price"}</p>
                     <p className="text-base font-bold font-mono text-foreground">${analysis.liveContext.currentPrice?.toLocaleString()}</p>
                   </div>
                   <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
-                    <p className="text-xs text-zinc-500 mb-1">24h Change</p>
+                    <p className="text-xs text-zinc-500 mb-1">{lang === "ko" ? "24시간 변동" : "24h Change"}</p>
                     <p className={`text-base font-bold font-mono ${analysis.liveContext.change24h >= 0 ? "text-green-400" : "text-red-400"}`}>
                       {analysis.liveContext.change24h >= 0 ? "+" : ""}{analysis.liveContext.change24h?.toFixed(2)}%
                     </p>
                   </div>
                   <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
-                    <p className="text-xs text-zinc-500 mb-1">24h Volume</p>
+                    <p className="text-xs text-zinc-500 mb-1">{lang === "ko" ? "24시간 거래량" : "24h Volume"}</p>
                     <p className="text-base font-bold font-mono text-foreground">${(analysis.liveContext.volume24h / 1e6).toFixed(1)}M</p>
                   </div>
                   <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
-                    <p className="text-xs text-zinc-500 mb-1">Sentiment</p>
+                    <p className="text-xs text-zinc-500 mb-1">{lang === "ko" ? "시장 심리" : "Sentiment"}</p>
                     <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold border ${sentimentColors[analysis.liveContext.sentiment] || sentimentColors.NEUTRAL}`}>
                       {analysis.liveContext.sentiment}
                     </span>
                   </div>
                   <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
-                    <p className="text-xs text-zinc-500 mb-1">Order Book</p>
+                    <p className="text-xs text-zinc-500 mb-1">{lang === "ko" ? "오더북" : "Order Book"}</p>
                     <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold border ${
                       analysis.liveContext.orderBookBias === "BUY_PRESSURE"
                         ? "text-green-400 bg-green-500/10 border-green-500/30"
@@ -1232,7 +1249,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
                 </div>
                 {analysis.liveContext.keyNews && analysis.liveContext.keyNews.length > 0 && (
                   <div className="space-y-2">
-                    <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Latest News</p>
+                    <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">{lang === "ko" ? "최신 뉴스" : "Latest News"}</p>
                     {analysis.liveContext.keyNews.map((news, i) => (
                       <div key={i} className="flex gap-2 text-sm">
                         <span className="text-blue-400 flex-shrink-0">&#8226;</span>
@@ -1275,11 +1292,11 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
                     <p className="text-base font-bold font-mono text-foreground">{analysis.ocrData.timeframe}</p>
                   </div>
                   <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
-                    <p className="text-xs text-zinc-500 mb-1">Range High</p>
+                    <p className="text-xs text-zinc-500 mb-1">{lang === "ko" ? "고가 범위" : "Range High"}</p>
                     <p className="text-base font-bold font-mono text-green-400">${analysis.ocrData.priceRange?.high?.toLocaleString()}</p>
                   </div>
                   <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-3">
-                    <p className="text-xs text-zinc-500 mb-1">Range Low</p>
+                    <p className="text-xs text-zinc-500 mb-1">{lang === "ko" ? "저가 범위" : "Range Low"}</p>
                     <p className="text-base font-bold font-mono text-red-400">${analysis.ocrData.priceRange?.low?.toLocaleString()}</p>
                   </div>
                 </div>
@@ -1300,19 +1317,19 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
           {/*  AI Commentary + Share Post (Grok-style)                      */}
           {/* ============================================================ */}
           {(() => {
-            const commentary = generateAICommentary(selectedPair, analysis);
-            const postText = generateSharePost(selectedPair, analysis);
+            const commentary = generateAICommentary(selectedPair, analysis, lang);
+            const postText = generateSharePost(selectedPair, analysis, lang);
             const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(postText)}`;
 
             const sentimentConfig = {
-              bullish: { bg: "from-emerald-500/20 to-emerald-600/5", border: "border-emerald-500/30", dot: "bg-emerald-400", label: "Bullish", labelColor: "text-emerald-400" },
-              bearish: { bg: "from-red-500/20 to-red-600/5", border: "border-red-500/30", dot: "bg-red-400", label: "Bearish", labelColor: "text-red-400" },
-              neutral: { bg: "from-zinc-500/20 to-zinc-600/5", border: "border-zinc-500/30", dot: "bg-zinc-400", label: "Neutral", labelColor: "text-zinc-400" },
+              bullish: { bg: "from-emerald-500/20 to-emerald-600/5", border: "border-emerald-500/30", dot: "bg-emerald-400", label: lang === "ko" ? "강세" : "Bullish", labelColor: "text-emerald-400" },
+              bearish: { bg: "from-red-500/20 to-red-600/5", border: "border-red-500/30", dot: "bg-red-400", label: lang === "ko" ? "약세" : "Bearish", labelColor: "text-red-400" },
+              neutral: { bg: "from-zinc-500/20 to-zinc-600/5", border: "border-zinc-500/30", dot: "bg-zinc-400", label: lang === "ko" ? "중립" : "Neutral", labelColor: "text-zinc-400" },
             };
             const convictionConfig = {
-              high: { color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30", label: "High Conviction" },
-              medium: { color: "text-amber-400 bg-amber-500/10 border-amber-500/30", label: "Medium Conviction" },
-              low: { color: "text-zinc-400 bg-zinc-500/10 border-zinc-500/30", label: "Low Conviction" },
+              high: { color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30", label: lang === "ko" ? "높은 확신" : "High Conviction" },
+              medium: { color: "text-amber-400 bg-amber-500/10 border-amber-500/30", label: lang === "ko" ? "중간 확신" : "Medium Conviction" },
+              low: { color: "text-zinc-400 bg-zinc-500/10 border-zinc-500/30", label: lang === "ko" ? "낮은 확신" : "Low Conviction" },
             };
             const sc = sentimentConfig[commentary.sentiment];
             const cc = convictionConfig[commentary.conviction];
@@ -1331,7 +1348,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
                       </div>
                       <div>
                         <h3 className="text-sm font-bold text-foreground">CryptoX AI</h3>
-                        <p className="text-[10px] text-zinc-500 font-mono">Analysis Commentary</p>
+                        <p className="text-[10px] text-zinc-500 font-mono">{lang === "ko" ? "분석 코멘터리" : "Analysis Commentary"}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -1370,7 +1387,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
                   {/* Share actions */}
                   <div className="px-6 py-4 flex items-center justify-between">
                     <p className="text-[11px] text-zinc-600 font-mono">
-                      Share this analysis with your community
+                      {lang === "ko" ? "이 분석을 커뮤니티에 공유하세요" : "Share this analysis with your community"}
                     </p>
                     <div className="flex items-center gap-2">
                       <button
@@ -1378,19 +1395,19 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
                           navigator.clipboard.writeText(postText);
                           setCopied(true);
                           setTimeout(() => setCopied(false), 2000);
-                          toast({ title: "Copied!", description: "Post copied to clipboard" });
+                          toast({ title: lang === "ko" ? "복사 완료!" : "Copied!", description: lang === "ko" ? "포스트가 클립보드에 복사되었습니다" : "Post copied to clipboard" });
                         }}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/[0.05] border border-white/[0.08] text-zinc-300 hover:bg-white/[0.1] hover:border-white/[0.15] transition-all cursor-pointer min-h-[44px]"
                       >
                         <ClipboardDocumentIcon className="w-3.5 h-3.5" />
-                        {copied ? "Copied!" : "Copy Post"}
+                        {copied ? (lang === "ko" ? "복사됨!" : "Copied!") : (lang === "ko" ? "포스트 복사" : "Copy Post")}
                       </button>
                       <button
                         onClick={saveSnapshot}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-white/[0.05] border border-white/[0.08] text-zinc-300 hover:bg-white/[0.1] hover:border-white/[0.15] transition-all cursor-pointer min-h-[44px]"
                       >
                         <ArrowDownTrayIcon className="w-3.5 h-3.5" />
-                        Download Chart
+                        {lang === "ko" ? "차트 다운로드" : "Download Chart"}
                       </button>
                       <a
                         href={twitterUrl}
@@ -1412,7 +1429,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
                       <svg className="w-4 h-4 text-zinc-500" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                       </svg>
-                      <span className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider">Post Preview</span>
+                      <span className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider">{lang === "ko" ? "포스트 미리보기" : "Post Preview"}</span>
                     </div>
                   </div>
                   <div className="px-6 pb-5">

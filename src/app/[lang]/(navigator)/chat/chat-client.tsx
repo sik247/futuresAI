@@ -443,7 +443,26 @@ export default function ChatClient({ lang, userName }: Props) {
         body: JSON.stringify({ message: trimmed, persona, sessionId, lang }),
       });
       const data = await res.json();
-      if (data.error) throw new Error(data.error);
+
+      if (data.error) {
+        let errorMsg: string;
+        if (data.error === "rate_limit") {
+          const mins = data.retryAfterMinutes ?? 1;
+          errorMsg = ko
+            ? `⏳ 요청 한도에 도달했습니다. ${mins}분 후에 다시 시도해 주세요.${data.shouldUpgrade ? " 프리미엄으로 업그레이드하면 더 많은 분석을 이용할 수 있습니다." : ""}`
+            : `⏳ You've reached the request limit. Please try again in ${mins} minute${mins > 1 ? "s" : ""}.${data.shouldUpgrade ? " Upgrade to Premium for more analysis." : ""}`;
+        } else if (res.status === 401) {
+          errorMsg = ko ? "로그인이 필요합니다." : "Please log in to continue.";
+        } else if (res.status === 503) {
+          errorMsg = ko
+            ? "🔧 AI 서비스에 일시적으로 연결할 수 없습니다. 잠시 후 다시 시도해 주세요."
+            : "🔧 AI service is temporarily unavailable. Please try again in a moment.";
+        } else {
+          errorMsg = ko ? "오류가 발생했습니다. 다시 시도해 주세요." : "An error occurred. Please try again.";
+        }
+        setMessages((prev) => [...prev, { role: "assistant", content: errorMsg, timestamp: Date.now() }]);
+        return;
+      }
 
       const assistantMessage: Message = {
         role: "assistant",
@@ -461,7 +480,7 @@ export default function ChatClient({ lang, userName }: Props) {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: ko ? "오류가 발생했습니다. 다시 시도해 주세요." : "An error occurred. Please try again.", timestamp: Date.now() },
+        { role: "assistant", content: ko ? "🔧 서버에 연결할 수 없습니다. 인터넷 연결을 확인하고 다시 시도해 주세요." : "🔧 Could not connect to the server. Check your connection and try again.", timestamp: Date.now() },
       ]);
     } finally {
       clearInterval(stepTimer);

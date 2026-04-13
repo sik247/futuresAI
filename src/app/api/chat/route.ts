@@ -37,7 +37,7 @@ YOUR ANALYSIS MUST BE COMPREHENSIVE AND PREMIUM-QUALITY:
 
 ### 4. News, Sentiment & Prediction Markets
 - Summarize the most relevant news headlines affecting this asset
-- Translate news titles to the user's language
+- Present news titles in the same language as the rest of your response
 - Explain HOW the news impacts price action
 - Fear & Greed Index interpretation
 - When PREDICTION MARKETS (Polymarket) data is available, cite specific prediction probabilities
@@ -170,7 +170,7 @@ export async function POST(req: NextRequest) {
     const langNote =
       lang === "ko"
         ? "\n\nIMPORTANT: 한국어로 답변하세요. 금융 전문 용어를 사용하고 존댓말로 작성하세요. 뉴스 헤드라인도 한국어로 번역하세요. 예: 시장 전망, 저항선, 지지선, 매수/매도, 변동성, 수익률, 시가총액, 손절매, 익절, 진입가, 리스크/리워드 비율. 기술적 분석 용어는 영어로 유지하세요 (RSI, MACD, EMA, MA 등). 분석은 전문적이고 상세하게 작성하여 사용자가 프리미엄 서비스의 가치를 느낄 수 있도록 하세요."
-        : "";
+        : "\n\nIMPORTANT: Respond ENTIRELY in English. All headers, analysis, news headlines, and explanations must be in English only. Do NOT include any Korean text, Korean translations, or mixed-language output.";
 
     // Inject user trading profile as agentic memory/context
     const { formatProfileForPrompt } = await import("@/lib/services/user/trading-profile");
@@ -186,9 +186,9 @@ ${historyText}
 
 User: ${message}
 
-Deliver a COMPREHENSIVE, premium-quality analysis (300-500 words). Use markdown formatting with ### headers, **bold** for key numbers, and * bullet points. Include specific entry/exit strategy with stop loss and take profit levels. Translate all news headlines to the user's language. Make the analysis so thorough and actionable that it demonstrates the full power of FuturesAI.
+Deliver a COMPREHENSIVE, premium-quality analysis (300-500 words). Use markdown formatting with ### headers, **bold** for key numbers, and * bullet points. Include specific entry/exit strategy with stop loss and take profit levels.${lang === "ko" ? " 뉴스 헤드라인을 포함한 모든 내용을 한국어로 작성하세요." : " Write everything in English only — no Korean text."} Make the analysis so thorough and actionable that it demonstrates the full power of FuturesAI.
 
-IMPORTANT: After your analysis, add a line "---FOLLOWUPS---" followed by exactly 3 short follow-up questions the user might want to ask next (one per line). These should be relevant to the conversation and encourage deeper analysis. Keep each under 40 characters.`;
+IMPORTANT: After your analysis, add a line "---FOLLOWUPS---" followed by exactly 3 short follow-up questions the user might want to ask next (one per line). These should be relevant to the conversation and encourage deeper analysis. Keep each under 40 characters.${lang === "ko" ? " 후속 질문도 한국어로 작성하세요." : " Follow-up questions must be in English."}`;
 
     // Call AI — Gemini primary, GPT-5.4 fallback
     let response = "";
@@ -222,7 +222,7 @@ IMPORTANT: After your analysis, add a line "---FOLLOWUPS---" followed by exactly
           model: "gpt-5.4",
           messages: [
             { role: "system", content: `${systemPrompt}${langNote}${profileContext}` },
-            { role: "user", content: `REAL-TIME MARKET DATA:\n${context || "No specific data fetched."}\n\nCONVERSATION HISTORY:\n${historyText}\n\nUser: ${message}\n\nDeliver a COMPREHENSIVE, premium-quality analysis (300-500 words). Use markdown formatting with ### headers, **bold** for key numbers, and * bullet points. Include specific entry/exit strategy with stop loss and take profit levels. Translate all news headlines to the user's language.\n\nIMPORTANT: After your analysis, add a line "---FOLLOWUPS---" followed by exactly 3 short follow-up questions (one per line, under 40 chars each).` },
+            { role: "user", content: `REAL-TIME MARKET DATA:\n${context || "No specific data fetched."}\n\nCONVERSATION HISTORY:\n${historyText}\n\nUser: ${message}\n\nDeliver a COMPREHENSIVE, premium-quality analysis (300-500 words). Use markdown formatting with ### headers, **bold** for key numbers, and * bullet points. Include specific entry/exit strategy with stop loss and take profit levels.${lang === "ko" ? " 뉴스 헤드라인을 포함한 모든 내용을 한국어로 작성하세요." : " Write everything in English only — no Korean text."}\n\nIMPORTANT: After your analysis, add a line "---FOLLOWUPS---" followed by exactly 3 short follow-up questions (one per line, under 40 chars each).${lang === "ko" ? " 후속 질문도 한국어로 작성하세요." : " Follow-up questions must be in English."}` },
           ],
           max_tokens: 2000,
           temperature: 0.7,
