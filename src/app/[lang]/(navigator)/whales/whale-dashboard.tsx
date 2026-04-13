@@ -711,7 +711,7 @@ export default function WhaleDashboard({
       </div>
 
       {/* Mobile views */}
-      <div className="lg:hidden" style={{ height: "calc(100vh - 140px)", overflow: "hidden" }}>
+      <div className="lg:hidden" style={{ height: "calc(100dvh - 64px - 56px - 44px)", overflow: "hidden" }}>
         {mobileTab === "figures" && (
           <div className="h-full overflow-y-auto">
             {/* Horizontal strip of figures with data */}

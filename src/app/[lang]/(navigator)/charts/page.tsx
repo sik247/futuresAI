@@ -186,7 +186,7 @@ export default async function ChartsPage({
       />
 
       {/* Desktop layout */}
-      <div className="hidden lg:flex flex-col flex-1 overflow-hidden" style={{ height: "calc(100vh - 92px - 44px)" }}>
+      <div className="hidden lg:flex flex-col flex-1 overflow-hidden" style={{ height: "calc(100dvh - 92px - 44px)" }}>
         {/* Top row (60%): Chart + Sentiment + Signals */}
         <div className="flex border-b border-white/[0.06]" style={{ flex: "60 0 0" }}>
           {/* Chart Terminal (55%) */}

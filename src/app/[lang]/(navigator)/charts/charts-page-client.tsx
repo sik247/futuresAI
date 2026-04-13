@@ -62,7 +62,7 @@ export default function ChartsPageClient({ fearGreedData, globalData, topCoins }
       </div>
 
       {/* Mobile content */}
-      <div className="flex flex-col lg:hidden" style={{ height: "calc(100vh - 140px)" }}>
+      <div className="flex flex-col lg:hidden" style={{ height: "calc(100dvh - 64px - 56px - 44px)" }}>
         {mobileTab === "chart" && (
           <div className="flex flex-col h-full overflow-hidden">
             <MultiChartTerminal />

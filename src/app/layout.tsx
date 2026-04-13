@@ -32,6 +32,7 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://futuresai.io";
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
   themeColor: "#09090b",
 };
 

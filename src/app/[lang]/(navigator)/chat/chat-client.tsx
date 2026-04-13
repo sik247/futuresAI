@@ -515,7 +515,7 @@ export default function ChatClient({ lang, userName }: Props) {
   /*  RENDER                                                                   */
   /* ======================================================================== */
   return (
-    <div className="fixed inset-0 top-16 sm:top-[92px] flex bg-zinc-950 font-mono z-10 mt-0">
+    <div className="fixed inset-x-0 top-16 sm:top-[92px] bottom-[56px] lg:bottom-0 flex bg-zinc-950 font-mono z-10">
       {/* ── Left Sidebar: Session History ── */}
       {showSidebar && (
         <div className="hidden lg:flex w-[260px] border-r border-white/[0.06] flex-col overflow-hidden shrink-0">

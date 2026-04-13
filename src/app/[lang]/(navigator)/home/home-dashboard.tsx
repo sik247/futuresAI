@@ -1129,7 +1129,7 @@ export default function HomeDashboard({
   const ko = lang === "ko";
 
   return (
-    <div className="bg-zinc-950 font-mono flex flex-col" style={{ height: "calc(100vh - 92px)" }}>
+    <div className="bg-zinc-950 font-mono flex flex-col h-[calc(100dvh-64px-56px)] sm:h-[calc(100dvh-92px)] lg:h-[calc(100dvh-92px)]">
       <StatBar btcData={btcData} ethData={ethData} fearGreed={fearGreed} globalData={globalData} />
 
       {/* Fixed grid — fits viewport, no page scroll */}
