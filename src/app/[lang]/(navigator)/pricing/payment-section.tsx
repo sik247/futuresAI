@@ -29,9 +29,30 @@ function StatusBadge({ status }: { status: Payment["status"] }) {
   );
 }
 
-const PLANS = [
-  { amount: 25, name: "Basic", nameKo: "베이직", color: "blue", description: "Core AI analysis + trading tools", descriptionKo: "핵심 AI 분석 + 트레이딩 도구" },
-  { amount: 99, name: "Premium", nameKo: "프리미엄", color: "purple", description: "10+ data sources + 8 research agents", descriptionKo: "10+ 데이터 소스 + 8개 리서치 에이전트" },
+type BillingPeriod = "monthly" | "6month" | "annual";
+
+interface PlanOption {
+  amount: number;
+  tier: "basic" | "premium";
+  period: BillingPeriod;
+  name: string;
+  nameKo: string;
+  color: string;
+  description: string;
+  descriptionKo: string;
+  perMonth: number;
+  months: number;
+}
+
+const PLANS: PlanOption[] = [
+  // Basic
+  { amount: 25, tier: "basic", period: "monthly", name: "Basic Monthly", nameKo: "베이직 월간", color: "blue", description: "$25/mo", descriptionKo: "$25/월", perMonth: 25, months: 1 },
+  { amount: 129, tier: "basic", period: "6month", name: "Basic 6-Month", nameKo: "베이직 6개월", color: "blue", description: "$21.50/mo · Save 14%", descriptionKo: "월 $21.50 · 14% 할인", perMonth: 21.5, months: 6 },
+  { amount: 199, tier: "basic", period: "annual", name: "Basic Annual", nameKo: "베이직 연간", color: "blue", description: "$16.58/mo · Save 34%", descriptionKo: "월 $16.58 · 34% 할인", perMonth: 16.58, months: 12 },
+  // Premium
+  { amount: 99, tier: "premium", period: "monthly", name: "Premium Monthly", nameKo: "프리미엄 월간", color: "purple", description: "$99/mo", descriptionKo: "$99/월", perMonth: 99, months: 1 },
+  { amount: 499, tier: "premium", period: "6month", name: "Premium 6-Month", nameKo: "프리미엄 6개월", color: "purple", description: "$83.17/mo · Save 16%", descriptionKo: "월 $83.17 · 16% 할인", perMonth: 83.17, months: 6 },
+  { amount: 799, tier: "premium", period: "annual", name: "Premium Annual", nameKo: "프리미엄 연간", color: "purple", description: "$66.58/mo · Save 33%", descriptionKo: "월 $66.58 · 33% 할인", perMonth: 66.58, months: 12 },
 ];
 
 export default function PaymentSection({
@@ -44,7 +65,9 @@ export default function PaymentSection({
   const { data: session, status } = useSession();
   const user = session?.user as { isPremium?: boolean; credits?: number } | undefined;
 
-  const [selectedPlan, setSelectedPlan] = useState<25 | 99>(99);
+  const [selectedTier, setSelectedTier] = useState<"basic" | "premium">("premium");
+  const [selectedPeriod, setSelectedPeriod] = useState<BillingPeriod>("monthly");
+  const selectedPlan = PLANS.find((p) => p.tier === selectedTier && p.period === selectedPeriod)!;
   const [txid, setTxid] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error" | "info"; text: string } | null>(null);
@@ -93,7 +116,7 @@ export default function PaymentSection({
       const res = await fetch("/api/payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ txid: txid.trim(), amount: selectedPlan }),
+        body: JSON.stringify({ txid: txid.trim(), amount: selectedPlan.amount, period: selectedPlan.period }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -157,53 +180,89 @@ export default function PaymentSection({
         </div>
       )}
 
-      {/* Plan Selection */}
+      {/* Tier Selection */}
       <div>
         <p className="text-xs font-mono uppercase tracking-wider text-zinc-500 mb-3">
           {ko ? "플랜 선택" : "Select Plan"}
         </p>
         <div className="grid grid-cols-2 gap-3">
-          {PLANS.map((plan) => (
-            <button
-              key={plan.amount}
-              onClick={() => setSelectedPlan(plan.amount as 25 | 99)}
-              className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${
-                selectedPlan === plan.amount
-                  ? plan.color === "purple"
-                    ? "border-purple-500/50 bg-purple-500/[0.08] ring-1 ring-purple-500/20"
-                    : "border-blue-500/50 bg-blue-500/[0.08] ring-1 ring-blue-500/20"
-                  : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]"
-              }`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className={`text-xs font-mono font-bold uppercase ${
-                  plan.color === "purple" ? "text-purple-400" : "text-blue-400"
-                }`}>
-                  {ko ? plan.nameKo : plan.name}
-                </span>
-                {selectedPlan === plan.amount && (
-                  <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                  </svg>
-                )}
-              </div>
-              <p className="text-3xl font-bold text-white mb-1">${plan.amount}<span className="text-xs text-zinc-500 font-normal">/mo</span></p>
-              <div className="text-sm text-zinc-400 space-y-0.5">
-                <p>{ko ? plan.descriptionKo : plan.description}</p>
-                <p>{plan.amount === 99
-                  ? (ko ? "에이전틱 매크로 리서치 프레임워크" : "Agentic macro research framework")
-                  : (ko ? "고래 트래커 + 퀀트 시그널" : "Whale tracker + Quant signals")
-                }</p>
-              </div>
-            </button>
-          ))}
+          {(["basic", "premium"] as const).map((tier) => {
+            const isSelected = selectedTier === tier;
+            const color = tier === "premium" ? "purple" : "blue";
+            return (
+              <button
+                key={tier}
+                onClick={() => setSelectedTier(tier)}
+                className={`rounded-xl border p-4 text-left transition-all cursor-pointer ${
+                  isSelected
+                    ? color === "purple"
+                      ? "border-purple-500/50 bg-purple-500/[0.08] ring-1 ring-purple-500/20"
+                      : "border-blue-500/50 bg-blue-500/[0.08] ring-1 ring-blue-500/20"
+                    : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-xs font-mono font-bold uppercase ${
+                    color === "purple" ? "text-purple-400" : "text-blue-400"
+                  }`}>
+                    {tier === "basic" ? (ko ? "베이직" : "Basic") : (ko ? "프리미엄" : "Premium")}
+                  </span>
+                  {isSelected && (
+                    <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    </svg>
+                  )}
+                </div>
+                <p className="text-2xl font-bold text-white mb-1">
+                  {tier === "basic" ? "$25" : "$99"}
+                  <span className="text-xs text-zinc-500 font-normal">/{ko ? "월~" : "mo+"}</span>
+                </p>
+                <p className="text-sm text-zinc-400">
+                  {tier === "premium"
+                    ? (ko ? "에이전틱 매크로 리서치 프레임워크" : "Agentic macro research framework")
+                    : (ko ? "고래 트래커 + 퀀트 시그널" : "Whale tracker + Quant signals")}
+                </p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Billing Period Selection */}
+      <div>
+        <p className="text-xs font-mono uppercase tracking-wider text-zinc-500 mb-3">
+          {ko ? "결제 주기" : "Billing Period"}
+        </p>
+        <div className="grid grid-cols-3 gap-2">
+          {PLANS.filter((p) => p.tier === selectedTier).map((plan) => {
+            const isSelected = selectedPeriod === plan.period;
+            return (
+              <button
+                key={plan.period}
+                onClick={() => setSelectedPeriod(plan.period)}
+                className={`rounded-xl border p-3 text-center transition-all cursor-pointer ${
+                  isSelected
+                    ? "border-emerald-500/50 bg-emerald-500/[0.08] ring-1 ring-emerald-500/20"
+                    : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]"
+                }`}
+              >
+                <p className="text-xs font-mono font-bold uppercase text-zinc-300 mb-1">
+                  {plan.period === "monthly" ? (ko ? "월간" : "Monthly") : plan.period === "6month" ? (ko ? "6개월" : "6 Months") : (ko ? "연간" : "Annual")}
+                </p>
+                <p className="text-xl font-bold text-white">${plan.amount}</p>
+                <p className="text-[11px] text-zinc-500 mt-0.5">
+                  {ko ? plan.descriptionKo : plan.description}
+                </p>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Wallet Address — TRC-20 Only */}
       <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 space-y-4">
         <p className="text-xs font-mono uppercase tracking-wider text-zinc-500">
-          {ko ? "결제 주소" : "Payment Address"} — {ko ? `정확히 ${selectedPlan} USDT 전송` : `Send exactly ${selectedPlan} USDT`}
+          {ko ? "결제 주소" : "Payment Address"} — {ko ? `정확히 ${selectedPlan.amount} USDT 전송` : `Send exactly ${selectedPlan.amount} USDT`}
         </p>
 
         {walletAddress && (
@@ -222,8 +281,8 @@ export default function PaymentSection({
 
         <p className="text-xs text-zinc-500">
           {ko
-            ? `⚠ 정확히 ${selectedPlan} USDT를 TRC-20 네트워크로 전송해 주세요. 금액이 다르면 자동 인증이 실패합니다.`
-            : `⚠ Send exactly ${selectedPlan} USDT via TRC-20 network. Incorrect amounts will fail verification.`}
+            ? `⚠ 정확히 ${selectedPlan.amount} USDT를 TRC-20 네트워크로 전송해 주세요. 금액이 다르면 자동 인증이 실패합니다.`
+            : `⚠ Send exactly ${selectedPlan.amount} USDT via TRC-20 network. Incorrect amounts will fail verification.`}
         </p>
       </div>
 
@@ -256,7 +315,7 @@ export default function PaymentSection({
           >
             {submitting
               ? (ko ? "확인 중..." : "Verifying...")
-              : (ko ? `${selectedPlan} USDT 결제 제출` : `Submit $${selectedPlan} Payment`)}
+              : (ko ? `${selectedPlan.amount} USDT 결제 제출` : `Submit $${selectedPlan.amount} Payment`)}
           </button>
         </form>
       </div>

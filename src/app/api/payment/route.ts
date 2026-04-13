@@ -5,10 +5,18 @@ import { verifyTronTransaction } from "@/lib/services/payment/tron-verify.servic
 
 export const dynamic = "force-dynamic";
 
-const TIERS = {
-  25: { tier: "BASIC", isPremium: false, credits: 25, chatEnabled: true },
-  99: { tier: "PREMIUM", isPremium: true, credits: 99, chatEnabled: true },
+const TIERS: Record<number, { tier: string; isPremium: boolean; credits: number; chatEnabled: true; months: number }> = {
+  // Basic
+  25:  { tier: "BASIC", isPremium: false, credits: 25, chatEnabled: true, months: 1 },
+  129: { tier: "BASIC", isPremium: false, credits: 25, chatEnabled: true, months: 6 },
+  199: { tier: "BASIC", isPremium: false, credits: 25, chatEnabled: true, months: 12 },
+  // Premium
+  99:  { tier: "PREMIUM", isPremium: true, credits: 99, chatEnabled: true, months: 1 },
+  499: { tier: "PREMIUM", isPremium: true, credits: 99, chatEnabled: true, months: 6 },
+  799: { tier: "PREMIUM", isPremium: true, credits: 99, chatEnabled: true, months: 12 },
 } as const;
+
+const VALID_AMOUNTS = new Set(Object.keys(TIERS).map(Number));
 
 // TRC-20 TXID: 64 hex characters
 const TXID_TRC20_REGEX = /^[0-9a-fA-F]{64}$/;
@@ -35,8 +43,8 @@ export async function POST(req: NextRequest) {
   }
 
   // Validate plan amount
-  if (planAmount !== 25 && planAmount !== 99) {
-    return NextResponse.json({ error: "Invalid plan amount. Choose $25 or $99." }, { status: 400 });
+  if (!VALID_AMOUNTS.has(planAmount)) {
+    return NextResponse.json({ error: "Invalid plan amount." }, { status: 400 });
   }
 
   // Validate TRC-20 TXID format
@@ -71,32 +79,49 @@ export async function POST(req: NextRequest) {
   const result = await verifyTronTransaction(txid, walletAddress, planAmount);
 
   if (result.verified) {
-    const tierConfig = TIERS[planAmount as 25 | 99];
+    const tierConfig = TIERS[planAmount];
+
+    // Calculate subscription period
+    const now = new Date();
+    const periodEnd = new Date(now);
+    periodEnd.setMonth(periodEnd.getMonth() + tierConfig.months);
 
     // Atomically verify payment + activate subscription
-    await prisma.$transaction([
-      prisma.payment.update({
+    await prisma.$transaction(async (tx) => {
+      await tx.payment.update({
         where: { id: payment.id },
-        data: {
-          status: "VERIFIED",
-          verifiedAt: new Date(),
-        },
-      }),
-      prisma.user.update({
+        data: { status: "VERIFIED", verifiedAt: now },
+      });
+      await tx.user.update({
         where: { id: userId },
         data: {
           isPremium: tierConfig.isPremium,
           credits: tierConfig.credits,
           chatEnabled: tierConfig.chatEnabled,
         },
-      }),
-    ]);
+      });
+      // Expire any existing active subscription, then create new one
+      await tx.subscription.updateMany({
+        where: { userId, status: "ACTIVE" },
+        data: { status: "EXPIRED" },
+      });
+      await tx.subscription.create({
+        data: {
+          userId,
+          status: "ACTIVE",
+          currentPeriodStart: now,
+          currentPeriodEnd: periodEnd,
+        },
+      });
+    });
+
+    const periodLabel = tierConfig.months === 1 ? "1 month" : tierConfig.months === 6 ? "6 months" : "12 months";
 
     return NextResponse.json({
       ok: true,
       status: "VERIFIED",
       tier: tierConfig.tier,
-      message: `Payment verified! ${tierConfig.tier} plan activated.`,
+      message: `Payment verified! ${tierConfig.tier} plan activated for ${periodLabel}.`,
       amount: result.amount,
       network: "TRC20",
     });
