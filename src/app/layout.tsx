@@ -120,7 +120,7 @@ export const metadata: Metadata = {
   // Register at https://searchadvisor.naver.com/ and https://search.google.com/search-console
   // Replace placeholder values with actual verification codes
   verification: {
-    google: "futuresai_google_verification",
+    google: "5WrFYSG6FTgntn_gVaotthSp-Gk-3XIJ0bJ7XH9yI5E",
     other: {
       "naver-site-verification": "e517f0556924dce1407b40c0c37611d94c9d73fd",
     },
