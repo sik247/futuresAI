@@ -56,7 +56,7 @@ function generateSharePost(pair: string, a: ChartAnalysisResult, lang: string): 
   }
 
   lines.push(``);
-  lines.push(`${ko ? "CryptoX AI 분석" : "Analyzed by CryptoX AI"} \u2014 Free at cryptox.co`);
+  lines.push(`${ko ? "FuturesAI 분석" : "Analyzed by FuturesAI"} \u2014 Free at cryptox.co`);
   lines.push(`#${pair.replace("USDT", "")} #Crypto #Trading`);
 
   return lines.join("\n");
@@ -1347,7 +1347,7 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
                         </svg>
                       </div>
                       <div>
-                        <h3 className="text-sm font-bold text-foreground">CryptoX AI</h3>
+                        <h3 className="text-sm font-bold text-foreground">FuturesAI</h3>
                         <p className="text-[10px] text-zinc-500 font-mono">{lang === "ko" ? "분석 코멘터리" : "Analysis Commentary"}</p>
                       </div>
                     </div>

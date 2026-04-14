@@ -122,7 +122,7 @@ export const metadata: Metadata = {
   verification: {
     google: "futuresai_google_verification",
     other: {
-      "naver-site-verification": "futuresai_naver_verification",
+      "naver-site-verification": "e517f0556924dce1407b40c0c37611d94c9d73fd",
     },
   },
 };

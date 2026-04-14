@@ -45,13 +45,15 @@ const ExchangeList = React.forwardRef<
               <Badge className="mb-4 bg-muted text-xs font-medium text-foreground rounded-md p-2">
                 마감 예정이에요!
               </Badge>
-              <Image
-                src={exchange.imageUrl}
-                alt=""
-                width={344}
-                height={180}
-                className="mb-3 object-fill h-[180px] rounded-lg"
-              />
+              <div className="relative w-full h-24 mb-3 rounded-lg overflow-hidden bg-white/[0.02]">
+                <Image
+                  src={exchange.imageUrl}
+                  alt={exchange.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-contain p-4"
+                />
+              </div>
               <div className="text-sm font-medium text-muted-foreground">
                 <p>제휴 거래소 페이백 {exchange.paybackRatio}%</p>
                 <p className="text-foreground">
