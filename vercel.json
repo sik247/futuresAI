@@ -56,6 +56,16 @@
 
     { "path": "/api/cron-blog", "schedule": "0 3 */3 * *" },
 
-    { "path": "/api/cron-price-check", "schedule": "0 */4 * * *" }
+    { "path": "/api/cron-price-check", "schedule": "0 */4 * * *" },
+
+    { "path": "/api/cron-fast-news", "schedule": "0 1 * * *" },
+    { "path": "/api/cron-fast-news", "schedule": "0 7 * * *" },
+    { "path": "/api/cron-fast-news", "schedule": "0 13 * * *" },
+
+    { "path": "/api/cron-quick-signals", "schedule": "30 0 * * *" },
+    { "path": "/api/cron-quick-signals", "schedule": "30 6 * * *" },
+    { "path": "/api/cron-quick-signals", "schedule": "30 14 * * *" },
+
+    { "path": "/api/cron-market-watch", "schedule": "*/10 * * * *" }
   ]
 }
