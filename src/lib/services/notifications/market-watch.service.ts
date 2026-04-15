@@ -95,18 +95,20 @@ async function checkBreakingNews(): Promise<{ messages: string[] }> {
 
   for (const item of top) {
     try {
-      const result = await model.generateContent(`You are a crypto market analyst for FuturesAI Telegram channel. Analyze this breaking news and provide:
+      const result = await model.generateContent(`You are a senior macro strategist at a crypto trading desk. Write a professional market commentary on this breaking news for institutional and serious retail traders.
 
-1. A brief summary (1 sentence)
-2. Market impact analysis (how this affects crypto prices — be specific about which coins and direction)
-3. Historical context (when similar events happened before, what was the market reaction)
+Structure (no labels, just flow naturally):
+- One-line take on what happened
+- Direct market implications: which assets move, which direction, and why. Name specific tokens. Quantify where possible (e.g. "historically causes 5-8% drawdown within 48h")
+- Precedent: cite 1-2 specific past events with dates and what the market did after (e.g. "Similar SEC action in June 2023 saw ETH drop 15% over 5 days before recovering")
+- Positioning: what smart money is likely doing right now
 
-Write in English only. Keep it concise — max 400 characters total.
-No markdown symbols. Use clean text with line breaks.
+Tone: authoritative, concise, zero fluff. Write like a Bloomberg terminal note, not a blog post.
+English only. Max 500 characters. No markdown, no emojis, no hashtags.
 
-News headline: ${item.title}
+Headline: ${item.title}
 Source: ${item.source}
-${item.body ? `Content: ${item.body.slice(0, 500)}` : ""}`);
+${item.body ? `Context: ${item.body.slice(0, 500)}` : ""}`);
 
       const analysis = result.response.text().trim();
 
@@ -259,25 +261,28 @@ async function checkPolymarketShifts(): Promise<{ messages: string[] }> {
       `"${s.title}": ${s.oldOdds.toFixed(0)}% → ${s.newOdds.toFixed(0)}% (Vol: $${(s.volume / 1e6).toFixed(1)}M)`
     ).join("\n");
 
-    const result = await model.generateContent(`You are a crypto prediction market analyst for FuturesAI Telegram channel. These Polymarket crypto prediction odds just shifted significantly:
+    const result = await model.generateContent(`You are a senior macro strategist at a crypto trading desk. These Polymarket prediction odds just shifted significantly:
 
 ${shiftsText}
 
-Provide:
-1. What each shift means for the market (1 sentence each)
-2. How traders should interpret this (bullish/bearish signal)
-3. Historical context — when similar prediction market movements happened, what followed in spot markets
+Write a professional trading desk note:
+- What each odds movement signals about market consensus
+- Whether spot markets have priced this in or are lagging the prediction market
+- Precedent: cite specific past instances where prediction market shifts preceded spot moves, with dates and magnitude
+- Net positioning implication: is this a leading indicator to go risk-on or risk-off
 
-Write in English only. Concise — max 400 chars total. No markdown symbols.`);
+Tone: institutional, data-driven, zero fluff. Like a Bloomberg terminal note.
+English only. Max 500 characters. No markdown, no emojis, no hashtags.`);
 
     const analysis = result.response.text().trim();
 
-    const now = new Date().toLocaleString("ko-KR", {
+    const now = new Date().toLocaleString("en-US", {
       timeZone: "Asia/Seoul",
-      month: "2-digit",
+      month: "short",
       day: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
+      hour12: false,
     });
 
     let msg = `<b>🎯 Polymarket Shift</b> · ${now} KST\n\n`;
