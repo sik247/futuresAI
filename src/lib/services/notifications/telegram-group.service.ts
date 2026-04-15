@@ -462,6 +462,302 @@ Tone: Professional quant desk — precise, data-driven, no hype, no emojis. Writ
 }
 
 /* ================================================================== */
+/*  4. FAST NEWS FLASH — rapid-fire short news, like 트레이딩 PRO      */
+/* ================================================================== */
+
+const recentFlashNews = new Set<string>();
+const MAX_FLASH_HISTORY = 100;
+
+/**
+ * Send 3-5 short news items as separate messages — concise Korean
+ * headline + 1-2 sentence AI analysis + related tickers + site link.
+ */
+export async function sendFastNewsFlash(): Promise<{ sent: number }> {
+  try {
+    const allNews = await fetchCryptoNews();
+    if (allNews.length === 0) return { sent: 0 };
+
+    // Filter already sent
+    const freshNews = allNews.filter(
+      (n) => !recentFlashNews.has(n.title) && !recentlySentNews.has(n.title)
+    );
+    if (freshNews.length === 0) return { sent: 0 };
+
+    // Use Gemini to rank and summarize top 5 news for flash format
+    const top15 = freshNews.slice(0, 15);
+    const flashItems = await rankNewsForFlash(top15);
+    if (!flashItems || flashItems.length === 0) return { sent: 0 };
+
+    let sentCount = 0;
+    for (const item of flashItems.slice(0, 5)) {
+      const newsItem = top15[item.index];
+      if (!newsItem) continue;
+
+      const now = new Date().toLocaleString("ko-KR", {
+        timeZone: "Asia/Seoul",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+
+      let msg = `<b>#뉴스</b>\n\n`;
+      msg += `<b>${item.headlineKo}</b>\n\n`;
+      msg += `AI: ${item.analysisKo}\n\n`;
+
+      if (item.tickers && item.tickers.length > 0) {
+        msg += `관련 : ${item.tickers.map((t: string) => `$${t}`).join(", ")}\n\n`;
+      }
+
+      msg += `${now}\n`;
+      msg += `<a href="https://futuresai.io/ko/news">FuturesAI에서 더 보기</a>`;
+
+      const sent = await sendGroupMessage(msg);
+      if (sent) {
+        recentFlashNews.add(newsItem.title);
+        if (recentFlashNews.size > MAX_FLASH_HISTORY) {
+          const first = recentFlashNews.values().next().value;
+          if (first) recentFlashNews.delete(first);
+        }
+        sentCount++;
+      }
+
+      // Small delay between messages to avoid rate limiting
+      if (sentCount < flashItems.length) {
+        await new Promise((r) => setTimeout(r, 1500));
+      }
+    }
+
+    return { sent: sentCount };
+  } catch (error) {
+    console.error("[telegram-group] Fast news flash failed:", error);
+    return { sent: 0 };
+  }
+}
+
+async function rankNewsForFlash(
+  articles: { title: string; body: string; source: string; url: string }[]
+): Promise<
+  { index: number; headlineKo: string; analysisKo: string; tickers: string[] }[] | null
+> {
+  try {
+    const apiKey = process.env.GEMINI_API_KEY?.trim();
+    if (!apiKey) return null;
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    const list = articles
+      .map((a, i) => `${i}. [${a.source}] ${a.title}\n   ${a.body.slice(0, 150)}`)
+      .join("\n");
+
+    const prompt = `You are a crypto news desk editor. Pick the top 3-5 most market-significant articles and rewrite them as SHORT Korean news flashes for a Telegram trading channel.
+
+Articles:
+${list}
+
+For EACH selected article, provide:
+- index: original article index
+- headlineKo: Korean headline (1 sentence, max 80 chars, factual)
+- analysisKo: Korean AI analysis (1-2 sentences, max 150 chars, what it means for the market, be specific about impact)
+- tickers: array of related ticker symbols (e.g. ["BTC", "ETH"] or ["CNY", "USDCNY"])
+
+Selection criteria:
+- Regulatory/policy news (SEC, Fed, rate decisions, trade war)
+- Major price moves, whale activity, exchange events
+- Macro events affecting crypto (trade data, CPI, employment)
+- Skip promotional content, opinion pieces, generic commentary
+
+Respond as a JSON object with a "results" key: {"results": [{"index": 0, "headlineKo": "...", "analysisKo": "...", "tickers": ["BTC"]}]}
+
+Tone: Factual, concise, Korean financial news style. No emojis. Be specific with numbers and data points when available.`;
+
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: "application/json" },
+    });
+
+    const raw = result.response.text();
+    const parsed = JSON.parse(raw);
+    const items = Array.isArray(parsed) ? parsed : parsed?.results;
+    return Array.isArray(items) ? items : null;
+  } catch (error: any) {
+    console.error("[telegram-group] Flash ranking failed:", error?.message || error);
+    return null;
+  }
+}
+
+/* ================================================================== */
+/*  5. QUICK SIGNAL DIGEST — condensed signals 3x/day                  */
+/* ================================================================== */
+
+/**
+ * Send a condensed signal update — top movers with direction,
+ * key levels, and a short market read. Much shorter than daily sentiment.
+ */
+export async function sendQuickSignals(): Promise<boolean> {
+  try {
+    const signals = await fetchMarketSignals();
+    const topCoins = signals.signals.slice(0, 6); // BTC, ETH, SOL, XRP, BNB, DOGE
+
+    const now = new Date().toLocaleString("ko-KR", {
+      timeZone: "Asia/Seoul",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const session = getSessionLabel();
+
+    let msg = `<b>#시그널 ${session}</b> · ${now} KST\n\n`;
+
+    for (const s of topCoins) {
+      const sigKo = SIGNAL_KO[s.signal] || s.signal;
+      const emoji = SIGNAL_EMOJI[s.signal] || "";
+      const changeStr = `${s.change24h >= 0 ? "+" : ""}${s.change24h.toFixed(2)}%`;
+      const priceStr = s.price > 100
+        ? `$${s.price.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+        : `$${s.price.toFixed(4)}`;
+      const dirKo = s.direction === "LONG" ? "롱" : s.direction === "SHORT" ? "숏" : "관망";
+
+      msg += `${emoji} <b>${s.symbol}</b> ${priceStr} (${changeStr})\n`;
+      msg += `   ${sigKo} | ${s.direction} (${dirKo}) | 신뢰도 ${s.confidence.toFixed(0)}%\n\n`;
+    }
+
+    // Market summary
+    const longCount = signals.signals.filter((s) => s.direction === "LONG").length;
+    const shortCount = signals.signals.filter((s) => s.direction === "SHORT").length;
+
+    const fgVal = signals.fearGreed.value;
+    const fgKo =
+      fgVal <= 25 ? "극도의 공포" :
+      fgVal <= 45 ? "공포" :
+      fgVal <= 55 ? "중립" :
+      fgVal <= 75 ? "탐욕" : "극도의 탐욕";
+
+    msg += `<b>시장 요약</b>\n`;
+    msg += `Fear & Greed: ${fgVal}/100 (${fgKo})\n`;
+    msg += `롱 ${longCount} / 숏 ${shortCount} / 중립 ${signals.signals.length - longCount - shortCount}\n`;
+
+    const btcKo = signals.btcTrend === "above_sma" ? "BTC 7D SMA 상향 ↑" : "BTC 7D SMA 하향 ↓";
+    msg += `${btcKo}\n\n`;
+
+    msg += `<a href="https://futuresai.io/ko/chart-ideas">AI 차트 분석 보기</a> · <a href="https://futuresai.io/ko/home">실시간 시그널</a>\n`;
+    msg += `<i>— FuturesAI Signal Desk</i>`;
+
+    return await sendGroupMessage(msg);
+  } catch (error) {
+    console.error("[telegram-group] Quick signals failed:", error);
+    return false;
+  }
+}
+
+function getSessionLabel(): string {
+  const hour = new Date().toLocaleString("en-US", {
+    timeZone: "Asia/Seoul",
+    hour: "numeric",
+    hour12: false,
+  });
+  const h = parseInt(hour, 10);
+  if (h >= 6 && h < 12) return "아시아 세션";
+  if (h >= 12 && h < 21) return "유럽/미국 세션";
+  return "야간 세션";
+}
+
+/* ================================================================== */
+/*  POLYMARKET PREDICTION SPOTLIGHT — engaging card with image          */
+/* ================================================================== */
+
+export async function sendPolymarketPrediction(): Promise<boolean> {
+  try {
+    const res = await fetch(
+      "https://gamma-api.polymarket.com/events?closed=false&tag=crypto&limit=12&order=volume&ascending=false",
+      { signal: AbortSignal.timeout(5000) }
+    );
+    const events = await res.json();
+    if (!Array.isArray(events) || events.length === 0) return false;
+
+    // Pick the most interesting event: highest volume with meaningful odds movement
+    let best = events[0];
+    let bestScore = 0;
+    for (const event of events) {
+      if (!event.markets?.[0]) continue;
+      const m = event.markets[0];
+      const vol = parseFloat(event.volume || m.volume || "0");
+      const change = m.oneDayPriceChange ? Math.abs(parseFloat(m.oneDayPriceChange)) : 0;
+      const score = vol / 1e6 + change * 100; // weight volume + change
+      if (score > bestScore) {
+        bestScore = score;
+        best = event;
+      }
+    }
+
+    const market = best.markets?.[0];
+    if (!market) return false;
+
+    const outcomes = market.outcomes ? JSON.parse(market.outcomes) : ["Yes", "No"];
+    const prices = market.outcomePrices ? JSON.parse(market.outcomePrices) : [];
+    const yesOdds = prices[0] ? (parseFloat(prices[0]) * 100).toFixed(0) : "?";
+    const noOdds = prices[1] ? (parseFloat(prices[1]) * 100).toFixed(0) : "?";
+    const vol = parseFloat(best.volume || market.volume || "0");
+    const change = market.oneDayPriceChange ? parseFloat(market.oneDayPriceChange) : null;
+
+    // Visual odds bar
+    const yesPct = parseInt(yesOdds) || 50;
+    const filled = Math.round(yesPct / 10);
+    const bar = "█".repeat(filled) + "░".repeat(10 - filled);
+
+    // AI commentary
+    let commentary = "";
+    const geminiKey = process.env.GEMINI_API_KEY;
+    if (geminiKey) {
+      try {
+        const genAI = new GoogleGenerativeAI(geminiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        const result = await model.generateContent(`You are a head trader. This Polymarket prediction market is trending:
+
+"${best.title}"
+Current odds: ${yesOdds}% YES / ${noOdds}% NO
+Volume: $${(vol / 1e6).toFixed(1)}M
+${change ? `24h odds change: ${change > 0 ? "+" : ""}${(change * 100).toFixed(1)}%` : ""}
+
+Write 2-3 sentences answering: What does this prediction tell us about where crypto is heading? Should traders position differently because of these odds?
+
+Be specific — name coins, give direction, give timeframe. No vague language.
+한국어로 작성하세요. Max 280 characters. No markdown, no emojis, no hashtags.`);
+        commentary = result.response.text().trim();
+      } catch {}
+    }
+
+    // Build caption
+    const changeStr = change ? ` | 24h: ${change > 0 ? "+" : ""}${(change * 100).toFixed(1)}%` : "";
+
+    let caption = `<b>🎯 예측 시장 스포트라이트</b>\n\n`;
+    caption += `<b>"${best.title}"</b>\n\n`;
+    caption += `${outcomes[0] || "YES"}: <b>${yesOdds}%</b> ${bar} ${outcomes[1] || "NO"}: ${noOdds}%\n`;
+    caption += `거래량: $${(vol / 1e6).toFixed(1)}M${changeStr}\n`;
+
+    if (commentary) {
+      caption += `\n${commentary}\n`;
+    }
+
+    caption += `\n<a href="https://polymarket.com/event/${best.slug}">Polymarket에서 보기</a>`;
+    caption += ` · <a href="https://futuresai.io/ko/markets">FuturesAI 마켓</a>`;
+
+    // Send as photo if image available, otherwise text
+    if (best.image) {
+      return await sendGroupPhoto(best.image, caption);
+    } else {
+      return await sendGroupMessage(caption);
+    }
+  } catch (error) {
+    console.error("[telegram-group] Polymarket prediction failed:", error);
+    return false;
+  }
+}
+
+/* ================================================================== */
 /*  LEGACY: Keep sendGroupDigest for backward compat (test endpoint)   */
 /* ================================================================== */
 export async function sendGroupDigest(): Promise<boolean> {

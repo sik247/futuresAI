@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendPolymarketAlert } from "@/lib/services/notifications/polymarket-alerts.service";
+import { sendPolymarketPrediction } from "@/lib/services/notifications/telegram-group.service";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 20;
+export const maxDuration = 30;
 
-/** 2x daily: interesting polymarket prediction changes in Korean */
+/** 2x daily: polymarket predictions with image cards + commentary */
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -13,11 +14,12 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const sent = await sendPolymarketAlert();
+    // Send engaging prediction card with image
+    const prediction = await sendPolymarketPrediction();
     return NextResponse.json({
       ok: true,
-      type: "polymarket",
-      sent,
+      type: "polymarket-prediction",
+      prediction,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
