@@ -83,10 +83,34 @@ export async function runMarketWatch(force = false): Promise<{ alerts: number; t
 
 async function sendForceNews(): Promise<{ messages: string[] }> {
   const messages: string[] = [];
-  const news = await fetchCryptoNews();
-  if (news.length === 0) return { messages };
 
-  const top = news.slice(0, 1); // Just 1 article for force mode
+  // Try news first, fall back to signal summary if news unavailable
+  const news = await fetchCryptoNews();
+  console.log(`[market-watch] Force mode: fetched ${news.length} news items`);
+
+  if (news.length === 0) {
+    // Fallback: send a signal summary instead
+    const signals = await fetchMarketSignals();
+    const EMOJI: Record<string, string> = {
+      "Strong Buy": "🟢🟢", "Buy": "🟢", "Neutral": "⚪", "Sell": "🔴", "Strong Sell": "🔴🔴",
+    };
+    const now = new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul", month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false });
+    let msg = `<b>📡 Signal Update</b> · ${now} KST\n\n`;
+    for (const s of signals.signals.slice(0, 6)) {
+      const emoji = EMOJI[s.signal] || "";
+      const price = s.price > 100 ? `$${s.price.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : `$${s.price.toFixed(4)}`;
+      const change = `${s.change24h >= 0 ? "+" : ""}${s.change24h.toFixed(1)}%`;
+      msg += `${emoji} <b>${s.symbol}</b> ${price} (${change}) ${s.direction}\n`;
+    }
+    const fgVal = signals.fearGreed.value;
+    const fgLabel = fgVal <= 25 ? "Extreme Fear" : fgVal <= 45 ? "Fear" : fgVal <= 55 ? "Neutral" : fgVal <= 75 ? "Greed" : "Extreme Greed";
+    msg += `\nFear & Greed: ${fgVal}/100 (${fgLabel})\n`;
+    msg += `<a href="https://futuresai.io/ko/home">실시간 시그널 보기</a>`;
+    messages.push(msg);
+    return { messages };
+  }
+
+  const top = news.slice(0, 1);
   const geminiKey = process.env.GEMINI_API_KEY;
   if (!geminiKey) return { messages };
 
