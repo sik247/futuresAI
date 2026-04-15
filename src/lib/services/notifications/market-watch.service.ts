@@ -101,7 +101,7 @@ async function checkBreakingNews(): Promise<{ messages: string[] }> {
 2. Market impact analysis (how this affects crypto prices — be specific about which coins and direction)
 3. Historical context (when similar events happened before, what was the market reaction)
 
-Format as bilingual (Korean first, then English). Keep it concise — max 600 characters per language.
+Write in English only. Keep it concise — max 400 characters total.
 No markdown symbols. Use clean text with line breaks.
 
 News headline: ${item.title}
@@ -110,19 +110,20 @@ ${item.body ? `Content: ${item.body.slice(0, 500)}` : ""}`);
 
       const analysis = result.response.text().trim();
 
-      const now = new Date().toLocaleString("ko-KR", {
+      const now = new Date().toLocaleString("en-US", {
         timeZone: "Asia/Seoul",
-        month: "2-digit",
+        month: "short",
         day: "2-digit",
         hour: "2-digit",
         minute: "2-digit",
+        hour12: false,
       });
 
       let msg = `<b>🔴 Breaking</b> · ${now} KST\n\n`;
       msg += `<b>${item.title}</b>\n`;
       msg += `<i>${item.source}</i>\n\n`;
       msg += `${analysis}\n\n`;
-      msg += `<a href="https://futuresai.io/ko/news">FuturesAI에서 더 보기</a>`;
+      msg += `<a href="https://futuresai.io/en/news">More on FuturesAI →</a>`;
 
       messages.push(msg);
     } catch (err) {
@@ -160,12 +161,13 @@ async function checkSignalChanges(): Promise<{ messages: string[] }> {
   // Build alert if any signal change detected
   if (flips.length === 0 && bigMovers.length === 0 && !fgChanged) return { messages };
 
-  const now = new Date().toLocaleString("ko-KR", {
+  const now = new Date().toLocaleString("en-US", {
     timeZone: "Asia/Seoul",
-    month: "2-digit",
+    month: "short",
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit",
+    hour12: false,
   });
 
   let msg = `<b>⚡ Signal Change Detected</b> · ${now} KST\n\n`;
@@ -198,15 +200,15 @@ async function checkSignalChanges(): Promise<{ messages: string[] }> {
 
   if (fgChanged) {
     const fgLabel = (v: number) =>
-      v <= 25 ? "극도의 공포 / Extreme Fear" :
-      v <= 45 ? "공포 / Fear" :
-      v <= 55 ? "중립 / Neutral" :
-      v <= 75 ? "탐욕 / Greed" : "극도의 탐욕 / Extreme Greed";
+      v <= 25 ? "Extreme Fear" :
+      v <= 45 ? "Fear" :
+      v <= 55 ? "Neutral" :
+      v <= 75 ? "Greed" : "Extreme Greed";
     msg += `<b>Fear & Greed Shift:</b>\n`;
     msg += `${prevFG} → ${signals.fearGreed.value} (${fgLabel(signals.fearGreed.value)})\n\n`;
   }
 
-  msg += `<a href="https://futuresai.io/ko/home">실시간 시그널 보기</a>`;
+  msg += `<a href="https://futuresai.io/en/home">Live Signals →</a>`;
   messages.push(msg);
 
   return { messages };
@@ -266,7 +268,7 @@ Provide:
 2. How traders should interpret this (bullish/bearish signal)
 3. Historical context — when similar prediction market movements happened, what followed in spot markets
 
-Bilingual (Korean first, then English). Concise — max 500 chars per language. No markdown symbols.`);
+Write in English only. Concise — max 400 chars total. No markdown symbols.`);
 
     const analysis = result.response.text().trim();
 
@@ -285,7 +287,7 @@ Bilingual (Korean first, then English). Concise — max 500 chars per language. 
       msg += `   ${s.oldOdds.toFixed(0)}% → <b>${s.newOdds.toFixed(0)}%</b> | Vol: $${(s.volume / 1e6).toFixed(1)}M\n\n`;
     }
     msg += `${analysis}\n\n`;
-    msg += `<a href="https://futuresai.io/ko/markets">Polymarket 분석 보기</a>`;
+    msg += `<a href="https://futuresai.io/en/markets">Polymarket Analysis →</a>`;
 
     messages.push(msg);
   } catch (err) {

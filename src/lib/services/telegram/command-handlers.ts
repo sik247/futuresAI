@@ -482,10 +482,152 @@ export const handleId: CommandHandler = async (ctx) => {
 };
 
 /* ================================================================== */
+/*  Public Commands — Market Data                                      */
+/* ================================================================== */
+
+const handleSignal: CommandHandler = async (ctx) => {
+  try {
+    const { fetchMarketSignals } = await import("@/lib/services/signals/signals.service");
+    const signals = await fetchMarketSignals();
+    const top = signals.signals.slice(0, 6);
+
+    const EMOJI: Record<string, string> = {
+      "Strong Buy": "🟢🟢", "Buy": "🟢", "Neutral": "⚪", "Sell": "🔴", "Strong Sell": "🔴🔴",
+    };
+
+    let msg = `<b>📡 Live Signals</b>\n\n`;
+    for (const s of top) {
+      const emoji = EMOJI[s.signal] || "";
+      const price = s.price > 100 ? `$${s.price.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : `$${s.price.toFixed(4)}`;
+      const change = `${s.change24h >= 0 ? "+" : ""}${s.change24h.toFixed(1)}%`;
+      msg += `${emoji} <b>${s.symbol}</b> ${price} (${change})\n`;
+      msg += `   ${s.signal} | ${s.direction} | ${s.confidence.toFixed(0)}%\n\n`;
+    }
+
+    const fgVal = signals.fearGreed.value;
+    const fgLabel = fgVal <= 25 ? "Extreme Fear" : fgVal <= 45 ? "Fear" : fgVal <= 55 ? "Neutral" : fgVal <= 75 ? "Greed" : "Extreme Greed";
+    const longCount = signals.signals.filter(s => s.direction === "LONG").length;
+    const shortCount = signals.signals.filter(s => s.direction === "SHORT").length;
+
+    msg += `Fear & Greed: ${fgVal}/100 (${fgLabel})\n`;
+    msg += `Long ${longCount} / Short ${shortCount} / Watch ${signals.signals.length - longCount - shortCount}\n`;
+    msg += `${signals.btcTrend === "above_sma" ? "BTC above 7D SMA ↑" : "BTC below 7D SMA ↓"}`;
+
+    await reply(ctx, msg);
+  } catch {
+    await reply(ctx, "⚠ Could not fetch signals. Try again shortly.");
+  }
+};
+
+const handlePrice: CommandHandler = async (ctx) => {
+  const symbol = (ctx.args[0] || "BTC").toUpperCase();
+  try {
+    const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}USDT`, {
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) {
+      await reply(ctx, `⚠ Coin <b>${symbol}</b> not found on Binance. Try: /p BTC`);
+      return;
+    }
+    const data = await res.json();
+    const price = parseFloat(data.lastPrice);
+    const change = parseFloat(data.priceChangePercent);
+    const vol = parseFloat(data.quoteVolume) / 1e6;
+    const high = parseFloat(data.highPrice);
+    const low = parseFloat(data.lowPrice);
+
+    const arrow = change >= 0 ? "📈" : "📉";
+    let msg = `${arrow} <b>${symbol}/USDT</b>\n\n`;
+    msg += `Price: $${price.toLocaleString(undefined, { maximumFractionDigits: price > 100 ? 0 : 4 })}\n`;
+    msg += `24h: ${change >= 0 ? "+" : ""}${change.toFixed(2)}%\n`;
+    msg += `High: $${high.toLocaleString(undefined, { maximumFractionDigits: high > 100 ? 0 : 4 })}\n`;
+    msg += `Low: $${low.toLocaleString(undefined, { maximumFractionDigits: low > 100 ? 0 : 4 })}\n`;
+    msg += `Volume: $${vol.toFixed(1)}M`;
+
+    await reply(ctx, msg);
+  } catch {
+    await reply(ctx, "⚠ Could not fetch price. Try again shortly.");
+  }
+};
+
+const handleNews: CommandHandler = async (ctx) => {
+  try {
+    const { fetchCryptoNews } = await import("@/lib/services/news/crypto-news.service");
+    const news = await fetchCryptoNews();
+    if (news.length === 0) {
+      await reply(ctx, "No recent news available.");
+      return;
+    }
+
+    let msg = `<b>📰 Latest Crypto News</b>\n\n`;
+    for (const n of news.slice(0, 5)) {
+      msg += `• ${escapeHtml(n.title)}\n  <i>${n.source}</i> · <a href="${n.url}">Read</a>\n\n`;
+    }
+    msg += `<a href="https://futuresai.io/en/news">More on FuturesAI →</a>`;
+
+    await reply(ctx, msg);
+  } catch {
+    await reply(ctx, "⚠ Could not fetch news. Try again shortly.");
+  }
+};
+
+const handleFearGreed: CommandHandler = async (ctx) => {
+  try {
+    const res = await fetch("https://api.alternative.me/fng/?limit=7", { signal: AbortSignal.timeout(3000) });
+    const data = await res.json();
+    const entries = data?.data || [];
+    if (entries.length === 0) {
+      await reply(ctx, "⚠ Could not fetch Fear & Greed Index.");
+      return;
+    }
+
+    const current = entries[0];
+    const val = parseInt(current.value);
+    const emoji = val <= 25 ? "😱" : val <= 45 ? "😟" : val <= 55 ? "😐" : val <= 75 ? "🤑" : "🤯";
+
+    let msg = `${emoji} <b>Fear & Greed Index: ${val}/100</b>\n`;
+    msg += `${current.value_classification}\n\n`;
+    msg += `<b>7-Day History:</b>\n`;
+
+    for (const entry of entries) {
+      const date = new Date(parseInt(entry.timestamp) * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      const v = parseInt(entry.value);
+      const bar = "█".repeat(Math.floor(v / 10)) + "░".repeat(10 - Math.floor(v / 10));
+      msg += `${date}: ${bar} ${v}\n`;
+    }
+
+    await reply(ctx, msg);
+  } catch {
+    await reply(ctx, "⚠ Could not fetch Fear & Greed data.");
+  }
+};
+
+const handleHelp: CommandHandler = async (ctx) => {
+  const msg = [
+    `<b>🤖 FuturesAI Bot Commands</b>\n`,
+    `<b>Market Data:</b>`,
+    `/signal — Live trading signals (top 6 coins)`,
+    `/p [COIN] — Price check (e.g. /p SOL)`,
+    `/news — Latest crypto headlines`,
+    `/fg — Fear & Greed Index (7-day)\n`,
+    `<b>Community:</b>`,
+    `/rules — Group rules`,
+    `/info — Your profile info`,
+    `/report — Report a message\n`,
+    `<b>Links:</b>`,
+    `<a href="https://futuresai.io">FuturesAI Dashboard</a>`,
+    `<a href="https://futuresai.io/en/chat">AI Chat Analysis</a>`,
+    `<a href="https://futuresai.io/en/news">News Feed</a>`,
+  ].join("\n");
+  await reply(ctx, msg);
+};
+
+/* ================================================================== */
 /*  Dispatcher                                                         */
 /* ================================================================== */
 
 export const COMMANDS: Record<string, CommandHandler> = {
+  // Admin
   "/ban": handleBan,
   "/unban": handleUnban,
   "/kick": handleKick,
@@ -501,10 +643,20 @@ export const COMMANDS: Record<string, CommandHandler> = {
   "/promote": handlePromote,
   "/demote": handleDemote,
   "/setrules": handleSetRules,
+  // Public
   "/info": handleInfo,
   "/rules": handleRules,
   "/report": handleReport,
   "/id": handleId,
+  "/signal": handleSignal,
+  "/signals": handleSignal,
+  "/price": handlePrice,
+  "/p": handlePrice,
+  "/news": handleNews,
+  "/fear": handleFearGreed,
+  "/fg": handleFearGreed,
+  "/help": handleHelp,
+  "/start": handleHelp,
 };
 
 /* ================================================================== */
