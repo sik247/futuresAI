@@ -821,7 +821,7 @@ export default function ChatClient({ lang, userName }: Props) {
                         {/* Follow-up questions */}
                         {msg.followUps && msg.followUps.length > 0 && idx === messages.length - 1 && (
                           <div className="pt-2">
-                            <span className="text-[9px] text-zinc-600 uppercase tracking-wider block mb-1.5">{ko ? "관련 질문" : "Follow up"}</span>
+                            <span className="text-[9px] text-zinc-600 uppercase tracking-wider block mb-1.5">{ko ? "💡 이런 질문은 어떠세요?" : "💡 Ask next"}</span>
                             <div className="flex flex-wrap gap-1.5">
                               {msg.followUps.map((q, qi) => (
                                 <button

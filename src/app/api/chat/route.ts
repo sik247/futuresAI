@@ -194,7 +194,18 @@ User: ${message}
 
 Deliver a COMPREHENSIVE, premium-quality analysis (300-500 words). Use markdown formatting with ### headers, **bold** for key numbers, and * bullet points. Include specific entry/exit strategy with stop loss and take profit levels.${lang === "ko" ? " 뉴스 헤드라인을 포함한 모든 내용을 한국어로 작성하세요." : " Write everything in English only — no Korean text."} Make the analysis so thorough and actionable that it demonstrates the full power of FuturesAI.
 
-IMPORTANT: After your analysis, add a line "---FOLLOWUPS---" followed by exactly 3 short follow-up questions the user might want to ask next (one per line). These should be relevant to the conversation and encourage deeper analysis. Keep each under 40 characters.${lang === "ko" ? " 후속 질문도 한국어로 작성하세요." : " Follow-up questions must be in English."}`;
+IMPORTANT: After your analysis, add a line "---FOLLOWUPS---" followed by exactly 3 follow-up questions (one per line, max 50 chars each).
+
+Follow-up question strategy — each question should serve a DIFFERENT purpose:
+1. DEEPER DIVE: Drill into a specific detail from your analysis (e.g., on-chain data, whale activity, funding rates, liquidation levels, token unlock schedule)
+2. COMPARISON/ALTERNATIVE: Compare with a related coin, competing L1/L2, or alternative trade setup (e.g., "ARB vs OP — which is better?", "What about a short setup instead?")
+3. ACTIONABLE NEXT STEP: A practical question about execution (e.g., "Best entry if BTC drops to $72K?", "DCA strategy for this setup?", "When is the next major catalyst?")
+
+Rules:
+- Questions must feel natural, like what a real trader would ask next
+- Reference specific coins, prices, or concepts from YOUR analysis — never be generic
+- Start each with an emoji: 📊 for data, 🔄 for comparison, 🎯 for action
+- Do NOT repeat information already covered in your analysis${lang === "ko" ? "\n후속 질문도 한국어로 작성하세요." : "\nFollow-up questions must be in English."}`;
 
     // Call AI — Gemini primary, GPT-5.4 fallback
     let response = "";
@@ -228,7 +239,7 @@ IMPORTANT: After your analysis, add a line "---FOLLOWUPS---" followed by exactly
           model: "gpt-5.4",
           messages: [
             { role: "system", content: `${systemPrompt}${langNote}${profileContext}` },
-            { role: "user", content: `REAL-TIME MARKET DATA:\n${context || "No specific data fetched."}\n\nCONVERSATION HISTORY:\n${historyText}\n\nUser: ${message}\n\nDeliver a COMPREHENSIVE, premium-quality analysis (300-500 words). Use markdown formatting with ### headers, **bold** for key numbers, and * bullet points. Include specific entry/exit strategy with stop loss and take profit levels.${lang === "ko" ? " 뉴스 헤드라인을 포함한 모든 내용을 한국어로 작성하세요." : " Write everything in English only — no Korean text."}\n\nIMPORTANT: After your analysis, add a line "---FOLLOWUPS---" followed by exactly 3 short follow-up questions (one per line, under 40 chars each).${lang === "ko" ? " 후속 질문도 한국어로 작성하세요." : " Follow-up questions must be in English."}` },
+            { role: "user", content: `REAL-TIME MARKET DATA:\n${context || "No specific data fetched."}\n\nCONVERSATION HISTORY:\n${historyText}\n\nUser: ${message}\n\nDeliver a COMPREHENSIVE, premium-quality analysis (300-500 words). Use markdown formatting with ### headers, **bold** for key numbers, and * bullet points. Include specific entry/exit strategy with stop loss and take profit levels.${lang === "ko" ? " 뉴스 헤드라인을 포함한 모든 내용을 한국어로 작성하세요." : " Write everything in English only — no Korean text."}\n\nIMPORTANT: After your analysis, add a line "---FOLLOWUPS---" followed by exactly 3 follow-up questions (one per line, max 50 chars). Strategy: 1) 📊 deeper dive into a specific detail, 2) 🔄 comparison with related coin/setup, 3) 🎯 actionable next step. Reference specific coins/prices from your analysis — never be generic.${lang === "ko" ? " 후속 질문도 한국어로 작성하세요." : " Follow-up questions must be in English."}` },
           ],
           max_tokens: 2000,
           temperature: 0.7,
