@@ -17,6 +17,7 @@ import { sendGroupMessage } from "./telegram.service";
 // ── In-memory state (resets on cold start) ──
 
 const seenNewsIds = new Set<string>();
+let newsInitialized = false;
 const lastSignalDirection: Record<string, string> = {};
 let lastFearGreed = -1;
 let lastPolymarketState: Record<string, number> = {};
@@ -30,9 +31,12 @@ const POLYMARKET_SHIFT_THRESHOLD = 5; // % odds change to trigger
 
 // ── Main entry point ──
 
-export async function runMarketWatch(): Promise<{ alerts: number; types: string[] }> {
+export async function runMarketWatch(force = false): Promise<{ alerts: number; types: string[] }> {
   const alerts: string[] = [];
   const types: string[] = [];
+
+  // Force mode: skip cold-start seeding, send immediately
+  if (force) newsInitialized = true;
 
   // Run all checks in parallel
   const [newsResult, signalResult, polyResult] = await Promise.allSettled([
@@ -69,6 +73,14 @@ async function checkBreakingNews(): Promise<{ messages: string[] }> {
   const messages: string[] = [];
   const news = await fetchCryptoNews();
   if (news.length === 0) return { messages };
+
+  // First run after cold start: seed the set, don't alert
+  if (!newsInitialized) {
+    for (const n of news) seenNewsIds.add(n.title);
+    newsInitialized = true;
+    console.log(`[market-watch] Cold start — seeded ${news.length} news items, will alert on next new headlines`);
+    return { messages };
+  }
 
   // Find unseen news
   const fresh = news.filter(n => !seenNewsIds.has(n.title));

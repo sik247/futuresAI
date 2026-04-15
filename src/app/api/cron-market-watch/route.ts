@@ -19,7 +19,8 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const result = await runMarketWatch();
+    const force = req.nextUrl.searchParams.get("force") === "1";
+    const result = await runMarketWatch(force);
     return NextResponse.json({
       ok: true,
       type: "market-watch",
