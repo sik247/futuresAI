@@ -84,12 +84,8 @@ export async function runMarketWatch(force = false): Promise<{ alerts: number; t
 async function sendForceNews(): Promise<{ messages: string[] }> {
   const messages: string[] = [];
 
-  // Try news first, fall back to signal summary if news unavailable
-  const news = await fetchCryptoNews();
-  console.log(`[market-watch] Force mode: fetched ${news.length} news items`);
-
-  if (news.length === 0) {
-    // Fallback: send a signal summary instead
+  // Always send signal summary in force mode — it's reliable
+  try {
     const signals = await fetchMarketSignals();
     const EMOJI: Record<string, string> = {
       "Strong Buy": "🟢🟢", "Buy": "🟢", "Neutral": "⚪", "Sell": "🔴", "Strong Sell": "🔴🔴",
@@ -105,64 +101,11 @@ async function sendForceNews(): Promise<{ messages: string[] }> {
     const fgVal = signals.fearGreed.value;
     const fgLabel = fgVal <= 25 ? "Extreme Fear" : fgVal <= 45 ? "Fear" : fgVal <= 55 ? "Neutral" : fgVal <= 75 ? "Greed" : "Extreme Greed";
     msg += `\nFear & Greed: ${fgVal}/100 (${fgLabel})\n`;
+    msg += `${signals.btcTrend === "above_sma" ? "BTC above 7D SMA ↑" : "BTC below 7D SMA ↓"}\n\n`;
     msg += `<a href="https://futuresai.io/ko/home">실시간 시그널 보기</a>`;
     messages.push(msg);
-    return { messages };
-  }
-
-  const top = news.slice(0, 1);
-  const geminiKey = process.env.GEMINI_API_KEY;
-  if (!geminiKey) return { messages };
-
-  const genAI = new GoogleGenerativeAI(geminiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
-  for (const item of top) {
-    try {
-      const result = await model.generateContent(`You are a head trader writing a morning note. Your job is to answer ONE question: "What does this news mean for my portfolio TODAY?"
-
-Write exactly 3 short paragraphs:
-
-1. WHAT HAPPENED (1 sentence max — just the fact, no opinion)
-
-2. WHAT IT MEANS FOR PRICES — this is the most important part. Be extremely specific:
-   - Name exact coins affected and whether they go UP or DOWN
-   - Give a magnitude estimate: "expect 2-4% move" not "could impact prices"
-   - Give a timeframe: "within 24h" or "over the next week"
-   - Say whether to BUY, SELL, or DO NOTHING right now
-   Example: "Bearish for ETH short-term. Expect 3-5% pullback within 48h. Reduce long exposure above $2,400."
-
-3. WHY — one sentence of evidence. Either a historical precedent with a date and number, or a structural reason.
-   Example: "Last comparable ruling (Nov 2023) triggered a 12% BTC selloff over 4 days."
-
-DO NOT be vague. DO NOT say "could impact" or "may affect" or "traders should watch." State what WILL likely happen.
-한국어로 작성하세요. Max 450 characters. No markdown, no emojis, no hashtags.
-
-News: ${item.title}
-Source: ${item.source}
-${item.body ? `Detail: ${item.body.slice(0, 500)}` : ""}`);
-
-      const analysis = result.response.text().trim();
-
-      const now = new Date().toLocaleString("en-US", {
-        timeZone: "Asia/Seoul",
-        month: "short",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
-
-      let msg = `<b>🔴 Breaking</b> · ${now} KST\n\n`;
-      msg += `<b>${item.title}</b>\n`;
-      msg += `<i>${item.source}</i>\n\n`;
-      msg += `${analysis}\n\n`;
-      msg += `<a href="https://futuresai.io/ko/news">FuturesAI에서 더 보기</a>`;
-
-      messages.push(msg);
-    } catch (err) {
-      console.warn("[market-watch] Force news failed:", err instanceof Error ? err.message : err);
-    }
+  } catch (err) {
+    console.error("[market-watch] Force signal failed:", err);
   }
 
   return { messages };
