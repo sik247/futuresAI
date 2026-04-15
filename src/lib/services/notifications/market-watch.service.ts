@@ -95,20 +95,28 @@ async function checkBreakingNews(): Promise<{ messages: string[] }> {
 
   for (const item of top) {
     try {
-      const result = await model.generateContent(`You are a senior macro strategist at a crypto trading desk. Write a professional market commentary on this breaking news for institutional and serious retail traders.
+      const result = await model.generateContent(`You are a head trader writing a morning note. Your job is to answer ONE question: "What does this news mean for my portfolio TODAY?"
 
-Structure (no labels, just flow naturally):
-- One-line take on what happened
-- Direct market implications: which assets move, which direction, and why. Name specific tokens. Quantify where possible (e.g. "historically causes 5-8% drawdown within 48h")
-- Precedent: cite 1-2 specific past events with dates and what the market did after (e.g. "Similar SEC action in June 2023 saw ETH drop 15% over 5 days before recovering")
-- Positioning: what smart money is likely doing right now
+Write exactly 3 short paragraphs:
 
-Tone: authoritative, concise, zero fluff. Write like a Bloomberg terminal note, not a blog post.
-English only. Max 500 characters. No markdown, no emojis, no hashtags.
+1. WHAT HAPPENED (1 sentence max — just the fact, no opinion)
 
-Headline: ${item.title}
+2. WHAT IT MEANS FOR PRICES — this is the most important part. Be extremely specific:
+   - Name exact coins affected and whether they go UP or DOWN
+   - Give a magnitude estimate: "expect 2-4% move" not "could impact prices"
+   - Give a timeframe: "within 24h" or "over the next week"
+   - Say whether to BUY, SELL, or DO NOTHING right now
+   Example: "Bearish for ETH short-term. Expect 3-5% pullback within 48h. Reduce long exposure above $2,400."
+
+3. WHY — one sentence of evidence. Either a historical precedent with a date and number, or a structural reason.
+   Example: "Last comparable ruling (Nov 2023) triggered a 12% BTC selloff over 4 days."
+
+DO NOT be vague. DO NOT say "could impact" or "may affect" or "traders should watch." State what WILL likely happen.
+English only. Max 450 characters. No markdown, no emojis, no hashtags.
+
+News: ${item.title}
 Source: ${item.source}
-${item.body ? `Context: ${item.body.slice(0, 500)}` : ""}`);
+${item.body ? `Detail: ${item.body.slice(0, 500)}` : ""}`);
 
       const analysis = result.response.text().trim();
 
@@ -261,18 +269,18 @@ async function checkPolymarketShifts(): Promise<{ messages: string[] }> {
       `"${s.title}": ${s.oldOdds.toFixed(0)}% → ${s.newOdds.toFixed(0)}% (Vol: $${(s.volume / 1e6).toFixed(1)}M)`
     ).join("\n");
 
-    const result = await model.generateContent(`You are a senior macro strategist at a crypto trading desk. These Polymarket prediction odds just shifted significantly:
+    const result = await model.generateContent(`You are a head trader. Polymarket prediction odds just shifted:
 
 ${shiftsText}
 
-Write a professional trading desk note:
-- What each odds movement signals about market consensus
-- Whether spot markets have priced this in or are lagging the prediction market
-- Precedent: cite specific past instances where prediction market shifts preceded spot moves, with dates and magnitude
-- Net positioning implication: is this a leading indicator to go risk-on or risk-off
+Answer in 2 short paragraphs:
 
-Tone: institutional, data-driven, zero fluff. Like a Bloomberg terminal note.
-English only. Max 500 characters. No markdown, no emojis, no hashtags.`);
+1. WHAT TO DO — Are these odds LEADING or LAGGING spot prices? If leading, name exactly which coins to buy or sell and by when. If lagging, say "already priced in — no action needed."
+
+2. PRECEDENT — One specific past example where prediction market odds moved like this and what happened to spot prices after. Include the date and percentage move.
+
+DO NOT be vague. State a clear trade direction.
+English only. Max 350 characters. No markdown, no emojis, no hashtags.`);
 
     const analysis = result.response.text().trim();
 
