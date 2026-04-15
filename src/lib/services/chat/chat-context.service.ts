@@ -1,6 +1,58 @@
 import { fetchStockData } from "./stock-data.agent";
 import { fetchCryptoNews, type CryptoNewsItem } from "@/lib/services/news/crypto-news.service";
 import { fetchCryptoFeed } from "@/lib/services/social/x-feed.service";
+import OpenAI from "openai";
+
+// Use GPT-5.4-mini to extract ticker from ambiguous user messages
+async function aiExtractTicker(message: string): Promise<string | null> {
+  const openaiKey = process.env.OPENAI_API_KEY;
+  if (!openaiKey) return null;
+  try {
+    const openai = new OpenAI({ apiKey: openaiKey });
+    const completion = await openai.chat.completions.create({
+      model: "gpt-5.4-mini",
+      messages: [
+        {
+          role: "system",
+          content: `You are a crypto ticker resolver. Given a user message about cryptocurrency, extract the most likely Binance USDT trading pair symbol. Return ONLY the base ticker symbol in uppercase (e.g. "BTC", "ETH", "ARB", "DOGE"). If you can identify multiple possible tickers, return up to 3 separated by commas (most likely first). If the message is not about a specific coin, return "NONE". No explanations.
+
+Examples:
+- "아비트럼 분석해줘" → "ARB"
+- "tell me about pepe coin" → "PEPE"
+- "what about sushi swap" → "SUSHI"
+- "도지 어때" → "DOGE"
+- "what's the market like today" → "NONE"
+- "hbar analysis" → "HBAR"
+- "아발란체랑 솔라나 비교" → "AVAX,SOL"
+- "injective protocol" → "INJ"
+- "밈코인 추천해줘" → "NONE"`,
+        },
+        { role: "user", content: message },
+      ],
+      max_tokens: 20,
+      temperature: 0,
+    });
+    const result = completion.choices[0]?.message?.content?.trim().toUpperCase();
+    if (!result || result === "NONE") return null;
+    return result;
+  } catch (err) {
+    console.warn("[aiExtractTicker] GPT-5.4-mini failed:", err instanceof Error ? err.message : err);
+    return null;
+  }
+}
+
+// Validate a ticker exists on Binance by checking the API
+async function validateBinanceTicker(symbol: string): Promise<boolean> {
+  try {
+    const res = await fetch(
+      `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}USDT`,
+      { signal: AbortSignal.timeout(2000) }
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
 
 // Extract ticker from user message
 export function extractTicker(message: string, persona: string): { ticker: string; exchange: string } | null {
@@ -14,9 +66,28 @@ export function extractTicker(message: string, persona: string): { ticker: strin
     op: "OP", optimism: "OP", pepe: "PEPE", shib: "SHIB",
   };
 
+  const koreanCryptoMap: Record<string, string> = {
+    "비트코인": "BTC", "이더리움": "ETH", "이더": "ETH",
+    "솔라나": "SOL", "리플": "XRP",
+    "도지코인": "DOGE", "도지": "DOGE",
+    "에이다": "ADA", "카르다노": "ADA",
+    "아발란체": "AVAX", "폴카닷": "DOT",
+    "체인링크": "LINK", "링크": "LINK",
+    "폴리곤": "MATIC", "매틱": "MATIC",
+    "니어": "NEAR", "아톰": "ATOM", "코스모스": "ATOM",
+    "수이": "SUI", "앱토스": "APT",
+    "아비트럼": "ARB", "옵티미즘": "OP",
+    "페페": "PEPE", "시바": "SHIB", "시바이누": "SHIB",
+    "바이낸스코인": "BNB", "비앤비": "BNB",
+  };
+
   const lower = message.toLowerCase();
 
   if (persona === "crypto") {
+    // Check Korean coin names first (no lowercasing needed for Korean)
+    for (const [key, val] of Object.entries(koreanCryptoMap)) {
+      if (message.includes(key)) return { ticker: val + "USDT", exchange: "BINANCE" };
+    }
     for (const [key, val] of Object.entries(cryptoMap)) {
       if (lower.includes(key)) return { ticker: val + "USDT", exchange: "BINANCE" };
     }
@@ -24,6 +95,11 @@ export function extractTicker(message: string, persona: string): { ticker: strin
     if (explicitMatch) return { ticker: explicitMatch[1].toUpperCase() + "USDT", exchange: "BINANCE" };
     const pairMatch = message.match(/\b([A-Z]{2,6})(?:\/USDT|USDT)\b/);
     if (pairMatch) return { ticker: pairMatch[1].toUpperCase() + "USDT", exchange: "BINANCE" };
+    // Catch standalone uppercase tickers (e.g., "HBAR", "INJ", "SUSHI")
+    const standaloneMatch = message.match(/\b([A-Z]{2,10})\b/);
+    if (standaloneMatch && standaloneMatch[1] !== "USDT" && standaloneMatch[1] !== "USD") {
+      return { ticker: standaloneMatch[1] + "USDT", exchange: "BINANCE" };
+    }
   }
 
   if (persona === "us-stocks") {
@@ -264,8 +340,31 @@ async function webSearchContext(query: string): Promise<string> {
 export async function buildCryptoContext(query: string): Promise<ChatContextResult> {
   const parts: string[] = [];
 
-  const ticker = extractTicker(query, "crypto");
-  const baseSymbol = ticker ? ticker.ticker.replace("USDT", "") : null;
+  // 1. Try hardcoded maps first (fast path)
+  let ticker = extractTicker(query, "crypto");
+  let baseSymbol = ticker ? ticker.ticker.replace("USDT", "") : null;
+
+  // 2. If no match, use GPT-5.4-mini to identify the ticker
+  if (!ticker) {
+    const aiResult = await aiExtractTicker(query);
+    if (aiResult) {
+      // AI may return comma-separated candidates — try each against Binance
+      const candidates = aiResult.split(",").map(s => s.trim()).filter(Boolean);
+      for (const candidate of candidates) {
+        const isValid = await validateBinanceTicker(candidate);
+        if (isValid) {
+          ticker = { ticker: candidate + "USDT", exchange: "BINANCE" };
+          baseSymbol = candidate;
+          break;
+        }
+      }
+      // If none validated on Binance, use the first candidate anyway (CoinGecko/CryptoCompare may have it)
+      if (!ticker && candidates.length > 0) {
+        ticker = { ticker: candidates[0] + "USDT", exchange: "BINANCE" };
+        baseSymbol = candidates[0];
+      }
+    }
+  }
 
   // Fetch ALL data sources in parallel (including fallbacks)
   const [binanceRes, upbitData, technicals, fngRes, cryptoPanicRes, rssNewsResult, xFeedResult, topPricesRes, webSearchRes, polymarketRes] = await Promise.allSettled([

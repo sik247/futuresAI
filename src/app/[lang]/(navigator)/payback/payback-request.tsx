@@ -347,7 +347,7 @@ export default function PaybackRequest({ lang }: Props) {
                       <span className="text-sm font-semibold text-white font-mono">${req.amount.toFixed(2)}</span>
                     </div>
                     <span className="text-xs text-zinc-500">
-                      {new Date(req.createdAt).toLocaleDateString("ko-KR", { year: "numeric", month: "short", day: "numeric" })}
+                      {new Date(req.createdAt).toLocaleDateString(ko ? "ko-KR" : "en-US", { year: "numeric", month: "short", day: "numeric" })}
                     </span>
                   </div>
 
@@ -358,7 +358,7 @@ export default function PaybackRequest({ lang }: Props) {
                       <div className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
                         <svg className="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                       </div>
-                      <span className="text-[11px] text-emerald-400 font-medium">제출됨</span>
+                      <span className="text-[11px] text-emerald-400 font-medium">{ko ? "제출됨" : "Submitted"}</span>
                     </div>
                     <div className={`flex-1 h-px mx-2 ${isPaid || isPending ? "bg-emerald-500/30" : "bg-red-500/30"}`} />
 
@@ -380,7 +380,7 @@ export default function PaybackRequest({ lang }: Props) {
                         )}
                       </div>
                       <span className={`text-[11px] font-medium ${isPending ? "text-amber-400" : isPaid ? "text-emerald-400" : "text-red-400"}`}>
-                        {isPending ? "검토 중" : isPaid ? "승인됨" : "거절됨"}
+                        {isPending ? (ko ? "검토 중" : "Reviewing") : isPaid ? (ko ? "승인됨" : "Approved") : (ko ? "거절됨" : "Rejected")}
                       </span>
                     </div>
                     <div className={`flex-1 h-px mx-2 ${isPaid ? "bg-emerald-500/30" : "bg-zinc-800"}`} />
@@ -399,7 +399,7 @@ export default function PaybackRequest({ lang }: Props) {
                         )}
                       </div>
                       <span className={`text-[11px] font-medium ${isPaid ? "text-emerald-400" : "text-zinc-600"}`}>
-                        {isPaid ? "지급 완료" : "지급 대기"}
+                        {isPaid ? (ko ? "지급 완료" : "Paid") : (ko ? "지급 대기" : "Pending")}
                       </span>
                     </div>
                   </div>
@@ -407,15 +407,15 @@ export default function PaybackRequest({ lang }: Props) {
                   {/* Details */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                     <div>
-                      <span className="text-zinc-600 block mb-0.5">거래소</span>
+                      <span className="text-zinc-600 block mb-0.5">{ko ? "거래소" : "Exchange"}</span>
                       <span className="text-zinc-300">{req.exchangeAccounts.map((ea) => ea.exchange.name).join(", ") || "—"}</span>
                     </div>
                     <div>
-                      <span className="text-zinc-600 block mb-0.5">네트워크</span>
+                      <span className="text-zinc-600 block mb-0.5">{ko ? "네트워크" : "Network"}</span>
                       <span className="text-zinc-300 font-mono">{req.network}</span>
                     </div>
                     <div className="col-span-2">
-                      <span className="text-zinc-600 block mb-0.5">지갑 주소</span>
+                      <span className="text-zinc-600 block mb-0.5">{ko ? "지갑 주소" : "Wallet Address"}</span>
                       <span className="text-zinc-300 font-mono text-[11px] break-all">{req.address}</span>
                     </div>
                   </div>
@@ -424,18 +424,20 @@ export default function PaybackRequest({ lang }: Props) {
                   {isPaid && req.paidAt && (
                     <div className="mt-3 pt-3 border-t border-emerald-500/10">
                       <span className="text-[11px] text-emerald-400">
-                        {new Date(req.paidAt).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}에 지급 완료
+                        {ko
+                          ? `${new Date(req.paidAt).toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}에 지급 완료`
+                          : `Paid on ${new Date(req.paidAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`}
                       </span>
                     </div>
                   )}
                   {isRejected && req.adminNote && (
                     <div className="mt-3 pt-3 border-t border-red-500/10">
-                      <span className="text-[11px] text-red-400">사유: {req.adminNote}</span>
+                      <span className="text-[11px] text-red-400">{ko ? "사유" : "Reason"}: {req.adminNote}</span>
                     </div>
                   )}
                   {isPending && (
                     <div className="mt-3 pt-3 border-t border-amber-500/10">
-                      <span className="text-[11px] text-amber-400">관리자 검토 중입니다. 일반적으로 24시간 이내에 처리됩니다.</span>
+                      <span className="text-[11px] text-amber-400">{ko ? "관리자 검토 중입니다. 일반적으로 24시간 이내에 처리됩니다." : "Under admin review. Typically processed within 24 hours."}</span>
                     </div>
                   )}
                 </div>

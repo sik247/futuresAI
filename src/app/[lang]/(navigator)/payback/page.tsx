@@ -10,19 +10,19 @@ import { EXCHANGE_GUIDES } from "../guides/exchange-data";
 export const metadata: Metadata = {
   title: "Trading Rebates and Payback",
   description:
-    "Earn up to 75% trading fee rebates on partner exchanges including Bitget, Bybit, OKX, Gate.io, and HTX. Track your payback earnings with Futures AI.",
+    "Earn trading fee rebates on partner exchanges including Bitget, Bybit, OKX, Gate.io, and HTX. Track your payback earnings with Futures AI.",
   keywords: ["trading rebates", "crypto payback", "exchange referral", "fee rebates", "Bitget rebate", "Bybit rebate"],
 };
 
 const EXCHANGES = [
   // Fees shown are AFTER payback/discount applied (실질 수수료)
-  { name: "Gate.io", paybackRate: 75, makerFee: 0.005, takerFee: 0.0125, link: "https://www.gate.com/share/FuturesAI", logo: "/icons/exchange/gate.png" },
-  { name: "Bitget", paybackRate: 55, makerFee: 0.009, takerFee: 0.018, link: "https://partner.bitget.com/bg/FuturesAI", logo: "/icons/exchange/bitget.png" },
-  { name: "HTX", paybackRate: 54, makerFee: 0.0092, takerFee: 0.023, link: "https://www.htx.com.gt/invite/en-us/1h?invite_code=miqkc223", logo: "/icons/exchange/htx.png" },
-  { name: "BingX", paybackRate: 50, makerFee: 0.01, takerFee: 0.025, link: "https://bingx.com/en/invite/FCC9QDJK", logo: "/icons/exchange/bingx.png" },
+  { name: "Gate.io", paybackRate: 1, makerFee: 0.0198, takerFee: 0.0495, link: "https://www.gate.com/share/FuturesAI", logo: "/icons/exchange/gate.png" },
+  { name: "Bitget", paybackRate: 1, makerFee: 0.0198, takerFee: 0.0495, link: "https://partner.bitget.com/bg/FuturesAI", logo: "/icons/exchange/bitget.png" },
+  { name: "HTX", paybackRate: 1, makerFee: 0.0198, takerFee: 0.0495, link: "https://www.htx.com.gt/invite/en-us/1h?invite_code=miqkc223", logo: "/icons/exchange/htx.png" },
+  { name: "BingX", paybackRate: 1, makerFee: 0.0198, takerFee: 0.0495, link: "https://bingx.com/en/invite/FCC9QDJK", logo: "/icons/exchange/bingx.png" },
   { name: "EdgeX", paybackRate: 0, makerFee: 0.0081, takerFee: 0.0225, link: "https://pro.edgex.exchange/en-US/referral/FUTURESAI", logo: "/icons/exchange/edgex.png", feeDiscount: 10 },
-  { name: "OKX", paybackRate: 20, makerFee: 0.016, takerFee: 0.04, link: "https://www.okx.com/join/futuresai", logo: "/icons/exchange/okx.png" },
-  { name: "Bybit", paybackRate: 20, makerFee: 0.016, takerFee: 0.044, link: "https://partner.bybit.com/b/FUTURESAI", logo: "/icons/exchange/bybit.png" },
+  { name: "OKX", paybackRate: 0, makerFee: 0.02, takerFee: 0.05, link: "https://www.okx.com/join/futuresai", logo: "/icons/exchange/okx.png" },
+  { name: "Bybit", paybackRate: 0, makerFee: 0.02, takerFee: 0.055, link: "https://partner.bybit.com/b/FUTURESAI", logo: "/icons/exchange/bybit.png" },
 ];
 
 export default async function PaybackPage({
@@ -75,7 +75,7 @@ export default async function PaybackPage({
           <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-3xl">
             {[
               { value: "5+", label: ko ? "거래소" : "Exchanges" },
-              { value: "75%", label: ko ? "최대 페이백" : "Max Payback" },
+              { value: "1%", label: ko ? "최대 페이백" : "Max Payback" },
               { value: "24/7", label: ko ? "지원" : "Support" },
               { value: "$2M+", label: ko ? "지급 완료" : "Paid Out" },
             ].map((stat, i) => (

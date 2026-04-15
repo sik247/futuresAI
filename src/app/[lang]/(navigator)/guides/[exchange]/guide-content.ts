@@ -41,8 +41,8 @@ function getBitgetGuide(isKo: boolean): GuideContent {
           {
             type: "text",
             content: isKo
-              ? "55% 페이백 혜택을 받기 위해 코드를 변경하는 절차는 다음과 같습니다."
-              : "Follow these steps to change your code and receive the 55% payback benefit.",
+              ? "페이백 혜택을 받기 위해 코드를 변경하는 절차는 다음과 같습니다."
+              : "Follow these steps to change your code and receive the payback benefit.",
           },
           {
             type: "list",
@@ -120,8 +120,8 @@ function getBitgetGuide(isKo: boolean): GuideContent {
       },
       {
         title: isKo
-          ? "FuturesAI 비트겟 55% 페이백 가입 방법"
-          : "How to Sign Up for 55% Payback with FuturesAI",
+          ? "FuturesAI 비트겟 페이백 가입 방법"
+          : "How to Sign Up for Payback with FuturesAI",
         blocks: [
           {
             type: "text",
@@ -185,8 +185,8 @@ function getBybitGuide(isKo: boolean): GuideContent {
           {
             type: "text",
             content: isKo
-              ? "신규 가입 후 14일이 지났다면 FuturesAI 20% 페이백 혜택을 받기 위해서는 신규 계정으로 다시 가입해야 하며 개인당 최대 3개의 계정까지 생성이 가능합니다. 여권, 운전면허증, 신분증을 각각 한 번씩 KYC 인증에 사용할 수 있습니다."
-              : "If more than 14 days have passed since signup, you'll need to create a new account to receive the 20% payback benefit. Up to 3 accounts per person are allowed. Passport, driver's license, and national ID can each be used once for KYC.",
+              ? "신규 가입 후 14일이 지났다면 FuturesAI 페이백 혜택을 받기 위해서는 신규 계정으로 다시 가입해야 하며 개인당 최대 3개의 계정까지 생성이 가능합니다. 여권, 운전면허증, 신분증을 각각 한 번씩 KYC 인증에 사용할 수 있습니다."
+              : "If more than 14 days have passed since signup, you'll need to create a new account to receive the payback benefit. Up to 3 accounts per person are allowed. Passport, driver's license, and national ID can each be used once for KYC.",
           },
           {
             type: "info",
@@ -277,8 +277,8 @@ Referral code to register: FUTURESAI`,
       },
       {
         title: isKo
-          ? "FuturesAI 바이비트 20% 페이백 가입 방법"
-          : "How to Sign Up for 20% Payback with FuturesAI",
+          ? "FuturesAI 바이비트 페이백 가입 방법"
+          : "How to Sign Up for Payback with FuturesAI",
         blocks: [
           {
             type: "text",
@@ -331,8 +331,8 @@ function getOkxGuide(isKo: boolean): GuideContent {
           {
             type: "text",
             content: isKo
-              ? "OKX(오케이엑스) 20% 페이백 혜택을 받기 위해서는 기존 계정을 탈퇴한 이후 신규 계정으로 다시 재가입해야 합니다. 다만 계정 삭제 후 30일 동안은 동일한 이메일 또는 휴대폰 번호로 가입할 수 없습니다."
-              : "To receive the 20% payback benefit from OKX, you must close your existing account and re-register with a new one. Note: you cannot sign up with the same email or phone for 30 days after deletion.",
+              ? "OKX(오케이엑스) 페이백 혜택을 받기 위해서는 기존 계정을 탈퇴한 이후 신규 계정으로 다시 재가입해야 합니다. 다만 계정 삭제 후 30일 동안은 동일한 이메일 또는 휴대폰 번호로 가입할 수 없습니다."
+              : "To receive the payback benefit from OKX, you must close your existing account and re-register with a new one. Note: you cannot sign up with the same email or phone for 30 days after deletion.",
           },
           {
             type: "info",
@@ -401,14 +401,14 @@ function getOkxGuide(isKo: boolean): GuideContent {
       },
       {
         title: isKo
-          ? "FuturesAI OKX 20% 페이백 가입 방법"
-          : "How to Sign Up for 20% Payback with FuturesAI",
+          ? "FuturesAI OKX 페이백 가입 방법"
+          : "How to Sign Up for Payback with FuturesAI",
         blocks: [
           {
             type: "text",
             content: isKo
-              ? "페이백 20% 혜택을 받기 위해선 반드시 FuturesAI에서 제공하는 코드를 통해 가입해야 합니다."
-              : "You must sign up through the FuturesAI code to receive the 20% payback benefit.",
+              ? "페이백 혜택을 받기 위해선 반드시 FuturesAI에서 제공하는 코드를 통해 가입해야 합니다."
+              : "You must sign up through the FuturesAI code to receive the payback benefit.",
           },
           {
             type: "link",
@@ -456,8 +456,8 @@ function getGateGuide(isKo: boolean): GuideContent {
           {
             type: "text",
             content: isKo
-              ? "게이트(Gate) 거래소는 레퍼럴 코드 변경은 불가능합니다. 75% 페이백 혜택을 받기 위해서는 신규 계정으로 재가입해야 하며 한 명이 최대 3개의 계정을 생성할 수 있습니다."
-              : "Gate.io does not allow referral code changes. To receive the 75% payback benefit, you must create a new account. Each person can create up to 3 accounts.",
+              ? "게이트(Gate) 거래소는 레퍼럴 코드 변경은 불가능합니다. 페이백 혜택을 받기 위해서는 신규 계정으로 재가입해야 하며 한 명이 최대 3개의 계정을 생성할 수 있습니다."
+              : "Gate.io does not allow referral code changes. To receive the payback benefit, you must create a new account. Each person can create up to 3 accounts.",
           },
           {
             type: "text",
@@ -539,14 +539,14 @@ function getGateGuide(isKo: boolean): GuideContent {
       },
       {
         title: isKo
-          ? "FuturesAI 게이트 75% 페이백 가입 방법"
-          : "How to Sign Up for 75% Payback with FuturesAI",
+          ? "FuturesAI 게이트 페이백 가입 방법"
+          : "How to Sign Up for Payback with FuturesAI",
         blocks: [
           {
             type: "text",
             content: isKo
-              ? "페이백 75% 혜택을 받기 위해선 반드시 FuturesAI에서 제공하는 코드를 통해 가입해야 합니다."
-              : "You must sign up through the FuturesAI code to receive the 75% payback benefit.",
+              ? "페이백 혜택을 받기 위해선 반드시 FuturesAI에서 제공하는 코드를 통해 가입해야 합니다."
+              : "You must sign up through the FuturesAI code to receive the payback benefit.",
           },
           {
             type: "link",
@@ -593,8 +593,8 @@ function getBingxGuide(isKo: boolean): GuideContent {
           {
             type: "text",
             content: isKo
-              ? "빙엑스(BingX) 거래소는 레퍼럴 코드 변경은 불가능합니다. 50% 페이백 혜택을 받기 위해서는 신규 계정으로 다시 가입해야 하며 개인당 최대 3개의 계정까지 생성이 가능합니다."
-              : "BingX does not allow referral code changes. To receive the 50% payback benefit, you must create a new account. Up to 3 accounts per person are allowed.",
+              ? "빙엑스(BingX) 거래소는 레퍼럴 코드 변경은 불가능합니다. 페이백 혜택을 받기 위해서는 신규 계정으로 다시 가입해야 하며 개인당 최대 3개의 계정까지 생성이 가능합니다."
+              : "BingX does not allow referral code changes. To receive the payback benefit, you must create a new account. Up to 3 accounts per person are allowed.",
           },
           {
             type: "text",
@@ -677,14 +677,14 @@ function getBingxGuide(isKo: boolean): GuideContent {
       },
       {
         title: isKo
-          ? "FuturesAI 빙엑스 50% 페이백 가입 방법"
-          : "How to Sign Up for 55% Payback with FuturesAI",
+          ? "FuturesAI 빙엑스 페이백 가입 방법"
+          : "How to Sign Up for Payback with FuturesAI",
         blocks: [
           {
             type: "text",
             content: isKo
-              ? "페이백 50% 혜택을 받기 위해선 반드시 FuturesAI에서 제공하는 코드를 통해 가입해야 합니다."
-              : "You must sign up through the FuturesAI code to receive the 50% payback benefit.",
+              ? "페이백 혜택을 받기 위해선 반드시 FuturesAI에서 제공하는 코드를 통해 가입해야 합니다."
+              : "You must sign up through the FuturesAI code to receive the payback benefit.",
           },
           {
             type: "link",
@@ -736,8 +736,8 @@ function getHtxGuide(isKo: boolean): GuideContent {
           {
             type: "text",
             content: isKo
-              ? "HTX(구 후오비) 거래소는 레퍼럴 코드 변경은 불가능합니다. 54% 페이백 혜택을 받기 위해서는 신규 계정으로 다시 가입해야 하며 개인당 최대 3개의 계정까지 생성이 가능합니다."
-              : "HTX (formerly Huobi) does not allow referral code changes. To receive the 54% payback benefit, you must create a new account. Up to 3 accounts per person are allowed.",
+              ? "HTX(구 후오비) 거래소는 레퍼럴 코드 변경은 불가능합니다. 페이백 혜택을 받기 위해서는 신규 계정으로 다시 가입해야 하며 개인당 최대 3개의 계정까지 생성이 가능합니다."
+              : "HTX (formerly Huobi) does not allow referral code changes. To receive the payback benefit, you must create a new account. Up to 3 accounts per person are allowed.",
           },
           {
             type: "text",
@@ -811,14 +811,14 @@ function getHtxGuide(isKo: boolean): GuideContent {
       },
       {
         title: isKo
-          ? "FuturesAI HTX 54% 페이백 가입 방법"
-          : "How to Sign Up for 20% Payback with FuturesAI",
+          ? "FuturesAI HTX 페이백 가입 방법"
+          : "How to Sign Up for Payback with FuturesAI",
         blocks: [
           {
             type: "text",
             content: isKo
-              ? "페이백 54% 혜택을 받기 위해선 반드시 FuturesAI에서 제공하는 코드를 통해 가입해야 합니다."
-              : "You must sign up through the FuturesAI code to receive the 54% payback benefit.",
+              ? "페이백 혜택을 받기 위해선 반드시 FuturesAI에서 제공하는 코드를 통해 가입해야 합니다."
+              : "You must sign up through the FuturesAI code to receive the payback benefit.",
           },
           {
             type: "link",
