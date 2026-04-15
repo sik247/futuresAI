@@ -35,8 +35,20 @@ export async function runMarketWatch(force = false): Promise<{ alerts: number; t
   const alerts: string[] = [];
   const types: string[] = [];
 
-  // Force mode: skip cold-start seeding, send immediately
-  if (force) newsInitialized = true;
+  // Force mode: send news immediately without change detection
+  if (force) {
+    const forceNews = await sendForceNews();
+    if (forceNews.messages.length > 0) {
+      alerts.push(...forceNews.messages);
+      types.push("news");
+    }
+    // Send alerts
+    for (let i = 0; i < alerts.length; i++) {
+      await sendGroupMessage(alerts[i]);
+      if (i < alerts.length - 1) await new Promise(r => setTimeout(r, 2000));
+    }
+    return { alerts: alerts.length, types };
+  }
 
   // Run all checks in parallel
   const [newsResult, signalResult, polyResult] = await Promise.allSettled([
@@ -65,6 +77,71 @@ export async function runMarketWatch(force = false): Promise<{ alerts: number; t
   }
 
   return { alerts: alerts.length, types };
+}
+
+// ── Force mode: send top news immediately (no change detection) ──
+
+async function sendForceNews(): Promise<{ messages: string[] }> {
+  const messages: string[] = [];
+  const news = await fetchCryptoNews();
+  if (news.length === 0) return { messages };
+
+  const top = news.slice(0, 1); // Just 1 article for force mode
+  const geminiKey = process.env.GEMINI_API_KEY;
+  if (!geminiKey) return { messages };
+
+  const genAI = new GoogleGenerativeAI(geminiKey);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+  for (const item of top) {
+    try {
+      const result = await model.generateContent(`You are a head trader writing a morning note. Your job is to answer ONE question: "What does this news mean for my portfolio TODAY?"
+
+Write exactly 3 short paragraphs:
+
+1. WHAT HAPPENED (1 sentence max — just the fact, no opinion)
+
+2. WHAT IT MEANS FOR PRICES — this is the most important part. Be extremely specific:
+   - Name exact coins affected and whether they go UP or DOWN
+   - Give a magnitude estimate: "expect 2-4% move" not "could impact prices"
+   - Give a timeframe: "within 24h" or "over the next week"
+   - Say whether to BUY, SELL, or DO NOTHING right now
+   Example: "Bearish for ETH short-term. Expect 3-5% pullback within 48h. Reduce long exposure above $2,400."
+
+3. WHY — one sentence of evidence. Either a historical precedent with a date and number, or a structural reason.
+   Example: "Last comparable ruling (Nov 2023) triggered a 12% BTC selloff over 4 days."
+
+DO NOT be vague. DO NOT say "could impact" or "may affect" or "traders should watch." State what WILL likely happen.
+한국어로 작성하세요. Max 450 characters. No markdown, no emojis, no hashtags.
+
+News: ${item.title}
+Source: ${item.source}
+${item.body ? `Detail: ${item.body.slice(0, 500)}` : ""}`);
+
+      const analysis = result.response.text().trim();
+
+      const now = new Date().toLocaleString("en-US", {
+        timeZone: "Asia/Seoul",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+
+      let msg = `<b>🔴 Breaking</b> · ${now} KST\n\n`;
+      msg += `<b>${item.title}</b>\n`;
+      msg += `<i>${item.source}</i>\n\n`;
+      msg += `${analysis}\n\n`;
+      msg += `<a href="https://futuresai.io/ko/news">FuturesAI에서 더 보기</a>`;
+
+      messages.push(msg);
+    } catch (err) {
+      console.warn("[market-watch] Force news failed:", err instanceof Error ? err.message : err);
+    }
+  }
+
+  return { messages };
 }
 
 // ── 1. Breaking News Detection ──

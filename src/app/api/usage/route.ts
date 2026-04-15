@@ -3,6 +3,8 @@ import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { checkDailyLimit } from "@/lib/services/usage.service";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const session = await auth();
