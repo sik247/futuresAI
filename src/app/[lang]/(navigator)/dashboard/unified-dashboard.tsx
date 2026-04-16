@@ -651,6 +651,29 @@ export default function UnifiedDashboard({
               )}
             </div>
 
+            {/* Mobile Payback */}
+            {!isGuest && paybackAccounts.length > 0 && (
+              <div className="border border-zinc-800 p-3">
+                <SectionHeader>{lang === "ko" ? "페이백" : "Payback"}</SectionHeader>
+                <div className="flex items-center justify-between mt-1">
+                  <div>
+                    <p className="text-xs text-zinc-500">{lang === "ko" ? "총 수익" : "Total Earned"}</p>
+                    <p className="text-lg font-bold font-mono tabular-nums text-emerald-400">{formatUSD(totalPayback)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-zinc-500">{lang === "ko" ? "미지급" : "Unpaid"}</p>
+                    <p className="text-sm font-mono tabular-nums text-amber-400">{formatUSD(totalUnpaid)}</p>
+                  </div>
+                </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="text-[10px] text-zinc-600">{paybackAccounts.length} {lang === "ko" ? "거래소 연결됨" : "exchanges linked"}</span>
+                  <Link href={`/${lang}/me/refund-withdraw`} className="text-[10px] text-blue-400 hover:text-blue-300">
+                    {lang === "ko" ? "상세 보기 →" : "View Details →"}
+                  </Link>
+                </div>
+              </div>
+            )}
+
             {/* Mobile Fear & Greed */}
             <div className="border border-zinc-800 p-3">
               <SectionHeader>Fear &amp; Greed</SectionHeader>

@@ -115,19 +115,20 @@ async function fetchHtx(): Promise<ExchangeResult> {
 async function fetchGate(): Promise<ExchangeResult> {
   try {
     if (!process.env.GATE_API_KEY || !process.env.GATE_API_SECRET) {
-      return { exchange: "Gate.io", account: "COINBASE", status: "error", totalPayback: 0, entries: 0, error: "GATE_API_KEY or GATE_API_SECRET not set" };
+      return { exchange: "Gate.io", account: "RKCBNQNR", status: "error", totalPayback: 0, entries: 0, error: "GATE_API_KEY or GATE_API_SECRET not set" };
     }
-    const data = await gateService.getAffiliateData("COINBASE");
+    // Query aggregate (all users) — pass empty uid
+    const data = await gateService.getAffiliateData("");
     return {
       exchange: "Gate.io",
-      account: "COINBASE",
+      account: "RKCBNQNR",
       status: data.ok ? "ok" : "error",
       totalPayback: data.payback || 0,
-      entries: data.entries || 0,
+      entries: (data as any).totalEntries || data.entries || 0,
       error: data.ok ? undefined : (data as any).error || "Gate.io API error",
     };
   } catch (error: any) {
-    return { exchange: "Gate.io", account: "COINBASE", status: "error", totalPayback: 0, entries: 0, error: error.message };
+    return { exchange: "Gate.io", account: "RKCBNQNR", status: "error", totalPayback: 0, entries: 0, error: error.message };
   }
 }
 

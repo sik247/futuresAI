@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { requireAdmin } from "@/lib/utils/admin";
-import AdminDashboard from "../admin-dashboard";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard",
@@ -10,5 +10,6 @@ export const metadata: Metadata = {
 
 export default async function AdminPage() {
   await requireAdmin();
-  return <AdminDashboard />;
+  // Default admin landing is the payback management dashboard
+  redirect("/en/dashboard/admin/paybacks");
 }

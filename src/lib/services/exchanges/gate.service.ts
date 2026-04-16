@@ -20,66 +20,101 @@ class GateService extends AffiliateService {
     };
   }
 
+  private async gateGet(path: string, query: string) {
+    const headers = this.sign("GET", path, query, "");
+    const res = await fetch(`${this.baseUrl}${path}?${query}`, {
+      headers: {
+        KEY: headers.KEY,
+        SIGN: headers.SIGN,
+        Timestamp: headers.Timestamp,
+        "Content-Type": "application/json",
+      },
+    });
+    return res.json();
+  }
+
+  /**
+   * Get commission data for a specific referred user (or all users if uid is empty).
+   * Uses the PARTNER endpoint — the account is a partner referral, not an agency.
+   */
   async getAffiliateData(uid: string) {
     try {
-      // Fetch last 30 days of commission history
       const now = Math.floor(Date.now() / 1000);
       const thirtyDaysAgo = now - 30 * 24 * 60 * 60;
 
-      const path = "/api/v4/rebate/agency/commission_history";
-      const query = `from=${thirtyDaysAgo}&to=${now}&limit=100`;
-      const headers = this.sign("GET", path, query, "");
+      const path = "/api/v4/rebate/partner/commission_history";
+      const query = uid
+        ? `user_id=${uid}&from=${thirtyDaysAgo}&to=${now}&limit=100`
+        : `from=${thirtyDaysAgo}&to=${now}&limit=100`;
 
-      const res = await fetch(`${this.baseUrl}${path}?${query}`, {
-        headers: {
-          KEY: headers.KEY,
-          SIGN: headers.SIGN,
-          Timestamp: headers.Timestamp,
-          "Content-Type": "application/json",
-        },
-      });
+      const data = await this.gateGet(path, query);
 
-      const data = await res.json();
-
-      if (Array.isArray(data)) {
-        const total = data.reduce(
-          (sum: number, item: any) => sum + parseFloat(item.commission_amount || item.amount || "0"),
+      // Partner endpoint returns { total, list[] }
+      if (data && Array.isArray(data.list)) {
+        const total = data.list.reduce(
+          (sum: number, item: any) => sum + parseFloat(item.commission_amount || "0"),
           0
         );
-        return { ok: true, payback: total, entries: data.length, uid };
+        return { ok: true, payback: total, entries: data.list.length, totalEntries: data.total, uid };
       }
 
-      // If commission_history returns an error object, try transaction_history
-      const altPath = "/api/v4/rebate/agency/transaction_history";
-      const altQuery = `from=${thirtyDaysAgo}&to=${now}&limit=100`;
-      const altHeaders = this.sign("GET", altPath, altQuery, "");
+      // Fallback: try transaction_history
+      const altPath = "/api/v4/rebate/partner/transaction_history";
+      const altQuery = uid
+        ? `user_id=${uid}&from=${thirtyDaysAgo}&to=${now}&limit=100`
+        : `from=${thirtyDaysAgo}&to=${now}&limit=100`;
 
-      const altRes = await fetch(`${this.baseUrl}${altPath}?${altQuery}`, {
-        headers: {
-          KEY: altHeaders.KEY,
-          SIGN: altHeaders.SIGN,
-          Timestamp: altHeaders.Timestamp,
-          "Content-Type": "application/json",
-        },
-      });
+      const altData = await this.gateGet(altPath, altQuery);
 
-      const altData = await altRes.json();
-
-      if (Array.isArray(altData)) {
-        const total = altData.reduce(
-          (sum: number, item: any) => sum + parseFloat(item.commission_amount || item.amount || "0"),
+      if (altData && Array.isArray(altData.list)) {
+        const total = altData.list.reduce(
+          (sum: number, item: any) => sum + parseFloat(item.fee || "0"),
           0
         );
-        return { ok: true, payback: total, entries: altData.length, uid };
+        return { ok: true, payback: total, entries: altData.list.length, totalEntries: altData.total, uid };
       }
 
-      return {
-        ok: true,
-        payback: 0,
-        entries: 0,
-        uid,
-        note: "No commission data available yet",
-      };
+      return { ok: true, payback: 0, entries: 0, uid, note: "No commission data available yet" };
+    } catch (error: any) {
+      return { ok: false, error: error.message };
+    }
+  }
+
+  /** Get all referred users under this partner account. */
+  async getPartnerSubList() {
+    try {
+      const data = await this.gateGet("/api/v4/rebate/partner/sub_list", "limit=100");
+      if (data && Array.isArray(data.list)) {
+        return { ok: true, total: data.total, users: data.list };
+      }
+      return { ok: false, error: "Unexpected response" };
+    } catch (error: any) {
+      return { ok: false, error: error.message };
+    }
+  }
+
+  /** Get trading fees for a specific user from transaction history. */
+  async getUserFees(uid: string) {
+    try {
+      const now = Math.floor(Date.now() / 1000);
+      const thirtyDaysAgo = now - 30 * 24 * 60 * 60;
+      const path = "/api/v4/rebate/partner/transaction_history";
+      const query = `user_id=${uid}&from=${thirtyDaysAgo}&to=${now}&limit=100`;
+
+      const data = await this.gateGet(path, query);
+
+      if (data && Array.isArray(data.list)) {
+        const totalFees = data.list.reduce(
+          (sum: number, item: any) => sum + parseFloat(item.fee || "0"),
+          0
+        );
+        const totalVolume = data.list.reduce(
+          (sum: number, item: any) => sum + parseFloat(item.amount || "0"),
+          0
+        );
+        return { ok: true, totalFees, totalVolume, entries: data.list.length, totalEntries: data.total, uid };
+      }
+      return { ok: true, totalFees: 0, totalVolume: 0, entries: 0, uid };
     } catch (error: any) {
       return { ok: false, error: error.message };
     }

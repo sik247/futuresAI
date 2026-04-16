@@ -32,7 +32,7 @@ class HtxService extends AffiliateService {
 
   async getAffiliateData(uid: string) {
     try {
-      // Get user UID to verify API access
+      // Verify API access
       const uidUrl = this.sign("GET", "/v2/user/uid", {});
       const uidRes = await fetch(uidUrl);
       const uidData = await uidRes.json();
@@ -41,18 +41,35 @@ class HtxService extends AffiliateService {
         return { ok: false, error: uidData.message || uidData["err-msg"] || "API error" };
       }
 
-      // Fetch account ledger for rebate entries
+      // Try the v2 ledger endpoint first (has more detail and may contain user info)
+      const ledgerUrl = this.sign("GET", "/v2/account/ledger", {
+        accountId: String(uid),
+        transactTypes: "rebate",
+        limit: "100",
+      });
+      const ledgerRes = await fetch(ledgerUrl);
+      const ledgerData = await ledgerRes.json();
+
+      if (ledgerData.code === 200 && Array.isArray(ledgerData.data)) {
+        const totalPayback = ledgerData.data.reduce(
+          (sum: number, item: any) => sum + Math.abs(parseFloat(item.transactAmt || "0")),
+          0
+        );
+        console.log(`[htx] Ledger for uid=${uid}: ${ledgerData.data.length} entries, total=$${totalPayback.toFixed(2)}`);
+        return { ok: true, payback: totalPayback, uid, entries: ledgerData.data.length };
+      }
+
+      // Fallback: fetch account history with rebate filter
       const accountUrl = this.sign("GET", "/v1/account/accounts", {});
       const accountRes = await fetch(accountUrl);
       const accountData = await accountRes.json();
 
       if (accountData.status !== "ok" || !accountData.data?.length) {
-        return { ok: true, payback: 0, uid, accounts: [], note: "No accounts found" };
+        return { ok: true, payback: 0, uid, note: "No accounts found" };
       }
 
       const accountId = accountData.data[0].id;
 
-      // Fetch account history filtering for rebate transactions
       const historyUrl = this.sign("GET", "/v1/account/history", {
         "account-id": String(accountId),
         "transact-types": "rebate",
@@ -67,6 +84,7 @@ class HtxService extends AffiliateService {
           (sum: number, item: any) => sum + Math.abs(parseFloat(item["transact-amt"] || "0")),
           0
         );
+        console.log(`[htx] History for uid=${uid}: ${historyData.data.length} entries, total=$${totalPayback.toFixed(2)}, sample:`, JSON.stringify(historyData.data[0] || {}).slice(0, 200));
       }
 
       return {
