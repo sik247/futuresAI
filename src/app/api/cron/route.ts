@@ -128,9 +128,10 @@ const handleBitget: IHandler = async (exchangeAccount) => {
   if (exchangeAccount.status !== "ACTIVE") {
     exchangeAccountsService.activate(exchangeAccount.id);
   }
+  const rate = exchangeAccount.exchange.paybackRatio || 0;
   const newTrades = await saveTrades(
     exchangeAccount.id,
-    data.map((item: any) => ({ amount: item.payback, payback: item.payback, date: item.date }))
+    data.map((item: any) => ({ amount: item.payback, payback: item.payback * rate, date: item.date }))
   );
   return { newTrades };
 };
@@ -146,13 +147,17 @@ const handleBingx: IHandler = async (exchangeAccount) => {
     exchangeAccountsService.activate(exchangeAccount.id);
   }
 
+  const rate = exchangeAccount.exchange.paybackRatio || 0;
   const newTrades = await saveTrades(
     exchangeAccount.id,
-    parsed.data.list.map((item: any) => ({
-      amount: parseFloat(item.commission || "0"),
-      payback: parseFloat(item.commission || "0"),
-      date: new Date(item.time != null && item.time !== "" ? parseInt(item.time) : Date.now()),
-    }))
+    parsed.data.list.map((item: any) => {
+      const commission = parseFloat(item.commission || "0");
+      return {
+        amount: commission,
+        payback: commission * rate,
+        date: new Date(item.time != null && item.time !== "" ? parseInt(item.time) : Date.now()),
+      };
+    })
   );
   return { newTrades };
 };
@@ -169,8 +174,9 @@ const handleBybit: IHandler = async (exchangeAccount) => {
     exchangeAccountsService.activate(exchangeAccount.id);
   }
 
+  const rate = exchangeAccount.exchange.paybackRatio || 0;
   const newTrades = await saveTrades(exchangeAccount.id, [
-    { amount: commission, payback: commission, date: new Date() },
+    { amount: commission, payback: commission * rate, date: new Date() },
   ]);
   return { newTrades };
 };
@@ -183,9 +189,10 @@ const handleOkx: IHandler = async (exchangeAccount) => {
     exchangeAccountsService.activate(exchangeAccount.id);
   }
 
-  const payback = typeof data.payback === "number" ? data.payback : parseFloat(data.payback);
+  const rate = exchangeAccount.exchange.paybackRatio || 0;
+  const commission = typeof data.payback === "number" ? data.payback : parseFloat(data.payback);
   const newTrades = await saveTrades(exchangeAccount.id, [
-    { amount: payback, payback, date: new Date() },
+    { amount: commission, payback: commission * rate, date: new Date() },
   ]);
   return { newTrades };
 };
@@ -198,8 +205,10 @@ const handleGate: IHandler = async (exchangeAccount) => {
     exchangeAccountsService.activate(exchangeAccount.id);
   }
 
+  const rate = exchangeAccount.exchange.paybackRatio || 0;
+  const commission = data.payback;
   const newTrades = await saveTrades(exchangeAccount.id, [
-    { amount: data.payback, payback: data.payback, date: new Date() },
+    { amount: commission, payback: commission * rate, date: new Date() },
   ]);
   return { newTrades };
 };
@@ -212,8 +221,10 @@ const handleHtx: IHandler = async (exchangeAccount) => {
     exchangeAccountsService.activate(exchangeAccount.id);
   }
 
+  const rate = exchangeAccount.exchange.paybackRatio || 0;
+  const commission = data.payback;
   const newTrades = await saveTrades(exchangeAccount.id, [
-    { amount: data.payback, payback: data.payback, date: new Date() },
+    { amount: commission, payback: commission * rate, date: new Date() },
   ]);
   return { newTrades };
 };
