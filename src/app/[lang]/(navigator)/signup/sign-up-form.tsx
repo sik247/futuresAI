@@ -1,6 +1,6 @@
 "use client";
 
-import React, { MouseEvent, useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,28 +13,20 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { CheckIcon } from "@heroicons/react/24/solid";
-import { EmailCodeModal } from "./email-code-modal";
 import { createUser } from "./actions";
 import { useRouter } from "next/navigation";
 import { useAction } from "@/hooks/use-action";
-import { sendVerificationEmail } from "@/lib/utils/send-mail";
 import FileUploader from "@/components/file-uploader";
 import { FileUploadModule } from "@/lib/modules/file-upload";
 import { Dictionary } from "@/i18n";
 import { SUPABASE_STORAGE_URL } from "@/lib/utils/get-image-url";
+import { SocialLoginButtons } from "../login/social-login-buttons";
 
 type TSignUpForm = {
   translations: Dictionary;
   lang: string;
 };
-
-function getRandomCode() {
-  return Math.floor(Math.random() * 10000)
-    .toString()
-    .padStart(4, "0");
-}
 
 const inputClasses =
   "h-11 bg-white/[0.03] border-white/[0.08] text-white placeholder:text-zinc-600 rounded-lg focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 focus:bg-white/[0.05] transition-all duration-200";
@@ -44,19 +36,15 @@ const SignUpForm = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement> & TSignUpForm
 >(({ translations: t, lang, ...props }, ref) => {
   const [isCheck, setIsCheck] = useState<boolean>(false);
-  const [isEmailCodeModalOpen, setIsEmailCodeModalOpen] =
-    useState<boolean>(false);
-  const [isEmailAuthentication, setIsEmailAuthentication] =
-    useState<boolean>(false);
-  const [checkPassword, setCheckPassword] = useState<boolean>(false);
   const createUserAction = useAction(createUser);
   const router = useRouter();
-  const [code, setCode] = useState<string>(getRandomCode());
+  const ko = lang === "ko";
+
   const formSchema = z.object({
     email: z
       .string()
       .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, {
-        message: "이메일이 유효하지 않습니다.",
+        message: ko ? "이메일이 유효하지 않습니다." : "Invalid email address.",
       })
       .min(2),
     name: z.string(),
@@ -64,70 +52,36 @@ const SignUpForm = React.forwardRef<
     password: z
       .string()
       .regex(/^(?=.*[0-9])(?=.*[!@#$%^&*()])/, {
-        message: "비밀번호가 유효하지 않습니다.",
+        message: ko ? "비밀번호는 숫자와 특수문자를 포함해야합니다." : "Password must include numbers and special characters.",
       })
       .min(8),
     confirmPassword: z
       .string()
-      .regex(/^(?=.*[0-9])(?=.*[!@#$%^&*()])/, {
-        message: "비밀번호가 유효하지 않습니다.",
-      })
       .min(3),
     phoneNumber: z.string(),
-    emailCode: z.string({ message: "인증코드를 입력해주세요." }),
     imageUrl: z.string(),
   });
 
-  const checkEmailHandler = async (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    const formValues = form.getValues();
+  const onSubmit = async () => {
+    const values = form.getValues();
 
-    if (
-      !formValues.email.match(
-        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-      )
-    ) {
-      alert("이메일 형식이 올바르지 않습니다.");
-      return;
-    }
-
-    if (!formValues.password.match(/^(?=.*[0-9])(?=.*[!@#$%^&*()])/)) {
-      alert("비밀번호는 숫자와 특수문자를 포함해야합니다.");
-      return;
-    }
-
-    if (formValues.password.length < 8) {
-      alert("비밀번호는 8자 이상이어야 합니다.");
-      return;
-    }
-
-    if (formValues.password !== formValues.confirmPassword) {
-      alert("비밀번호가 일치하지 않습니다.");
+    if (values.password !== values.confirmPassword) {
+      alert(ko ? "비밀번호가 일치하지 않습니다." : "Passwords do not match.");
       return;
     }
 
     if (!isCheck) {
-      alert("이용약관 및 개인정보 보호 정책에 동의해주세요.");
+      alert(ko ? "이용약관 및 개인정보 보호 정책에 동의해주세요." : "Please agree to the terms and privacy policy.");
       return;
     }
 
-    if (!formValues.email) {
-      alert("이메일을 입력해주세요.");
-      return;
-    }
-
-    await sendVerificationEmail(formValues.email, code);
-    setIsEmailCodeModalOpen(true);
-  };
-
-  const onSubmit = async () => {
-    const response = await createUserAction(form.getValues());
+    const response = await createUserAction(values);
 
     if (response) {
-      alert("회원가입이 완료되었습니다.");
+      alert(ko ? "회원가입이 완료되었습니다." : "Account created successfully.");
       router.push(`/${lang}/login`);
     } else {
-      alert("아이디 또는 비밀번호가 일치하지 않습니다.");
+      alert(ko ? "회원가입에 실패했습니다. 이메일이 이미 사용 중일 수 있습니다." : "Sign up failed. Email may already be in use.");
     }
   };
 
@@ -141,12 +95,24 @@ const SignUpForm = React.forwardRef<
       password: "",
       confirmPassword: "",
       phoneNumber: "",
-      emailCode: "",
     },
   });
 
   return (
     <div ref={ref} {...props}>
+      {/* Telegram quick signup */}
+      <div className="mb-6">
+        <SocialLoginButtons lang={lang} />
+        <div className="relative flex items-center justify-center my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-white/[0.08]" />
+          </div>
+          <span className="relative bg-zinc-950 px-4 text-xs text-zinc-500 uppercase tracking-wider">
+            {ko ? "또는 이메일로 가입" : "or sign up with email"}
+          </span>
+        </div>
+      </div>
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* Profile Image */}
@@ -165,9 +131,7 @@ const SignUpForm = React.forwardRef<
                         if (files.length < 1) return;
                         const file = files[0];
                         if (
-                          file.name.includes(
-                            SUPABASE_STORAGE_URL
-                          )
+                          file.name.includes(SUPABASE_STORAGE_URL)
                         ) {
                           field.onChange({ target: { value: file.name } });
                           return;
@@ -175,8 +139,7 @@ const SignUpForm = React.forwardRef<
                         const fileUploader = new FileUploadModule();
                         const data = await fileUploader.upload(file);
                         const fileUrl =
-                          (SUPABASE_STORAGE_URL +
-                            data.path) as string;
+                          (SUPABASE_STORAGE_URL + data.path) as string;
                         field.onChange({ target: { value: fileUrl } });
                       }}
                     />
@@ -222,7 +185,7 @@ const SignUpForm = React.forwardRef<
                   <Input
                     {...field}
                     id="name"
-                    placeholder="홍길동"
+                    placeholder={ko ? "홍길동" : "John Doe"}
                     className={inputClasses}
                   />
                 </FormControl>
@@ -244,7 +207,7 @@ const SignUpForm = React.forwardRef<
                   <Input
                     {...field}
                     id="nickname"
-                    placeholder="홍길동"
+                    placeholder={ko ? "닉네임" : "Nickname"}
                     className={inputClasses}
                   />
                 </FormControl>
@@ -349,36 +312,16 @@ const SignUpForm = React.forwardRef<
             </div>
           </div>
 
-          {/* Submit / Verify button */}
+          {/* Submit button — direct, no email verification */}
           <div className="pt-2">
-            {isEmailAuthentication ? (
-              <Button
-                type="submit"
-                className="group relative w-full h-11 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20 hover:shadow-[0_0_24px_rgba(59,130,246,0.35)] transition-all duration-300 overflow-hidden"
-              >
-                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                <span className="relative">{t.signup_submit}</span>
-              </Button>
-            ) : (
-              <Button
-                type="button"
-                className="group relative w-full h-11 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20 hover:shadow-[0_0_24px_rgba(59,130,246,0.35)] transition-all duration-300 overflow-hidden"
-                onClick={checkEmailHandler}
-              >
-                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                <span className="relative">{t.signup_verify}</span>
-              </Button>
-            )}
+            <Button
+              type="submit"
+              className="group relative w-full h-11 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-600/20 hover:shadow-[0_0_24px_rgba(59,130,246,0.35)] transition-all duration-300 overflow-hidden"
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              <span className="relative">{t.signup_submit}</span>
+            </Button>
           </div>
-
-          <EmailCodeModal
-            form={form}
-            onSubmit={onSubmit}
-            code={code}
-            isEmailCodeModal={isEmailCodeModalOpen}
-            setIsEmailCodeModalOpen={setIsEmailCodeModalOpen}
-            setIsEmailAuthentication={setIsEmailAuthentication}
-          />
         </form>
       </Form>
     </div>
