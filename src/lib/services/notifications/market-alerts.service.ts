@@ -21,8 +21,8 @@ function kstNow(): string {
   });
 }
 
-async function geminiBilingual(prompt: string): Promise<string> {
-  const cacheKey = `gemini-bi:${prompt.slice(0, 80)}`;
+async function geminiKorean(prompt: string): Promise<string> {
+  const cacheKey = `gemini-ko:${prompt.slice(0, 80)}`;
   return cachedAI(cacheKey, async () => {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return "";
@@ -34,7 +34,7 @@ async function geminiBilingual(prompt: string): Promise<string> {
 }
 
 /* ================================================================== */
-/*  1. PRICE MOVEMENT ALERT (>3% in 4H)                               */
+/*  1. PRICE MOVEMENT ALERT (>5% in 4H)                               */
 /* ================================================================== */
 export async function checkPriceMovementAlert(): Promise<number> {
   let sent = 0;
@@ -48,28 +48,27 @@ export async function checkPriceMovementAlert(): Promise<number> {
       const curr = candles[candles.length - 1];
       const pctChange = ((curr.close - prev.close) / prev.close) * 100;
 
-      if (Math.abs(pctChange) < 3) continue;
+      if (Math.abs(pctChange) < 5) continue;
 
       const dirKo = pctChange > 0 ? "급등" : "급락";
-      const dirEn = pctChange > 0 ? "Surge" : "Drop";
-      const analysis = await geminiBilingual(
-        `${p.nameEn} (${p.symbol}) moved ${pctChange.toFixed(1)}% in 4 hours. Current price $${curr.close.toLocaleString()}.
+      const analysis = await geminiKorean(
+        `${p.nameKo}(${p.symbol})이 4시간 동안 ${pctChange.toFixed(1)}% 움직였습니다. 현재가 $${curr.close.toLocaleString()}.
 
-You are a quant strategist explaining what this move means for the market.
+퀀트 전략가로서 이 움직임의 시장 의미를 분석하세요.
 
-Write bilingual analysis:
-[Korean: 2-3 sentences — what caused this move, what it means for market structure (liquidations, OI shift, funding rate pressure), and what to watch next. Be specific about levels.]
----
-[English: 2-3 sentences — same depth. "This move suggests..." Explain positioning implications, second-order effects on correlated assets, and the key level that determines if this continues or reverses.]
+2-3문장으로 작성:
+- 이 움직임의 원인과 시장 구조적 의미 (청산, 미결제약정, 펀딩비 영향)
+- 주시해야 할 핵심 가격 레벨
+- 구체적인 매수/매도/관망 추천
 
-No emojis. Quant desk style — causal, precise, actionable.`
+전문적 퀀트 톤 — 인과관계 중심, 구체적, 실행 가능. 이모지 금지. 최대 400자.`
       );
 
-      let msg = `<b>Price ${dirEn} | 가격 ${dirKo}</b> · ${kstNow()} KST\n\n`;
+      let msg = `<b>📊 가격 ${dirKo}</b> · ${kstNow()} KST\n\n`;
       msg += `<b>${p.symbol}/USDT</b>  $${prev.close.toLocaleString()} → $${curr.close.toLocaleString()}\n`;
-      msg += `4H Change: <b>${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(2)}%</b>\n\n`;
+      msg += `4시간 변동: <b>${pctChange >= 0 ? "+" : ""}${pctChange.toFixed(2)}%</b>\n\n`;
       if (analysis) msg += `${analysis}\n\n`;
-      msg += `<i>— FuturesAI Quant Desk</i>`;
+      msg += `⚠️ 본 분석은 투자 조언이 아닙니다.\n<i>— FuturesAI드림</i>`;
 
       await sendGroupMessage(msg);
       sent++;
@@ -99,27 +98,21 @@ export async function checkFundingRateAlert(): Promise<boolean> {
     const extremeRates = rates.filter((r) => r.extreme);
     if (extremeRates.length === 0) return false;
 
-    let msg = `<b>Funding Rate Warning | 펀딩비 경고</b> · ${kstNow()} KST\n\n`;
+    let msg = `<b>⚠️ 펀딩비 경고</b> · ${kstNow()} KST\n\n`;
 
     for (const r of rates) {
       const emoji = r.extreme ? (r.rate > 0 ? "🔴" : "🟢") : "⚪";
       const labelKo = r.rate > 0 ? "롱이 숏에 지불 중" : "숏이 롱에 지불 중";
-      const labelEn = r.rate > 0 ? "Longs paying shorts" : "Shorts paying longs";
       const warningKo = r.extreme
         ? r.rate > 0 ? " (롱 과열)" : " (숏 과열)"
         : "";
-      const warningEn = r.extreme
-        ? r.rate > 0 ? " (Long overheated)" : " (Short overheated)"
-        : "";
 
-      msg += `${emoji} <b>${r.symbol}</b> Funding: ${r.rate >= 0 ? "+" : ""}${r.rate.toFixed(4)}%\n`;
-      msg += `   ${labelKo}${warningKo}\n`;
-      msg += `   ${labelEn}${warningEn}\n\n`;
+      msg += `${emoji} <b>${r.symbol}</b> 펀딩비: ${r.rate >= 0 ? "+" : ""}${r.rate.toFixed(4)}%\n`;
+      msg += `   ${labelKo}${warningKo}\n\n`;
     }
 
-    msg += `극단적 펀딩비 — 포지션 청산 위험 주의\n`;
-    msg += `Extreme funding rates — watch for position liquidation risk.\n\n`;
-    msg += `<i>— FuturesAI Quant Desk</i>`;
+    msg += `극단적 펀딩비 — 포지션 청산 위험에 주의하세요.\n\n`;
+    msg += `<i>— FuturesAI드림</i>`;
 
     return await sendGroupMessage(msg);
   } catch (error) {
@@ -171,33 +164,29 @@ export async function checkLiquidationAlert(): Promise<boolean> {
 
     if (totalLiq < 10_000_000) return false; // Only alert if >$10M
 
-    let msg = `<b>Mass Liquidation | 대규모 청산</b> · ${kstNow()} KST\n\n`;
-    msg += `4H liquidation summary:\n\n`;
+    let msg = `<b>🔥 대규모 청산</b> · ${kstNow()} KST\n\n`;
+    msg += `4시간 청산 요약:\n\n`;
 
     for (const l of liquidations) {
       const longStr = `$${(l.longTotal / 1e6).toFixed(1)}M`;
       const shortStr = `$${(l.shortTotal / 1e6).toFixed(1)}M`;
 
       let biasKo: string;
-      let biasEn: string;
       if (l.longTotal > l.shortTotal * 2) {
         biasKo = "롱 집중 청산 (하락 압력)";
-        biasEn = "Long-heavy liquidation (bearish pressure)";
       } else if (l.shortTotal > l.longTotal * 2) {
         biasKo = "숏 집중 청산 (상승 압력)";
-        biasEn = "Short-heavy liquidation (bullish pressure)";
       } else {
         biasKo = "양방향 청산";
-        biasEn = "Bilateral liquidation";
       }
 
       msg += `<b>${l.symbol}USDT</b>\n`;
-      msg += `   Longs: ${longStr} | Shorts: ${shortStr}\n`;
-      msg += `   ${biasKo} | ${biasEn}\n\n`;
+      msg += `   롱: ${longStr} | 숏: ${shortStr}\n`;
+      msg += `   ${biasKo}\n\n`;
     }
 
-    msg += `Total: <b>$${(totalLiq / 1e6).toFixed(1)}M</b> liquidated\n\n`;
-    msg += `<i>— FuturesAI Quant Desk</i>`;
+    msg += `총 청산: <b>$${(totalLiq / 1e6).toFixed(1)}M</b>\n\n`;
+    msg += `<i>— FuturesAI드림</i>`;
 
     return await sendGroupMessage(msg);
   } catch (error) {
@@ -223,13 +212,12 @@ export async function checkVolumeSpikeAlert(): Promise<number> {
 
       if (ratio < 2.0) continue;
 
-      let msg = `<b>Volume Spike | 거래량 급증</b> · ${kstNow()} KST\n\n`;
+      let msg = `<b>📊 거래량 급증</b> · ${kstNow()} KST\n\n`;
       msg += `<b>${p.symbol}/USDT</b>\n`;
-      msg += `Current 4H Vol: ${formatVol(latest)} (<b>${ratio.toFixed(1)}x</b> avg)\n`;
-      msg += `20-period avg: ${formatVol(avg20)}\n\n`;
-      msg += `이례적 거래량 급증 — 방향성 움직임의 전조 가능성.\n`;
-      msg += `Abnormal volume spike — potential precursor to directional move.\n\n`;
-      msg += `<i>— FuturesAI Quant Desk</i>`;
+      msg += `현재 4시간 거래량: ${formatVol(latest)} (<b>${ratio.toFixed(1)}x</b> avg)\n`;
+      msg += `20기간 평균: ${formatVol(avg20)}\n\n`;
+      msg += `이례적 거래량 급증 — 방향성 움직임의 전조 가능성에 주의하세요.\n\n`;
+      msg += `<i>— FuturesAI드림</i>`;
 
       await sendGroupMessage(msg);
       sent++;
@@ -249,7 +237,6 @@ export async function checkOpenInterestAlert(): Promise<boolean> {
       change4h: number;
       priceChange: number;
       interpretationKo: string;
-      interpretationEn: string;
     }[] = [];
 
     for (const p of PAIRS) {
@@ -272,19 +259,14 @@ export async function checkOpenInterestAlert(): Promise<boolean> {
         const priceChange = priceData.changePercent24h;
 
         let interpretationKo: string;
-        let interpretationEn: string;
         if (change4h > 0 && priceChange > 0) {
           interpretationKo = "신규 롱 포지션 유입 (상승 베팅 증가)";
-          interpretationEn = "New long positions opening (bullish bets increasing)";
         } else if (change4h > 0 && priceChange < 0) {
           interpretationKo = "신규 숏 포지션 유입 (하락 베팅 증가)";
-          interpretationEn = "New short positions opening (bearish bets increasing)";
         } else if (change4h < 0 && priceChange > 0) {
           interpretationKo = "숏 청산 진행 중 (숏 스퀴즈)";
-          interpretationEn = "Short covering underway (short squeeze)";
         } else {
           interpretationKo = "롱 청산 진행 중 (롱 언와인드)";
-          interpretationEn = "Long unwinding in progress";
         }
 
         alerts.push({
@@ -293,14 +275,13 @@ export async function checkOpenInterestAlert(): Promise<boolean> {
           change4h,
           priceChange,
           interpretationKo,
-          interpretationEn,
         });
       } catch { /* skip */ }
     }
 
     if (alerts.length === 0) return false;
 
-    let msg = `<b>Open Interest Shift | 미결제약정 변동</b> · ${kstNow()} KST\n\n`;
+    let msg = `<b>📊 미결제약정 변동</b> · ${kstNow()} KST\n\n`;
 
     for (const a of alerts) {
       const oiStr = a.currentOI >= 1e9
@@ -308,12 +289,11 @@ export async function checkOpenInterestAlert(): Promise<boolean> {
         : `$${(a.currentOI / 1e6).toFixed(0)}M`;
 
       msg += `<b>${a.symbol}USDT</b>\n`;
-      msg += `   OI: ${oiStr} (${a.change4h >= 0 ? "+" : ""}${a.change4h.toFixed(1)}% / 4H)\n`;
-      msg += `   ${a.interpretationKo}\n`;
-      msg += `   ${a.interpretationEn}\n\n`;
+      msg += `   미결제약정: ${oiStr} (${a.change4h >= 0 ? "+" : ""}${a.change4h.toFixed(1)}% / 4시간)\n`;
+      msg += `   ${a.interpretationKo}\n\n`;
     }
 
-    msg += `<i>— FuturesAI Quant Desk</i>`;
+    msg += `<i>— FuturesAI드림</i>`;
     return await sendGroupMessage(msg);
   } catch (error) {
     console.error("[open-interest]", error);
@@ -326,7 +306,7 @@ export async function checkOpenInterestAlert(): Promise<boolean> {
 /* ================================================================== */
 export async function checkExchangeFlowAlert(): Promise<boolean> {
   try {
-    let msg = `<b>Exchange Flow | 거래소 자금 흐름</b> · ${kstNow()} KST\n\n`;
+    let msg = `<b>💰 거래소 자금 흐름</b> · ${kstNow()} KST\n\n`;
     let hasData = false;
 
     for (const p of PAIRS) {
@@ -343,19 +323,17 @@ export async function checkExchangeFlowAlert(): Promise<boolean> {
           (d: any) => parseFloat(d.buyVol) / parseFloat(d.sellVol)
         );
         const trendDirKo = trend[0] > trend[trend.length - 1] ? "상승 중" : "하락 중";
-        const trendDirEn = trend[0] > trend[trend.length - 1] ? "Rising" : "Declining";
         const biasKo = latest > 1.2 ? "매수 우위" : latest < 0.8 ? "매도 우위" : "균형";
-        const biasEn = latest > 1.2 ? "Buy dominant" : latest < 0.8 ? "Sell dominant" : "Balanced";
 
-        msg += `<b>${p.symbol}</b> Taker Buy/Sell: ${latest.toFixed(2)} (${biasKo} | ${biasEn})\n`;
-        msg += `   Trend: ${trendDirKo} | ${trendDirEn}\n\n`;
+        msg += `<b>${p.symbol}</b> 테이커 매수/매도 비율: ${latest.toFixed(2)} (${biasKo})\n`;
+        msg += `   추세: ${trendDirKo}\n\n`;
         hasData = true;
       } catch { /* skip */ }
     }
 
     if (!hasData) return false;
 
-    msg += `<i>— FuturesAI Quant Desk</i>`;
+    msg += `<i>— FuturesAI드림</i>`;
     return await sendGroupMessage(msg);
   } catch (error) {
     console.error("[exchange-flow]", error);

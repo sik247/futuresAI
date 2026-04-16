@@ -132,7 +132,7 @@ export default async function SnsPage({ params: { lang } }: { params: { lang: st
           </div>
           {/* Telegram link - compact */}
           <a
-            href="https://t.me/FuturesAIOfficial"
+            href={lang === "ko" ? "https://t.me/FuturesAIOfficial" : "https://t.me/FuturesAI_Global"}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 rounded-lg border border-[#2AABEE]/20 bg-[#2AABEE]/[0.08] px-4 py-2 hover:bg-[#2AABEE]/[0.15] transition-all"

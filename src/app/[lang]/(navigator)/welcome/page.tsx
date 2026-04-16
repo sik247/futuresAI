@@ -56,7 +56,7 @@ export default async function WelcomePage({
         <div className="space-y-4 mb-10">
           {/* Step 1: Join Telegram Channel */}
           <a
-            href="https://t.me/FuturesAIOfficial"
+            href={lang === "ko" ? "https://t.me/FuturesAIOfficial" : "https://t.me/FuturesAI_Global"}
             target="_blank"
             rel="noopener noreferrer"
             className="group flex items-center gap-4 p-5 rounded-2xl border border-[#2AABEE]/20 bg-[#2AABEE]/[0.06] hover:bg-[#2AABEE]/[0.12] hover:border-[#2AABEE]/40 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2AABEE]/50"

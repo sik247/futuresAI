@@ -17,11 +17,11 @@ const PartnerExchanges = [
   { item: "/icons/exchange/okx.svg", alt: "OKX", href: "https://www.okx.com/join/futuresai" },
 ];
 
-const CommunityIconsPathList = [
+const getCommunityIcons = (lang: string) => [
   {
     item: "/icons/footer-icons/telegram.svg",
     alt: "Futures AI Official",
-    href: "https://t.me/FuturesAIOfficial",
+    href: lang === "ko" ? "https://t.me/FuturesAIOfficial" : "https://t.me/FuturesAI_Global",
   },
 ];
 
@@ -110,7 +110,7 @@ const Footer: React.FC<TFooter> = ({ lang = "en", translations }) => {
               {ko ? "커뮤니티" : "Community"}
             </span>
             <ul className="flex gap-3">
-              {CommunityIconsPathList.map((path, idx) => (
+              {getCommunityIcons(lang).map((path, idx) => (
                 <li key={idx}>
                   <a href={path.href} target="_blank" rel="noopener noreferrer"
                     className="group flex items-center justify-center w-10 h-10 rounded-full bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm hover:bg-blue-600/10 hover:border-blue-500/30 hover:shadow-[0_0_16px_rgba(59,130,246,0.2)] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950">

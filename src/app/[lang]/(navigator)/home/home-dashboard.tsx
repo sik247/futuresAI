@@ -938,7 +938,7 @@ function ChatWidget({ lang }: { lang: string }) {
                       {ko ? "로그인" : "Sign In"}
                     </a>
                     <a
-                      href="https://t.me/FuturesAIOfficial"
+                      href={lang === "ko" ? "https://t.me/FuturesAIOfficial" : "https://t.me/FuturesAI_Global"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-1.5 rounded-lg bg-[#229ED9]/15 hover:bg-[#229ED9]/25 border border-[#229ED9]/30 text-[#5bc0f5] text-[11px] font-semibold px-3 py-1.5 transition-colors"

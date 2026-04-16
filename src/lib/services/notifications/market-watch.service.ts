@@ -25,8 +25,8 @@ const MAX_SEEN = 100;
 
 // ── Thresholds ──
 
-const PRICE_MOVE_THRESHOLD = 3; // % in 24h to trigger alert
-const FNG_CHANGE_THRESHOLD = 10; // Fear & Greed shift to trigger
+const PRICE_MOVE_THRESHOLD = 10; // % in 24h to trigger alert
+const FNG_CHANGE_THRESHOLD = 15; // Fear & Greed shift to trigger
 const POLYMARKET_SHIFT_THRESHOLD = 5; // % odds change to trigger
 
 // ── Main entry point ──
@@ -90,8 +90,8 @@ async function sendForceNews(): Promise<{ messages: string[] }> {
     const EMOJI: Record<string, string> = {
       "Strong Buy": "🟢🟢", "Buy": "🟢", "Neutral": "⚪", "Sell": "🔴", "Strong Sell": "🔴🔴",
     };
-    const now = new Date().toLocaleString("en-US", { timeZone: "Asia/Seoul", month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false });
-    let msg = `<b>📡 Signal Update</b> · ${now} KST\n\n`;
+    const now = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul", month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false });
+    let msg = `<b>📡 시그널 업데이트</b> · ${now} KST\n\n`;
     for (const s of signals.signals.slice(0, 6)) {
       const emoji = EMOJI[s.signal] || "";
       const price = s.price > 100 ? `$${s.price.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : `$${s.price.toFixed(4)}`;
@@ -99,10 +99,10 @@ async function sendForceNews(): Promise<{ messages: string[] }> {
       msg += `${emoji} <b>${s.symbol}</b> ${price} (${change}) ${s.direction}\n`;
     }
     const fgVal = signals.fearGreed.value;
-    const fgLabel = fgVal <= 25 ? "Extreme Fear" : fgVal <= 45 ? "Fear" : fgVal <= 55 ? "Neutral" : fgVal <= 75 ? "Greed" : "Extreme Greed";
+    const fgLabel = fgVal <= 25 ? "극도의 공포" : fgVal <= 45 ? "공포" : fgVal <= 55 ? "중립" : fgVal <= 75 ? "탐욕" : "극도의 탐욕";
     msg += `\nFear & Greed: ${fgVal}/100 (${fgLabel})\n`;
-    msg += `${signals.btcTrend === "above_sma" ? "BTC above 7D SMA ↑" : "BTC below 7D SMA ↓"}\n\n`;
-    msg += `<a href="https://futuresai.io/ko/home">실시간 시그널 보기</a>`;
+    msg += `${signals.btcTrend === "above_sma" ? "BTC 7일 이동평균 상향 ↑" : "BTC 7일 이동평균 하향 ↓"}\n\n`;
+    msg += `<a href="https://futuresai.io/ko/home">실시간 시그널 보기</a>\n<i>— FuturesAI드림</i>`;
     messages.push(msg);
   } catch (err) {
     console.error("[market-watch] Force signal failed:", err);
@@ -151,32 +151,30 @@ async function checkBreakingNews(): Promise<{ messages: string[] }> {
 
   for (const item of top) {
     try {
-      const result = await model.generateContent(`You are a head trader writing a morning note. Your job is to answer ONE question: "What does this news mean for my portfolio TODAY?"
+      const result = await model.generateContent(`당신은 수석 트레이더입니다. 이 뉴스가 "오늘 내 포트폴리오에 어떤 의미인지" 답하세요.
 
-Write exactly 3 short paragraphs:
+정확히 3개 문단으로 작성:
 
-1. WHAT HAPPENED (1 sentence max — just the fact, no opinion)
+1. 무슨 일이 일어났나 (1문장 — 사실만, 의견 없이)
 
-2. WHAT IT MEANS FOR PRICES — this is the most important part. Be extremely specific:
-   - Name exact coins affected and whether they go UP or DOWN
-   - Give a magnitude estimate: "expect 2-4% move" not "could impact prices"
-   - Give a timeframe: "within 24h" or "over the next week"
-   - Say whether to BUY, SELL, or DO NOTHING right now
-   Example: "Bearish for ETH short-term. Expect 3-5% pullback within 48h. Reduce long exposure above $2,400."
+2. 가격에 미치는 영향 — 가장 중요한 부분:
+   - 영향받는 코인과 방향(상승/하락) 명시
+   - 변동폭 예상: "2-4% 움직임 예상" (모호하게 "영향 있을 수 있음" 금지)
+   - 시간대: "24시간 이내" 또는 "1주일 내"
+   - 지금 매수/매도/관망 중 무엇을 해야 하는지 명시
 
-3. WHY — one sentence of evidence. Either a historical precedent with a date and number, or a structural reason.
-   Example: "Last comparable ruling (Nov 2023) triggered a 12% BTC selloff over 4 days."
+3. 근거 — 역사적 선례(날짜, 수치 포함) 또는 구조적 이유 1문장
 
-DO NOT be vague. DO NOT say "could impact" or "may affect" or "traders should watch." State what WILL likely happen.
-English only. Max 450 characters. No markdown, no emojis, no hashtags.
+모호한 표현 금지. "영향 있을 수 있음", "주시해야 함" 등 금지. 무엇이 일어날 것인지 단정적으로 서술.
+최대 500자. 마크다운, 이모지, 해시태그 금지.
 
-News: ${item.title}
-Source: ${item.source}
-${item.body ? `Detail: ${item.body.slice(0, 500)}` : ""}`);
+뉴스: ${item.title}
+출처: ${item.source}
+${item.body ? `상세: ${item.body.slice(0, 500)}` : ""}`);
 
       const analysis = result.response.text().trim();
 
-      const now = new Date().toLocaleString("en-US", {
+      const now = new Date().toLocaleString("ko-KR", {
         timeZone: "Asia/Seoul",
         month: "short",
         day: "2-digit",
@@ -185,11 +183,11 @@ ${item.body ? `Detail: ${item.body.slice(0, 500)}` : ""}`);
         hour12: false,
       });
 
-      let msg = `<b>🔴 Breaking</b> · ${now} KST\n\n`;
+      let msg = `<b>🔴 속보</b> · ${now} KST\n\n`;
       msg += `<b>${item.title}</b>\n`;
       msg += `<i>${item.source}</i>\n\n`;
       msg += `${analysis}\n\n`;
-      msg += `<a href="https://futuresai.io/en/news">More on FuturesAI →</a>`;
+      msg += `<a href="https://futuresai.io/ko/news">FuturesAI에서 더 보기</a>\n<i>— FuturesAI드림</i>`;
 
       messages.push(msg);
     } catch (err) {
@@ -203,81 +201,8 @@ ${item.body ? `Detail: ${item.body.slice(0, 500)}` : ""}`);
 // ── 2. Signal Change Detection ──
 
 async function checkSignalChanges(): Promise<{ messages: string[] }> {
-  const messages: string[] = [];
-  const signals = await fetchMarketSignals();
-
-  // Check for direction flips (LONG → SHORT or vice versa)
-  const flips: string[] = [];
-  for (const s of signals.signals) {
-    const prev = lastSignalDirection[s.symbol];
-    if (prev && prev !== s.direction && s.direction !== "NEUTRAL" && prev !== "NEUTRAL") {
-      flips.push(s.symbol);
-    }
-    lastSignalDirection[s.symbol] = s.direction;
-  }
-
-  // Check for big price moves
-  const bigMovers = signals.signals.filter(s => Math.abs(s.change24h) >= PRICE_MOVE_THRESHOLD);
-
-  // Check for Fear & Greed shift
-  const fgChanged = lastFearGreed >= 0 && Math.abs(signals.fearGreed.value - lastFearGreed) >= FNG_CHANGE_THRESHOLD;
-  const prevFG = lastFearGreed;
-  lastFearGreed = signals.fearGreed.value;
-
-  // Build alert if any signal change detected
-  if (flips.length === 0 && bigMovers.length === 0 && !fgChanged) return { messages };
-
-  const now = new Date().toLocaleString("en-US", {
-    timeZone: "Asia/Seoul",
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-
-  let msg = `<b>⚡ Signal Change Detected</b> · ${now} KST\n\n`;
-
-  if (flips.length > 0) {
-    msg += `<b>Direction Flip:</b>\n`;
-    for (const sym of flips) {
-      const s = signals.signals.find(x => x.symbol === sym);
-      if (!s) continue;
-      const prev = lastSignalDirection[sym] === "LONG" ? "SHORT" : "LONG";
-      const price = s.price > 100
-        ? `$${s.price.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
-        : `$${s.price.toFixed(4)}`;
-      msg += `${sym} ${prev} → ${s.direction} (${price})\n`;
-    }
-    msg += `\n`;
-  }
-
-  if (bigMovers.length > 0) {
-    msg += `<b>Big Moves (24h):</b>\n`;
-    for (const s of bigMovers.slice(0, 3)) {
-      const emoji = s.change24h > 0 ? "📈" : "📉";
-      const price = s.price > 100
-        ? `$${s.price.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
-        : `$${s.price.toFixed(4)}`;
-      msg += `${emoji} ${s.symbol} ${price} (${s.change24h >= 0 ? "+" : ""}${s.change24h.toFixed(1)}%)\n`;
-    }
-    msg += `\n`;
-  }
-
-  if (fgChanged) {
-    const fgLabel = (v: number) =>
-      v <= 25 ? "Extreme Fear" :
-      v <= 45 ? "Fear" :
-      v <= 55 ? "Neutral" :
-      v <= 75 ? "Greed" : "Extreme Greed";
-    msg += `<b>Fear & Greed Shift:</b>\n`;
-    msg += `${prevFG} → ${signals.fearGreed.value} (${fgLabel(signals.fearGreed.value)})\n\n`;
-  }
-
-  msg += `<a href="https://futuresai.io/en/home">Live Signals →</a>`;
-  messages.push(msg);
-
-  return { messages };
+  // Signal change alerts disabled — only the 4-hour cron-quick-signals report sends signals now
+  return { messages: [] };
 }
 
 // ── 3. Polymarket Odds Change Detection ──
@@ -325,22 +250,22 @@ async function checkPolymarketShifts(): Promise<{ messages: string[] }> {
       `"${s.title}": ${s.oldOdds.toFixed(0)}% → ${s.newOdds.toFixed(0)}% (Vol: $${(s.volume / 1e6).toFixed(1)}M)`
     ).join("\n");
 
-    const result = await model.generateContent(`You are a head trader. Polymarket prediction odds just shifted:
+    const result = await model.generateContent(`당신은 수석 트레이더입니다. Polymarket 예측 시장 확률이 변동했습니다:
 
 ${shiftsText}
 
-Answer in 2 short paragraphs:
+2개 문단으로 답하세요:
 
-1. WHAT TO DO — Are these odds LEADING or LAGGING spot prices? If leading, name exactly which coins to buy or sell and by when. If lagging, say "already priced in — no action needed."
+1. 어떻게 할 것인가 — 이 확률 변동이 현물 가격을 선행하는가 후행하는가? 선행이면 매수/매도할 코인과 시점을 구체적으로. 후행이면 "이미 반영됨 — 조치 불필요."
 
-2. PRECEDENT — One specific past example where prediction market odds moved like this and what happened to spot prices after. Include the date and percentage move.
+2. 과거 사례 — 비슷한 확률 변동이 있었던 과거 사례, 이후 현물 가격 움직임(날짜, 변동폭 포함).
 
-DO NOT be vague. State a clear trade direction.
-English only. Max 350 characters. No markdown, no emojis, no hashtags.`);
+모호한 표현 금지. 명확한 매매 방향 제시.
+최대 400자. 마크다운, 이모지, 해시태그 금지.`);
 
     const analysis = result.response.text().trim();
 
-    const now = new Date().toLocaleString("en-US", {
+    const now = new Date().toLocaleString("ko-KR", {
       timeZone: "Asia/Seoul",
       month: "short",
       day: "2-digit",
@@ -349,14 +274,14 @@ English only. Max 350 characters. No markdown, no emojis, no hashtags.`);
       hour12: false,
     });
 
-    let msg = `<b>🎯 Polymarket Shift</b> · ${now} KST\n\n`;
+    let msg = `<b>🎯 예측 시장 변동</b> · ${now} KST\n\n`;
     for (const s of shifts) {
       const arrow = s.newOdds > s.oldOdds ? "↑" : "↓";
       msg += `${arrow} ${s.title}\n`;
       msg += `   ${s.oldOdds.toFixed(0)}% → <b>${s.newOdds.toFixed(0)}%</b> | Vol: $${(s.volume / 1e6).toFixed(1)}M\n\n`;
     }
     msg += `${analysis}\n\n`;
-    msg += `<a href="https://futuresai.io/en/markets">Polymarket Analysis →</a>`;
+    msg += `<a href="https://futuresai.io/ko/markets">예측 시장 분석 보기</a>\n<i>— FuturesAI드림</i>`;
 
     messages.push(msg);
   } catch (err) {

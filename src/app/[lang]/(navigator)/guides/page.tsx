@@ -157,7 +157,7 @@ export default function GuidesPage({
                 : "If you need assistance during the process, get help from the FuturesAI community."}
             </p>
             <a
-              href="https://t.me/futuresai"
+              href={isKo ? "https://t.me/FuturesAIOfficial" : "https://t.me/FuturesAI_Global"}
               target="_blank"
               rel="noopener noreferrer"
               className="px-6 py-2.5 rounded-xl text-sm font-medium bg-indigo-500 hover:bg-indigo-400 text-white transition-colors"

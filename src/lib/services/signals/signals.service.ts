@@ -38,10 +38,10 @@ const COINS = [
 // ── Signal logic ────────────────────────────────────────────────────
 
 function getSignalFromChange(change: number): SignalItem["signal"] {
-  if (change > 5) return "Strong Buy";
-  if (change > 2) return "Buy";
-  if (change > -2) return "Neutral";
-  if (change > -5) return "Sell";
+  if (change > 8) return "Strong Buy";
+  if (change > 5) return "Buy";
+  if (change > -5) return "Neutral";
+  if (change > -8) return "Sell";
   return "Strong Sell";
 }
 

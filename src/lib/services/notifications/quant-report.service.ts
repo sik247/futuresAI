@@ -244,11 +244,12 @@ export async function sendQuantReport(): Promise<boolean> {
         verdictEn = `No clear direction — range-bound. Wait for a decisive break of key levels before committing.`;
       }
 
-      msg += `<b>Verdict | 결론</b>\n`;
-      msg += `${verdictKo}\n${verdictEn}\n\n`;
+      msg += `<b>🎯 결론</b>\n`;
+      msg += `${verdictKo}\n\n`;
 
-      msg += `<a href="https://futuresai.io/ko/chart-ideas">Free AI Chart Analysis | 무료 AI 차트 분석</a>\n`;
-      msg += `<i>— FuturesAI Quant Analysis</i>`;
+      msg += `⚠️ 본 분석은 투자 조언이 아닙니다.\n`;
+      msg += `<a href="https://futuresai.io/ko/chart-ideas">AI 차트 분석 보기</a>\n`;
+      msg += `<i>— FuturesAI드림</i>`;
 
       await sendGroupMessage(msg);
     }

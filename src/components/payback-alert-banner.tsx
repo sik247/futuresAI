@@ -17,7 +17,7 @@ export default function PaybackAlertBanner({ lang }: { lang: string }) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex items-center justify-center gap-2 sm:gap-4 text-sm flex-wrap">
         {/* Telegram */}
         <a
-          href="https://t.me/FuturesAIOfficial"
+          href={lang === "ko" ? "https://t.me/FuturesAIOfficial" : "https://t.me/FuturesAI_Global"}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#2AABEE]/15 hover:bg-[#2AABEE]/25 border border-[#2AABEE]/25 transition-colors"

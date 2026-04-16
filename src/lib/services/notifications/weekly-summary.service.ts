@@ -52,23 +52,23 @@ export async function sendWeeklySummary(): Promise<boolean> {
     const dateRangeKo = `${formatDateKo(weekAgo)} ~ ${formatDateKo(today)}`;
     const dateRangeEn = `${formatDateEn(weekAgo)} — ${formatDateEn(today)}`;
 
-    let msg = `<b>Weekly Market Report | 주간 시장 리포트</b>\n${dateRangeKo} (${dateRangeEn})\n\n`;
+    let msg = `<b>📊 주간 시장 리포트</b>\n${dateRangeKo}\n\n`;
 
     // Best performers
-    msg += `<b>Top 5 Performers | 주간 베스트 5</b>\n`;
+    msg += `<b>📈 주간 베스트 5</b>\n`;
     best5.forEach((c, i) => {
       const pct = c.price_change_percentage_7d_in_currency ?? 0;
       msg += `${i + 1}. <b>${c.symbol.toUpperCase()}</b> ${pct >= 0 ? "+" : ""}${pct.toFixed(1)}% ($${formatPrice(c.current_price)})\n`;
     });
 
-    msg += `\n<b>Bottom 5 | 주간 워스트 5</b>\n`;
+    msg += `\n<b>📉 주간 워스트 5</b>\n`;
     worst5.forEach((c, i) => {
       const pct = c.price_change_percentage_7d_in_currency ?? 0;
       msg += `${i + 1}. <b>${c.symbol.toUpperCase()}</b> ${pct >= 0 ? "+" : ""}${pct.toFixed(1)}% ($${formatPrice(c.current_price)})\n`;
     });
 
     // Key stats
-    msg += `\n<b>Key Metrics | 주요 지표</b>\n`;
+    msg += `\n<b>📋 주요 지표</b>\n`;
     if (btc) {
       msg += `BTC: $${formatPrice(btc.current_price)} (7D ${(btc.price_change_percentage_7d_in_currency ?? 0) >= 0 ? "+" : ""}${(btc.price_change_percentage_7d_in_currency ?? 0).toFixed(1)}%)\n`;
     }
@@ -77,12 +77,13 @@ export async function sendWeeklySummary(): Promise<boolean> {
     }
     msg += `Top 30 Volume: $${(totalVol / 1e9).toFixed(1)}B\n`;
 
-    // AI Analysis (bilingual)
+    // AI Analysis
     if (analysis) {
-      msg += `\n<b>Weekly Analysis | 주간 분석</b>\n${analysis}\n`;
+      msg += `\n<b>💡 주간 분석</b>\n${analysis}\n`;
     }
 
-    msg += `\n<i>— FuturesAI Weekly Report</i>`;
+    msg += `\n⚠️ 본 분석은 투자 조언이 아닙니다.\n`;
+    msg += `<i>— FuturesAI드림</i>`;
 
     return await sendGroupMessage(msg);
   } catch (error) {

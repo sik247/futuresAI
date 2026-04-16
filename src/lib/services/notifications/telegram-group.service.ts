@@ -48,25 +48,22 @@ export async function sendHourlyNewsAlert(): Promise<boolean> {
       minute: "2-digit",
     });
 
-    let msg = `<b>BREAKING NEWS</b> · ${now} KST\n\n`;
-    msg += `<b>${koTitle}</b>\n`;
-    msg += `<i>${newsItem.title}</i>\n\n`;
+    const impactEmoji = picked.impactEmoji || "🚨";
 
-    // Analysis with strong opinions — "this means → this"
+    let msg = `${impactEmoji} <b>#속보 ${koTitle}</b>\n\n`;
+
+    // Analysis with strong opinions
     if (analysis) {
       msg += `${analysis}\n\n`;
     }
 
-    if (picked.reasonKo && picked.reasonEn) {
-      msg += `<i>${picked.reasonKo}</i>\n`;
-      msg += `<i>${picked.reasonEn}</i>\n\n`;
-    } else if (picked.reasonKo) {
+    if (picked.reasonKo) {
       msg += `<i>${picked.reasonKo}</i>\n\n`;
     }
 
-    msg += `여러분은 어떻게 보시나요?\nWhat's your take?\n\n`;
-    msg += `<a href="https://futuresai.io/ko/news">더 많은 분석 보기 | More on FuturesAI</a>\n`;
-    msg += `<i>— FuturesAI Quant Desk</i>`;
+    msg += `여러분은 어떻게 보시나요? 💬\n\n`;
+    msg += `<a href="https://futuresai.io/ko/news">📊 FuturesAI에서 더 보기</a>\n`;
+    msg += `<i>— FuturesAI드림</i>`;
 
     const sent = await sendGroupMessage(msg);
     if (sent) {
@@ -86,33 +83,33 @@ export async function sendHourlyNewsAlert(): Promise<boolean> {
 
 async function pickMostSignificantNews(
   articles: { title: string; source: string; url: string }[]
-): Promise<{ index: number; reasonKo: string; reasonEn: string } | null> {
+): Promise<{ index: number; reasonKo: string; impactEmoji?: string } | null> {
   try {
     // Cache key based on first 3 article titles (changes hourly as news refreshes)
     const cacheKey = `pick-news:${articles.slice(0, 3).map(a => a.title).join("|").slice(0, 100)}`;
 
     const raw = await cachedAI(cacheKey, async () => {
       const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) return JSON.stringify({ index: 0, reasonKo: "", reasonEn: "" });
+      if (!apiKey) return JSON.stringify({ index: 0, reasonKo: "" });
 
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
       const list = articles.map((a, i) => `${i}. [${a.source}] ${a.title}`).join("\n");
 
-      const prompt = `Pick the 1 most market-significant crypto article from this list.
+      const prompt = `이 목록에서 가장 시장에 영향을 미치는 기사 1개를 선택하세요.
 
 ${list}
 
-Criteria:
-- Direct price impact (regulation, major partnership, hack, ETF, rates)
-- Major coin related (BTC, ETH, SOL etc.)
-- Macro impact (Fed, inflation, gold)
-- Exclude marketing/promotional news
+기준:
+- 가격에 직접 영향 (규제, 대형 파트너십, 해킹, ETF, 금리)
+- 주요 코인 관련 (BTC, ETH, SOL 등)
+- 매크로 영향 (연준, 인플레이션, 금)
+- 마케팅/프로모션 뉴스 제외
 
-Respond in JSON: {"index": number, "reasonKo": "Korean 1-sentence reason why important", "reasonEn": "English 1-sentence reason why important"}
+JSON으로 응답: {"index": number, "reasonKo": "이 뉴스가 중요한 이유 1문장 한국어", "impactEmoji": "📈 또는 📉 또는 ⚠️ 또는 🔥", "recommendation": "매수 또는 매도 또는 관망"}
 
-Use a professional quant analyst tone — concise, data-driven, no hype.`;
+전문 퀀트 애널리스트 톤 — 간결, 데이터 기반, 과대광고 금지.`;
 
       const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -121,16 +118,16 @@ Use a professional quant analyst tone — concise, data-driven, no hype.`;
       return result.response.text();
     }, 20 * 60 * 1000); // 20 min cache
 
-    if (!raw) return { index: 0, reasonKo: "", reasonEn: "" };
+    if (!raw) return { index: 0, reasonKo: "" };
 
     const parsed = JSON.parse(raw);
     return {
       index: Math.min(parsed.index ?? 0, articles.length - 1),
       reasonKo: parsed.reasonKo || parsed.reason || "",
-      reasonEn: parsed.reasonEn || "",
+      impactEmoji: parsed.impactEmoji || "🚨",
     };
   } catch {
-    return { index: 0, reasonKo: "", reasonEn: "" };
+    return { index: 0, reasonKo: "" };
   }
 }
 
@@ -143,21 +140,23 @@ async function generateNewsAnalysis(title: string): Promise<string> {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    const prompt = `Analyze this crypto news for a Korean trading Telegram group.
+    const prompt = `크립토 뉴스를 분석하세요.
 
-News: "${title}"
+뉴스: "${title}"
 
-Write EXACTLY in this format (keep the bold HTML tags):
+정확히 이 형식으로 작성 (HTML 태그 유지):
 
-<b>이건 → 이런 의미 | What This Means</b>
+<b>💡 시장 영향 분석</b>
 
-[Korean 3-4 sentences]: "이 뉴스는 [구체적 영향]을 의미합니다." 형식으로 시작. 어떤 코인이 영향받는지, 왜 그런지 구체적으로. 가격 레벨이나 시나리오 언급. 마지막에 대담한 의견 하나. 예: "ETH가 이번 주 $3,200 지지선을 테스트할 가능성이 높습니다."
+3-4문장으로 작성:
+- "이 뉴스는 [구체적 영향]을 의미합니다." 형식으로 시작
+- 어떤 코인이 영향받는지, 왜 그런지 구체적으로
+- 가격 레벨이나 시나리오 언급
+- 마지막에 대담한 의견 하나. 예: "ETH가 이번 주 $3,200 지지선을 테스트할 가능성이 높습니다."
 
----
+🎯 추천: [매수/매도/관망] — [구체적 근거와 가격 레벨]
 
-[English 3-4 sentences]: Start with "This means [specific impact]." Which coins win, which lose, and why. Give a specific price level or scenario. End with a bold call. Example: "BTC likely retests $85K support this week — accumulate below that level."
-
-Rules: No emojis. Every sentence must be a concrete claim, not vague. "This means X" not "this could potentially maybe affect markets."`;
+규칙: 모든 문장은 구체적 주장. 모호한 표현 금지. "이것은 X를 의미합니다" 형식. 이모지는 💡🎯만 사용. 최대 500자.`;
 
     const result = await model.generateContent(prompt);
     const text = result.response.text().trim();
@@ -202,19 +201,16 @@ export async function sendTweetAlert(): Promise<boolean> {
     msg += `"${tweet.koreanText.slice(0, 300)}"\n\n`;
 
     if (tweet.marketAnalysis) {
-      msg += `<b>시장 영향 분석 | Market Impact</b>\n${tweet.marketAnalysis}\n\n`;
+      msg += `<b>💡 시장 영향 분석</b>\n${tweet.marketAnalysis}\n\n`;
     }
 
     if (significant.reasonKo) {
-      msg += `<i>${significant.reasonKo}</i>\n`;
-    }
-    if (significant.reasonEn) {
-      msg += `<i>${significant.reasonEn}</i>\n\n`;
+      msg += `<i>${significant.reasonKo}</i>\n\n`;
     }
 
-    msg += `여러분의 의견은? 댓글로 알려주세요!\nWhat's your take? Share in the chat!\n\n`;
-    msg += `<a href="${tweet.tweetUrl}">View Original</a> · <a href="https://futuresai.io/ko/news">FuturesAI</a>\n`;
-    msg += `<i>— FuturesAI Quant Desk</i>`;
+    msg += `⚠️ 본 분석은 투자 조언이 아닙니다.\n`;
+    msg += `<a href="${tweet.tweetUrl}">원문 보기</a> · <a href="https://futuresai.io/ko/news">FuturesAI</a>\n`;
+    msg += `<i>— FuturesAI드림</i>`;
 
     const sent = await sendGroupMessage(msg);
 
@@ -322,21 +318,15 @@ export async function sendDailySentiment(): Promise<boolean> {
       day: "numeric",
     });
 
-    const nowEn = new Date().toLocaleDateString("en-US", {
-      timeZone: "Asia/Seoul",
-      month: "short",
-      day: "numeric",
-    });
+    let msg = `<b>📊 일일 시장 리포트</b> · ${now}\n\n`;
 
-    let msg = `<b>Daily Market Report</b> · ${now} (${nowEn})\n\n`;
-
-    // AI briefing (bilingual)
+    // AI briefing
     if (aiBriefing) {
-      msg += `<b>AI Market Analysis</b>\n${aiBriefing}\n\n`;
+      msg += `<b>💡 AI 시장 분석</b>\n${aiBriefing}\n\n`;
     }
 
     // Quant signals
-    msg += `<b>AI Quant Signals</b>\n\n`;
+    msg += `<b>AI 퀀트 시그널</b>\n\n`;
     for (const s of signals.signals) {
       const sigKo = SIGNAL_KO[s.signal] || s.signal;
       const emoji = SIGNAL_EMOJI[s.signal] || "";
@@ -357,17 +347,10 @@ export async function sendDailySentiment(): Promise<boolean> {
       signals.fearGreed.value <= 55 ? "중립" :
       signals.fearGreed.value <= 75 ? "탐욕" : "극도의 탐욕";
 
-    const fgLabelEn =
-      signals.fearGreed.value <= 25 ? "Extreme Fear" :
-      signals.fearGreed.value <= 45 ? "Fear" :
-      signals.fearGreed.value <= 55 ? "Neutral" :
-      signals.fearGreed.value <= 75 ? "Greed" : "Extreme Greed";
+    msg += `<b>공포탐욕지수:</b> ${signals.fearGreed.value}/100 (${fgLabelKo})\n`;
 
-    msg += `<b>Fear & Greed:</b> ${signals.fearGreed.value}/100 (${fgLabelKo} | ${fgLabelEn})\n`;
-
-    const btcTrendKo = signals.btcTrend === "above_sma" ? "7일 SMA 상향 (강세)" : "7일 SMA 하향 (약세)";
-    const btcTrendEn = signals.btcTrend === "above_sma" ? "Above 7D SMA (Bullish)" : "Below 7D SMA (Bearish)";
-    msg += `<b>BTC Trend:</b> ${btcTrendKo} | ${btcTrendEn}\n\n`;
+    const btcTrendKo = signals.btcTrend === "above_sma" ? "7일 이동평균 상향 (강세)" : "7일 이동평균 하향 (약세)";
+    msg += `<b>BTC 추세:</b> ${btcTrendKo}\n\n`;
 
     // Generate conclusive recommendation
     const topSignal = signals.signals[0]; // BTC
@@ -376,30 +359,24 @@ export async function sendDailySentiment(): Promise<boolean> {
     const fgVal = signals.fearGreed.value;
 
     let verdictKo: string;
-    let verdictEn: string;
     if (bullCount >= 7) {
       verdictKo = "시장 전반 강세 시그널 우세 — 리스크 관리하며 롱 포지션 유지 권장.";
-      verdictEn = "Broad bullish signals across the board — maintain long exposure with proper risk management.";
     } else if (bearCount >= 7) {
       verdictKo = "시장 전반 약세 시그널 우세 — 현금 비중 확대 또는 헤지 권장.";
-      verdictEn = "Bearish signals dominating — consider raising cash or hedging existing positions.";
     } else if (fgVal <= 25) {
       verdictKo = "극도의 공포 구간 — 역발상 매수 기회 탐색, 단 분할 진입 필수.";
-      verdictEn = "Extreme fear zone — contrarian buy opportunities emerging, but scale in gradually.";
     } else if (fgVal >= 75) {
       verdictKo = "극도의 탐욕 구간 — 이익 실현 고려, 신규 롱 진입은 자제.";
-      verdictEn = "Extreme greed zone — consider taking profits, avoid chasing new longs.";
     } else {
       verdictKo = "혼조 시그널 — 확실한 방향성 나올 때까지 소규모 포지션 유지 권장.";
-      verdictEn = "Mixed signals — keep position sizes small until a clear directional catalyst emerges.";
     }
 
-    msg += `<b>Verdict | 결론</b>\n`;
-    msg += `${verdictKo}\n${verdictEn}\n\n`;
+    msg += `<b>🎯 결론</b>\n`;
+    msg += `${verdictKo}\n\n`;
 
-    msg += `오늘 시장 어떻게 보시나요? 의견을 나눠주세요!\nHow are you positioned today? Share your view!\n\n`;
-    msg += `<a href="https://futuresai.io/ko/chart-ideas">무료 AI 차트 분석 | Free AI Chart Analysis</a>\n`;
-    msg += `<i>— FuturesAI Daily Report</i>`;
+    msg += `⚠️ 본 분석은 투자 조언이 아닙니다.\n`;
+    msg += `<a href="https://futuresai.io/ko/chart-ideas">AI 차트 분석 보기</a>\n`;
+    msg += `<i>— FuturesAI드림</i>`;
 
     const sent = await sendGroupMessage(msg);
 
@@ -427,32 +404,26 @@ async function generateDailyBriefing(
       .map((s) => `${s.symbol}: $${s.price.toLocaleString()} (${s.change24h > 0 ? "+" : ""}${s.change24h.toFixed(2)}%) - ${s.signal}`)
       .join("\n");
 
-    const prompt = `You are a senior crypto quant analyst writing a daily market briefing for professional traders.
+    const prompt = `당신은 시니어 크립토 퀀트 애널리스트입니다. 전문 트레이더를 위한 일일 시장 브리핑을 작성하세요.
 
-Today's market data:
+오늘의 시장 데이터:
 ${signalSummary}
 
-Fear & Greed Index: ${fearGreed.value}/100 (${fearGreed.classification})
-BTC Trend: ${btcTrend === "above_sma" ? "Above 7D SMA (Bullish)" : "Below 7D SMA (Bearish)"}
+공포탐욕지수: ${fearGreed.value}/100 (${fearGreed.classification})
+BTC 추세: ${btcTrend === "above_sma" ? "7일 이동평균 상향 (강세)" : "7일 이동평균 하향 (약세)"}
 
-Today's headlines:
+오늘의 주요 헤드라인:
 ${headlines.join("\n")}
 
-Write a BILINGUAL briefing in this exact format:
+한국어로 3-4문장의 종합 시장 분석을 작성하세요:
 
-[Korean section: 3-4 sentences of comprehensive market analysis]
+요구사항:
+1. 전체 시장 심리와 방향성 (데이터 근거 포함)
+2. 주목할 만한 코인별 관찰 사항
+3. 트레이더가 주시해야 할 리스크 요인
+4. 포지셔닝에 대한 구체적 조언
 
----
-
-[English section: 3-4 sentences — same analysis in English]
-
-Requirements for BOTH sections:
-1. Overall market sentiment and direction with supporting data
-2. Key coin-specific observations worth noting
-3. Risk factors traders should watch
-4. Actionable insight for positioning
-
-Tone: Professional quant desk — precise, data-driven, no hype, no emojis. Write like a Goldman Sachs morning note.`;
+톤: 전문 퀀트 데스크 — 정확하고 데이터 기반, 과대광고 없음, 이모지 없음. 골드만삭스 모닝 노트 스타일. 최대 500자.`;
 
     const result = await model.generateContent(prompt);
     return result.response.text().trim();
@@ -503,16 +474,24 @@ export async function sendFastNewsFlash(): Promise<{ sent: number }> {
         second: "2-digit",
       });
 
-      let msg = `<b>#뉴스</b>\n\n`;
-      msg += `<b>${item.headlineKo}</b>\n\n`;
-      msg += `AI: ${item.analysisKo}\n\n`;
+      const impactEmoji = item.impactEmoji || "📰";
+      const recommendation = item.recommendation || "";
+
+      // Fast, concise format inspired by 특파원 style — speed + AI analysis
+      let msg = `${impactEmoji} <b>#속보 ${item.headlineKo}</b>\n`;
+      msg += `• ${item.analysisKo}\n`;
+
+      if (recommendation) {
+        msg += `🎯 ${recommendation}\n`;
+      }
 
       if (item.tickers && item.tickers.length > 0) {
-        msg += `관련 : ${item.tickers.map((t: string) => `$${t}`).join(", ")}\n\n`;
+        msg += `${item.tickers.map((t: string) => `$${t}`).join(" ")}\n`;
       }
 
       msg += `${now}\n`;
-      msg += `<a href="https://futuresai.io/ko/news">FuturesAI에서 더 보기</a>`;
+      msg += `<a href="https://futuresai.io/ko/news">📊 FuturesAI</a>`;
+      msg += ` · 여러분은 어떻게 보시나요? 💬`;
 
       const sent = await sendGroupMessage(msg);
       if (sent) {
@@ -540,7 +519,7 @@ export async function sendFastNewsFlash(): Promise<{ sent: number }> {
 async function rankNewsForFlash(
   articles: { title: string; body: string; source: string; url: string }[]
 ): Promise<
-  { index: number; headlineKo: string; analysisKo: string; tickers: string[] }[] | null
+  { index: number; headlineKo: string; analysisKo: string; impactEmoji?: string; recommendation?: string; tickers: string[] }[] | null
 > {
   try {
     const apiKey = process.env.GEMINI_API_KEY?.trim();
@@ -553,26 +532,28 @@ async function rankNewsForFlash(
       .map((a, i) => `${i}. [${a.source}] ${a.title}\n   ${a.body.slice(0, 150)}`)
       .join("\n");
 
-    const prompt = `You are a crypto news desk editor. Pick the top 3-5 most market-significant articles and rewrite them as SHORT Korean news flashes for a Telegram trading channel.
+    const prompt = `크립토 뉴스 데스크 편집장으로서 가장 시장 영향이 큰 기사 3-5개를 선택하고 텔레그램 트레이딩 채널용 한국어 뉴스 플래시로 작성하세요.
 
-Articles:
+기사:
 ${list}
 
-For EACH selected article, provide:
-- index: original article index
-- headlineKo: Korean headline (1 sentence, max 80 chars, factual)
-- analysisKo: Korean AI analysis (1-2 sentences, max 150 chars, what it means for the market, be specific about impact)
-- tickers: array of related ticker symbols (e.g. ["BTC", "ETH"] or ["CNY", "USDCNY"])
+각 선택된 기사에 대해 제공:
+- index: 원본 기사 인덱스
+- headlineKo: 한국어 헤드라인 (1문장, 최대 80자, 사실 기반)
+- analysisKo: 한국어 AI 분석 (1-2문장, 최대 150자, 시장에 미치는 영향을 구체적으로)
+- impactEmoji: 시장 영향 이모지 (📈 상승영향 / 📉 하락영향 / ⚠️ 주의 / 🔥 긴급)
+- recommendation: 추천 (매수 / 매도 / 관망 + 간단한 근거)
+- tickers: 관련 티커 심볼 배열 (예: ["BTC", "ETH"])
 
-Selection criteria:
-- Regulatory/policy news (SEC, Fed, rate decisions, trade war)
-- Major price moves, whale activity, exchange events
-- Macro events affecting crypto (trade data, CPI, employment)
-- Skip promotional content, opinion pieces, generic commentary
+선택 기준:
+- 규제/정책 뉴스 (SEC, 연준, 금리, 무역전쟁)
+- 대형 가격 변동, 고래 활동, 거래소 이벤트
+- 크립토에 영향을 미치는 매크로 이벤트 (무역 데이터, CPI, 고용)
+- 마케팅/프로모션, 의견 기사, 일반 논평 제외
 
-Respond as a JSON object with a "results" key: {"results": [{"index": 0, "headlineKo": "...", "analysisKo": "...", "tickers": ["BTC"]}]}
+JSON으로 응답: {"results": [{"index": 0, "headlineKo": "...", "analysisKo": "...", "impactEmoji": "📈", "recommendation": "매수 — BTC $80K 이하 분할 매수", "tickers": ["BTC"]}]}
 
-Tone: Factual, concise, Korean financial news style. No emojis. Be specific with numbers and data points when available.`;
+톤: 사실 기반, 간결한 한국어 금융 뉴스 스타일. 숫자와 데이터 포인트 포함.`;
 
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -600,7 +581,8 @@ Tone: Factual, concise, Korean financial news style. No emojis. Be specific with
 export async function sendQuickSignals(): Promise<boolean> {
   try {
     const signals = await fetchMarketSignals();
-    const topCoins = signals.signals.slice(0, 6); // BTC, ETH, SOL, XRP, BNB, DOGE
+    // Only BTC, ETH, SOL — skip altcoin noise
+    const topCoins = signals.signals.filter((s) => ["BTC", "ETH", "SOL"].includes(s.symbol));
 
     const now = new Date().toLocaleString("ko-KR", {
       timeZone: "Asia/Seoul",
@@ -610,25 +592,6 @@ export async function sendQuickSignals(): Promise<boolean> {
 
     const session = getSessionLabel();
 
-    let msg = `<b>#시그널 ${session}</b> · ${now} KST\n\n`;
-
-    for (const s of topCoins) {
-      const sigKo = SIGNAL_KO[s.signal] || s.signal;
-      const emoji = SIGNAL_EMOJI[s.signal] || "";
-      const changeStr = `${s.change24h >= 0 ? "+" : ""}${s.change24h.toFixed(2)}%`;
-      const priceStr = s.price > 100
-        ? `$${s.price.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
-        : `$${s.price.toFixed(4)}`;
-      const dirKo = s.direction === "LONG" ? "롱" : s.direction === "SHORT" ? "숏" : "관망";
-
-      msg += `${emoji} <b>${s.symbol}</b> ${priceStr} (${changeStr})\n`;
-      msg += `   ${sigKo} | ${s.direction} (${dirKo}) | 신뢰도 ${s.confidence.toFixed(0)}%\n\n`;
-    }
-
-    // Market summary
-    const longCount = signals.signals.filter((s) => s.direction === "LONG").length;
-    const shortCount = signals.signals.filter((s) => s.direction === "SHORT").length;
-
     const fgVal = signals.fearGreed.value;
     const fgKo =
       fgVal <= 25 ? "극도의 공포" :
@@ -636,15 +599,91 @@ export async function sendQuickSignals(): Promise<boolean> {
       fgVal <= 55 ? "중립" :
       fgVal <= 75 ? "탐욕" : "극도의 탐욕";
 
-    msg += `<b>시장 요약</b>\n`;
-    msg += `Fear & Greed: ${fgVal}/100 (${fgKo})\n`;
-    msg += `롱 ${longCount} / 숏 ${shortCount} / 중립 ${signals.signals.length - longCount - shortCount}\n`;
+    // Generate AI trade setups per coin with entry/SL/TP
+    let tradeSetups = "";
+    try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (apiKey) {
+        const { GoogleGenerativeAI: GenAI } = await import("@google/generative-ai");
+        const genAI = new GenAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    const btcKo = signals.btcTrend === "above_sma" ? "BTC 7D SMA 상향 ↑" : "BTC 7D SMA 하향 ↓";
-    msg += `${btcKo}\n\n`;
+        const coinData = topCoins
+          .map((s) => `${s.symbol}: 현재가 $${s.price.toLocaleString()}, 24시간 변동 ${s.change24h >= 0 ? "+" : ""}${s.change24h.toFixed(2)}%, RSI 기반 시그널: ${s.signal}, 방향: ${s.direction}, 신뢰도: ${s.confidence.toFixed(0)}%`)
+          .join("\n");
 
-    msg += `<a href="https://futuresai.io/ko/chart-ideas">AI 차트 분석 보기</a> · <a href="https://futuresai.io/ko/home">실시간 시그널</a>\n`;
-    msg += `<i>— FuturesAI Signal Desk</i>`;
+        const result = await model.generateContent(`당신은 수석 크립토 파생상품 트레이더입니다. 텔레그램 트레이딩 채널에 보낼 4시간 시그널 리포트를 작성하세요.
+
+현재 시장 데이터:
+${coinData}
+공포탐욕지수: ${fgVal}/100 (${fgKo})
+BTC 추세: ${signals.btcTrend === "above_sma" ? "7일 이동평균 상향 (강세)" : "7일 이동평균 하향 (약세)"}
+
+각 코인(BTC, ETH, SOL)에 대해 정확히 이 형식으로 작성 (HTML 태그 유지):
+
+<b>[이모지] [코인] — [롱/숏/관망]</b>
+현재가: $XX,XXX (±X.X%)
+진입가: $XX,XXX
+손절가: $XX,XXX (−X.X%)
+목표가 1: $XX,XXX (+X.X%)
+목표가 2: $XX,XXX (+X.X%)
+R:R 비율: X:X
+💡 근거: [1-2문장 — 왜 이 방향인지, 어떤 기술적/구조적 근거가 있는지]
+
+이모지 규칙: 📈 롱, 📉 숏, ⏸ 관망
+
+그 다음 시장 요약 작성:
+
+<b>📋 시장 요약</b>
+[2-3문장: 전체 시장 분위기, 핵심 이벤트, 주의할 점]
+
+규칙:
+- 진입가는 현재가에서 ±1-3% 범위의 현실적 레벨
+- 손절가는 진입가에서 2-5% 이내
+- 목표가는 R:R 최소 1.5:1 이상
+- 관망이면 진입/손절/목표가 대신 "관망 조건: [어떤 조건이 충족되면 진입 고려]" 작성
+- 모호한 표현 금지. 구체적 가격 레벨만 제시
+- 마크다운 금지 (**, ##, --- 금지). HTML <b> 태그만 사용`);
+
+        tradeSetups = result.response.text().trim()
+          // Strip unsupported HTML tags — Telegram only allows <b>, <i>, <a>, <code>, <pre>
+          .replace(/<br\s*\/?>/gi, "\n")
+          .replace(/<\/?(p|div|span|h[1-6]|ul|ol|li|strong|em|hr)[^>]*>/gi, "")
+          .replace(/\*\*/g, "")
+          .replace(/^#{1,6}\s/gm, "")
+          .replace(/^---+$/gm, "");
+      }
+    } catch (err) {
+      console.warn("[telegram-group] AI trade setup generation failed:", err);
+    }
+
+    let msg = `📊 <b>시그널 리포트</b> · ${session} · ${now} KST\n\n`;
+
+    if (tradeSetups && tradeSetups.length > 50) {
+      msg += `${tradeSetups}\n\n`;
+    } else {
+      // Fallback: basic signal display if AI fails
+      for (const s of topCoins) {
+        const sigKo = SIGNAL_KO[s.signal] || s.signal;
+        const emoji = SIGNAL_EMOJI[s.signal] || "";
+        const changeStr = `${s.change24h >= 0 ? "+" : ""}${s.change24h.toFixed(2)}%`;
+        const priceStr = s.price > 100
+          ? `$${s.price.toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+          : `$${s.price.toFixed(4)}`;
+        const dirKo = s.direction === "LONG" ? "롱" : s.direction === "SHORT" ? "숏" : "관망";
+
+        msg += `${emoji} <b>${s.symbol}</b> ${priceStr} (${changeStr})\n`;
+        msg += `   ${sigKo} | ${dirKo} | 신뢰도 ${s.confidence.toFixed(0)}%\n\n`;
+      }
+
+      msg += `공포탐욕지수: ${fgVal}/100 (${fgKo})\n`;
+      msg += `BTC ${signals.btcTrend === "above_sma" ? "7일 이동평균 상향 ↑" : "7일 이동평균 하향 ↓"}\n\n`;
+    }
+
+    msg += `여러분은 어떤 포지션을 잡고 계신가요? 💬\n\n`;
+    msg += `⚠️ 본 분석은 투자 조언이 아닙니다.\n`;
+    msg += `<a href="https://futuresai.io/ko/home">실시간 시그널 보기</a>\n`;
+    msg += `<i>— FuturesAI드림</i>`;
 
     return await sendGroupMessage(msg);
   } catch (error) {
@@ -715,17 +754,17 @@ export async function sendPolymarketPrediction(): Promise<boolean> {
       try {
         const genAI = new GoogleGenerativeAI(geminiKey);
         const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-        const result = await model.generateContent(`You are a head trader. This Polymarket prediction market is trending:
+        const result = await model.generateContent(`당신은 수석 트레이더입니다. 이 Polymarket 예측 시장이 주목받고 있습니다:
 
 "${best.title}"
-Current odds: ${yesOdds}% YES / ${noOdds}% NO
-Volume: $${(vol / 1e6).toFixed(1)}M
-${change ? `24h odds change: ${change > 0 ? "+" : ""}${(change * 100).toFixed(1)}%` : ""}
+현재 확률: ${yesOdds}% YES / ${noOdds}% NO
+거래량: $${(vol / 1e6).toFixed(1)}M
+${change ? `24시간 확률 변동: ${change > 0 ? "+" : ""}${(change * 100).toFixed(1)}%` : ""}
 
-Write 2-3 sentences answering: What does this prediction tell us about where crypto is heading? Should traders position differently because of these odds?
+2-3문장으로 답하세요: 이 예측이 크립토 시장 방향에 대해 무엇을 알려주는가? 트레이더는 포지션을 어떻게 조정해야 하는가?
 
-Be specific — name coins, give direction, give timeframe. No vague language.
-한국어로 작성하세요. Max 280 characters. No markdown, no emojis, no hashtags.`);
+구체적으로 — 코인명, 방향, 시간대를 명시. 모호한 표현 금지.
+🎯 추천도 포함. 최대 300자. 마크다운, 해시태그 금지. 이모지 금지.`);
         commentary = result.response.text().trim();
       } catch {}
     }
@@ -742,8 +781,9 @@ Be specific — name coins, give direction, give timeframe. No vague language.
       caption += `\n${commentary}\n`;
     }
 
-    caption += `\n<a href="https://polymarket.com/event/${best.slug}">Polymarket에서 보기</a>`;
-    caption += ` · <a href="https://futuresai.io/ko/markets">FuturesAI 마켓</a>`;
+    caption += `\n⚠️ 본 분석은 투자 조언이 아닙니다.\n`;
+    caption += `<a href="https://futuresai.io/ko/markets">FuturesAI 예측 시장</a>\n`;
+    caption += `<i>— FuturesAI드림</i>`;
 
     // Send as photo if image available, otherwise text
     if (best.image) {
