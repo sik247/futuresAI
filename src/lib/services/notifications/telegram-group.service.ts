@@ -717,10 +717,23 @@ export async function sendPolymarketPrediction(): Promise<boolean> {
     const events = await res.json();
     if (!Array.isArray(events) || events.length === 0) return false;
 
+    // Filter out irrelevant political markets that don't affect crypto
+    const SKIP_KEYWORDS = [
+      "presidential nominee", "presidential election", "democratic", "republican",
+      "governor", "senator", "congress", "mayor", "party leader", "primary",
+      "nomination", "vice president", "cabinet", "impeach",
+    ];
+    const relevantEvents = events.filter((e: any) => {
+      const title = (e.title || "").toLowerCase();
+      return !SKIP_KEYWORDS.some(kw => title.includes(kw));
+    });
+
+    if (relevantEvents.length === 0) return false;
+
     // Pick the most interesting event: highest volume with meaningful odds movement
-    let best = events[0];
+    let best = relevantEvents[0];
     let bestScore = 0;
-    for (const event of events) {
+    for (const event of relevantEvents) {
       if (!event.markets?.[0]) continue;
       const m = event.markets[0];
       const vol = parseFloat(event.volume || m.volume || "0");
