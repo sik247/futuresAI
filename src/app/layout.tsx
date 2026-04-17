@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import SessionProviders from "@/components/providers/session-provider";
 import { OrganizationJsonLd, WebsiteJsonLd, SoftwareApplicationJsonLd, FAQJsonLd } from "@/components/structured-data";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -132,17 +133,6 @@ export default function RootLayout({
           crossOrigin="anonymous"
           strategy="beforeInteractive"
         />
-        <Script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-7GWMMNL7K8"
-          strategy="afterInteractive"
-        />
-        <Script id="gtag-init" strategy="afterInteractive">
-          {`window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-7GWMMNL7K8');`}
-        </Script>
       </head>
       <body className={cn(inter.className, "bg-background text-foreground antialiased")}>
         <NextTopLoader color="#3b82f6" height={2} showSpinner={false} />
@@ -156,6 +146,7 @@ gtag('config', 'G-7GWMMNL7K8');`}
           <Loading />
           <GlobalAlertDialog />
         </Providers>
+        <Analytics />
       </body>
     </html>
   );
