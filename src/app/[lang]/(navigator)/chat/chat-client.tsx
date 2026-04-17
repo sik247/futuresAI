@@ -356,6 +356,249 @@ function fmtTime(ts?: number) {
 }
 
 /* -------------------------------------------------------------------------- */
+/*  Home: Live Market Strip (BTC / ETH / SOL + Fear & Greed)                   */
+/* -------------------------------------------------------------------------- */
+const HOME_COINS = [
+  { symbol: "BTC", gradient: "from-amber-500/20 to-orange-500/5", accent: "text-amber-300" },
+  { symbol: "ETH", gradient: "from-indigo-500/20 to-blue-500/5", accent: "text-indigo-300" },
+  { symbol: "SOL", gradient: "from-violet-500/20 to-fuchsia-500/5", accent: "text-violet-300" },
+];
+
+function HomeMarketStrip({ ko }: { ko: boolean }) {
+  const [prices, setPrices] = useState<Record<string, { price: number; change: number }>>({});
+  const [fng, setFng] = useState<{ value: number; classification: string } | null>(null);
+
+  // Live Binance prices — 5s poll (matches TradingViewChart cadence)
+  useEffect(() => {
+    let cancelled = false;
+    const symbols = HOME_COINS.map((c) => `${c.symbol}USDT`);
+    async function fetchPrices() {
+      try {
+        const symbolParam = encodeURIComponent(JSON.stringify(symbols));
+        const res = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=${symbolParam}`);
+        if (!res.ok || cancelled) return;
+        const data: { symbol: string; lastPrice: string; priceChangePercent: string }[] = await res.json();
+        const map: Record<string, { price: number; change: number }> = {};
+        for (const t of data) {
+          const coin = t.symbol.replace("USDT", "");
+          map[coin] = {
+            price: parseFloat(t.lastPrice),
+            change: parseFloat(t.priceChangePercent),
+          };
+        }
+        if (!cancelled) setPrices(map);
+      } catch {}
+    }
+    fetchPrices();
+    const id = window.setInterval(fetchPrices, 5_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, []);
+
+  // Fear & Greed Index — fetch once on mount (updates daily anyway)
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchFng() {
+      try {
+        const res = await fetch("https://api.alternative.me/fng/?limit=1");
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        const entry = data?.data?.[0];
+        if (entry && !cancelled) {
+          setFng({
+            value: parseInt(entry.value, 10),
+            classification: entry.value_classification ?? "",
+          });
+        }
+      } catch {}
+    }
+    fetchFng();
+  }, []);
+
+  function classifyKo(c: string): string {
+    const map: Record<string, string> = {
+      "Extreme Fear": "극도의 공포",
+      "Fear": "공포",
+      "Neutral": "중립",
+      "Greed": "탐욕",
+      "Extreme Greed": "극도의 탐욕",
+    };
+    return map[c] ?? c;
+  }
+
+  function fngTone(v: number): string {
+    if (v >= 75) return "text-emerald-300 bg-emerald-500/10 border-emerald-500/20";
+    if (v >= 55) return "text-lime-300 bg-lime-500/10 border-lime-500/20";
+    if (v >= 45) return "text-amber-300 bg-amber-500/10 border-amber-500/20";
+    if (v >= 25) return "text-orange-300 bg-orange-500/10 border-orange-500/20";
+    return "text-red-300 bg-red-500/10 border-red-500/20";
+  }
+
+  return (
+    <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
+      {HOME_COINS.map((c) => {
+        const p = prices[c.symbol];
+        const up = p ? p.change >= 0 : false;
+        return (
+          <div
+            key={c.symbol}
+            className={`shrink-0 flex items-center gap-2 pl-2.5 pr-3 py-2 rounded-xl bg-gradient-to-br ${c.gradient} border border-white/[0.06] backdrop-blur-sm`}
+          >
+            <span className={`flex items-center justify-center w-6 h-6 rounded-full bg-white/[0.06] text-[9px] font-bold ${c.accent} tracking-wider`}>
+              {c.symbol}
+            </span>
+            <div className="flex flex-col leading-tight">
+              {p ? (
+                <>
+                  <span className="text-[12px] font-mono font-semibold text-white tabular-nums">
+                    ${p.price.toLocaleString(undefined, {
+                      maximumFractionDigits: p.price > 100 ? 0 : p.price > 1 ? 2 : 4,
+                    })}
+                  </span>
+                  <span
+                    className={`text-[10px] font-mono font-semibold tabular-nums ${up ? "text-emerald-400" : "text-red-400"}`}
+                  >
+                    {up ? "+" : ""}
+                    {p.change.toFixed(2)}%
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="h-3 w-12 bg-white/[0.06] rounded animate-pulse" />
+                  <span className="h-2.5 w-8 bg-white/[0.04] rounded animate-pulse mt-0.5" />
+                </>
+              )}
+            </div>
+          </div>
+        );
+      })}
+
+      {/* Fear & Greed pill */}
+      <div
+        className={`shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl border backdrop-blur-sm ${fng ? fngTone(fng.value) : "text-zinc-500 bg-white/[0.02] border-white/[0.06]"}`}
+      >
+        <span className="text-[9px] font-mono uppercase tracking-[0.12em] opacity-80">
+          {ko ? "공포·탐욕" : "F&G"}
+        </span>
+        {fng ? (
+          <>
+            <span className="text-[13px] font-mono font-bold tabular-nums leading-none">{fng.value}</span>
+            <span className="text-[10px] font-medium leading-none">
+              {ko ? classifyKo(fng.classification) : fng.classification}
+            </span>
+          </>
+        ) : (
+          <span className="h-3 w-10 bg-white/[0.06] rounded animate-pulse" />
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Home: Recent Chart Analyses strip                                          */
+/* -------------------------------------------------------------------------- */
+interface RecentAnalysis {
+  id: string;
+  pair: string | null;
+  summary: string;
+  trend: string;
+  imageUrl: string;
+  createdAt: string;
+}
+
+function HomeRecentStrip({ lang, ko }: { lang: string; ko: boolean }) {
+  const [items, setItems] = useState<RecentAnalysis[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch("/api/chart-analysis");
+        if (!res.ok) {
+          if (!cancelled) setLoaded(true);
+          return;
+        }
+        const data = await res.json();
+        if (!cancelled) {
+          const arr: RecentAnalysis[] = Array.isArray(data.analyses)
+            ? data.analyses.slice(0, 3).map((a: any) => ({
+                id: a.id,
+                pair: a.pair ?? null,
+                summary: a.summary ?? "",
+                trend: a.trend ?? "",
+                imageUrl: a.imageUrl ?? "",
+                createdAt: a.createdAt ?? "",
+              }))
+            : [];
+          setItems(arr);
+          setLoaded(true);
+        }
+      } catch {
+        if (!cancelled) setLoaded(true);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!loaded || items.length === 0) return null;
+
+  return (
+    <div className="w-full">
+      <div className="flex items-center justify-between mb-2 px-0.5">
+        <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-zinc-500 font-semibold">
+          {ko ? "최근 분석" : "Recent analyses"}
+        </span>
+      </div>
+      <div className="flex items-stretch gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
+        {items.map((a) => {
+          const trendUp = /bull|up|상승|롱|long/i.test(a.trend);
+          const trendDown = /bear|down|하락|숏|short/i.test(a.trend);
+          return (
+            <a
+              key={a.id}
+              href={`/${lang}/chart-ideas/analyze?id=${a.id}`}
+              className="group shrink-0 w-[220px] rounded-xl overflow-hidden bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.14] hover:bg-white/[0.04] transition-all duration-200"
+            >
+              {a.imageUrl && (
+                <div className="relative w-full h-20 bg-zinc-900 overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={a.imageUrl}
+                    alt={a.pair ?? "chart"}
+                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                  />
+                  <span
+                    className={`absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold tracking-wider ${
+                      trendUp
+                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                        : trendDown
+                        ? "bg-red-500/20 text-red-300 border border-red-500/30"
+                        : "bg-white/[0.1] text-zinc-300 border border-white/[0.15]"
+                    }`}
+                  >
+                    {a.pair ?? (ko ? "차트" : "CHART")}
+                  </span>
+                </div>
+              )}
+              <div className="px-2.5 py-2">
+                <p className="text-[11px] text-zinc-300 line-clamp-2 leading-snug">{a.summary}</p>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
 /*  Main Chat Client Component                                                 */
 /* -------------------------------------------------------------------------- */
 export default function ChatClient({ lang, userName }: Props) {
@@ -529,9 +772,84 @@ export default function ChatClient({ lang, userName }: Props) {
   const placeholder = ko ? "크립토, 시장에 대해 물어보세요..." : "Ask about crypto and markets...";
   const isEmpty = messages.length === 0 && !loading;
 
-  const suggestedPrompts = ko
-    ? ["BTC 추세 분석", "ETH 지지/저항", "공포탐욕지수", "SOL 포지션"]
-    : ["BTC trend analysis", "ETH S/R levels", "Fear & Greed?", "SOL position"];
+  // Home quick-ask chips — prefill + auto-send on tap
+  const quickAskChips: {
+    key: string;
+    label: string;
+    payload: string;
+    icon: JSX.Element;
+    accent: string;
+  }[] = useMemo(
+    () => [
+      {
+        key: "btc-outlook",
+        label: ko ? "BTC 오늘 전망" : "BTC outlook today",
+        payload: "What's the BTC outlook today? Give entry, SL, TP.",
+        accent: "text-amber-300 bg-amber-500/[0.08] border-amber-500/20 hover:border-amber-500/40",
+        icon: (
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 17l6-6 4 4 8-8M21 7h-6M21 7v6" />
+          </svg>
+        ),
+      },
+      {
+        key: "eth-entry",
+        label: ko ? "ETH 진입 가격" : "ETH entry zone",
+        payload: "Best ETH entry zone right now?",
+        accent: "text-indigo-300 bg-indigo-500/[0.08] border-indigo-500/20 hover:border-indigo-500/40",
+        icon: (
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+        ),
+      },
+      {
+        key: "whales",
+        label: ko ? "고래 활동 요약" : "Whale activity",
+        payload: "Summarize today's whale activity.",
+        accent: "text-sky-300 bg-sky-500/[0.08] border-sky-500/20 hover:border-sky-500/40",
+        icon: (
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        ),
+      },
+      {
+        key: "news",
+        label: ko ? "오늘 뉴스 임팩트" : "Top news impact",
+        payload: "What's today's most market-moving news?",
+        accent: "text-emerald-300 bg-emerald-500/[0.08] border-emerald-500/20 hover:border-emerald-500/40",
+        icon: (
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5" />
+          </svg>
+        ),
+      },
+      {
+        key: "btc-chart",
+        label: ko ? "BTC 4H 차트" : "Chart BTC 4H",
+        payload: "Analyze BTC 4H chart.",
+        accent: "text-cyan-300 bg-cyan-500/[0.08] border-cyan-500/20 hover:border-cyan-500/40",
+        icon: (
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+          </svg>
+        ),
+      },
+      {
+        key: "polymarket",
+        label: ko ? "Polymarket 베팅" : "Polymarket verdict",
+        payload: "What's Polymarket betting on today for crypto?",
+        accent: "text-orange-300 bg-orange-500/[0.08] border-orange-500/20 hover:border-orange-500/40",
+        icon: (
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+          </svg>
+        ),
+      },
+    ],
+    [ko]
+  );
 
   /* ======================================================================== */
   /*  RENDER                                                                   */
@@ -641,52 +959,80 @@ export default function ChatClient({ lang, userName }: Props) {
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto">
           {isEmpty ? (
-            /* ── Empty State ── */
-            <div className="flex flex-col items-center justify-center h-full px-4">
-              <div className="w-full max-w-lg flex flex-col items-center gap-6">
-                {/* Persona card */}
-                <div className="flex items-center gap-3 bg-white/[0.02] border border-white/[0.06] rounded-lg px-4 py-3 w-full">
-                  <Image
-                    src={PERSONA_AVATARS[persona]}
-                    alt="AI"
-                    width={40}
-                    height={40}
-                    className="w-10 h-10 rounded-full object-cover ring-2 ring-blue-500/20 shrink-0"
-                  />
-                  <div>
-                    <p className="text-sm font-semibold text-zinc-100">
-                      {ko ? "FuturesAI 퀀트" : "FuturesAI Quant"}
-                    </p>
-                    <p className="text-[10px] text-zinc-500 mt-0.5">
-                      {ko
-                        ? "실시간 암호화폐 분석 · 선물 포지션 · 온체인 데이터"
-                        : "Real-time crypto analysis, futures positions & on-chain data"}
-                    </p>
+            /* ── Home-as-Chat Landing — mobile-first empty state ── */
+            <div className="h-full overflow-y-auto">
+              <div className="w-full max-w-3xl mx-auto px-4 pt-4 pb-8 flex flex-col gap-5 lg:gap-6">
+                {/* A. Live market strip */}
+                <section aria-label={ko ? "실시간 시장" : "Live markets"}>
+                  <div className="flex items-center gap-1.5 mb-2 px-0.5">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                    </span>
+                    <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-zinc-500 font-semibold">
+                      {ko ? "실시간 시장" : "Live Markets"}
+                    </span>
+                    <span className="text-[9px] font-mono text-zinc-700 uppercase tracking-wider ml-1">
+                      Binance
+                    </span>
                   </div>
-                </div>
+                  <HomeMarketStrip ko={ko} />
+                </section>
 
-                {/* Greeting */}
-                <div className="text-center space-y-1">
-                  <h2 className="text-lg font-semibold text-zinc-200">
-                    {ko ? "무엇을 분석할까요?" : "What would you like to analyze?"}
-                  </h2>
-                  <p className="text-[11px] text-zinc-600">
-                    {ko ? "실시간 데이터 기반 · AI 분석" : "Real-time data · AI-powered analysis"}
+                {/* B. Welcome headline */}
+                <section className="pt-2">
+                  <h1 className="text-[22px] sm:text-2xl lg:text-3xl font-semibold tracking-tight leading-tight text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-zinc-400">
+                    {ko ? "오늘 무엇을 분석해 드릴까요?" : "What should we analyze today?"}
+                  </h1>
+                  <p className="text-[12px] text-zinc-500 mt-1.5 leading-relaxed">
+                    {ko
+                      ? "실시간 시세 · 온체인 · 트레이드 셋업을 한 채팅에서 확인하세요."
+                      : "Live market data, on-chain flows, and trade setups — all in one chat."}
                   </p>
-                </div>
+                </section>
 
-                {/* Suggested prompts */}
-                <div className="grid grid-cols-2 gap-2 w-full">
-                  {suggestedPrompts.map((prompt) => (
-                    <button
-                      key={prompt}
-                      onClick={() => sendMessage(prompt)}
-                      className="text-[11px] px-3 py-2.5 rounded-lg bg-white/[0.02] text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-200 border border-white/[0.06] hover:border-white/[0.12] transition-all duration-200 text-left cursor-pointer"
-                    >
-                      {prompt}
-                    </button>
-                  ))}
-                </div>
+                {/* C. Quick-ask chip grid */}
+                <section>
+                  <div className="flex items-center gap-1.5 mb-2 px-0.5">
+                    <svg className="w-3 h-3 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-zinc-500 font-semibold">
+                      {ko ? "빠른 질문" : "Quick ask"}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {quickAskChips.map((chip) => (
+                      <button
+                        key={chip.key}
+                        onClick={() => sendMessage(chip.payload)}
+                        disabled={loading}
+                        className={`group flex items-center gap-2 px-3 py-3 rounded-xl border text-left transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${chip.accent}`}
+                      >
+                        <span className="shrink-0 w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.05] flex items-center justify-center group-hover:bg-white/[0.1] transition-colors">
+                          {chip.icon}
+                        </span>
+                        <span className="text-[12px] font-medium leading-tight flex-1 min-w-0">
+                          {chip.label}
+                        </span>
+                        <svg
+                          className="shrink-0 w-3 h-3 opacity-0 group-hover:opacity-60 -translate-x-1 group-hover:translate-x-0 transition-all duration-200"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                {/* D. Recent activity strip — auto-hides if user has no history */}
+                <section>
+                  <HomeRecentStrip lang={lang} ko={ko} />
+                </section>
               </div>
             </div>
           ) : (
