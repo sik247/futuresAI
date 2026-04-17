@@ -28,26 +28,82 @@ const TradingChart = dynamic(() => import("@/components/trading-chart"), {
 
 /* ------------------------------------------------------------------ */
 /*  Chart calibration validator — rejects garbage anchor data so we    */
-/*  never draw misaligned overlays.                                    */
+/*  never draw misaligned overlays. Accepts 2-5 anchors and does a     */
+/*  sanity pass: monotonic price-vs-yPercent, sufficient spread, each  */
+/*  anchor within a reasonable band of live market price.              */
 /* ------------------------------------------------------------------ */
 function validateCalibration(
   cal: ChartCalibration | undefined,
   livePrice?: number
 ): ChartCalibration | null {
-  if (!cal || !Array.isArray(cal.anchors) || cal.anchors.length !== 2) return null;
-  const [a, b] = cal.anchors;
-  if (!a || !b) return null;
-  if (!isFinite(a.price) || !isFinite(b.price)) return null;
-  if (!isFinite(a.yPercent) || !isFinite(b.yPercent)) return null;
-  if (a.price <= b.price) return null; // top anchor must be higher price
-  if (a.yPercent >= b.yPercent) return null; // top anchor must be higher on image
-  if (a.yPercent < 0 || b.yPercent > 100) return null;
-  if (livePrice && livePrice > 0) {
-    // Both anchors should be within ±60% of live market price (wide band to allow older chart snapshots).
-    if (a.price < livePrice * 0.4 || a.price > livePrice * 2.5) return null;
-    if (b.price < livePrice * 0.4 || b.price > livePrice * 2.5) return null;
+  if (!cal || !Array.isArray(cal.anchors)) return null;
+  if (cal.confidence === "low") return null;
+
+  const clean = cal.anchors
+    .filter(
+      (a) =>
+        a &&
+        Number.isFinite(a.price) &&
+        Number.isFinite(a.yPercent) &&
+        a.price > 0 &&
+        a.yPercent >= 0 &&
+        a.yPercent <= 100
+    )
+    .sort((a, b) => b.price - a.price); // highest price first
+
+  if (clean.length < 2) return null;
+
+  // Monotonic: higher price must sit at smaller yPercent (higher on image)
+  for (let i = 1; i < clean.length; i++) {
+    if (clean[i].yPercent <= clean[i - 1].yPercent) return null;
   }
-  return cal;
+
+  // Spread: top vs bottom anchor must cover ≥35% of image height
+  const spread = clean[clean.length - 1].yPercent - clean[0].yPercent;
+  if (spread < 35) return null;
+
+  // Live-price sanity band (wide ±60%/×2.5 because user charts may be older snapshots)
+  if (livePrice && livePrice > 0) {
+    for (const a of clean) {
+      if (a.price < livePrice * 0.4 || a.price > livePrice * 2.5) return null;
+    }
+  }
+
+  return { ...cal, anchors: clean };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Linear-regression price → yPercent. For linear scale, fit over     */
+/*  raw prices; for log, fit over log(price). Handles N anchors ≥2.    */
+/* ------------------------------------------------------------------ */
+function buildPriceToYPercent(cal: ChartCalibration): (price: number) => number {
+  const xs = cal.anchors.map((a) =>
+    cal.scale === "log" ? Math.log(a.price) : a.price
+  );
+  const ys = cal.anchors.map((a) => a.yPercent);
+  const n = xs.length;
+  const sumX = xs.reduce((s, v) => s + v, 0);
+  const sumY = ys.reduce((s, v) => s + v, 0);
+  const sumXY = xs.reduce((s, v, i) => s + v * ys[i], 0);
+  const sumXX = xs.reduce((s, v) => s + v * v, 0);
+  const denom = n * sumXX - sumX * sumX;
+  if (denom === 0) {
+    // Fallback: two-point interpolation
+    const [a, b] = cal.anchors;
+    return (price: number) => {
+      if (cal.scale === "log") {
+        const la = Math.log(a.price), lb = Math.log(b.price), lp = Math.log(price);
+        return a.yPercent + (b.yPercent - a.yPercent) * (la - lp) / (la - lb);
+      }
+      return a.yPercent + (b.yPercent - a.yPercent) * (a.price - price) / (a.price - b.price);
+    };
+  }
+  const m = (n * sumXY - sumX * sumY) / denom;
+  const c = (sumY - m * sumX) / n;
+  return (price: number) => {
+    const x = cal.scale === "log" ? Math.log(price) : price;
+    return m * x + c;
+  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -335,21 +391,13 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     const W = dimensions.width;
     const H = dimensions.height;
 
-    // Deterministic price → pixel Y. No vision-model spatial guessing.
-    const priceToY = (price: number) => {
-      const [a, b] = cal.anchors;
-      let pct: number;
-      if (cal.scale === "log") {
-        const la = Math.log(a.price), lb = Math.log(b.price), lp = Math.log(price);
-        pct = a.yPercent + (b.yPercent - a.yPercent) * (la - lp) / (la - lb);
-      } else {
-        pct = a.yPercent + (b.yPercent - a.yPercent) * (a.price - price) / (a.price - b.price);
-      }
-      return (pct / 100) * H;
-    };
+    // Deterministic price → pixel Y via linear regression across all anchors.
+    const priceToYPercent = buildPriceToYPercent(cal);
+    const priceToY = (price: number) => (priceToYPercent(price) / 100) * H;
 
-    // Drop lines whose price falls outside the calibrated visible range (× 1.2 slack).
-    const [topAnchor, botAnchor] = cal.anchors;
+    // Drop lines whose price falls outside the calibrated visible range (20% slack each side).
+    const topAnchor = cal.anchors[0];
+    const botAnchor = cal.anchors[cal.anchors.length - 1];
     const priceSpan = topAnchor.price - botAnchor.price;
     const validLines = analysis.lines.filter(
       (l) =>
@@ -511,10 +559,13 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     if (!imageUrl) return;
     setAnalyzing(true);
     try {
+      const imageDimensions = imgRef.current
+        ? { width: imgRef.current.naturalWidth, height: imgRef.current.naturalHeight }
+        : undefined;
       const res = await fetch("/api/chart-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageUrl, pair: selectedPair, lang }),
+        body: JSON.stringify({ imageUrl, pair: selectedPair, lang, imageDimensions }),
       });
       if (!res.ok) {
         const data = await res.json();

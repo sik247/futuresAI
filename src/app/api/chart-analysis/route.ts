@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { imageUrl, pair, lang } = await req.json();
+    const { imageUrl, pair, lang, imageDimensions } = await req.json();
     if (!imageUrl) {
       return NextResponse.json(
         { error: "Image URL is required" },
@@ -28,6 +28,14 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+    const dims =
+      imageDimensions &&
+      Number.isFinite(imageDimensions.width) &&
+      Number.isFinite(imageDimensions.height) &&
+      imageDimensions.width > 0 &&
+      imageDimensions.height > 0
+        ? { width: Number(imageDimensions.width), height: Number(imageDimensions.height) }
+        : undefined;
 
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
@@ -51,7 +59,8 @@ export async function POST(req: NextRequest) {
     const { analysis, priceData, webResults } = await runMultiAgentAnalysis(
       imageUrl,
       pair,
-      lang || "en"
+      lang || "en",
+      dims
     );
 
     // Create analysis record (auto-charged for subscribers)

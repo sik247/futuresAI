@@ -1,11 +1,12 @@
 import { runPriceAgent, type PriceAgentResult } from "./agents/price.agent";
 import { runWebSearchAgent, type WebSearchResult } from "./agents/web-search.agent";
-import { analyzeChart, type ChartAnalysisResult } from "./chart-analysis.service";
+import { analyzeChart, type ChartAnalysisResult, type ImageDimensions } from "./chart-analysis.service";
 
 export async function runMultiAgentAnalysis(
   imageUrl: string,
   pair: string,
-  lang: string = "en"
+  lang: string = "en",
+  imageDimensions?: ImageDimensions
 ): Promise<{
   analysis: ChartAnalysisResult;
   priceData: PriceAgentResult | null;
@@ -30,7 +31,7 @@ export async function runMultiAgentAnalysis(
   }
 
   // Phase 2: Run quant agent with all available context
-  const analysis = await analyzeChart(imageUrl, priceData, webResults, lang);
+  const analysis = await analyzeChart(imageUrl, priceData, webResults, lang, imageDimensions);
 
   return { analysis, priceData, webResults };
 }

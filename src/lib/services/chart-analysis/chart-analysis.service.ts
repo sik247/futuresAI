@@ -70,11 +70,12 @@ export type ChartLine = {
 
 export type ChartCalibration = {
   scale: "linear" | "log";
-  anchors: [
-    { price: number; yPercent: number },
-    { price: number; yPercent: number }
-  ];
+  anchors: { price: number; yPercent: number }[];
+  plotArea?: { topYPercent: number; bottomYPercent: number };
+  confidence: "high" | "medium" | "low";
 };
+
+export type ImageDimensions = { width: number; height: number };
 
 const CHART_ANALYSIS_PROMPT = `You are a senior quantitative analyst at a top-tier proprietary trading firm. You are preparing a chart analysis report for the risk committee. Your analysis must be precise, data-driven, and actionable.
 
@@ -122,17 +123,28 @@ Construct a professional trade setup:
 
 ### Part A — Calibration (CRITICAL for pixel-accurate overlay rendering)
 
-The frontend will draw overlay lines. Do NOT estimate pixel positions for each line. Instead provide **two calibration anchors** from the chart's visible Y-axis labels. The frontend computes pixel positions deterministically from these anchors.
+Charts arrive in every shape: mobile portrait screenshots, desktop landscape captures, images with or without volume panels, TradingView vs exchange-native UIs, dark/light themes, heavily zoomed or barely visible y-axis. Your job is to **read the printed y-axis numbers** — do NOT estimate pixel positions of unlabeled candle levels.
 
-Pick two Y-axis **numeric labels that are clearly drawn on the chart**:
-- **Anchor A (top anchor):** a numeric label near the TOP of the visible Y-axis. Read its exact price and estimate its yPercent (0 = top of image, 100 = bottom of image).
-- **Anchor B (bottom anchor):** a numeric label near the BOTTOM of the visible Y-axis. Read its exact price and yPercent.
+**Step 1 — Plot area bounds.** Identify the rectangular region where candles are drawn (exclude: top toolbar/menu, bottom time axis, volume panel below candles, right-side y-axis label column, any app chrome). Report:
+- \`plotArea.topYPercent\`: the vertical position (0-100) of the TOP edge of the candle area.
+- \`plotArea.bottomYPercent\`: the vertical position (0-100) of the BOTTOM edge of the candle area.
 
-Requirements:
-- \`anchors[0].price > anchors[1].price\` (top anchor is the higher price).
-- \`anchors[0].yPercent < anchors[1].yPercent\` (top anchor sits higher on the image, so smaller yPercent).
-- Use prices that are actually **printed as text labels** on the Y-axis (not guesses from candle positions). Reading labeled text is reliable; estimating unlabeled positions is not.
-- Also report \`scale\`: "linear" unless the chart is visibly logarithmic (typical for long-term weekly/monthly BTC charts).
+**Step 2 — Calibration anchors.** Pick **3 to 5** clearly printed y-axis numeric labels whose prices you can read exactly. Spread them across the vertical range — at minimum one near the top of the plot area, one near the bottom, ideally one in the middle. For each anchor:
+- \`price\`: the exact number printed as a y-axis label (NOT extrapolated, NOT from candle heights).
+- \`yPercent\`: vertical position (0 = top of image, 100 = bottom of image) of that label's horizontal gridline.
+
+Anchor requirements:
+- All anchor prices must appear as TEXT on the y-axis. Never guess prices between labels.
+- Anchors must span at least 40% of the image height between the topmost and bottommost anchor.
+- Order anchors from highest price to lowest price.
+- All anchors should sit within \`[plotArea.topYPercent, plotArea.bottomYPercent]\`.
+
+**Step 3 — Scale.** Report \`scale\`: "linear" unless the chart is visibly logarithmic (typical for weekly/monthly BTC/ETH over wide ranges).
+
+**Step 4 — Confidence.** Self-rate \`confidence\`:
+- "high": y-axis labels are clearly visible, ≥3 anchors available, scale unambiguous.
+- "medium": fewer labels visible or partially obscured, but enough to calibrate.
+- "low": y-axis is cropped, blurry, or missing; labels cannot be read reliably. **If low, the frontend will suppress the overlay — be honest.**
 
 ### Part B — Overlay lines
 
@@ -201,8 +213,11 @@ Return a JSON object with this exact structure:
     "scale": "linear" | "log",
     "anchors": [
       {"price": top_yaxis_label_price, "yPercent": 0-100},
+      {"price": middle_yaxis_label_price, "yPercent": 0-100},
       {"price": bottom_yaxis_label_price, "yPercent": 0-100}
-    ]
+    ],
+    "plotArea": {"topYPercent": 0-100, "bottomYPercent": 0-100},
+    "confidence": "high" | "medium" | "low"
   },
   "professionalSummary": {
     "executiveSummary": "2-3 sentence summary for a portfolio manager — mention direction, key levels, and risk/reward",
@@ -231,6 +246,16 @@ async function fetchImageAsBase64(url: string): Promise<{ base64: string; mimeTy
   const base64 = Buffer.from(buffer).toString("base64");
   const contentType = res.headers.get("content-type") || "image/jpeg";
   return { base64, mimeType: contentType };
+}
+
+function buildImageShapeHint(dims?: ImageDimensions): string {
+  if (!dims || !dims.width || !dims.height) return "";
+  const ratio = dims.width / dims.height;
+  let shape: string;
+  if (ratio < 0.7) shape = "portrait mobile screenshot — expect compressed y-axis labels and possible phone chrome (status bar, address bar, bottom nav) above and below the chart";
+  else if (ratio > 1.8) shape = "wide desktop screenshot — may include toolbars, watchlist sidebars, or multi-panel layouts";
+  else shape = "standard aspect ratio — likely a cropped mobile or tablet screenshot";
+  return `\n\nIMAGE CONTEXT:\n- Dimensions: ${dims.width}×${dims.height} (aspect ${ratio.toFixed(2)})\n- Shape: ${shape}\n- Use this when identifying the plotArea bounds in Phase 5: exclude any app chrome/toolbars/time-axis/volume-panel outside the actual candle region.`;
 }
 
 function buildLiveContextBlock(
@@ -323,7 +348,8 @@ export async function analyzeChart(
   imageUrl: string,
   priceData?: PriceAgentResult | null,
   webResults?: WebSearchResult[] | null,
-  lang: string = "en"
+  lang: string = "en",
+  imageDimensions?: ImageDimensions
 ): Promise<ChartAnalysisResult> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -341,10 +367,11 @@ export async function analyzeChart(
   const { base64, mimeType } = await fetchImageAsBase64(imageUrl);
 
   const liveBlock = buildLiveContextBlock(priceData || null, webResults || null);
+  const shapeHint = buildImageShapeHint(imageDimensions);
   const langInstruction = lang === "ko"
     ? "\n\nIMPORTANT: Write ALL text fields (summary, professionalSummary, patterns, indicators values, volumeProfile, bollingerPosition, rsiDivergence, statisticalTargets timeframe, fibonacciLevels significance) in Korean (한국어). Keep technical terms (LONG, SHORT, BUY, SELL, NEUTRAL, BULLISH, BEARISH) in English. Price numbers stay as numbers."
     : "\n\nIMPORTANT: Write ALL text fields (summary, professionalSummary, patterns, indicators values, volumeProfile, bollingerPosition, rsiDivergence, statisticalTargets timeframe, fibonacciLevels significance) ENTIRELY in English. Do NOT include any Korean text, Korean characters, or mixed-language content anywhere in the response.";
-  const fullPrompt = CHART_ANALYSIS_PROMPT + (liveBlock || "") + langInstruction;
+  const fullPrompt = CHART_ANALYSIS_PROMPT + (liveBlock || "") + shapeHint + langInstruction;
 
   const result = await model.generateContent([
     fullPrompt,
