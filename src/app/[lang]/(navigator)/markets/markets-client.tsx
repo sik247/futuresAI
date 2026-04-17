@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import type { MarketSignals, SignalItem } from "@/lib/services/signals/signals.service";
+import MobileMarkets from "./mobile-markets";
 
 /* ═══════════════════════════════════════════════════════════
    Types
@@ -543,6 +544,11 @@ export default function MarketsClient({
       {/* ═══ PREDICTIONS VIEW ══════════════════════════════ */}
       {view === "predictions" && (
         <>
+          {/* Mobile verdict-led feed (<1024px) */}
+          <MobileMarkets events={events} lang={lang} />
+
+          {/* Desktop layout (≥1024px) — unchanged */}
+          <div className="hidden lg:block">
           {/* Category Tabs + Type Tabs */}
           <div className="max-w-[1440px] mx-auto flex">
             <div className="hidden lg:block w-[200px] shrink-0" />
@@ -643,6 +649,7 @@ export default function MarketsClient({
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 pb-10">
             <div className="h-px bg-white/[0.04] mb-4" />
             <p className="text-center text-[11px] text-[#3a3f4a]">{isKo ? "데이터 출처: Polymarket. 가격은 시장 확률을 반영합니다." : "Data from Polymarket. Prices reflect market probability."}</p>
+          </div>
           </div>
         </>
       )}

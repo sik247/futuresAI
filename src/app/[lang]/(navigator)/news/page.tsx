@@ -190,7 +190,7 @@ export default async function NewsList({
           </div>
         </section>
 
-        <NewsListSection news={translatedNews} />
+        <NewsListSection news={translatedNews} lang={lang} />
       </Container>
     </div>
   );

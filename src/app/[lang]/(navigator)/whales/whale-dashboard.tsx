@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import WhaleActivityFeed from "./whale-activity-feed";
+import MobileWhales from "./mobile-whales";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -508,8 +509,8 @@ export default function WhaleDashboard({
   hlWhales: initialWhales,
   hlTrades: initialTrades,
   hlMarkets: initialMarkets,
+  lang,
 }: WhaleDashboardProps) {
-  const [mobileTab, setMobileTab] = useState<"figures" | "positions" | "trades">("positions");
   const [showOthers, setShowOthers] = useState(false);
   const [hlWhales, setHlWhales] = useState(initialWhales);
   const [hlTrades, setHlTrades] = useState(initialTrades);
@@ -589,22 +590,7 @@ export default function WhaleDashboard({
         )}
       </div>
 
-      {/* Mobile tab bar */}
-      <div className="flex lg:hidden border-b border-white/[0.06] bg-zinc-900/60">
-        {(["figures", "positions", "trades"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setMobileTab(tab)}
-            className={`flex-1 py-2 text-[10px] font-mono uppercase tracking-[0.1em] transition-colors cursor-pointer ${
-              mobileTab === tab
-                ? "text-white border-b-2 border-emerald-500"
-                : "text-zinc-600 hover:text-zinc-400"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
+      {/* Mobile: feed-first layout handled by MobileWhales below */}
 
       {/* Main grid — desktop */}
       <div className="hidden lg:grid h-[calc(100vh-92px-44px)]" style={{ gridTemplateColumns: "260px 1fr" }}>
@@ -710,101 +696,14 @@ export default function WhaleDashboard({
         </div>
       </div>
 
-      {/* Mobile views */}
-      <div className="lg:hidden" style={{ height: "calc(100dvh - 64px - 56px - 44px)", overflow: "hidden" }}>
-        {mobileTab === "figures" && (
-          <div className="h-full overflow-y-auto">
-            {/* Horizontal strip of figures with data */}
-            <div className="flex gap-3 p-3 overflow-x-auto border-b border-white/[0.06]">
-              {figuresWithData.map((fig) => (
-                <div key={fig.name} className="flex flex-col items-center gap-1 shrink-0">
-                  <Avatar image={fig.image} name={fig.name} size={36} />
-                  <span className="text-[8px] font-mono text-zinc-400 text-center max-w-[48px] truncate">
-                    {fig.name.split(" ")[0]}
-                  </span>
-                </div>
-              ))}
-            </div>
-            {/* Full list */}
-            <div>
-              {figuresWithData.map((fig) => (
-                <FigureRow key={fig.name} figure={fig} />
-              ))}
-              {(trackedNoData.length > 0 || notableFigures.length > 0) && (
-                <>
-                  <button
-                    onClick={() => setShowOthers((o) => !o)}
-                    className="w-full flex items-center justify-between px-4 py-2 bg-white/[0.02] border-y border-white/[0.04] cursor-pointer"
-                  >
-                    <span className="text-[9px] font-mono uppercase tracking-[0.15em] text-zinc-600">Others ({trackedNoData.length + notableFigures.length})</span>
-                    <svg className={`w-3 h-3 text-zinc-600 transition-transform ${showOthers ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  {showOthers && [...trackedNoData, ...notableFigures].map((fig) => (
-                    <FigureRow key={fig.name} figure={fig} />
-                  ))}
-                </>
-              )}
-            </div>
-          </div>
-        )}
-
-        {mobileTab === "positions" && (
-          <div className="h-full overflow-y-auto p-3 space-y-3">
-            {hlWhales.length === 0 ? (
-              <div className="flex items-center justify-center h-32 text-[10px] font-mono text-zinc-700">
-                No active positions
-              </div>
-            ) : (
-              hlWhales.map((whale) => (
-                <HLWhaleCard key={whale.address} whale={whale} />
-              ))
-            )}
-          </div>
-        )}
-
-        {mobileTab === "trades" && (
-          <div className="h-full flex flex-col overflow-hidden">
-            {/* Tabbed: trades vs activity */}
-            <MobileTradesActivity trades={hlTrades} />
-          </div>
-        )}
-      </div>
+      {/* Mobile views — feed-first redesign */}
+      <MobileWhales
+        figures={figures}
+        hlWhales={hlWhales}
+        hlTrades={hlTrades}
+        lang={lang}
+      />
     </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Mobile Trades / Activity Toggle                                    */
-/* ------------------------------------------------------------------ */
-
-function MobileTradesActivity({ trades }: { trades: HLTrade[] }) {
-  const [tab, setTab] = useState<"trades" | "activity">("trades");
-  return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex border-b border-white/[0.06] shrink-0">
-        {(["trades", "activity"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`flex-1 py-2 text-[10px] font-mono uppercase tracking-[0.1em] transition-colors ${
-              tab === t ? "text-white border-b-2 border-blue-500" : "text-zinc-600"
-            }`}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
-      <div className="flex-1 overflow-hidden">
-        {tab === "trades" ? (
-          <RecentTradesTable trades={trades} />
-        ) : (
-          <div className="p-3 h-full overflow-y-auto">
-            <WhaleActivityFeed />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}

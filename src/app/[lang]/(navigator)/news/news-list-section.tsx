@@ -5,6 +5,7 @@ import Image from "next/image";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import MobileNewsFeed from "./mobile-news-feed";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -27,6 +28,7 @@ function decodeHtml(html: string): string {
 
 interface INewsListSection {
   news: CryptoNewsItem[];
+  lang?: string;
 }
 
 const CATEGORIES = [
@@ -60,7 +62,7 @@ function isBreakingNews(date: Date): boolean {
 const NewsListSection = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"section"> & INewsListSection
->(({ news, ...props }, ref) => {
+>(({ news, lang = "en", ...props }, ref) => {
   const [activeCategory, setActiveCategory] = useState("All");
   const tabsRef = useRef<HTMLDivElement>(null);
   const indicatorRef = useRef<HTMLDivElement>(null);
@@ -182,6 +184,11 @@ const NewsListSection = React.forwardRef<
 
   return (
     <section ref={ref} {...props} className="flex flex-col gap-8 w-full">
+      {/* Mobile condensed feed (<1024px) */}
+      <MobileNewsFeed news={news} lang={lang} />
+
+      {/* Desktop layout (≥1024px) — unchanged */}
+      <div className="hidden lg:flex flex-col gap-8 w-full">
       {/* Breaking news ticker — removed */}
 
       {/* Category filter with GSAP sliding indicator */}
@@ -237,6 +244,7 @@ const NewsListSection = React.forwardRef<
           </p>
         </div>
       )}
+      </div>
     </section>
   );
 });
