@@ -178,11 +178,12 @@ export default async function ChartsPage({
         </span>
       </div>
 
-      {/* Mobile: tab selector + content */}
+      {/* Mobile: focus-first chart + collapsible sections */}
       <ChartsPageClient
         fearGreedData={fearGreedData}
         globalData={globalData}
         topCoins={topCoins}
+        lang={lang}
       />
 
       {/* Desktop layout */}

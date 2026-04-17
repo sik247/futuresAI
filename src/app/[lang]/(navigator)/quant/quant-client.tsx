@@ -29,6 +29,10 @@ const QuantBlog = dynamic(
   }
 );
 
+const MobileSignalsList = dynamic(() => import("./mobile-signals-list"), {
+  ssr: false,
+});
+
 const QuantTools = dynamic(
   () => import("./quant-tools"),
   {
@@ -366,7 +370,7 @@ export default function QuantClient({
       {/* ============================================================ */}
       {/*  HERO                                                        */}
       {/* ============================================================ */}
-      <section ref={heroRef} className="relative pt-20 sm:pt-24 pb-8 overflow-hidden">
+      <section ref={heroRef} className="relative pt-20 sm:pt-24 pb-3 sm:pb-8 overflow-hidden">
         {/* Background gradient orbs — slimmer */}
         <div className="absolute inset-0 bg-gradient-to-b from-blue-950/20 via-zinc-950 to-zinc-950" />
         <div className="absolute top-[-60px] left-1/4 w-[400px] h-[300px] bg-blue-500/[0.10] rounded-full blur-[100px] animate-pulse" />
@@ -386,12 +390,12 @@ export default function QuantClient({
               Quant Terminal
             </span>
           </h1>
-          <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed mb-3">
+          <p className="hidden sm:block text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed mb-3">
             {t.quant_description}
           </p>
 
-          {/* Stats bar */}
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+          {/* Stats bar — desktop only; mobile has its own compact filter */}
+          <div className="hidden sm:flex flex-wrap items-center gap-4 sm:gap-6">
             {/* Fear & Greed mini */}
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
@@ -481,6 +485,13 @@ export default function QuantClient({
       <div className="max-w-7xl mx-auto px-6 pt-10 pb-24 sm:pb-32">
         {activeTab === "signals" && (
           <div>
+            {/* Mobile vertical card list — renders under 1024px only */}
+            <div className="lg:hidden -mx-6 -mt-10">
+              <MobileSignalsList data={data} lang={lang} />
+            </div>
+
+            {/* Desktop layout (unchanged) */}
+            <div className="hidden lg:block">
             {/* -- Market Regime Bar ---------------------------------------- */}
             <div
               ref={overviewRef}
@@ -828,6 +839,7 @@ export default function QuantClient({
               <p className="text-[11px] text-zinc-600 leading-relaxed max-w-2xl mx-auto font-mono">
                 {t.quant_disclaimer}
               </p>
+            </div>
             </div>
           </div>
         )}

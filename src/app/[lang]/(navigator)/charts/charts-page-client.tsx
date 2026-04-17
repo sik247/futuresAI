@@ -1,9 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { TradingViewScreener, FearGreedSection } from "../live/live-client";
-import { MultiChartTerminal } from "./charts-client";
-import { MarketCorrelations, TopCoinsTable } from "./market-data";
+import MobileCharts from "./mobile-charts";
 
 type FearGreedEntry = {
   value: string;
@@ -35,85 +32,25 @@ type Props = {
   fearGreedData: FearGreedEntry[];
   globalData: GlobalMarketData | null;
   topCoins: CoinData[];
+  lang?: string;
 };
 
-type MobileTab = "chart" | "market" | "screener";
-
-export default function ChartsPageClient({ fearGreedData, globalData, topCoins }: Props) {
-  const [mobileTab, setMobileTab] = useState<MobileTab>("chart");
-
+/**
+ * Mobile wrapper — renders a focus-first charts experience on <1024px.
+ * Desktop multi-chart terminal is rendered separately in the parent page.
+ */
+export default function ChartsPageClient({
+  fearGreedData,
+  globalData,
+  topCoins,
+  lang = "en",
+}: Props) {
   return (
-    <>
-      {/* Mobile tab bar */}
-      <div className="flex lg:hidden border-b border-white/[0.06] bg-zinc-900/60">
-        {(["chart", "market", "screener"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setMobileTab(tab)}
-            className={`flex-1 py-2 text-[10px] font-mono uppercase tracking-[0.1em] transition-colors cursor-pointer ${
-              mobileTab === tab
-                ? "text-white border-b-2 border-emerald-500"
-                : "text-zinc-600 hover:text-zinc-400"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {/* Mobile content */}
-      <div className="flex flex-col lg:hidden" style={{ height: "calc(100dvh - 64px - 56px - 44px)" }}>
-        {mobileTab === "chart" && (
-          <div className="flex flex-col h-full overflow-hidden">
-            <MultiChartTerminal />
-          </div>
-        )}
-
-        {mobileTab === "market" && (
-          <div className="flex flex-col h-full overflow-auto">
-            {/* Fear & Greed */}
-            <div className="border-b border-white/[0.06]">
-              <div className="px-3 py-2 border-b border-white/[0.06]">
-                <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">Sentiment</span>
-              </div>
-              <div className="p-3">
-                <FearGreedSection data={fearGreedData} />
-              </div>
-            </div>
-
-            {/* Market Overview */}
-            <div className="border-b border-white/[0.06]">
-              <div className="px-3 py-2 border-b border-white/[0.06]">
-                <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">Market Overview</span>
-              </div>
-              <div className="overflow-x-auto">
-                <MarketCorrelations data={globalData} />
-              </div>
-            </div>
-
-            {/* Top Coins */}
-            <div className="flex-1">
-              <div className="px-3 py-2 border-b border-white/[0.06] flex items-center justify-between">
-                <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">Top Coins</span>
-                <span className="text-[9px] font-mono text-zinc-700">{topCoins.length} assets</span>
-              </div>
-              <TopCoinsTable coins={topCoins} />
-            </div>
-          </div>
-        )}
-
-        {mobileTab === "screener" && (
-          <div className="flex flex-col h-full overflow-hidden">
-            <div className="px-3 py-2 border-b border-white/[0.06] flex items-center gap-2 shrink-0">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-mono uppercase tracking-[0.15em] text-zinc-500">Live Screener</span>
-            </div>
-            <div className="flex-1 overflow-hidden [&_.tradingview-widget-container]:!h-full [&_.tradingview-widget-container]:!rounded-none [&_.tradingview-widget-container]:!border-0">
-              <TradingViewScreener />
-            </div>
-          </div>
-        )}
-      </div>
-    </>
+    <MobileCharts
+      fearGreedData={fearGreedData}
+      globalData={globalData}
+      topCoins={topCoins}
+      lang={lang}
+    />
   );
 }
