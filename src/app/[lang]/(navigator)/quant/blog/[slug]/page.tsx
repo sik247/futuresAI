@@ -308,6 +308,8 @@ export async function generateMetadata({
 /* ------------------------------------------------------------------ */
 /*  Static params                                                       */
 /* ------------------------------------------------------------------ */
+export const dynamicParams = true;
+
 export function generateStaticParams() {
   const langs = ["en", "ko"];
   return langs.flatMap((lang) =>
