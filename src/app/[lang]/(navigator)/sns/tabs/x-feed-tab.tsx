@@ -9,6 +9,7 @@ import type { XFeedItem } from "@/lib/services/social/x-feed.service";
 
 const X_CATEGORY_LABELS: Record<string, string> = {
   all: "All",
+  official: "FuturesAI",
   news: "News",
   analyst: "Analysts",
   onchain: "On-Chain",
@@ -18,6 +19,7 @@ const X_CATEGORY_LABELS: Record<string, string> = {
 };
 
 const X_CATEGORY_COLORS: Record<string, string> = {
+  official: "bg-blue-500/20 text-blue-300 border-blue-400/40",
   news: "bg-rose-500/20 text-rose-400 border-rose-500/30",
   analyst: "bg-blue-500/20 text-blue-400 border-blue-500/30",
   onchain: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
@@ -132,14 +134,25 @@ export default function XFeedTab({ xFeedItems }: XFeedTabProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const filteredXFeed = useMemo(() => {
-    if (xCategory === "all") return xFeedItems;
-    return xFeedItems.filter((item) => item.category === xCategory);
+    const items = xCategory === "all" ? xFeedItems : xFeedItems.filter((item) => item.category === xCategory);
+    // Official tweets always appear first
+    return [...items].sort((a, b) => {
+      if (a.category === "official" && b.category !== "official") return -1;
+      if (b.category === "official" && a.category !== "official") return 1;
+      return 0;
+    });
   }, [xFeedItems, xCategory]);
 
-  const xCategories = useMemo(
-    () => ["all", ...Array.from(new Set(xFeedItems.map((item) => item.category)))],
-    [xFeedItems]
-  );
+  const xCategories = useMemo(() => {
+    const cats = Array.from(new Set(xFeedItems.map((item) => item.category)));
+    // Put "official" first if present
+    const sorted = cats.sort((a, b) => {
+      if (a === "official") return -1;
+      if (b === "official") return 1;
+      return 0;
+    });
+    return ["all", ...sorted];
+  }, [xFeedItems]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -184,7 +197,11 @@ export default function XFeedTab({ xFeedItems }: XFeedTabProps) {
         {filteredXFeed.map((item) => (
           <div
             key={`${item.tweetId}-${item.username}`}
-            className="community-card group relative rounded-xl border border-white/[0.06] bg-white/[0.03] overflow-hidden hover:border-blue-500/25 hover:bg-white/[0.05] hover:shadow-[0_0_20px_-5px_rgba(59,130,246,0.15)] transition-all duration-300"
+            className={`community-card group relative rounded-xl overflow-hidden transition-all duration-300 ${
+              item.category === "official"
+                ? "border-2 border-blue-500/30 bg-blue-500/[0.04] hover:border-blue-400/50 hover:bg-blue-500/[0.07] hover:shadow-[0_0_30px_-5px_rgba(59,130,246,0.25)] ring-1 ring-blue-500/10"
+                : "border border-white/[0.06] bg-white/[0.03] hover:border-blue-500/25 hover:bg-white/[0.05] hover:shadow-[0_0_20px_-5px_rgba(59,130,246,0.15)]"
+            }`}
           >
             {/* Top glow on hover */}
             <div className="absolute top-0 inset-x-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-transparent via-blue-500/30 to-transparent" />

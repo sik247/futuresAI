@@ -16,6 +16,9 @@ export type CryptoAccount = {
 };
 
 const CRYPTO_ACCOUNTS: CryptoAccount[] = [
+  // ── Official (FuturesAI) ───────────────────────────────────────────
+  { username: "FuturesAI_io", displayName: "FuturesAI", category: "official" },
+
   // ── Analysts ────────────────────────────────────────────────────────
   { username: "elaboratideas", displayName: "Elaborate Ideas", category: "analyst" },
   { username: "coinaboratideas", displayName: "Coin Ideas", category: "analyst" },
