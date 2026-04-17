@@ -760,45 +760,87 @@ export async function sendPolymarketPrediction(): Promise<boolean> {
     const filled = Math.round(yesPct / 10);
     const bar = "█".repeat(filled) + "░".repeat(10 - filled);
 
-    // AI commentary
-    let commentary = "";
+    // AI verdict — structured JSON, skip send if weak
     const geminiKey = process.env.GEMINI_API_KEY;
-    if (geminiKey) {
-      try {
-        const genAI = new GoogleGenerativeAI(geminiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-        const result = await model.generateContent(`당신은 수석 트레이더입니다. 이 Polymarket 예측 시장이 주목받고 있습니다:
+    if (!geminiKey) {
+      console.warn("[telegram-group] Polymarket skipped: no GEMINI_API_KEY");
+      return false;
+    }
 
+    type Verdict = {
+      verdict: string;
+      rationale: string;
+      action: string;
+      timeframe: string;
+      confidence: "high" | "medium" | "low";
+    };
+
+    let verdict: Verdict | null = null;
+    try {
+      const genAI = new GoogleGenerativeAI(geminiKey);
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.0-flash",
+        generationConfig: { responseMimeType: "application/json" },
+      });
+      const prompt = `당신은 수석 크립토 트레이더입니다. 이 Polymarket 예측 시장을 분석해 트레이더가 당장 행동할 수 있는 한 줄 판단(verdict)을 내리세요.
+
+예측 시장:
 "${best.title}"
 현재 확률: ${yesOdds}% YES / ${noOdds}% NO
 거래량: $${(vol / 1e6).toFixed(1)}M
 ${change ? `24시간 확률 변동: ${change > 0 ? "+" : ""}${(change * 100).toFixed(1)}%` : ""}
 
-2-3문장으로 답하세요: 이 예측이 크립토 시장 방향에 대해 무엇을 알려주는가? 트레이더는 포지션을 어떻게 조정해야 하는가?
+아래 JSON 스키마로만 답하세요. 모호하거나 양다리 전망이면 confidence를 "low"로 자진 표시하세요.
 
-구체적으로 — 코인명, 방향, 시간대를 명시. 모호한 표현 금지.
-🎯 추천도 포함. 최대 300자. 마크다운, 해시태그 금지. 이모지 금지.`);
-        commentary = result.response.text().trim();
-      } catch {}
+{
+  "verdict": "한 문장 판단 — 반드시 방향(bullish/bearish/neutral) + 대상 자산(BTC/ETH/SOL 등) 명시. 예: '시장은 BTC $100K 돌파를 68% 확률로 베팅 중 — 단기 매수 편향'",
+  "rationale": "한 문장 이유 — 오즈 변동을 움직인 구체적 촉매(ETF 유입, Fed 코멘트, 규제 이슈 등)",
+  "action": "한 문장 실행안 — 구체적 가격/범위/조건. 예: 'BTC $95K 이하 분할 매수, $102K 돌파 시 추격'",
+  "timeframe": "이번 주 | 이번 달 | 이번 분기 중 하나",
+  "confidence": "high | medium | low"
+}
+
+규칙:
+- 모든 필드 한국어로.
+- verdict에 '불확실', '관망', '혼조', '반반', '양방향' 같은 표현 금지.
+- action에 '상황 주시', '지켜본다' 같은 비행동 표현 금지. 구체적 가격 레벨 필수.
+- 이모지, 마크다운, 해시태그 금지. 순수 JSON만.`;
+      const result = await model.generateContent(prompt);
+      const jsonStr = result.response.text().replace(/```json?\n?/g, "").replace(/```\n?/g, "").trim();
+      verdict = JSON.parse(jsonStr) as Verdict;
+    } catch (err) {
+      console.error("[telegram-group] Polymarket Gemini verdict failed:", err);
+      return false;
     }
 
-    // Build caption
-    const changeStr = change ? ` | 24h: ${change > 0 ? "+" : ""}${(change * 100).toFixed(1)}%` : "";
-
-    let caption = `<b>🎯 예측 시장 스포트라이트</b>\n\n`;
-    caption += `<b>"${best.title}"</b>\n\n`;
-    caption += `${outcomes[0] || "YES"}: <b>${yesOdds}%</b> ${bar} ${outcomes[1] || "NO"}: ${noOdds}%\n`;
-    caption += `거래량: $${(vol / 1e6).toFixed(1)}M${changeStr}\n`;
-
-    if (commentary) {
-      caption += `\n${commentary}\n`;
+    // Skip if verdict is weak / generic
+    if (!verdict || verdict.confidence === "low") {
+      console.log("[telegram-group] Polymarket skipped: low-confidence verdict");
+      return false;
+    }
+    const weakPhrases = ["불확실", "관망", "혼조", "반반", "양방향", "알 수 없", "예측 불가"];
+    if (weakPhrases.some((p) => verdict!.verdict.includes(p) || verdict!.action.includes(p))) {
+      console.log("[telegram-group] Polymarket skipped: weak-phrase verdict");
+      return false;
     }
 
-    caption += `\n⚠️ 본 분석은 투자 조언이 아닙니다.\n`;
+    // Build verdict-led caption
+    const changeStr = change ? ` · 24h ${change > 0 ? "+" : ""}${(change * 100).toFixed(1)}%` : "";
+
+    let caption = `<b>🎯 오늘의 예측 시장 베팅</b>\n\n`;
+    caption += `<b>${verdict.verdict}</b>\n\n`;
+    caption += `<b>근거</b>\n`;
+    caption += `• <i>"${best.title}"</i>\n`;
+    caption += `• ${verdict.rationale}\n`;
+    caption += `• ${verdict.action}\n\n`;
+    caption += `<b>시간대</b>: ${verdict.timeframe}\n\n`;
+    caption += `┈┈┈┈┈┈┈┈┈┈┈┈┈┈\n`;
+    caption += `📊 ${outcomes[0] || "YES"} ${yesOdds}% ${bar} ${noOdds}% ${outcomes[1] || "NO"}\n`;
+    caption += `거래량 $${(vol / 1e6).toFixed(1)}M${changeStr}\n\n`;
+    caption += `⚠️ 투자 조언이 아닙니다.\n`;
     caption += `<a href="https://futuresai.io/ko/markets">FuturesAI 예측 시장</a>\n`;
     caption += `<i>— FuturesAI드림</i>`;
 
-    // Send as photo if image available, otherwise text
     if (best.image) {
       return await sendGroupPhoto(best.image, caption);
     } else {

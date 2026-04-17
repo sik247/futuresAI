@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendPolymarketAlert } from "@/lib/services/notifications/polymarket-alerts.service";
 import { sendPolymarketPrediction } from "@/lib/services/notifications/telegram-group.service";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
-/** 2x daily: polymarket predictions with image cards + commentary */
+/** 1x daily: one verdict-led Polymarket call. Skips send if verdict is weak. */
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
