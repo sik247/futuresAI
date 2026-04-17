@@ -120,7 +120,7 @@ export default function BlogTab({ lang }: BlogTabProps) {
             return (
               <a
                 key={article.id}
-                href={`/${lang || "en"}/blog/${article.id}`}
+                href={`/${lang || "en"}/quant?tab=reports`}
                 className="community-card group relative flex flex-col rounded-xl bg-white/[0.03] border border-white/[0.06] overflow-hidden hover:border-indigo-500/25 hover:shadow-[0_0_25px_-5px_rgba(99,102,241,0.12)] transition-all duration-300"
               >
                 {/* Category badge */}

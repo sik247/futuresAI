@@ -86,7 +86,7 @@ interface CommunityTabsProps {
 
 const TABS = [
   { key: "all", label: "All" },
-  { key: "blog", label: "Blog" },
+  { key: "blog", label: "Research" },
   { key: "xfeed", label: "X Feed" },
   { key: "news", label: "News" },
   { key: "youtube", label: "YouTube" },
