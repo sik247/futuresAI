@@ -42,6 +42,7 @@ model User {
   isPremium        Boolean           @default(false)
   blogArticles     BlogArticle[]
   payments         Payment[]
+  notifications    Notification[]
   // Trading profile — user tendencies, risk appetite used as agentic memory/context
   tradingProfile   Json?             @db.JsonB
   // Contact linking for invite/post program
@@ -505,6 +506,20 @@ model ChatMessage {
 
   @@index([sessionId])
   @@index([userId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("info") // info | success | warning | system
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.Timestamptz()
+
+  @@index([userId, read])
+  @@index([createdAt])
 }
 
 enum PaymentStatus {

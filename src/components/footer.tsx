@@ -23,6 +23,11 @@ const getCommunityIcons = (lang: string) => [
     alt: "Futures AI Official",
     href: lang === "ko" ? "https://t.me/FuturesAIOfficial" : "https://t.me/FuturesAI_Global",
   },
+  {
+    item: "/icons/footer-icons/X.png",
+    alt: "FuturesAI on X",
+    href: "https://x.com/FuturesAI_io",
+  },
 ];
 
 const Footer: React.FC<TFooter> = ({ lang = "en", translations }) => {

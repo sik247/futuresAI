@@ -5,7 +5,6 @@ import { PriceTicker } from "@/components/price-ticker";
 import PaybackAlertBanner from "@/components/payback-alert-banner";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
 import FloatingChatButton from "@/components/floating-chat-button";
-import FoundingMemberBanner from "@/components/founding-member-banner";
 import { Metadata } from "next";
 
 export async function generateMetadata({
@@ -53,7 +52,6 @@ export default async function LanguageLayout({
       <PriceTicker />
       <Headers lang={lang} translations={dictionary} />
       <div className="pt-16 sm:pt-[92px]">
-        <FoundingMemberBanner ko={lang === "ko"} />
         <PaybackAlertBanner lang={lang} />
       </div>
       <main className="min-h-screen pb-16 lg:pb-0">{children}</main>

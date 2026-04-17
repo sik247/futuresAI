@@ -38,7 +38,7 @@ const ExchangeList = React.forwardRef<
                 {exchange.name}
               </p>
               <p className="text-lg font-bold text-foreground">
-                페이백 {exchange.paybackRatio.toFixed(0)}%
+                페이백 {Math.round(exchange.paybackRatio * 100)}%
               </p>
             </CardHeader>
             <CardContent className="px-4">
@@ -55,7 +55,7 @@ const ExchangeList = React.forwardRef<
                 />
               </div>
               <div className="text-sm font-medium text-muted-foreground">
-                <p>제휴 거래소 페이백 {exchange.paybackRatio}%</p>
+                <p>제휴 거래소 페이백 {Math.round(exchange.paybackRatio * 100)}%</p>
                 <p className="text-foreground">
                   {"1인 평균 161만원 벌었어요!"}
                 </p>

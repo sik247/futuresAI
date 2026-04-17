@@ -85,7 +85,7 @@ const DetailContent = React.forwardRef<
                     수수료 페이백
                   </p>
                   <p className="text-foreground text-base font-bold">
-                    {paybackRatio.toFixed(0)}%
+                    {Math.round(paybackRatio * 100)}%
                   </p>
                 </div>
               </div>

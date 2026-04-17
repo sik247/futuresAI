@@ -214,6 +214,27 @@ if (data.error === "rate_limit") {
 | `Missing fields` | 400 | Required request body fields missing |
 | `AI service temporarily unavailable` | 503 | Both Gemini and GPT fallback failed |
 
+### Payback Rate Rules
+
+**Payback rates must be consistent** across the entire application. The source of truth is the `EXCHANGES` array in `src/app/[lang]/(navigator)/payback/page.tsx`:
+
+| Exchange | Payback Rate | Notes |
+|----------|-------------|-------|
+| Gate.io  | 75%         | Highest payback |
+| Bitget   | 55%         | |
+| HTX      | 54%         | |
+| BingX    | 50%         | |
+| OKX      | 20%         | |
+| Bybit    | 20%         | |
+
+**Rules:**
+- The DB `Exchange.paybackRatio` stores rates as **decimals** (0.75 = 75%, 0.55 = 55%)
+- Frontend display must multiply by 100: `Math.round(paybackRatio * 100)%`
+- The cron job uses `paybackRatio` directly as a multiplier: `commission * paybackRatio`
+- The admin payback dashboard (`/api/admin/payback-users`) must apply the same payback rate to ALL users including admin accounts — admin is not excluded from calculations
+- The exchanges page (`/exchanges`) reads from DB `Exchange.paybackRatio` — keep it in sync
+- When adding a new exchange, update both the `EXCHANGES` array in the payback page AND the DB `Exchange` record
+
 ### Quality Checklist
 
 Before pushing any feature or fix, verify:

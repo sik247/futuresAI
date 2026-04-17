@@ -24,6 +24,7 @@ import {
 import Logo from "@/components/logo";
 import HeaderHamburger from "@/components/header-hamburger";
 import HeaderMeMenu from "@/components/header-me-menu";
+import NotificationBell from "@/components/notification-bell";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { Dictionary } from "@/i18n";
@@ -137,6 +138,7 @@ const Headers: React.FC<THeaders> = ({ lang, translations }) => {
 
           {session?.user ? (
             <>
+              <NotificationBell />
               <HeaderMeMenu />
               <LanguageSwitcher />
             </>

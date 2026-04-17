@@ -39,7 +39,7 @@ const DetailHeader = React.forwardRef<
         <div className="text-foreground">
           <p className="text-2xl font-extrabold pb-2">{name}</p>
           <p className="text-base font-bold pb-2">
-            수수료 페이백 {paybackRatio.toFixed(0)}%
+            수수료 페이백 {Math.round(paybackRatio * 100)}%
           </p>
           <p className="text-muted-foreground text-xs font-bold">
             페이백을 감안한 수수료율 <br />

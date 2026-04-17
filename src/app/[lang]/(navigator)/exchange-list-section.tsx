@@ -206,7 +206,7 @@ const ExchangeListSection = React.forwardRef<
                 Payback Rate
               </p>
               <p className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                {exchange.paybackRatio.toFixed(0)}%
+                {Math.round(exchange.paybackRatio * 100)}%
               </p>
             </div>
 

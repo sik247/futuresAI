@@ -8,13 +8,13 @@ import TradingProfileModal from "./trading-profile-modal";
 function renderMarkdown(text: string): string {
   return text
     // Code blocks (```...```)
-    .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-white/[0.04] border border-white/[0.06] rounded-lg p-3 my-2 overflow-x-auto text-[11px] font-mono text-zinc-300"><code>$2</code></pre>')
+    .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-white/[0.04] border border-white/[0.06] rounded-lg p-3 my-2 overflow-x-auto text-xs font-mono text-zinc-300"><code>$2</code></pre>')
     // Inline code
-    .replace(/`([^`]+)`/g, '<code class="bg-white/[0.06] px-1 py-0.5 rounded text-blue-300 text-[11px]">$1</code>')
+    .replace(/`([^`]+)`/g, '<code class="bg-white/[0.06] px-1 py-0.5 rounded text-blue-300 text-xs">$1</code>')
     // Headers
-    .replace(/^### (.+)$/gm, '<h3 class="text-sm font-bold text-white mt-3 mb-1.5">$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2 class="text-base font-bold text-white mt-4 mb-2">$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1 class="text-lg font-bold text-white mt-4 mb-2">$1</h1>')
+    .replace(/^### (.+)$/gm, '<h3 class="text-sm font-bold text-white mt-4 mb-2">$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2 class="text-base font-bold text-white mt-5 mb-2">$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1 class="text-lg font-bold text-white mt-5 mb-2">$1</h1>')
     // Bold
     .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-white">$1</strong>')
     // Italic
@@ -25,9 +25,9 @@ function renderMarkdown(text: string): string {
     // Numbered lists
     .replace(/^(\d+)\. (.+)$/gm, '<li class="flex gap-2 text-zinc-300 ml-1"><span class="text-zinc-500 font-mono shrink-0">$1.</span><span>$2</span></li>')
     // Wrap consecutive <li> in <ul>
-    .replace(/((?:<li[^>]*>.*<\/li>\s*)+)/g, '<ul class="space-y-1 my-1.5">$1</ul>')
+    .replace(/((?:<li[^>]*>.*<\/li>\s*)+)/g, '<ul class="space-y-1.5 my-2">$1</ul>')
     // Paragraphs (double newline)
-    .replace(/\n\n/g, '</p><p class="my-1.5">')
+    .replace(/\n\n/g, '</p><p class="my-2.5">')
     // Single newlines within paragraphs
     .replace(/\n/g, '<br/>');
 }
@@ -383,9 +383,31 @@ export default function ChatClient({ lang, userName }: Props) {
       .catch(() => {});
   }, []);
 
-  /* Scroll to bottom on new messages */
+  /* Scroll to keep the user's question in view (answer appears below) */
+  const lastUserMsgIdxRef = useRef<number>(-1);
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messages.length === 0) return;
+    const lastMsg = messages[messages.length - 1];
+
+    if (loading) {
+      // AI is thinking — scroll so the user's question stays at top with thinking indicator below
+      const userMsgEl = document.querySelector(`[data-msg-idx="${messages.length - 1}"]`);
+      if (userMsgEl) {
+        userMsgEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        lastUserMsgIdxRef.current = messages.length - 1;
+      }
+    } else if (lastMsg.role === "assistant" && lastUserMsgIdxRef.current >= 0) {
+      // AI response arrived — scroll to the user's question so the answer is visible below
+      const userMsgEl = document.querySelector(`[data-msg-idx="${lastUserMsgIdxRef.current}"]`);
+      if (userMsgEl) {
+        userMsgEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      lastUserMsgIdxRef.current = -1;
+    } else if (lastMsg.role === "user") {
+      // User just sent a message — scroll to it
+      const el = document.querySelector(`[data-msg-idx="${messages.length - 1}"]`);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   }, [messages, loading]);
 
   const handleNewChat = useCallback(() => {
@@ -673,14 +695,14 @@ export default function ChatClient({ lang, userName }: Props) {
               {messages.map((msg, idx) => (
                 <React.Fragment key={idx}>
                   {msg.role === "user" ? (
-                    <div className="flex justify-end gap-2 items-end">
+                    <div data-msg-idx={idx} className="flex justify-end gap-2 items-end">
                       <span className="text-[8px] text-zinc-700 tabular-nums shrink-0">{fmtTime(msg.timestamp)}</span>
                       <div className="max-w-[75%] px-3 py-2 rounded-lg rounded-br-sm bg-blue-600/90 text-white text-[12px] leading-relaxed whitespace-pre-wrap">
                         {msg.content}
                       </div>
                     </div>
                   ) : (
-                    <div className="flex gap-2.5 items-start">
+                    <div data-msg-idx={idx} className="flex gap-2.5 items-start">
                       <Image
                         src={PERSONA_AVATARS[persona]}
                         alt="AI"
@@ -724,7 +746,7 @@ export default function ChatClient({ lang, userName }: Props) {
 
                         {/* Main AI response — rendered markdown */}
                         <div
-                          className="text-[13px] text-zinc-200 leading-relaxed chat-markdown"
+                          className="text-sm text-zinc-200 leading-relaxed chat-markdown"
                           dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
                         />
 

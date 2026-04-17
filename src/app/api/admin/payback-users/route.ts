@@ -26,10 +26,13 @@ export async function GET(req: NextRequest) {
 
   try {
     // Fetch all data in parallel
-    const [gateData, dbAccounts] = await Promise.all([
+    const [gateData, dbAccounts, gateExchange] = await Promise.all([
       fetchGatePartnerData(from, to),
       fetchDbAccounts(),
+      prisma.exchange.findFirst({ where: { name: "Gate.io" }, select: { paybackRatio: true } }),
     ]);
+
+    const gatePaybackRate = gateExchange?.paybackRatio || 0.75;
 
     // Merge all users into unified list
     const userMap = new Map<string, {
@@ -52,8 +55,8 @@ export async function GET(req: NextRequest) {
         uid: u.userId,
         exchange: "Gate.io",
         commission: u.commission,
-        paybackRate: 0.75,
-        paybackOwed: u.commission * 0.75,
+        paybackRate: gatePaybackRate,
+        paybackOwed: u.commission * gatePaybackRate,
         fees: u.fees,
         volume: u.volume,
         trades: u.trades,

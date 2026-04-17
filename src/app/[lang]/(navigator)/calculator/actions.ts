@@ -12,7 +12,7 @@ export async function getExchangesForCalculator() {
       logo: ex.imageUrl || ex.titleImageUrl,
       makerFee: ex.limitFee,
       takerFee: ex.marketFee,
-      paybackRate: ex.paybackRatio / 100,
+      paybackRate: ex.paybackRatio,
       color: "#000",
       features: [] as string[],
     }));
