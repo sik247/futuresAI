@@ -187,6 +187,29 @@ export default function MobileHome({ lang, btcData, ethData, fearGreed, globalDa
         </div>
       </Link>
 
+      {/* ── Connect Exchange CTA (payback UID link) ── */}
+      <Link
+        href={`/${lang}/me/refund-withdraw`}
+        className="mx-4 mb-4 block rounded-2xl overflow-hidden border border-amber-500/25 bg-gradient-to-r from-amber-950/40 via-orange-950/25 to-zinc-950 active:scale-[0.99] transition-transform"
+      >
+        <div className="flex items-center gap-4 p-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0 text-xl">
+            💎
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-bold text-white">
+              {ko ? "거래소 UID 연동" : "Connect Exchange UID"}
+            </h3>
+            <p className="text-xs text-zinc-400 mt-0.5 line-clamp-2">
+              {ko ? "거래소를 추가하고 페이백을 받아보세요" : "Add your exchange UID to earn payback"}
+            </p>
+          </div>
+          <svg className="w-5 h-5 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </div>
+      </Link>
+
       {/* ── Quick Actions ── */}
       <div className="flex gap-2 px-4 mb-4 overflow-x-auto no-scrollbar">
         {[

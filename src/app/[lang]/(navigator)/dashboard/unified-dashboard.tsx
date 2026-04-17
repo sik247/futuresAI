@@ -305,6 +305,17 @@ export default function UnifiedDashboard({
                     <span className="text-xs">({pnl >= 0 ? "+" : ""}{pnlPct.toFixed(2)}%)</span>
                   </p>
                 )}
+                {portfolio.totalValue === 0 && paybackAccounts.length === 0 && (
+                  <Link
+                    href={`/${lang}/me/refund-withdraw`}
+                    className="mt-2 flex items-center justify-between px-2.5 py-1.5 rounded bg-amber-500/10 border border-amber-500/25 hover:bg-amber-500/15 transition-colors"
+                  >
+                    <span className="text-[11px] font-semibold text-amber-300">
+                      {lang === "ko" ? "💎 거래소 UID 연동" : "💎 Connect Exchange UID"}
+                    </span>
+                    <span className="text-[11px] text-amber-400">→</span>
+                  </Link>
+                )}
                 <div className="mt-3 space-y-1">
                   <SectionHeader>Overview</SectionHeader>
                   <div className="flex justify-between text-xs">
@@ -715,6 +726,17 @@ export default function UnifiedDashboard({
                     <p className={`text-sm font-mono ${pnl >= 0 ? "text-[#00C805]" : "text-[#FF5000]"}`}>
                       {pnl >= 0 ? "▲ +" : "▼ -"}{formatUSD(pnl)} ({pnl >= 0 ? "+" : ""}{pnlPct.toFixed(2)}%)
                     </p>
+                  )}
+                  {portfolio.totalValue === 0 && paybackAccounts.length === 0 && (
+                    <Link
+                      href={`/${lang}/me/refund-withdraw`}
+                      className="mt-3 flex items-center justify-between px-3 py-2 rounded bg-amber-500/10 border border-amber-500/25"
+                    >
+                      <span className="text-xs font-semibold text-amber-300">
+                        {lang === "ko" ? "💎 거래소 UID 연동하고 페이백 받기" : "💎 Connect exchange UID to earn payback"}
+                      </span>
+                      <span className="text-xs text-amber-400">→</span>
+                    </Link>
                   )}
                 </>
               )}

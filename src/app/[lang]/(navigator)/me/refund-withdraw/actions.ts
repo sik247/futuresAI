@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
+import prisma from "@/lib/prisma";
 import { exchangeAccountsService } from "@/lib/services/exchange-accounts/exchange-accounts.service";
 import { exchangesService } from "@/lib/services/exchanges/exchanges.service";
 import { withdrawsService } from "@/lib/services/withdraws/withdraws.service";
@@ -21,8 +22,20 @@ export async function getExchangeAccounts() {
 
 export async function createExchangeAccount(exchangeId: string, uid: string) {
   const session = await auth();
-  if (!session) {
-    throw redirect("/login");
+  if (!session?.user?.email) {
+    throw new Error("Unauthorized: 로그인이 필요합니다.");
+  }
+  if (!exchangeId || !uid?.trim()) {
+    throw new Error("거래소와 UID를 모두 입력해주세요.");
+  }
+
+  const trimmedUid = uid.trim();
+
+  const existing = await prisma.exchangeAccount.findFirst({
+    where: { userId: session.user.id, exchangeId },
+  });
+  if (existing) {
+    throw new Error("이미 해당 거래소를 연동하셨습니다.");
   }
 
   const exchangeAccount = await exchangeAccountsService.create({
@@ -36,7 +49,7 @@ export async function createExchangeAccount(exchangeId: string, uid: string) {
         email: session.user.email,
       },
     },
-    uid: uid,
+    uid: trimmedUid,
   });
   revalidatePath("/me/refund-withdraw");
 

@@ -33,23 +33,47 @@ const AddExchangeModal = React.forwardRef<
 >(({ exchanges }, ref) => {
   const [selectedExchange, setSelectedExchange] = React.useState<string>("");
   const [uid, setUid] = React.useState<string>("");
+  const [open, setOpen] = React.useState(false);
+  const [submitting, setSubmitting] = React.useState(false);
+  const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
   const router = useRouter();
 
-  function onSubmit() {
+  async function onSubmit() {
+    if (submitting) return;
+    setErrorMsg(null);
     if (!selectedExchange || !uid) {
-      alert("거래소와 UID를 입력해주세요.");
+      setErrorMsg("거래소와 UID를 모두 입력해주세요.");
       return;
     }
-    createExchangeAccount(selectedExchange, uid).then(() => {
+    if (exchanges.length === 0) {
+      setErrorMsg("현재 선택 가능한 거래소가 없습니다. 관리자에게 문의해주세요.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await createExchangeAccount(selectedExchange, uid.trim());
       alert("거래소가 추가되었습니다.");
       setUid("");
       setSelectedExchange("");
+      setOpen(false);
       router.refresh();
-    });
+    } catch (err: any) {
+      const raw = String(err?.message || err || "");
+      if (raw.includes("Unique constraint") || raw.includes("P2002")) {
+        setErrorMsg("이미 등록된 UID입니다. 다른 UID이거나, 이미 연동된 계정인지 확인해주세요.");
+      } else if (raw.includes("NEXT_REDIRECT") || raw.toLowerCase().includes("unauthor")) {
+        setErrorMsg("세션이 만료되었습니다. 다시 로그인해주세요.");
+      } else {
+        setErrorMsg(`거래소 추가에 실패했습니다. ${raw ? `(${raw.slice(0, 120)})` : "잠시 후 다시 시도해주세요."}`);
+      }
+      console.error("[AddExchange] failed:", err);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setErrorMsg(null); }}>
       <DialogTrigger asChild>
         <Button
           variant="outline"
@@ -74,7 +98,7 @@ const AddExchangeModal = React.forwardRef<
               }}
             >
               <SelectTrigger className="w-full text-muted-foreground">
-                <SelectValue placeholder="거래소를 선택해주세요." />
+                <SelectValue placeholder={exchanges.length === 0 ? "사용 가능한 거래소가 없습니다" : "거래소를 선택해주세요."} />
               </SelectTrigger>
               <SelectContent className="h-1/2">
                 <SelectGroup>
@@ -100,14 +124,20 @@ const AddExchangeModal = React.forwardRef<
               className="w-full"
             />
           </div>
+          {errorMsg && (
+            <p className="text-sm font-medium text-red-500 bg-red-50 border border-red-200 rounded-md p-2">
+              {errorMsg}
+            </p>
+          )}
         </div>
         <DialogFooter>
           <Button
             onClick={onSubmit}
             type="submit"
-            className="rounded-full bg-foreground text-background w-full text-base font-bold"
+            disabled={submitting}
+            className="rounded-full bg-foreground text-background w-full text-base font-bold disabled:opacity-60"
           >
-            거래소 추가
+            {submitting ? "추가 중..." : "거래소 추가"}
           </Button>
         </DialogFooter>
       </DialogContent>

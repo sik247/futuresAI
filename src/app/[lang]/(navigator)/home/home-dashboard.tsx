@@ -1132,6 +1132,25 @@ export default function HomeDashboard({
     <div className="bg-zinc-950 font-mono flex flex-col h-[calc(100dvh-64px-56px)] sm:h-[calc(100dvh-92px)] lg:h-[calc(100dvh-92px)]">
       <StatBar btcData={btcData} ethData={ethData} fearGreed={fearGreed} globalData={globalData} />
 
+      {/* Connect Exchange CTA (payback UID link) */}
+      <Link
+        href={`/${lang}/me/refund-withdraw`}
+        className="flex items-center justify-between gap-3 px-4 py-2 border-b border-amber-500/15 bg-gradient-to-r from-amber-950/30 via-orange-950/15 to-transparent hover:from-amber-950/50 hover:via-orange-950/25 transition-colors shrink-0"
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="text-base shrink-0">💎</span>
+          <span className="text-xs font-semibold text-amber-300 truncate">
+            {ko ? "거래소 UID를 연동하고 페이백을 받으세요" : "Connect your exchange UID to earn payback"}
+          </span>
+        </div>
+        <span className="flex items-center gap-1 text-[11px] font-bold text-amber-400 shrink-0">
+          {ko ? "연동하기" : "Connect"}
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </span>
+      </Link>
+
       {/* Fixed grid — fits viewport, no page scroll */}
       <div className="flex-1 min-h-0 p-2 grid grid-cols-12 grid-rows-[55%_45%] gap-2">
         {/* Row 1: Chart (5) + Signals (4) + Chat (3, spans both rows) */}
