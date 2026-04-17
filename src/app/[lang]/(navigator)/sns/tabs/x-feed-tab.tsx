@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Tweet } from "react-tweet";
 import gsap from "gsap";
 import type { XFeedItem } from "@/lib/services/social/x-feed.service";
@@ -101,6 +101,66 @@ class TweetErrorBoundary extends React.Component<
   }
 }
 
+// ── Twitter Timeline Embed ───────────────────────────────────────────
+
+function TwitterTimeline({ username, height = 600 }: { username: string; height?: number }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    // Load Twitter widget.js if not already loaded
+    const win = window as any;
+    const render = () => {
+      if (win.twttr?.widgets) {
+        // Clear previous content
+        if (containerRef.current) containerRef.current.innerHTML = "";
+        win.twttr.widgets.createTimeline(
+          { sourceType: "profile", screenName: username },
+          containerRef.current,
+          { theme: "dark", chrome: "noheader nofooter noborders transparent", height, dnt: true, tweetLimit: 10 }
+        ).then(() => setLoaded(true)).catch(() => {});
+      }
+    };
+
+    if (win.twttr?.widgets) {
+      render();
+    } else {
+      const script = document.createElement("script");
+      script.src = "https://platform.twitter.com/widgets.js";
+      script.async = true;
+      script.onload = render;
+      document.head.appendChild(script);
+    }
+  }, [username, height]);
+
+  return (
+    <div className="rounded-xl border-2 border-blue-500/20 bg-blue-500/[0.03] overflow-hidden">
+      <div className="flex items-center gap-3 px-5 py-3 border-b border-blue-500/10 bg-blue-500/[0.04]">
+        <svg className="w-5 h-5 text-blue-400" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+        </svg>
+        <span className="text-sm font-semibold text-white">@{username}</span>
+        <a
+          href={`https://x.com/${username}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-auto text-xs text-blue-400 hover:text-blue-300 transition-colors"
+        >
+          Follow
+        </a>
+      </div>
+      {!loaded && (
+        <div className="flex items-center justify-center py-12">
+          <div className="w-6 h-6 border-2 border-blue-500/30 border-t-blue-400 rounded-full animate-spin" />
+        </div>
+      )}
+      <div ref={containerRef} className="[&_iframe]:!border-0" />
+    </div>
+  );
+}
+
 // ── Safe Tweet Wrapper ───────────────────────────────────────────────
 
 function SafeTweet({ id, username }: { id: string; username: string }) {
@@ -134,13 +194,11 @@ export default function XFeedTab({ xFeedItems }: XFeedTabProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const filteredXFeed = useMemo(() => {
-    const items = xCategory === "all" ? xFeedItems : xFeedItems.filter((item) => item.category === xCategory);
-    // Official tweets always appear first
-    return [...items].sort((a, b) => {
-      if (a.category === "official" && b.category !== "official") return -1;
-      if (b.category === "official" && a.category !== "official") return 1;
-      return 0;
-    });
+    // Official tweets are shown in the embedded timeline, exclude from grid
+    const items = xCategory === "all"
+      ? xFeedItems.filter((item) => item.category !== "official")
+      : xFeedItems.filter((item) => item.category === xCategory);
+    return items;
   }, [xFeedItems, xCategory]);
 
   const xCategories = useMemo(() => {
@@ -172,6 +230,11 @@ export default function XFeedTab({ xFeedItems }: XFeedTabProps) {
 
   return (
     <div ref={containerRef} className="flex flex-col gap-6">
+      {/* FuturesAI Official Timeline */}
+      {(xCategory === "all" || xCategory === "official") && (
+        <TwitterTimeline username="FuturesAI_io" height={500} />
+      )}
+
       {/* Category filter pills */}
       <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
         {xCategories.map((cat) => (
