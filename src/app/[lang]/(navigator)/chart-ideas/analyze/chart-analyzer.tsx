@@ -10,7 +10,7 @@ import { CloudArrowUpIcon, LockClosedIcon, ArrowDownTrayIcon } from "@heroicons/
 import { toast } from "@/components/ui/use-toast";
 import { Dictionary } from "@/i18n";
 import { ClipboardDocumentIcon, ShareIcon } from "@heroicons/react/24/outline";
-import type { ChartAnalysisResult, ChartLine } from "@/lib/services/chart-analysis/chart-analysis.service";
+import type { ChartAnalysisResult, ChartLine, ChartCalibration } from "@/lib/services/chart-analysis/chart-analysis.service";
 import dynamic from "next/dynamic";
 import type { ChartLevel, ChartZone } from "@/components/trading-chart";
 
@@ -25,6 +25,30 @@ const TradingChart = dynamic(() => import("@/components/trading-chart"), {
     </div>
   ),
 });
+
+/* ------------------------------------------------------------------ */
+/*  Chart calibration validator — rejects garbage anchor data so we    */
+/*  never draw misaligned overlays.                                    */
+/* ------------------------------------------------------------------ */
+function validateCalibration(
+  cal: ChartCalibration | undefined,
+  livePrice?: number
+): ChartCalibration | null {
+  if (!cal || !Array.isArray(cal.anchors) || cal.anchors.length !== 2) return null;
+  const [a, b] = cal.anchors;
+  if (!a || !b) return null;
+  if (!isFinite(a.price) || !isFinite(b.price)) return null;
+  if (!isFinite(a.yPercent) || !isFinite(b.yPercent)) return null;
+  if (a.price <= b.price) return null; // top anchor must be higher price
+  if (a.yPercent >= b.yPercent) return null; // top anchor must be higher on image
+  if (a.yPercent < 0 || b.yPercent > 100) return null;
+  if (livePrice && livePrice > 0) {
+    // Both anchors should be within ±60% of live market price (wide band to allow older chart snapshots).
+    if (a.price < livePrice * 0.4 || a.price > livePrice * 2.5) return null;
+    if (b.price < livePrice * 0.4 || b.price > livePrice * 2.5) return null;
+  }
+  return cal;
+}
 
 /* ------------------------------------------------------------------ */
 /*  Post generator + Grok-style AI commentary                          */
@@ -304,51 +328,75 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
 
     if (!analysis?.lines) return;
 
+    const cal = validateCalibration(analysis.chartCalibration, analysis.liveContext?.currentPrice);
+    if (!cal) return;
+
     const entryPrice = analysis.tradeSetup?.entry || 0;
     const W = dimensions.width;
     const H = dimensions.height;
 
+    // Deterministic price → pixel Y. No vision-model spatial guessing.
+    const priceToY = (price: number) => {
+      const [a, b] = cal.anchors;
+      let pct: number;
+      if (cal.scale === "log") {
+        const la = Math.log(a.price), lb = Math.log(b.price), lp = Math.log(price);
+        pct = a.yPercent + (b.yPercent - a.yPercent) * (la - lp) / (la - lb);
+      } else {
+        pct = a.yPercent + (b.yPercent - a.yPercent) * (a.price - price) / (a.price - b.price);
+      }
+      return (pct / 100) * H;
+    };
+
+    // Drop lines whose price falls outside the calibrated visible range (× 1.2 slack).
+    const [topAnchor, botAnchor] = cal.anchors;
+    const priceSpan = topAnchor.price - botAnchor.price;
+    const validLines = analysis.lines.filter(
+      (l) =>
+        typeof l.price === "number" &&
+        isFinite(l.price) &&
+        l.price >= botAnchor.price - priceSpan * 0.2 &&
+        l.price <= topAnchor.price + priceSpan * 0.2
+    );
+
     // --- Zone fills (visible, like TradingView long/short position tool) ---
-    const entryLine = analysis.lines.find((l) => l.type === "entry");
-    const slLine = analysis.lines.find((l) => l.type === "stopLoss");
-    const tpLine = analysis.lines.find((l) => l.type === "takeProfit");
+    const entryLine = validLines.find((l) => l.type === "entry");
+    const slLine = validLines.find((l) => l.type === "stopLoss");
+    const tpLine = validLines.find((l) => l.type === "takeProfit");
 
     if (entryLine && slLine) {
-      const eY = (entryLine.yPercent / 100) * H;
-      const sY = (slLine.yPercent / 100) * H;
+      const eY = priceToY(entryLine.price);
+      const sY = priceToY(slLine.price);
       ctx.fillStyle = "rgba(239, 83, 80, 0.12)";
       ctx.fillRect(0, Math.min(eY, sY), W, Math.abs(sY - eY));
     }
     if (entryLine && tpLine) {
-      const eY = (entryLine.yPercent / 100) * H;
-      const tY = (tpLine.yPercent / 100) * H;
+      const eY = priceToY(entryLine.price);
+      const tY = priceToY(tpLine.price);
       ctx.fillStyle = "rgba(38, 166, 154, 0.12)";
       ctx.fillRect(0, Math.min(eY, tY), W, Math.abs(tY - eY));
     }
 
     // --- Draw all lines (with label collision avoidance) ---
-    // Sort lines by yPercent to detect overlaps
-    const sortedLines = [...analysis.lines].sort((a, b) => a.yPercent - b.yPercent);
+    // Sort by pixel Y to detect label overlaps; lines draw at true pixel positions.
+    const sortedLines = [...validLines].sort((a, b) => priceToY(a.price) - priceToY(b.price));
     const MIN_LABEL_GAP = 30; // minimum pixels between label centers
     const labelPositions: number[] = [];
 
     sortedLines.forEach((line) => {
-      let y = (line.yPercent / 100) * H;
+      const lineY = priceToY(line.price);
+      let labelY = lineY;
 
-      // Offset label if too close to previous label
+      // Offset label if too close to previous label (line position stays true to price)
       for (const prevY of labelPositions) {
-        if (Math.abs(y - prevY) < MIN_LABEL_GAP) {
-          y = prevY + MIN_LABEL_GAP * (y > prevY ? 1 : -1);
+        if (Math.abs(labelY - prevY) < MIN_LABEL_GAP) {
+          labelY = prevY + MIN_LABEL_GAP * (labelY > prevY ? 1 : -1);
         }
       }
-      labelPositions.push(y);
+      labelPositions.push(labelY);
 
-      // Always draw the line at original position
-      const lineY = (line.yPercent / 100) * H;
-      drawAnalysisLine(ctx, lineY, y, line, W, entryPrice);
+      drawAnalysisLine(ctx, lineY, labelY, line, W, entryPrice);
     });
-
-    // --- No canvas panel — strategy data is shown in the HTML bar above ---
   }, [dimensions, analysis]);
 
   useEffect(() => { drawCanvas(); }, [drawCanvas]);
@@ -417,21 +465,18 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
     }
 
     // --- Right price tag (TradingView style: colored bg, large bold text) ---
-    const priceMatch = line.label.match(/\$[\d,.]+/)?.[0] || "";
-    if (priceMatch) {
+    if (typeof line.price === "number" && isFinite(line.price)) {
+      const priceText = `$${line.price.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
       // Build suffix
       let suffix = "";
       if (entryPrice > 0 && (isSL || isTP)) {
-        const price = parseFloat(priceMatch.replace(/[$,]/g, ""));
-        if (!isNaN(price)) {
-          const pct = ((price - entryPrice) / entryPrice * 100).toFixed(2);
-          suffix = `  ${Number(pct) > 0 ? "+" : ""}${pct}%`;
-        }
+        const pct = ((line.price - entryPrice) / entryPrice * 100).toFixed(2);
+        suffix = `  ${Number(pct) > 0 ? "+" : ""}${pct}%`;
       } else if (isLevel && line.hitProbability > 0) {
         suffix = `  ${line.hitProbability}%`;
       }
 
-      const displayText = priceMatch + suffix;
+      const displayText = priceText + suffix;
       ctx.font = `bold 14px ${TV.mono}`;
       const tw = ctx.measureText(displayText).width;
       const pad = 10;

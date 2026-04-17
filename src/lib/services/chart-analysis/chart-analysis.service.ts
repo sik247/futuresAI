@@ -48,6 +48,7 @@ export type ChartAnalysisResult = {
     statisticalTargets: { price: number; probability: number; timeframe: string }[];
   };
   lines: ChartLine[];
+  chartCalibration: ChartCalibration;
   liveContext?: LiveContext;
   professionalSummary?: {
     executiveSummary: string;
@@ -60,11 +61,19 @@ export type ChartAnalysisResult = {
 
 export type ChartLine = {
   type: "support" | "resistance" | "trend" | "entry" | "stopLoss" | "takeProfit";
-  yPercent: number;
+  price: number;
   label: string;
   color: string;
   dashed: boolean;
   hitProbability: number;
+};
+
+export type ChartCalibration = {
+  scale: "linear" | "log";
+  anchors: [
+    { price: number; yPercent: number },
+    { price: number; yPercent: number }
+  ];
 };
 
 const CHART_ANALYSIS_PROMPT = `You are a senior quantitative analyst at a top-tier proprietary trading firm. You are preparing a chart analysis report for the risk committee. Your analysis must be precise, data-driven, and actionable.
@@ -109,15 +118,31 @@ Construct a professional trade setup:
 5. **Risk:Reward:** Must be at least 1:1.5. If the setup doesn't offer this, direction should be NEUTRAL.
 6. **Confidence:** 0-100 based on: indicator alignment, volume confirmation, pattern clarity, trend support.
 
-## PHASE 5: CHART OVERLAY LINES
+## PHASE 5: CHART CALIBRATION & OVERLAY LINES
 
-Generate precise overlay lines for the chart image:
+### Part A — Calibration (CRITICAL for pixel-accurate overlay rendering)
 
-- yPercent = vertical position on the image (0 = top of image, 100 = bottom of image)
-- Map each price level to its approximate vertical position based on the Y-axis you read in Phase 1
-- Colors: support=#22c55e, resistance=#ef4444, entry=#3b82f6, stopLoss=#ef4444, takeProfit=#22c55e, trend=#f59e0b
-- Include at minimum: 2 supports, 2 resistances, entry, stopLoss, takeProfit
-- hitProbability = estimated % chance price reaches this level within the chart's timeframe
+The frontend will draw overlay lines. Do NOT estimate pixel positions for each line. Instead provide **two calibration anchors** from the chart's visible Y-axis labels. The frontend computes pixel positions deterministically from these anchors.
+
+Pick two Y-axis **numeric labels that are clearly drawn on the chart**:
+- **Anchor A (top anchor):** a numeric label near the TOP of the visible Y-axis. Read its exact price and estimate its yPercent (0 = top of image, 100 = bottom of image).
+- **Anchor B (bottom anchor):** a numeric label near the BOTTOM of the visible Y-axis. Read its exact price and yPercent.
+
+Requirements:
+- \`anchors[0].price > anchors[1].price\` (top anchor is the higher price).
+- \`anchors[0].yPercent < anchors[1].yPercent\` (top anchor sits higher on the image, so smaller yPercent).
+- Use prices that are actually **printed as text labels** on the Y-axis (not guesses from candle positions). Reading labeled text is reliable; estimating unlabeled positions is not.
+- Also report \`scale\`: "linear" unless the chart is visibly logarithmic (typical for long-term weekly/monthly BTC charts).
+
+### Part B — Overlay lines
+
+Provide each price level you want drawn:
+- \`price\`: exact numeric price (read from chart or derived from your analysis).
+- \`type\`: support | resistance | trend | entry | stopLoss | takeProfit.
+- Colors: support=#22c55e, resistance=#ef4444, entry=#3b82f6, stopLoss=#ef4444, takeProfit=#22c55e, trend=#f59e0b.
+- Include at minimum: 2 supports, 2 resistances, entry, stopLoss, takeProfit.
+- \`hitProbability\`: estimated % chance price reaches this level within the chart's timeframe.
+- \`label\`: short descriptor like "S1 $73,200" (the \`price\` field is authoritative — the frontend reads from \`price\`, not from parsing the label).
 
 ## OUTPUT FORMAT
 
@@ -170,8 +195,15 @@ Return a JSON object with this exact structure:
     ]
   },
   "lines": [
-    {"type": "support|resistance|trend|entry|stopLoss|takeProfit", "yPercent": 0-100, "label": "S1 $price", "color": "hex", "dashed": boolean, "hitProbability": 0-100}
+    {"type": "support|resistance|trend|entry|stopLoss|takeProfit", "price": exact_price, "label": "S1 $price", "color": "hex", "dashed": boolean, "hitProbability": 0-100}
   ],
+  "chartCalibration": {
+    "scale": "linear" | "log",
+    "anchors": [
+      {"price": top_yaxis_label_price, "yPercent": 0-100},
+      {"price": bottom_yaxis_label_price, "yPercent": 0-100}
+    ]
+  },
   "professionalSummary": {
     "executiveSummary": "2-3 sentence summary for a portfolio manager — mention direction, key levels, and risk/reward",
     "marketStructure": "Current phase: accumulation/distribution/markup/markdown. Key swing points with prices.",
@@ -187,8 +219,8 @@ Return a JSON object with this exact structure:
 - All price levels must be within the visible range of the chart.
 - Support levels must be BELOW current price. Resistance must be ABOVE.
 - Stop loss must be on the opposite side of entry from take profit.
-- yPercent must accurately map to the price's position on the chart image.
-- CRITICAL: Ensure minimum 4% vertical spacing between adjacent lines (yPercent values). If two levels are too close, merge them or drop the less significant one. Overlapping labels make the chart unreadable.
+- chartCalibration anchors MUST come from Y-axis numeric labels that are visibly drawn on the chart. Never guess or extrapolate beyond the visible axis.
+- CRITICAL: Avoid returning price levels that are within ~0.3% of each other — they will render as overlapping lines. Merge near-duplicate levels or drop the less significant one.
 - Maximum 8 lines total. Prioritize: entry > stopLoss > takeProfit > strongest support > strongest resistance > trend. Drop weak levels rather than overcrowding.
 - Write with the precision of a research analyst at Goldman Sachs or Two Sigma.`;
 
