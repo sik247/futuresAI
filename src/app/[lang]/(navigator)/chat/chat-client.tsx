@@ -789,57 +789,6 @@ export default function ChatClient({ lang, userName }: Props) {
                           </div>
                         )}
 
-                        {/* Analyst tweets */}
-                        {msg.tweets && msg.tweets.length > 0 && (
-                          <div className="pt-2 border-t border-white/[0.04]">
-                            <span className="text-[9px] text-zinc-600 uppercase tracking-wider block mb-1.5">{ko ? "애널리스트 트윗" : "Analyst Tweets"}</span>
-                            <div className="space-y-1">
-                              {msg.tweets.slice(0, 3).map((t, ti) => (
-                                <a
-                                  key={ti}
-                                  href={t.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-start gap-2 px-2.5 py-1.5 rounded-md bg-white/[0.02] border border-white/[0.04] hover:border-white/[0.10] hover:bg-white/[0.04] transition-all cursor-pointer group"
-                                >
-                                  <span className="w-4 h-4 rounded-full bg-sky-500/15 flex items-center justify-center text-[8px] font-bold text-sky-400 shrink-0 mt-0.5">X</span>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-[9px] text-sky-400 font-semibold">@{t.author}</p>
-                                    <p className="text-[10px] text-zinc-400 group-hover:text-zinc-300 leading-snug line-clamp-2 transition-colors">{t.text}</p>
-                                  </div>
-                                </a>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Related news articles */}
-                        {msg.news && msg.news.length > 0 && (
-                          <div className="pt-2 border-t border-white/[0.04]">
-                            <span className="text-[9px] text-zinc-600 uppercase tracking-wider block mb-1.5">{ko ? "관련 뉴스" : "Related News"}</span>
-                            <div className="space-y-1">
-                              {msg.news.slice(0, 5).map((n, ni) => (
-                                <a
-                                  key={ni}
-                                  href={n.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-start gap-2 px-2.5 py-1.5 rounded-md bg-white/[0.02] border border-white/[0.04] hover:border-white/[0.10] hover:bg-white/[0.04] transition-all cursor-pointer group"
-                                >
-                                  <span className="w-4 h-4 rounded-sm bg-blue-500/15 flex items-center justify-center text-[8px] font-bold text-blue-400 shrink-0 mt-0.5">{ni + 1}</span>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-[11px] text-zinc-300 group-hover:text-white leading-snug line-clamp-1 transition-colors">{n.title}</p>
-                                    <p className="text-[9px] text-zinc-600 mt-0.5">{n.source}</p>
-                                  </div>
-                                  <svg className="w-3 h-3 text-zinc-700 group-hover:text-zinc-400 shrink-0 mt-0.5 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                                  </svg>
-                                </a>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
                         {/* Follow-up questions */}
                         {msg.followUps && msg.followUps.length > 0 && idx === messages.length - 1 && (
                           <div className="pt-2">
