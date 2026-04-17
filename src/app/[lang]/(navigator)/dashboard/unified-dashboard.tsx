@@ -447,10 +447,79 @@ export default function UnifiedDashboard({
 
           {/* Signals Table */}
           <div className="flex-1 p-0 overflow-hidden flex flex-col">
-            <div className="px-4 pt-3 pb-2 border-b border-zinc-800">
+            <div className="px-4 pt-3 pb-2 border-b border-zinc-800 flex items-center justify-between">
               <SectionHeader>{lang === "ko" ? "시장 신호" : "Market Signals"}</SectionHeader>
+              <Link href={`/${lang}/quant`} className="lg:hidden text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors">
+                {lang === "ko" ? "전체 →" : "All →"}
+              </Link>
             </div>
-            <div className="flex-1 overflow-y-auto overflow-x-auto">
+
+            {/* Mobile: vertical card list */}
+            <div className="lg:hidden flex-1 overflow-y-auto divide-y divide-zinc-800/60">
+              {signals.signals.slice(0, 10).map((sig) => {
+                const icon = COIN_ICONS[sig.symbol];
+                const isLong = sig.direction === "LONG";
+                const isShort = sig.direction === "SHORT";
+                return (
+                  <div key={sig.symbol} className="px-4 py-3 flex items-center gap-3 hover:bg-zinc-900/40 transition-colors">
+                    <span className="shrink-0 text-base w-6 text-center">{icon?.emoji ?? sig.symbol[0]}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[13px] font-bold text-zinc-100">{sig.symbol}</span>
+                        <span
+                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                            isLong
+                              ? "bg-[#00C805]/15 text-[#00C805]"
+                              : isShort
+                              ? "bg-[#FF5000]/15 text-[#FF5000]"
+                              : "bg-zinc-700/30 text-zinc-500"
+                          }`}
+                        >
+                          {isLong ? "▲ LONG" : isShort ? "▼ SHORT" : "◆ NEUT"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[11px] font-mono text-zinc-400 tabular-nums">{formatUSD(sig.price)}</span>
+                        <span
+                          className={`text-[11px] font-mono tabular-nums ${
+                            sig.change24h >= 0 ? "text-[#00C805]" : "text-[#FF5000]"
+                          }`}
+                        >
+                          {sig.change24h >= 0 ? "+" : ""}
+                          {sig.change24h.toFixed(2)}%
+                        </span>
+                      </div>
+                    </div>
+                    <div className="shrink-0 text-right min-w-[70px]">
+                      <SignalBadge signal={sig.signal} />
+                      <div className="mt-1 flex items-center justify-end gap-1">
+                        <div className="w-8 h-0.5 bg-zinc-800 overflow-hidden">
+                          <div
+                            className={`h-full ${
+                              sig.confidence >= 70
+                                ? "bg-[#00C805]"
+                                : sig.confidence >= 40
+                                ? "bg-yellow-500"
+                                : "bg-[#FF5000]"
+                            }`}
+                            style={{ width: `${sig.confidence}%` }}
+                          />
+                        </div>
+                        <span className="text-[9px] text-zinc-500 tabular-nums">{sig.confidence}%</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {signals.signals.length === 0 && (
+                <div className="py-8 text-center text-zinc-600 text-xs">
+                  {lang === "ko" ? "신호 데이터를 불러오는 중..." : "Loading signal data..."}
+                </div>
+              )}
+            </div>
+
+            {/* Desktop: table */}
+            <div className="hidden lg:block flex-1 overflow-y-auto overflow-x-auto">
               <table className="w-full text-xs min-w-[600px]" style={{ fontVariantNumeric: "tabular-nums" }}>
                 <thead className="sticky top-0 bg-black z-10">
                   <tr className="border-b border-zinc-800 text-zinc-500">

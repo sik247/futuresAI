@@ -1,61 +1,73 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
-import { User } from "@prisma/client";
 import { signOut } from "next-auth/react";
 import { useRouter, usePathname } from "next/navigation";
 import React from "react";
 
-type TMeMenuSection = {};
-
 const MeMenuSection = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & TMeMenuSection
->(({ ...props }, ref) => {
+  React.HTMLAttributes<HTMLDivElement>
+>((props, ref) => {
   const router = useRouter();
   const pathname = usePathname();
   const lang = pathname.split("/")[1] || "en";
+  const ko = lang === "ko";
+
   const signOutHandler = () => {
     signOut({ redirect: true });
-    alert("로그아웃 되었습니다.");
   };
 
+  const items: {
+    label: string;
+    onClick: () => void;
+    mobileOnly?: boolean;
+    variant?: "default" | "danger";
+  }[] = [
+    {
+      label: ko ? "정보 수정" : "Edit Profile",
+      onClick: () => router.push(`/${lang}/me/edit`),
+    },
+    {
+      label: ko ? "출금 및 환급 내역" : "Withdrawals & Refunds",
+      onClick: () => router.push(`/${lang}/me/refund-withdraw`),
+      mobileOnly: true,
+    },
+    {
+      label: ko ? "프로필 관리" : "Profile Management",
+      onClick: () => router.push(`/${lang}/me/profile`),
+      mobileOnly: true,
+    },
+    {
+      label: ko ? "로그아웃" : "Sign Out",
+      onClick: signOutHandler,
+      variant: "danger",
+    },
+  ];
+
   return (
-    <section ref={ref} {...props} className="py-6">
-      <div className="text-base font-semibold text-foreground grid grid-cols-1 gap-2">
-        <Button
-          variant={"secondary"}
-          className="w-full justify-between text-base font-semibold text-foreground bg-background"
-          onClick={() => router.push("/me/edit")}
-        >
-          <p>정보 수정</p>
-          <ChevronRightIcon className="w-4 h-4" />
-        </Button>
-        <Button
-          variant={"secondary"}
-          onClick={() => router.push(`/${lang}/me/refund-withdraw`)}
-          className="w-full justify-between text-base font-semibold text-foreground bg-background md:hidden"
-        >
-          출금 및 환급 내역
-          <ChevronRightIcon className="w-4 h-4" />
-        </Button>
-        <Button
-          variant={"secondary"}
-          onClick={() => router.push(`/${lang}/me/profile`)}
-          className="w-full justify-between text-base font-semibold text-foreground bg-background md:hidden"
-        >
-          프로필 관리
-          <ChevronRightIcon className="w-4 h-4" />
-        </Button>
-        <Button
-          variant={"secondary"}
-          onClick={signOutHandler}
-          className="w-full justify-between text-base font-semibold text-foreground bg-background"
-        >
-          로그아웃
-          <ChevronRightIcon className="w-4 h-4" />
-        </Button>
+    <section ref={ref} {...props} className="py-4">
+      <div className="flex flex-col gap-1.5 rounded-2xl overflow-hidden border border-border bg-card">
+        {items.map((item, i) => (
+          <button
+            key={i}
+            onClick={item.onClick}
+            className={`group w-full flex items-center justify-between gap-3 min-h-[52px] px-4 text-[15px] font-medium text-left transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 ${
+              item.variant === "danger"
+                ? "text-red-500 hover:bg-red-500/[0.04]"
+                : "text-foreground hover:bg-muted/40"
+            } ${item.mobileOnly ? "md:hidden" : ""} ${
+              i > 0 ? "border-t border-border" : ""
+            }`}
+          >
+            <span>{item.label}</span>
+            <ChevronRightIcon
+              className={`w-4 h-4 shrink-0 transition-transform duration-150 group-hover:translate-x-0.5 ${
+                item.variant === "danger" ? "text-red-500/60" : "text-muted-foreground"
+              }`}
+            />
+          </button>
+        ))}
       </div>
     </section>
   );
