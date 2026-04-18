@@ -134,17 +134,5 @@
     "quant_assetSignals": "자산 시그널",
     "quant_marketSummary": "시장 요약",
     "quant_disclaimer": "시그널은 공개된 시장 데이터와 단순 기술 지표를 기반으로 생성됩니다. 투자 조언이 아닙니다. 항상 직접 조사하세요.",
-    "portfolio": "포트폴리오",
-    "chat_home_greeting": "오늘 무엇을 분석해 드릴까요?",
-    "chat_home_subtitle": "실시간 시세 · 온체인 · 트레이드 셋업을 한 채팅에서 확인하세요.",
-    "chat_home_market": "실시간 시장",
-    "chat_home_fear_greed": "공포·탐욕",
-    "chat_home_quick_ask": "빠른 질문",
-    "chat_home_recent": "최근 분석",
-    "chat_home_chip_btc_outlook": "BTC 오늘 전망",
-    "chat_home_chip_eth_entry": "ETH 진입 가격",
-    "chat_home_chip_whales": "고래 활동 요약",
-    "chat_home_chip_news": "오늘 뉴스 임팩트",
-    "chat_home_chip_btc_chart": "BTC 4H 차트",
-    "chat_home_chip_polymarket": "Polymarket 베팅"
+    "portfolio": "포트폴리오"
   }

@@ -784,7 +784,7 @@ export default function ChatClient({ lang, userName }: Props) {
       {
         key: "btc-outlook",
         label: ko ? "BTC 오늘 전망" : "BTC outlook today",
-        payload: "What's the BTC outlook today? Give entry, SL, TP.",
+        payload: ko ? "오늘 BTC 전망은 어때요? 진입가, 손절, 익절 알려주세요." : "What's the BTC outlook today? Give entry, SL, TP.",
         accent: "text-amber-300 bg-amber-500/[0.08] border-amber-500/20 hover:border-amber-500/40",
         icon: (
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -795,7 +795,7 @@ export default function ChatClient({ lang, userName }: Props) {
       {
         key: "eth-entry",
         label: ko ? "ETH 진입 가격" : "ETH entry zone",
-        payload: "Best ETH entry zone right now?",
+        payload: ko ? "지금 ETH 진입하기 좋은 가격대는 어디인가요?" : "Best ETH entry zone right now?",
         accent: "text-indigo-300 bg-indigo-500/[0.08] border-indigo-500/20 hover:border-indigo-500/40",
         icon: (
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -806,7 +806,7 @@ export default function ChatClient({ lang, userName }: Props) {
       {
         key: "whales",
         label: ko ? "고래 활동 요약" : "Whale activity",
-        payload: "Summarize today's whale activity.",
+        payload: ko ? "오늘 고래 활동을 요약해 주세요." : "Summarize today's whale activity.",
         accent: "text-sky-300 bg-sky-500/[0.08] border-sky-500/20 hover:border-sky-500/40",
         icon: (
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -817,7 +817,7 @@ export default function ChatClient({ lang, userName }: Props) {
       {
         key: "news",
         label: ko ? "오늘 뉴스 임팩트" : "Top news impact",
-        payload: "What's today's most market-moving news?",
+        payload: ko ? "오늘 시장에 가장 임팩트 큰 뉴스가 뭐예요?" : "What's today's most market-moving news?",
         accent: "text-emerald-300 bg-emerald-500/[0.08] border-emerald-500/20 hover:border-emerald-500/40",
         icon: (
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -828,7 +828,7 @@ export default function ChatClient({ lang, userName }: Props) {
       {
         key: "btc-chart",
         label: ko ? "BTC 4H 차트" : "Chart BTC 4H",
-        payload: "Analyze BTC 4H chart.",
+        payload: ko ? "BTC 4시간봉 차트 분석해 주세요." : "Analyze BTC 4H chart.",
         accent: "text-cyan-300 bg-cyan-500/[0.08] border-cyan-500/20 hover:border-cyan-500/40",
         icon: (
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -839,7 +839,7 @@ export default function ChatClient({ lang, userName }: Props) {
       {
         key: "polymarket",
         label: ko ? "Polymarket 베팅" : "Polymarket verdict",
-        payload: "What's Polymarket betting on today for crypto?",
+        payload: ko ? "Polymarket이 오늘 크립토에 대해 어떻게 베팅하고 있나요?" : "What's Polymarket betting on today for crypto?",
         accent: "text-orange-300 bg-orange-500/[0.08] border-orange-500/20 hover:border-orange-500/40",
         icon: (
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>

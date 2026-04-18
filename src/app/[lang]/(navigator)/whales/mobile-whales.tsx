@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type TokenEntry = { symbol: string; balance: number; usdValue: number };
 type FigureWalletData = { ethBalance: number; ethUsd: number; tokens: TokenEntry[] };
@@ -172,8 +172,17 @@ function MoveDetailSheet({
   ko: boolean;
 }) {
   const up = trade.side === "BUY";
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end lg:hidden" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end lg:hidden" onClick={onClose} role="dialog" aria-modal="true">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" />
 

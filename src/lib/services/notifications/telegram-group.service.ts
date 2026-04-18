@@ -748,8 +748,17 @@ export async function sendPolymarketPrediction(): Promise<boolean> {
     const market = best.markets?.[0];
     if (!market) return false;
 
-    const outcomes = market.outcomes ? JSON.parse(market.outcomes) : ["Yes", "No"];
-    const prices = market.outcomePrices ? JSON.parse(market.outcomePrices) : [];
+    // Polymarket returns these as JSON strings OR pre-parsed arrays depending on version.
+    const parseMaybeArray = (v: any, fallback: any[]) => {
+      if (!v) return fallback;
+      if (Array.isArray(v)) return v;
+      if (typeof v === "string") {
+        try { return JSON.parse(v); } catch { return fallback; }
+      }
+      return fallback;
+    };
+    const outcomes = parseMaybeArray(market.outcomes, ["Yes", "No"]);
+    const prices = parseMaybeArray(market.outcomePrices, []);
     const yesOdds = prices[0] ? (parseFloat(prices[0]) * 100).toFixed(0) : "?";
     const noOdds = prices[1] ? (parseFloat(prices[1]) * 100).toFixed(0) : "?";
     const vol = parseFloat(best.volume || market.volume || "0");
@@ -806,7 +815,11 @@ ${change ? `24시간 확률 변동: ${change > 0 ? "+" : ""}${(change * 100).toF
 - action에 '상황 주시', '지켜본다' 같은 비행동 표현 금지. 구체적 가격 레벨 필수.
 - 이모지, 마크다운, 해시태그 금지. 순수 JSON만.`;
       const result = await model.generateContent(prompt);
-      const jsonStr = result.response.text().replace(/```json?\n?/g, "").replace(/```\n?/g, "").trim();
+      const raw = result.response.text();
+      // Strip fences, then pull the first balanced {...} block — Gemini sometimes prefixes
+      // explanations or emits multiple objects. This survives most drift.
+      const stripped = raw.replace(/```json?\n?/g, "").replace(/```\n?/g, "").trim();
+      const jsonStr = stripped.match(/\{[\s\S]*\}/)?.[0] ?? stripped;
       verdict = JSON.parse(jsonStr) as Verdict;
     } catch (err) {
       console.error("[telegram-group] Polymarket Gemini verdict failed:", err);

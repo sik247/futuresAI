@@ -134,17 +134,5 @@
     "quant_assetSignals": "Asset Signals",
     "quant_marketSummary": "Market Summary",
     "quant_disclaimer": "Signals are generated from publicly available market data and simple technical indicators. This is not financial advice. Always do your own research.",
-    "portfolio": "Portfolio",
-    "chat_home_greeting": "What should we analyze today?",
-    "chat_home_subtitle": "Live market data, on-chain flows, and trade setups — all in one chat.",
-    "chat_home_market": "Live Markets",
-    "chat_home_fear_greed": "Fear & Greed",
-    "chat_home_quick_ask": "Quick ask",
-    "chat_home_recent": "Recent analyses",
-    "chat_home_chip_btc_outlook": "BTC outlook today",
-    "chat_home_chip_eth_entry": "ETH entry zone",
-    "chat_home_chip_whales": "Whale activity",
-    "chat_home_chip_news": "Top news impact",
-    "chat_home_chip_btc_chart": "Chart BTC 4H",
-    "chat_home_chip_polymarket": "Polymarket verdict"
+    "portfolio": "Portfolio"
   }

@@ -266,7 +266,7 @@ export default function UnifiedDashboard({
       </div>
 
       {/* ── Main 3-column layout ── */}
-      <div className="flex flex-1 overflow-hidden lg:h-[calc(100vh-120px)]">
+      <div className="flex flex-1 overflow-hidden lg:h-[calc(100dvh-120px)]">
 
         {/* ══════════ LEFT PANEL ══════════ */}
         <div className="hidden xl:flex flex-col w-[260px] shrink-0 border-r border-zinc-800 overflow-y-auto">
