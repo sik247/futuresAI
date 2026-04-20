@@ -28,6 +28,11 @@ export async function GET() {
       isPremium: user.isPremium,
       chart: { used: chart.used, limit: chart.limit },
       chat: { used: chat.used, limit: chat.limit },
+      credits: {
+        chart: user.chartCreditsRemaining,
+        chat: user.chatCreditsRemaining,
+        trxBalance: user.trxBalance,
+      },
     });
   } catch (error) {
     console.error("Usage check error:", error);

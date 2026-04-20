@@ -238,10 +238,12 @@ export default function QuantClient({
   initialData,
   lang,
   translations: t,
+  walletAddress = "",
 }: {
   initialData: MarketSignals;
   lang: string;
   translations: Dictionary;
+  walletAddress?: string;
 }) {
   const [data, setData] = useState<MarketSignals>(initialData);
   const [loading, setLoading] = useState(initialData.signals.length === 0);
@@ -852,7 +854,7 @@ export default function QuantClient({
 
         {activeTab === "chart" && (
           <div>
-            <ChartAnalyzer lang={lang} translations={t} />
+            <ChartAnalyzer lang={lang} translations={t} walletAddress={walletAddress} />
           </div>
         )}
 

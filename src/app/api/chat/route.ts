@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import OpenAI from "openai";
 import { buildCryptoContext, buildUSStockContext } from "@/lib/services/chat/chat-context.service";
-import { checkRateLimit } from "@/lib/services/usage.service";
+import { consumeCreditOrRateLimit, consumePurchasedCredit } from "@/lib/services/usage.service";
 
 const PERSONA_PROMPTS: Record<string, string> = {
   "crypto": `You are an elite crypto quantitative analyst and head strategist at FuturesAI, one of the top AI-powered crypto trading intelligence platforms. You combine deep technical analysis expertise with on-chain data interpretation, macro-economic awareness, and quantitative modeling.
@@ -126,20 +126,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    // Rolling rate limit (admin: unlimited)
+    // Rolling rate limit (admin: unlimited). Purchased credits bypass the window.
+    let usedPurchasedCredit = false;
     if (user.role !== "ADMIN") {
-      const rateCheck = await checkRateLimit(user.id, user.isPremium, "chat", user.credits);
-      if (!rateCheck.allowed) {
+      const gate = await consumeCreditOrRateLimit(user, "chat");
+      if (!gate.allowed) {
         return NextResponse.json(
           {
             error: "rate_limit",
-            shouldUpgrade: rateCheck.shouldUpgrade,
-            retryAfterMinutes: rateCheck.retryAfterMinutes,
-            tier: rateCheck.tier,
+            shouldUpgrade: gate.shouldUpgrade,
+            retryAfterMinutes: gate.retryAfterMinutes,
+            tier: gate.tier,
+            canPurchase: true,
+            product: "CHAT_PACK_10",
+            priceTrx: 5,
           },
-          { status: 429 }
+          { status: 429 },
         );
       }
+      usedPurchasedCredit = gate.usedPurchasedCredit;
     }
 
     // Save user message
@@ -304,6 +309,11 @@ Rules:
         userId: user.id,
       },
     });
+
+    // Decrement a purchased credit only after the AI response succeeded.
+    if (usedPurchasedCredit) {
+      await consumePurchasedCredit(user.id, "chat");
+    }
 
     // Detect all coin tickers mentioned in the response for inline price cards
     const mentionedCoins: string[] = [];

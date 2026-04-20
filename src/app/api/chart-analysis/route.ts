@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { runMultiAgentAnalysis } from "@/lib/services/chart-analysis/orchestrator";
-import { checkDailyLimit } from "@/lib/services/usage.service";
+import { consumeCreditOrRateLimit, consumePurchasedCredit } from "@/lib/services/usage.service";
 import {
   notifyAdmin,
   formatChartAnalysisNotification,
@@ -45,14 +45,24 @@ export async function POST(req: NextRequest) {
     }
 
     // Admin users bypass daily limit check
+    let usedPurchasedCredit = false;
     if (user.role !== "ADMIN") {
-      const { allowed, used, limit } = await checkDailyLimit(user.id, user.isPremium, "chart");
-      if (!allowed) {
+      const gate = await consumeCreditOrRateLimit(user, "chart");
+      if (!gate.allowed) {
         return NextResponse.json(
-          { error: "Daily chart analysis limit reached", used, limit },
-          { status: 429 }
+          {
+            error: "rate_limit",
+            shouldUpgrade: gate.shouldUpgrade,
+            retryAfterMinutes: gate.retryAfterMinutes,
+            tier: gate.tier,
+            canPurchase: true,
+            product: "CHART_SINGLE",
+            priceTrx: 3,
+          },
+          { status: 429 },
         );
       }
+      usedPurchasedCredit = gate.usedPurchasedCredit;
     }
 
     // Run multi-agent analysis
@@ -101,10 +111,17 @@ export async function POST(req: NextRequest) {
       // Don't fail if notification fails
     }
 
+    // Decrement a purchased credit only after Gemini succeeded — a failed call
+    // above would have thrown and we'd never reach here, so the credit stays intact.
+    if (usedPurchasedCredit) {
+      await consumePurchasedCredit(user.id, "chart");
+    }
+
     return NextResponse.json({
       id: chartAnalysis.id,
       analysis,
       status: "CHARGED",
+      usedPurchasedCredit,
     });
   } catch (error) {
     console.error("Chart analysis error:", error);

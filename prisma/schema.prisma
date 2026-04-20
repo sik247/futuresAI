@@ -40,6 +40,11 @@ model User {
   chatMessages     ChatMessage[]
   chatEnabled      Boolean           @default(false)
   isPremium        Boolean           @default(false)
+  // TRX micro-purchase credits (one-shot readings / message packs)
+  chartCreditsRemaining Int          @default(0)
+  chatCreditsRemaining  Int          @default(0)
+  // TRX auto-refill wallet balance (denominated in TRX, deducted per feature use)
+  trxBalance            Float        @default(0)
   blogArticles     BlogArticle[]
   payments         Payment[]
   notifications    Notification[]
@@ -541,6 +546,15 @@ model Payment {
   adminNote  String?
   createdAt  DateTime      @default(now()) @db.Timestamptz()
   updatedAt  DateTime      @updatedAt @db.Timestamptz()
+  // Currency + productType for TRX micro-purchases (non-breaking, optional)
+  // currency: "USDT" | "TRX" — USDT subscriptions default unchanged
+  currency     String  @default("USDT")
+  // productType: "SUBSCRIPTION" | "CHART_SINGLE" | "CHAT_PACK_10" | "TRX_REFILL" | null
+  productType  String?
+  // How many credits this payment granted (chart or chat, based on productType)
+  creditsAdded Int     @default(0)
+  // TRX added to trxBalance for TRX_REFILL product
+  trxAdded     Float   @default(0)
 
   @@index([userId])
   @@index([status])

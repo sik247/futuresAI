@@ -73,6 +73,73 @@ export async function checkRateLimit(
   return { allowed: true, tier };
 }
 
+// Check whether the user has purchased credits for a feature.
+// Does NOT decrement — we only decrement after the AI call succeeds (see
+// consumePurchasedCredit) so a failed Gemini call doesn't burn paid credit.
+export async function hasPurchasedCredit(
+  userId: string,
+  type: "chart" | "chat",
+): Promise<boolean> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { chartCreditsRemaining: true, chatCreditsRemaining: true },
+  });
+  if (!user) return false;
+  return type === "chart"
+    ? user.chartCreditsRemaining > 0
+    : user.chatCreditsRemaining > 0;
+}
+
+// Atomic post-success decrement. Call this AFTER the AI call succeeds.
+// Uses an optimistic decrement guarded by a `> 0` predicate so two concurrent
+// requests can't both consume the last credit.
+export async function consumePurchasedCredit(
+  userId: string,
+  type: "chart" | "chat",
+): Promise<boolean> {
+  const field = type === "chart" ? "chartCreditsRemaining" : "chatCreditsRemaining";
+  const { count } = await prisma.user.updateMany({
+    where: { id: userId, [field]: { gt: 0 } },
+    data: { [field]: { decrement: 1 } },
+  });
+  return count === 1;
+}
+
+// Combined gate used by chart + chat routes:
+//   1. If user has purchased credits, allow (we'll decrement after success).
+//   2. Else fall through to the existing rolling-window rate limit.
+export async function consumeCreditOrRateLimit(
+  user: { id: string; isPremium: boolean; credits: number; chartCreditsRemaining: number; chatCreditsRemaining: number },
+  type: "chart" | "chat",
+): Promise<{
+  allowed: boolean;
+  tier: UserTier;
+  usedPurchasedCredit: boolean;
+  retryAfterMinutes?: number;
+  shouldUpgrade?: boolean;
+}> {
+  const hasCredit = type === "chart"
+    ? user.chartCreditsRemaining > 0
+    : user.chatCreditsRemaining > 0;
+
+  if (hasCredit) {
+    return {
+      allowed: true,
+      tier: getUserTier(user.isPremium, user.credits),
+      usedPurchasedCredit: true,
+    };
+  }
+
+  const rate = await checkRateLimit(user.id, user.isPremium, type, user.credits);
+  return {
+    allowed: rate.allowed,
+    tier: rate.tier,
+    usedPurchasedCredit: false,
+    retryAfterMinutes: rate.retryAfterMinutes,
+    shouldUpgrade: rate.shouldUpgrade,
+  };
+}
+
 // Legacy compatibility
 export async function checkDailyLimit(
   userId: string,

@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import TradingProfileModal from "./trading-profile-modal";
+import BuyTrxCreditsModal from "@/components/payments/buy-trx-credits-modal";
 
 /** Lightweight markdown → HTML for chat responses */
 function renderMarkdown(text: string): string {
@@ -94,6 +95,7 @@ interface Message {
 interface Props {
   lang: string;
   userName: string;
+  walletAddress: string;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -601,7 +603,7 @@ function HomeRecentStrip({ lang, ko }: { lang: string; ko: boolean }) {
 /* -------------------------------------------------------------------------- */
 /*  Main Chat Client Component                                                 */
 /* -------------------------------------------------------------------------- */
-export default function ChatClient({ lang, userName }: Props) {
+export default function ChatClient({ lang, userName, walletAddress }: Props) {
   const ko = lang === "ko";
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -613,6 +615,17 @@ export default function ChatClient({ lang, userName }: Props) {
   const [sessions, setSessions] = useState<{ sessionId: string; content: string; createdAt: string }[]>([]);
   const [showSidebar, setShowSidebar] = useState(true);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showBuyModal, setShowBuyModal] = useState(false);
+  const [chatCredits, setChatCredits] = useState<number>(0);
+
+  useEffect(() => {
+    fetch("/api/usage")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.credits) setChatCredits(d.credits.chat ?? 0);
+      })
+      .catch(() => {});
+  }, []);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -713,9 +726,17 @@ export default function ChatClient({ lang, userName }: Props) {
         let errorMsg: string;
         if (data.error === "rate_limit") {
           const mins = data.retryAfterMinutes ?? 1;
+          const purchaseHint = data.canPurchase
+            ? ko
+              ? " 또는 5 TRX로 10회를 바로 구매할 수 있어요."
+              : " Or buy 10 messages instantly for 5 TRX."
+            : "";
           errorMsg = ko
-            ? `⏳ 요청 한도에 도달했습니다. ${mins}분 후에 다시 시도해 주세요.${data.shouldUpgrade ? " 프리미엄으로 업그레이드하면 더 많은 분석을 이용할 수 있습니다." : ""}`
-            : `⏳ You've reached the request limit. Please try again in ${mins} minute${mins > 1 ? "s" : ""}.${data.shouldUpgrade ? " Upgrade to Premium for more analysis." : ""}`;
+            ? `⏳ 요청 한도에 도달했습니다. ${mins}분 후에 다시 시도해 주세요.${data.shouldUpgrade ? " 프리미엄으로 업그레이드하면 더 많은 분석을 이용할 수 있습니다." : ""}${purchaseHint}`
+            : `⏳ You've reached the request limit. Please try again in ${mins} minute${mins > 1 ? "s" : ""}.${data.shouldUpgrade ? " Upgrade to Premium for more analysis." : ""}${purchaseHint}`;
+          if (data.canPurchase && data.product === "CHAT_PACK_10") {
+            setShowBuyModal(true);
+          }
         } else if (res.status === 401) {
           errorMsg = ko ? "로그인이 필요합니다." : "Please log in to continue.";
         } else if (res.status === 503) {
@@ -955,6 +976,14 @@ export default function ChatClient({ lang, userName }: Props) {
           </div>
         </div>
         <TradingProfileModal open={showProfileModal} onClose={() => setShowProfileModal(false)} ko={ko} />
+        <BuyTrxCreditsModal
+          open={showBuyModal}
+          onClose={() => setShowBuyModal(false)}
+          product="CHAT_PACK_10"
+          walletAddress={walletAddress}
+          lang={ko ? "ko" : "en"}
+          onSuccess={(b) => setChatCredits(b.chat)}
+        />
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto">

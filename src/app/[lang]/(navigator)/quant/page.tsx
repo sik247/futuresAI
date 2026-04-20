@@ -51,5 +51,7 @@ export default async function QuantPage({
     getDictionary(lang),
   ]);
 
-  return <QuantClient initialData={data} lang={lang} translations={translations} />;
+  const walletAddress = process.env.PAYMENT_WALLET_TRC20 || process.env.PAYMENT_WALLET_ADDRESS || "";
+
+  return <QuantClient initialData={data} lang={lang} translations={translations} walletAddress={walletAddress} />;
 }

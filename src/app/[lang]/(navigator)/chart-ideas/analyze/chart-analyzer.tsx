@@ -8,6 +8,7 @@ import { FileUploadModule } from "@/lib/modules/file-upload";
 import { SUPABASE_STORAGE_URL } from "@/lib/utils/get-image-url";
 import { CloudArrowUpIcon, LockClosedIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { toast } from "@/components/ui/use-toast";
+import BuyTrxCreditsModal from "@/components/payments/buy-trx-credits-modal";
 import { Dictionary } from "@/i18n";
 import { ClipboardDocumentIcon, ShareIcon } from "@heroicons/react/24/outline";
 import type { ChartAnalysisResult, ChartLine, ChartCalibration } from "@/lib/services/chart-analysis/chart-analysis.service";
@@ -233,6 +234,7 @@ function generateAICommentary(pair: string, a: ChartAnalysisResult, lang: string
 type Props = {
   lang: string;
   translations: Dictionary;
+  walletAddress?: string;
 };
 
 const POPULAR_PAIRS = [
@@ -266,15 +268,28 @@ const ANALYSIS_STAGES = [
   "Drawing key levels...",
 ];
 
-const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
+const ChartAnalyzer: React.FC<Props> = ({ lang, translations, walletAddress = "" }) => {
   const { data: session, status } = useSession();
   const isAdmin = (session?.user as any)?.role === "ADMIN";
   const isLoggedIn = status === "authenticated";
+  const ko = lang === "ko";
 
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<ChartAnalysisResult | null>(null);
+  const [showBuyModal, setShowBuyModal] = useState(false);
+  const [chartCredits, setChartCredits] = useState<number>(0);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    fetch("/api/usage")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.credits) setChartCredits(d.credits.chart ?? 0);
+      })
+      .catch(() => {});
+  }, [isLoggedIn]);
   const [analysisId, setAnalysisId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [pair, setPair] = useState("BTCUSDT");
@@ -569,11 +584,26 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
       });
       if (!res.ok) {
         const data = await res.json();
+        if (res.status === 429 && data.canPurchase && data.product === "CHART_SINGLE") {
+          // Rate-limited but user can buy a single reading for 3 TRX.
+          setShowBuyModal(true);
+          toast({
+            variant: "destructive",
+            title: ko ? "무료 한도 도달" : "Free limit reached",
+            description: ko
+              ? "3 TRX로 1회 분석을 바로 구매할 수 있어요."
+              : "Buy a single reading instantly for 3 TRX.",
+          });
+          return;
+        }
         throw new Error(data.error || "Analysis failed");
       }
       const data = await res.json();
       setAnalysis(data.analysis);
       setAnalysisId(data.id);
+      if (data.usedPurchasedCredit) {
+        setChartCredits((c) => Math.max(0, c - 1));
+      }
       toast({
         title: translations.chartAnalysis_complete || "Analysis Complete",
         description: "Your AI chart analysis is ready.",
@@ -1543,6 +1573,14 @@ const ChartAnalyzer: React.FC<Props> = ({ lang, translations }) => {
       )}
       </>
       )}
+      <BuyTrxCreditsModal
+        open={showBuyModal}
+        onClose={() => setShowBuyModal(false)}
+        product="CHART_SINGLE"
+        walletAddress={walletAddress}
+        lang={ko ? "ko" : "en"}
+        onSuccess={(b) => setChartCredits(b.chart)}
+      />
     </div>
   );
 };

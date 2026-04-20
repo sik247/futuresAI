@@ -22,7 +22,9 @@ export default async function ChatPage({
   });
   if (!user) redirect(`/${lang}/login`);
 
+  const walletAddress = process.env.PAYMENT_WALLET_TRC20 || process.env.PAYMENT_WALLET_ADDRESS || "";
+
   return (
-    <ChatClient lang={lang} userName={user.name} />
+    <ChatClient lang={lang} userName={user.name} walletAddress={walletAddress} />
   );
 }

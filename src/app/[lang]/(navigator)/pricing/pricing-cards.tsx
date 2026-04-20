@@ -60,6 +60,33 @@ function saveBadge(period: BillingPeriod, tier: "basic" | "premium") {
 export default function PricingCards({ lang, ko }: { lang: string; ko: boolean }) {
   const [period, setPeriod] = useState<BillingPeriod>("monthly");
 
+  const PAY_PER_USE = [
+    {
+      key: "CHART_SINGLE",
+      trx: 3,
+      titleEn: "Single chart reading",
+      titleKo: "차트 분석 1회",
+      subEn: "One-shot AI analysis — bypasses the free 3-hour cooldown.",
+      subKo: "즉시 AI 분석 1회. 3시간 무료 제한을 우회합니다.",
+    },
+    {
+      key: "CHAT_PACK_10",
+      trx: 5,
+      titleEn: "10 chat messages",
+      titleKo: "AI 채팅 10회",
+      subEn: "Stacks on top of free tier, consumed before cooldown kicks in.",
+      subKo: "무료 한도보다 먼저 사용되는 10회 추가 메시지.",
+    },
+    {
+      key: "TRX_REFILL",
+      trx: 20,
+      titleEn: "Refill TRX wallet",
+      titleKo: "TRX 지갑 충전",
+      subEn: "Deposit ≥20 TRX once. Every feature deducts automatically — no per-purchase friction.",
+      subKo: "20 TRX 이상 한 번 충전. 모든 기능 사용 시 자동 차감됩니다.",
+    },
+  ] as const;
+
   const basicPrice = PRICING.basic[period];
   const premiumPrice = PRICING.premium[period];
   const basicPerMo = perMonth(basicPrice, period);
@@ -69,6 +96,54 @@ export default function PricingCards({ lang, ko }: { lang: string; ko: boolean }
 
   return (
     <>
+      {/* Pay-per-use card — TRX micro-purchases, shown above subscriptions to catch try-before-commit users */}
+      <div className="max-w-6xl mx-auto mb-10 rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/[0.04] via-zinc-900/40 to-zinc-950 p-5 lg:p-6">
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                {ko ? "신규" : "New"}
+              </span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-amber-300">
+                {ko ? "건별 결제 (TRX)" : "Pay-per-use (TRX)"}
+              </span>
+            </div>
+            <p className="text-sm text-zinc-400">
+              {ko
+                ? "구독 없이 TRX로 필요한 만큼만 결제하세요. 1–2분 내 자동 반영됩니다."
+                : "Pay in TRX for exactly what you use. Auto-verified within 1–2 minutes. No subscription required."}
+            </p>
+          </div>
+          <a
+            href={`/${lang}/pricing#payment`}
+            className="shrink-0 text-[11px] font-mono uppercase tracking-wider text-amber-300 hover:text-amber-200 transition-colors"
+          >
+            {ko ? "결제 방법 →" : "How to pay →"}
+          </a>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {PAY_PER_USE.map((p) => (
+            <div
+              key={p.key}
+              className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 flex flex-col"
+            >
+              <div className="flex items-baseline gap-1.5 mb-1">
+                <span className="text-2xl font-bold text-white">
+                  {p.key === "TRX_REFILL" ? `${p.trx}+` : p.trx}
+                </span>
+                <span className="text-sm text-emerald-300 font-mono">TRX</span>
+              </div>
+              <p className="text-sm font-semibold text-zinc-200 mt-1">
+                {ko ? p.titleKo : p.titleEn}
+              </p>
+              <p className="text-[11px] text-zinc-500 mt-1 leading-snug flex-1">
+                {ko ? p.subKo : p.subEn}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Billing Period Toggle */}
       <div className="flex justify-center mb-10">
         <div className="flex items-center gap-1 p-1 bg-white/[0.03] border border-white/[0.08] rounded-xl">
