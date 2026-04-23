@@ -5027,4 +5027,388 @@ CPI 이전에 새로운 포지션을 추가하지 않습니다. 이분법적 거
     publishedAt: "2026-04-20T09:00:00.000Z",
     author: "CryptoX Quant Desk",
   },
+  {
+    id: "btc-68500-breakout-confirmed-20260421",
+    slug: "btc-68500-breakout-confirmed-76k-pullback-analysis",
+    title: "BTC $68.5K Breakout Confirmed: The $76K Pullback Is the Tell",
+    titleKo: "BTC $68.5K 돌파 확정: $76K 풀백이 진짜 신호",
+    excerpt:
+      "Bitcoin cleared the $68,500 ceiling on April 13, ran to a $78,400 print on April 17, and is now digesting at $76,118. The April 20 weekly note flagged this exact level as the thesis-changing trigger. Thesis validated. The pullback to $75-76K is now the highest-quality re-entry window we have seen since March.",
+    excerptKo:
+      "비트코인은 4월 13일 $68,500 천장을 돌파했고 4월 17일 $78,400 고점을 찍은 뒤 $76,118에서 소화 중입니다. 4월 20일 주간 노트는 이 레벨을 바이어스를 바꾸는 정확한 트리거로 지목했습니다. 논거가 입증됐습니다. $75~76K 풀백은 3월 이후 본 재진입 창 중 가장 품질이 높습니다.",
+    content: `## Structure
+
+The April 20 weekly desk note named BTC $68,500 as "the most significant technical development in the past two months" if it cleared. It cleared. On April 13, BTC closed the 4H above $69,200 on 1.4x average volume, followed through to a $72,100 retest of December resistance on April 15, and ran to $78,400 — a new six-week high — on April 17.
+
+The move since has been healthy, not explosive. Price backed off the $78K tag over three sessions, held $74,200 on the first real test April 19, and is now consolidating $75,500–$76,500. That is textbook post-breakout behavior: new high, shallow pullback, demand shows up at the prior breakout zone.
+
+What changed structurally: the $65K–$68.5K range that capped BTC for seven weeks is now the support. Every 4H close above $72,000 since April 15 has held through the pullback. The higher-high sequence is intact. $68,500 is no longer resistance — it is the bull-case invalidation line.
+
+## Key Levels
+
+**Resistance:** $78,400 (April 17 swing high — must take this out to reopen the $80K conversation), $80,000 (psychological round number / largest spot options strike cluster), $82,500 (measured move from $65–$68.5K range projected above the breakout)
+
+**Support:** $75,000 (current range low / first real demand test since breakout), $72,000 (December consolidation base — must hold to preserve the bull structure), $68,500 (breakout level / hard invalidation — close below this and the rally is done)
+
+## RSI / MACD
+
+RSI at 58 on the 4H is the first reading that has cooled off meaningfully since the April 17 peak at 74. That unwind from overbought without a deep price decline is exactly what you want to see in a healthy trend. Daily RSI sits at 62 — elevated but not stretched.
+
+The MACD histogram on the 4H flipped back to positive on April 20 after a brief two-session dip into negative territory during the pullback. That minor flush-and-recovery pattern is characteristic of early-trend consolidations, not late-cycle tops.
+
+Weekly RSI crossed back above 50 for the first time since early February. That cross historically precedes extended multi-week trend runs in BTC roughly 70% of the time — not a guarantee, but a strong base rate.
+
+## Volume Profile
+
+The spot volume node between $74,000 and $76,000 has thickened rapidly over the past four sessions. BTC has spent 72% of the time since April 17 in this range, which means every dip buyer and every short-term top fader has been active here. That kind of volume cluster tends to act as a magnet on pullbacks rather than a level that breaks on the first test.
+
+Exchange reserves continued to decline through the breakout — net outflows of 18,400 BTC from known spot exchanges over the past five days. That is not a distribution signal; that is accumulation. Coinbase premium has swung from -0.08% (mid-April) to +0.12% — a small shift, but directionally supportive of US institutional bidding.
+
+## Macro Context
+
+The April 22 CPI print tomorrow is the primary macro risk. Consensus is 2.8% core YoY. If the print lands at or below consensus, BTC likely tests $78,400 within 24 hours. A surprise above 3.1% could produce a sharp flush back toward $72,000 — which we would actively buy.
+
+Funding rates on perp markets are at +0.018% per 8 hours. Not crowded. Open interest is up 14% since the breakout but remains below the January peak. The long side is not yet stretched.
+
+## Trade Setup
+
+**Primary long (current):** Entry $75,500–$76,500 zone, stop $73,800 (below the April 19 swing low), target $80,000 first, $82,500 second. Risk approximately $2,200, reward $4,500–$7,000. R/R on the first target: 2:1 minimum.
+
+**Aggressive add on a flush:** If CPI triggers a move to $72,000–$72,500, add to the position. Stop moves to $70,500, target stays $80,000+. R/R on the flush entry is 4–5R.
+
+**Bear case / invalidation:** A 4H close below $72,000 meaningfully weakens the structure. A close below $68,500 fully invalidates the breakout and reopens the old range — the trade is off at that point and the bias flips back to neutral.
+
+## Risk
+
+The main risk is the CPI print itself. A 3.2%+ reading would stress the entire risk-asset complex, not just BTC, and the correlation to equities would dominate the chart for 24–48 hours. Position sized for that scenario means not being fully long into the data — we are running approximately 70% of maximum BTC allocation currently, saving dry powder for a macro-driven flush we would buy.
+
+The secondary risk is a failure of the $72,000 support on any test. If that goes, the structural bull thesis becomes much harder to defend and the trade should be reduced or closed.
+
+## Bottom Line
+
+**LONG.** The April 20 weekly note said a close above $68,500 would be thesis-changing. It was. The pullback to $75K–$76K is the first real opportunity to add to positions since the breakout, and the setup has clear invalidation ($72K close below is a warning, $68.5K close below is game over). Primary target is $80,000, measured move target is $82,500. Trade what you see, respect the levels, and keep size disciplined through the CPI print.`,
+    contentKo: `## 구조
+
+4월 20일 주간 데스크 노트는 BTC $68,500을 "돌파 시 지난 두 달간 가장 중요한 기술적 발전"으로 지목했습니다. 돌파됐습니다. 4월 13일 BTC는 평균 거래량의 1.4배로 4시간봉 $69,200 위 종가를 마감했고, 4월 15일 $72,100의 12월 저항 재테스트로 이어졌으며, 4월 17일 6주 신고가인 $78,400까지 상승했습니다.
+
+이후 이동은 건강했지, 폭발적이지 않았습니다. 가격은 3세션에 걸쳐 $78K 태그에서 후퇴했고, 4월 19일 첫 진짜 시험에서 $74,200을 지켰으며, 현재 $75,500~$76,500에서 소화 중입니다. 이는 교과서적 돌파 후 행동입니다. 신고가, 얕은 풀백, 이전 돌파 구간에서 수요 출현.
+
+구조적으로 바뀐 것: BTC를 7주간 억눌렀던 $65K~$68.5K 레인지가 이제 지지입니다. 4월 15일 이후 모든 $72,000 위 4시간봉 종가가 풀백 내내 유지됐습니다. 고점 고점 시퀀스가 유지됩니다. $68,500은 더 이상 저항이 아닙니다. 강세 논거 무효화 라인입니다.
+
+## 핵심 레벨
+
+**저항선:** $78,400 (4월 17일 스윙 고점 — 이를 뚫어야 $80K 논의가 재개됨), $80,000 (심리적 라운드 넘버 / 가장 큰 스팟 옵션 행사가 클러스터), $82,500 ($65K~$68.5K 레인지의 측정 이동 목표를 돌파 위로 투사)
+
+**지지선:** $75,000 (현재 레인지 저점 / 돌파 이후 첫 진짜 수요 테스트), $72,000 (12월 횡보 기반 — 강세 구조 보존을 위해 반드시 유지), $68,500 (돌파 레벨 / 강성 무효화 — 이 아래 종가 시 랠리 종료)
+
+## RSI / MACD
+
+4시간봉 RSI 58은 4월 17일 74 피크 이후 의미 있게 식은 첫 번째 리딩입니다. 깊은 가격 하락 없이 과매수에서 해소되는 것이 건강한 추세에서 보고 싶은 모습입니다. 일봉 RSI는 62로 상승했으나 스트레치되지 않았습니다.
+
+4시간봉 MACD 히스토그램은 풀백 기간 음전 진입 2세션 후 4월 20일 양전 전환했습니다. 이 작은 플러시-회복 패턴은 말기 사이클 천장이 아닌 초기 추세 소화 국면의 특징입니다.
+
+주봉 RSI는 2월 초 이후 처음으로 50 위로 재교차했습니다. 이 교차는 역사적으로 BTC에서 확장된 다주간 추세 진행에 선행하는 경우가 약 70%입니다. 보장은 아니지만 강한 베이스 레이트입니다.
+
+## 거래량 프로파일
+
+$74,000~$76,000의 스팟 거래량 노드가 지난 4세션 동안 급격히 두꺼워졌습니다. BTC는 4월 17일 이후 72%의 시간을 이 레인지에서 보냈으며, 이는 모든 딥 매수자와 단기 천장 페이더가 여기서 활동했다는 뜻입니다. 이런 거래량 클러스터는 첫 테스트에서 깨지는 레벨보다 풀백 시 자석 역할을 하는 경향이 있습니다.
+
+거래소 보유량은 돌파 내내 지속 감소했습니다. 지난 5일간 알려진 스팟 거래소에서 순유출 18,400 BTC. 이는 분배 신호가 아닌 축적입니다. 코인베이스 프리미엄은 -0.08%(4월 중순)에서 +0.12%로 전환됐습니다. 작지만 방향적으로 미국 기관 매수를 지지합니다.
+
+## 거시 환경
+
+내일 4월 22일 CPI 프린트가 주요 거시 리스크입니다. 컨센서스는 코어 YoY 2.8%. 프린트가 컨센서스 이하로 나오면 BTC는 24시간 내 $78,400을 테스트할 가능성이 높습니다. 3.1% 이상 서프라이즈는 $72,000으로의 급격한 플러시를 만들 수 있는데, 저희는 이 레벨에서 적극적으로 매수할 것입니다.
+
+퍼프 시장 펀딩비는 8시간당 +0.018%. 붐비지 않음. 미결제약정은 돌파 이후 14% 증가했지만 1월 피크 아래에 머뭅니다. 롱 사이드는 아직 스트레치되지 않았습니다.
+
+## 트레이드 셋업
+
+**주요 롱 (현재):** $75,500~$76,500 구간 진입, $73,800 손절(4월 19일 스윙 저점 아래), 1차 목표 $80,000, 2차 $82,500. 리스크 약 $2,200, 리워드 $4,500~$7,000. 1차 목표 R/R: 최소 2:1.
+
+**플러시 시 공격적 추가:** CPI가 $72,000~$72,500 이동을 촉발하면 포지션 추가. 손절은 $70,500으로 이동, 목표는 $80,000+ 유지. 플러시 진입 R/R은 4~5R.
+
+**약세 시나리오 / 무효화:** $72,000 아래 4시간봉 종가는 구조를 의미 있게 약화시킵니다. $68,500 아래 종가는 돌파를 완전히 무효화하고 이전 레인지를 다시 엽니다. 이 시점에 트레이드는 종료되고 바이어스는 중립으로 돌아갑니다.
+
+## 리스크
+
+주요 리스크는 CPI 프린트 자체입니다. 3.2%+ 리딩은 BTC뿐 아니라 전체 위험 자산 복합체에 부담을 주며 주식과의 상관관계가 24~48시간 차트를 지배할 것입니다. 해당 시나리오를 위한 포지션 사이징은 데이터 진입 시 완전 롱이 아닙니다. 저희는 현재 최대 BTC 배분의 약 70%를 운용하며, 매수할 거시 기반 플러시를 위한 드라이 파우더를 보전하고 있습니다.
+
+2차 리스크는 테스트 시 $72,000 지지 실패입니다. 이것이 깨지면 구조적 강세 논거를 방어하기가 훨씬 어려워지고 트레이드는 축소 또는 종료돼야 합니다.
+
+## 판단
+
+**롱.** 4월 20일 주간 노트는 $68,500 위 종가가 논거를 바꿀 것이라고 말했습니다. 그랬습니다. $75K~$76K 풀백은 돌파 이후 포지션 추가를 위한 첫 진짜 기회이며, 셋업에는 명확한 무효화가 있습니다($72K 아래 종가는 경고, $68.5K 아래 종가는 게임 오버). 주요 목표는 $80,000, 측정 이동 목표는 $82,500. 보이는 대로 거래하고, 레벨을 존중하고, CPI 프린트까지 사이즈를 규율 있게 유지하십시오.`,
+    coin: "Bitcoin",
+    symbol: "BTC",
+    direction: "LONG",
+    chartImage: "/images/blog/btc-4h-chart-20260421.png",
+    price: 76118,
+    change24h: 0.59,
+    rsi: 58,
+    tradeSetup: { entry: 76000, stopLoss: 73800, takeProfit: 82500, riskReward: "1:2.9" },
+    supportLevels: [75000, 72000, 68500],
+    resistanceLevels: [78400, 80000, 82500],
+    publishedAt: "2026-04-21T04:00:00.000Z",
+    author: "CryptoX Quant Desk",
+  },
+  {
+    id: "eth-2200-break-altseason-trigger-20260421",
+    slug: "eth-2200-break-altseason-condition-three-triggered",
+    title: "ETH Clears $2,200: Altseason Condition #3 Just Triggered",
+    titleKo: "ETH $2,200 돌파: 알트시즌 조건 #3 발동",
+    excerpt:
+      "Ethereum closed above $2,200 on April 15 and has since tagged $2,455 before settling at $2,321. The April 19 altseason framework identified ETH $2,200 as the missing condition. It is no longer missing. ETH/BTC has lifted to 0.0305 — still depressed historically, but the ratio bottom appears to be in.",
+    excerptKo:
+      "이더리움은 4월 15일 $2,200 위 종가를 마감한 이후 $2,455를 찍고 $2,321에서 안정됐습니다. 4월 19일 알트시즌 프레임워크는 ETH $2,200을 빠진 조건으로 지목했습니다. 더 이상 빠지지 않았습니다. ETH/BTC는 0.0305로 상승 — 역사적으로는 여전히 저조하나 비율 바닥이 형성된 것으로 보입니다.",
+    content: `## Structure
+
+ETH has been the laggard of the 2026 cycle. While BTC has been defending a structural bull case at $65K–$68K for seven weeks, ETH has been grinding lower-lows from $2,800 down to the $1,997 April 5 print. The entire altcoin complex has been held back by ETH's inability to find a floor.
+
+That changed between April 13 and April 17. ETH closed above $2,100 on April 13 (first meaningful reclaim of a prior level since March), cleared $2,200 on April 15 (the April 19 altseason framework threshold), and ran to $2,455 on April 17 before backing off. The current $2,321 print is the digestion zone — not the top of the move.
+
+What this means structurally: the lower-low sequence from the December $4,100 rejection is broken on the 4H timeframe. The $1,997 April 5 low is now a structural higher low if $2,100 holds on any retest. That is the first time ETH has printed a bullish structural shift since October 2025.
+
+## Key Levels
+
+**Resistance:** $2,455 (April 17 swing high), $2,550 (prior consolidation base from February), $2,700 (4H 200 EMA — the big one)
+
+**Support:** $2,280 (first minor support, held April 19 pullback), $2,200 (breakout level / first critical level), $2,100 (deeper structural support — must hold to preserve bullish structure)
+
+## ETH/BTC Ratio
+
+The ETH/BTC ratio is the more important chart here. It has lifted from the 0.0298 March lows to 0.0305 currently. That is a 2.3% recovery — not a rally, but the first time the ratio has closed above its 14-day average in eight weeks. Historically, ETH/BTC ratio inflections precede extended ETH outperformance by 2–4 weeks with roughly 65% reliability.
+
+The April 19 altseason framework identified three conditions for a rotation into alts: (1) BTC stable above $68K, (2) ETH clear $2,200 cleanly, (3) ETH/BTC ratio inflect from the lows. Condition 1 is in. Condition 2 is now done. Condition 3 is forming — not complete, but actively trending in the right direction.
+
+## RSI / MACD
+
+4H RSI at 52 is mid-range and healthy after the run from 31 (April 5 low) to 72 (April 17 peak). The unwind from overbought happened cleanly over three sessions without a deep price decline. That is characteristic of consolidating uptrends, not failed rallies.
+
+Daily RSI at 58 is the first reading above 50 since early February. MACD on the daily is very close to a bullish cross — signal line convergence is happening but the histogram has not yet flipped decisively positive. A clean daily MACD bullish cross within the next 3–5 sessions would add meaningful technical conviction.
+
+The 4H MACD crossed bullish on April 12 and has held the bullish configuration through the pullback. That is continuation behavior.
+
+## On-Chain / Flow Data
+
+Spot ETH ETF flows have turned positive for six consecutive sessions — net inflows of $340M between April 15 and April 20. This follows 90 days of net outflows. Institutional positioning has shifted. Whether that persists depends entirely on whether ETH can clear $2,450 — but the early signs are constructive.
+
+DeFi TVL on Ethereum crossed $100B on April 17 (first time since December 2025). Aave deposits at $28B, Uniswap V4 adoption accelerating, and Ethena protocol TVL at a fresh all-time high. The fundamental underpinning is real — not just price action.
+
+Staking deposits increased by 180,000 ETH over the past 14 days. Exchange supply decreased by 4.2%. Long-term holders are adding, not distributing.
+
+## Trade Setup
+
+**Primary long:** Entry $2,280–$2,330 zone (current digestion), stop $2,180 (below the $2,200 breakout level and the prior consolidation high), target $2,550 first, $2,700 second. Risk approximately $120, reward $220–$400. R/R on the first target: approximately 1.8R; on the second: 3.3R.
+
+**Aggressive add on any dip:** A retest of $2,200 that holds would be a conviction add. Stop tightens to $2,150. Same targets. R/R improves materially on the dip entry.
+
+**Bear case / invalidation:** A 4H close below $2,150 indicates the breakout is failing. Below $2,100 and the structural higher-low sequence is broken — the trade is off.
+
+## Risk
+
+The ETH thesis is more reliant on continued BTC strength than a standalone ETH story. If BTC rolls over through $72K, ETH will not hold $2,200 on its own. Position size should reflect that correlation — we are running approximately 60% of max ETH allocation, lower than BTC exposure, specifically because ETH is the derivative trade of the broader risk-on rotation rather than the primary driver.
+
+The secondary risk is the CPI print. A hot print would hit ETH harder than BTC because altcoin beta amplifies macro moves. Be prepared to take partial profits ahead of the data if ETH is at $2,400+.
+
+## Bottom Line
+
+**LONG.** ETH clearing $2,200 is the altseason trigger the April 19 framework called out explicitly. The structural shift is real — first higher-low sequence since October, ETH/BTC ratio inflection underway, ETF flows reversing, DeFi TVL at fresh highs. Entry on the current digestion with a stop below $2,180. Primary target $2,550, extended target $2,700. Size lower than BTC because ETH is correlated beta, not the primary thesis.`,
+    contentKo: `## 구조
+
+ETH는 2026년 사이클의 패자였습니다. BTC가 7주간 $65K~$68K에서 구조적 강세 논거를 방어하는 동안, ETH는 $2,800에서 4월 5일 $1,997 저점까지 고점 저점을 갈아엎었습니다. ETH가 바닥을 찾지 못한 탓에 알트코인 복합체 전체가 끌려 내려갔습니다.
+
+4월 13일~17일 사이에 그 상황이 바뀌었습니다. ETH는 4월 13일 $2,100 위 종가(3월 이후 이전 레벨의 첫 의미 있는 재탈환)를 마감했고, 4월 15일 $2,200(4월 19일 알트시즌 프레임워크 임계값)을 돌파했으며, 4월 17일 $2,455까지 상승한 뒤 후퇴했습니다. 현재 $2,321 프린트는 소화 구간이며 이동의 정점이 아닙니다.
+
+구조적으로 의미하는 것: 12월 $4,100 거부에서 시작된 저저점 시퀀스가 4시간봉 시간대에서 깨졌습니다. 4월 5일 $1,997 저점은 이제 $2,100이 재테스트 시 유지되면 구조적 고점 저점입니다. 2025년 10월 이후 ETH가 처음으로 강세 구조 전환을 프린트한 순간입니다.
+
+## 핵심 레벨
+
+**저항선:** $2,455 (4월 17일 스윙 고점), $2,550 (2월 이전 횡보 기반), $2,700 (4H 200 EMA — 핵심 레벨)
+
+**지지선:** $2,280 (첫 번째 소형 지지, 4월 19일 풀백 유지), $2,200 (돌파 레벨 / 첫 번째 결정적 레벨), $2,100 (더 깊은 구조적 지지 — 강세 구조 보존을 위해 반드시 유지)
+
+## ETH/BTC 비율
+
+여기서 더 중요한 차트는 ETH/BTC 비율입니다. 3월 저점 0.0298에서 현재 0.0305로 상승했습니다. 2.3% 회복 — 랠리는 아니지만 비율이 14일 평균 위에서 8주 만에 처음 종가 마감한 것입니다. 역사적으로 ETH/BTC 비율 변곡점은 약 65% 신뢰도로 2~4주 선행하여 ETH 아웃퍼폼을 이끕니다.
+
+4월 19일 알트시즌 프레임워크는 알트 로테이션의 3가지 조건을 제시했습니다: (1) BTC $68K 위에서 안정, (2) ETH $2,200 깔끔한 돌파, (3) ETH/BTC 비율이 저점에서 변곡. 조건 1 완료. 조건 2 방금 완료. 조건 3 형성 중 — 완료는 아니나 올바른 방향으로 진행 중.
+
+## RSI / MACD
+
+4H RSI 52는 31(4월 5일 저점)에서 72(4월 17일 피크)로의 상승 이후 중간 레인지로 건강합니다. 과매수 해소는 3세션에 걸쳐 깊은 가격 하락 없이 깔끔하게 진행됐습니다. 이는 실패 랠리가 아닌 소화 중인 상승추세의 특징입니다.
+
+일봉 RSI 58은 2월 초 이후 첫 50 이상 리딩입니다. 일봉 MACD는 강세 교차에 매우 가깝습니다. 시그널선 수렴이 진행 중이나 히스토그램은 아직 결정적으로 양전하지 않았습니다. 향후 3~5세션 내 일봉 MACD 강세 교차는 기술적 확신을 의미 있게 추가할 것입니다.
+
+4시간봉 MACD는 4월 12일 강세 교차했고 풀백 내내 강세 구성을 유지했습니다. 이는 지속 행동입니다.
+
+## 온체인 / 플로우 데이터
+
+스팟 ETH ETF 플로우가 6세션 연속 양전했습니다. 4월 15일~20일 사이 순유입 $3.4억. 이는 90일간의 순유출 이후입니다. 기관 포지셔닝이 전환됐습니다. 지속 여부는 전적으로 ETH가 $2,450을 뚫을 수 있는지에 달렸으나 초기 신호는 건설적입니다.
+
+이더리움의 DeFi TVL이 4월 17일 $1,000억을 돌파했습니다(2025년 12월 이후 처음). Aave 예치금 $280억, Uniswap V4 채택 가속, Ethena 프로토콜 TVL 신고가. 펀더멘탈 기반은 실재합니다 — 가격 행동만이 아닙니다.
+
+스테이킹 예치금은 지난 14일간 180,000 ETH 증가했습니다. 거래소 공급은 4.2% 감소했습니다. 장기 보유자는 분배가 아닌 추가 중입니다.
+
+## 트레이드 셋업
+
+**주요 롱:** $2,280~$2,330 구간(현재 소화) 진입, $2,180 손절($2,200 돌파 레벨과 이전 횡보 고점 아래), 1차 목표 $2,550, 2차 $2,700. 리스크 약 $120, 리워드 $220~$400. 1차 목표 R/R: 약 1.8R. 2차: 3.3R.
+
+**딥 시 공격적 추가:** $2,200 재테스트 유지는 확신 추가. 손절은 $2,150으로 조임. 동일 목표. 딥 진입 시 R/R이 의미 있게 개선.
+
+**약세 시나리오 / 무효화:** $2,150 아래 4시간봉 종가는 돌파 실패를 시사. $2,100 아래는 구조적 고점 저점 시퀀스 파괴 — 트레이드 종료.
+
+## 리스크
+
+ETH 논거는 ETH 단독 스토리보다 지속적인 BTC 강세에 더 의존적입니다. BTC가 $72K를 깨고 내려가면 ETH는 단독으로 $2,200을 지킬 수 없습니다. 포지션 사이징은 그 상관관계를 반영해야 합니다. 저희는 ETH 최대 배분의 약 60%를 운용 중이며, 이는 BTC 노출보다 낮습니다. ETH가 주요 드라이버가 아닌 광범위한 위험 선호 로테이션의 파생 트레이드이기 때문입니다.
+
+2차 리스크는 CPI 프린트입니다. 핫 프린트는 알트코인 베타가 거시 이동을 증폭시키기 때문에 ETH를 BTC보다 더 세게 때립니다. ETH가 $2,400+일 경우 데이터 이전에 부분 이익 실현을 준비하십시오.
+
+## 판단
+
+**롱.** ETH의 $2,200 돌파는 4월 19일 프레임워크가 명시적으로 지목한 알트시즌 트리거입니다. 구조적 전환은 실재합니다. 10월 이후 첫 고점 저점 시퀀스, ETH/BTC 비율 변곡 진행 중, ETF 플로우 반전, DeFi TVL 신고가. 현재 소화 구간 진입, $2,180 아래 손절. 주요 목표 $2,550, 확장 목표 $2,700. ETH는 상관된 베타이지 주요 논거가 아니므로 BTC보다 작은 사이즈로.`,
+    coin: "Ethereum",
+    symbol: "ETH",
+    direction: "LONG",
+    chartImage: "/images/blog/eth-4h-chart-20260421.png",
+    price: 2321,
+    change24h: 0.47,
+    rsi: 52,
+    tradeSetup: { entry: 2310, stopLoss: 2180, takeProfit: 2700, riskReward: "1:3.0" },
+    supportLevels: [2280, 2200, 2100],
+    resistanceLevels: [2455, 2550, 2700],
+    publishedAt: "2026-04-21T05:00:00.000Z",
+    author: "CryptoX Quant Desk",
+  },
+  {
+    id: "sol-firedancer-consolidation-20260421",
+    slug: "sol-firedancer-devnet-consolidation-85-range",
+    title: "SOL at $85: Firedancer Devnet Is Live, But $90 Is Still the Wall",
+    titleKo: "SOL $85: Firedancer 데브넷 가동, 그러나 $90은 여전한 벽",
+    excerpt:
+      "Solana is consolidating in the $83-86 range after a clean rejection at $90.50 on April 17. The Firedancer client devnet beta is live as of April 16, but the market is pricing the upgrade as executed, not imminent. The current setup is a classic range-trade opportunity — not a breakout.",
+    excerptKo:
+      "솔라나는 4월 17일 $90.50에서 깔끔한 거부 이후 $83~$86 구간에서 횡보 중입니다. Firedancer 클라이언트 데브넷 베타는 4월 16일 기준 가동 중이나, 시장은 업그레이드를 임박이 아닌 이미 반영된 것으로 가격에 반영하고 있습니다. 현재 셋업은 돌파가 아닌 고전적 레인지 트레이드 기회입니다.",
+    content: `## Structure
+
+SOL has been range-bound between $82 and $90 for 10 sessions. The April 17 $90.50 print was a clean rejection — three consecutive red 4H candles followed the tag, with volume on the rejection leg 2.1x average. That wick is now the definitive short-term resistance.
+
+The range bottom at $82 held on April 19 after the BTC pullback pressured the alt complex broadly. The SOL chart did not break structure during that stress test. That is a small but meaningful signal — rangebound consolidations that hold their range lows during macro pullbacks usually resolve higher eventually, but the timing is the question.
+
+Current price at $85.73 is mid-range. No directional edge from here in isolation — but the setup becomes actionable at either boundary.
+
+## Key Levels
+
+**Resistance:** $86.50 (4H EMA cluster), $90.00 (psychological / April 17 swing high), $95.00 (February range floor, would be a significant technical event if reclaimed)
+
+**Support:** $84.00 (intraday pivot from last 5 sessions), $82.00 (range low / must hold for the range trade to remain valid), $79.00 (April 7 swing low — below this and the range is broken)
+
+## RSI / MACD
+
+4H RSI at 54 is balanced, slightly biased bullish. The RSI trend over the past 48 hours has been slowly climbing off the 42 reading at the $82 low, which is constructive. No divergence concerns in either direction — price and RSI are tracking together.
+
+Daily RSI at 50 is exactly neutral. MACD on the daily is flat — histogram bars are small in both directions, no clear momentum signal. This is characteristic of consolidation, not accumulation with breakout pressure building.
+
+4H MACD has cycled twice through bullish and bearish configurations during the range — typical range-trade chop. No current conviction signal from MACD until the range resolves.
+
+## Firedancer Context
+
+The Firedancer client devnet beta deployment on April 16 is the most important fundamental development for SOL in Q2 2026. The upgrade promises massive throughput improvements — testnet benchmarks show 800,000+ TPS vs current 3,000-5,000 TPS sustained. If Firedancer delivers in production, SOL's fundamental value proposition as a high-throughput L1 gets materially stronger.
+
+The market response to the devnet launch was muted: SOL rallied $2.50 in the 24 hours after the announcement, then gave it all back. That price action tells you the market has already priced the upgrade as likely to succeed. The actual catalyst for SOL will be the mainnet deployment date, not the devnet activation. No mainnet date has been confirmed — most analysts estimate Q3 2026 at earliest.
+
+DeFi TVL on Solana is $9.2B (flat MoM). Jupiter aggregator volume is 18% below December peak. Daily active addresses are stable but not growing. The on-chain story is not a leading catalyst right now.
+
+## Volume Profile
+
+The $82–$87 zone has the densest volume cluster on the 30-day profile. This is the "acceptance zone" for the current range — where most participants have transacted. A decisive move out of this zone (either direction) will trigger stop cascades and volume expansion.
+
+Perp market open interest is flat to slightly elevated. Funding rate is slightly positive at +0.008% per 8 hours — neutral.
+
+## Trade Setup
+
+The range-trade setup is the cleanest here. Do not chase the middle of the range.
+
+**Range long (preferred):** Entry $82.00–$82.50 on a retest of the range low. Stop $80.00 (below the $82 support and the April 7 swing low). Target $89.50 (below the range high to front-run sellers). Risk $2.00–$2.50, reward $7.00–$7.50. R/R approximately 3:1.
+
+**Breakout long (secondary):** Entry on a 4H close above $90.50 with volume confirmation. Stop $87.50 (below the prior resistance flipped support). Target $95.00 first. R/R approximately 1.5:1 on the breakout trigger.
+
+**Breakout short:** Entry on a 4H close below $81.50 with volume. Stop $84.00. Target $79.00 first, $75.00 second. The range-break short is a valid setup but a lower-probability trade given BTC's bullish structure.
+
+## Risk
+
+The primary risk is a range resolution driven by external catalysts rather than SOL-specific flow. The April 22 CPI print could force a range break in either direction depending on the data. Position sizing should reflect that uncertainty — do not be aggressively long or short ahead of CPI.
+
+The secondary risk is over-anchoring on Firedancer. The devnet is live; the mainnet is not. Any long thesis that requires Firedancer mainnet as the catalyst is dependent on a deployment schedule that has not been announced and could slip.
+
+## Bottom Line
+
+**NEUTRAL to modest LONG at range low.** SOL at $85 mid-range offers no clean trade. Wait for a retest of $82 for the highest-quality long entry with a stop below $80. Take profits near $89 before chasing a $90 breakout that has already failed twice. Until the Firedancer mainnet date becomes a market catalyst, SOL is a range-trade, not a trend-trade.`,
+    contentKo: `## 구조
+
+SOL은 10세션 동안 $82~$90 레인지에서 횡보 중입니다. 4월 17일 $90.50 프린트는 깔끔한 거부였습니다. 태그 이후 3개의 연속 빨간 4시간봉 캔들이 나왔고 거부 구간 거래량은 평균의 2.1배였습니다. 그 위꼬리가 이제 결정적 단기 저항입니다.
+
+레인지 저점 $82는 BTC 풀백이 알트 복합체를 광범위하게 압박한 4월 19일에 유지됐습니다. SOL 차트는 그 스트레스 테스트 동안 구조를 깨지 않았습니다. 이는 작지만 의미 있는 신호입니다. 거시 풀백 동안 레인지 저점을 지키는 레인지바운드 횡보는 결국 위로 해결되는 경우가 많지만, 타이밍이 문제입니다.
+
+현재 가격 $85.73은 레인지 중간입니다. 단독으로는 여기서 방향성 엣지가 없습니다 — 하지만 셋업은 어느 경계에서든 실행 가능해집니다.
+
+## 핵심 레벨
+
+**저항선:** $86.50 (4H EMA 클러스터), $90.00 (심리적 / 4월 17일 스윙 고점), $95.00 (2월 레인지 바닥, 재탈환 시 의미 있는 기술적 이벤트)
+
+**지지선:** $84.00 (지난 5세션 인트라데이 피벗), $82.00 (레인지 저점 / 레인지 트레이드 유효성을 위해 반드시 유지), $79.00 (4월 7일 스윙 저점 — 아래 시 레인지 파괴)
+
+## RSI / MACD
+
+4H RSI 54는 균형, 약간 강세 편향. 지난 48시간 RSI 추세는 $82 저점의 42 리딩에서 천천히 올라오고 있어 건설적입니다. 양방향 다이버전스 우려 없음 — 가격과 RSI가 함께 움직입니다.
+
+일봉 RSI 50은 정확히 중립입니다. 일봉 MACD는 평평 — 히스토그램 바가 양방향 모두 작으며 명확한 모멘텀 신호가 없습니다. 이는 돌파 압력이 쌓이는 축적이 아닌 횡보의 특징입니다.
+
+4H MACD는 레인지 동안 강세와 약세 구성을 두 번 순환했습니다 — 전형적인 레인지 트레이드 초핑. 레인지가 해결되기까지 MACD에서 현재 확신 신호는 없습니다.
+
+## Firedancer 맥락
+
+4월 16일 Firedancer 클라이언트 데브넷 베타 배포는 2026년 2분기 SOL에서 가장 중요한 펀더멘탈 발전입니다. 업그레이드는 대규모 처리량 개선을 약속합니다. 테스트넷 벤치마크는 현재 지속 3,000~5,000 TPS 대비 800,000+ TPS를 보여줍니다. Firedancer가 프로덕션에서 구현된다면, 고처리량 L1으로서 SOL의 펀더멘탈 가치 제안은 크게 강화됩니다.
+
+데브넷 런칭에 대한 시장 반응은 미지근했습니다. SOL은 발표 후 24시간 동안 $2.50 상승했다가 모두 반납했습니다. 그 가격 행동은 시장이 이미 업그레이드의 성공 가능성을 가격에 반영했음을 알려줍니다. SOL의 실제 촉매는 데브넷 활성화가 아닌 메인넷 배포 날짜가 될 것입니다. 메인넷 날짜는 확정되지 않았으며 대부분 분석가는 빨라야 2026년 3분기로 추정합니다.
+
+솔라나 DeFi TVL은 $92억(MoM 보합). Jupiter 애그리게이터 거래량은 12월 피크 대비 18% 아래. 일일 활성 주소는 안정적이나 성장하지 않습니다. 온체인 스토리는 현재 선행 촉매가 아닙니다.
+
+## 거래량 프로파일
+
+$82~$87 구간은 30일 프로파일에서 가장 두꺼운 거래량 클러스터를 가집니다. 이는 현재 레인지의 "수용 구간"이며 대부분 참가자가 거래한 곳입니다. 이 구간에서의 결정적 이탈(어느 방향이든)은 손절 캐스케이드와 거래량 확장을 촉발할 것입니다.
+
+퍼프 시장 미결제약정은 평평에서 약간 상승. 펀딩비는 8시간당 +0.008%로 약한 양전 — 중립.
+
+## 트레이드 셋업
+
+여기서는 레인지 트레이드 셋업이 가장 깔끔합니다. 레인지 중간을 추격하지 마십시오.
+
+**레인지 롱 (선호):** 레인지 저점 재테스트 시 $82.00~$82.50 진입. $80.00 손절($82 지지 및 4월 7일 스윙 저점 아래). 목표 $89.50(레인지 고점 아래에서 매도자 선점). 리스크 $2.00~$2.50, 리워드 $7.00~$7.50. R/R 약 3:1.
+
+**돌파 롱 (2차):** 거래량 확인과 함께 $90.50 위 4시간봉 종가 시 진입. $87.50 손절(이전 저항에서 지지로 전환 아래). 1차 목표 $95.00. 돌파 트리거 R/R 약 1.5:1.
+
+**돌파 숏:** 거래량과 함께 $81.50 아래 4시간봉 종가 시 진입. $84.00 손절. 1차 목표 $79.00, 2차 $75.00. 레인지 파괴 숏은 유효한 셋업이나 BTC의 강세 구조를 고려하면 낮은 확률 트레이드입니다.
+
+## 리스크
+
+주요 리스크는 SOL 고유 플로우가 아닌 외부 촉매에 의한 레인지 해결입니다. 4월 22일 CPI 프린트는 데이터에 따라 레인지를 어느 방향으로든 깰 수 있습니다. 포지션 사이징은 그 불확실성을 반영해야 합니다. CPI 이전에 공격적으로 롱이나 숏이 되지 마십시오.
+
+2차 리스크는 Firedancer에 대한 과도한 앵커링입니다. 데브넷은 가동 중이나 메인넷은 아닙니다. 촉매로 Firedancer 메인넷을 요구하는 롱 논거는 발표되지 않았고 지연될 수 있는 배포 일정에 의존합니다.
+
+## 판단
+
+**중립에서 레인지 저점 소폭 롱.** SOL $85 레인지 중간은 깔끔한 트레이드를 제공하지 않습니다. $82 재테스트를 기다려 $80 아래 손절과 함께 가장 품질 높은 롱 진입을 취하십시오. 이미 두 번 실패한 $90 돌파를 추격하기 전에 $89 근처에서 이익을 실현하십시오. Firedancer 메인넷 날짜가 시장 촉매가 되기 전까지 SOL은 추세 트레이드가 아닌 레인지 트레이드입니다.`,
+    coin: "Solana",
+    symbol: "SOL",
+    direction: "NEUTRAL",
+    chartImage: "/images/blog/sol-4h-chart-20260421.png",
+    price: 85.73,
+    change24h: 0.69,
+    rsi: 54,
+    tradeSetup: { entry: 82.25, stopLoss: 80.00, takeProfit: 89.50, riskReward: "1:3.0" },
+    supportLevels: [84.00, 82.00, 79.00],
+    resistanceLevels: [86.50, 90.00, 95.00],
+    publishedAt: "2026-04-21T06:00:00.000Z",
+    author: "CryptoX Quant Desk",
+  },
 ];

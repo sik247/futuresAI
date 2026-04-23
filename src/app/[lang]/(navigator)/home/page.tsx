@@ -161,7 +161,9 @@ export default async function HomePage({
   }
 
   // Latest 10 blog posts (most recent first)
-  const blogPosts = [...QUANT_BLOG_POSTS].reverse().slice(0, 10);
+  const blogPosts = [...QUANT_BLOG_POSTS]
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+    .slice(0, 10);
 
   const serializedNews = JSON.parse(JSON.stringify(translatedNews));
   const serializedSignals = JSON.parse(JSON.stringify(signals));

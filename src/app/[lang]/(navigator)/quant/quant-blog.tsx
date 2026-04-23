@@ -346,6 +346,14 @@ export default function QuantBlog({ lang, limit }: { lang: string; limit?: numbe
   const sectionRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<HTMLDivElement>(null);
 
+  const sortedPosts = React.useMemo(
+    () =>
+      [...QUANT_BLOG_POSTS].sort(
+        (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+      ),
+    []
+  );
+
   useEffect(() => {
     const ctx = gsap.context(() => {
       if (sectionRef.current) {
@@ -400,7 +408,7 @@ export default function QuantBlog({ lang, limit }: { lang: string; limit?: numbe
         ref={cardsRef}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
       >
-        {(limit ? QUANT_BLOG_POSTS.slice(0, limit) : QUANT_BLOG_POSTS).map((post) => (
+        {(limit ? sortedPosts.slice(0, limit) : sortedPosts).map((post) => (
           <BlogCard key={post.id} post={post} lang={lang} />
         ))}
       </div>
