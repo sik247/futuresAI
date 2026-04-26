@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import Image from "next/image";
 import TradingProfileModal from "./trading-profile-modal";
 import BuyTrxCreditsModal from "@/components/payments/buy-trx-credits-modal";
+import ChatLimitPaywallCard from "@/components/payments/chat-limit-paywall-card";
 
 /** Lightweight markdown → HTML for chat responses */
 function renderMarkdown(text: string): string {
@@ -79,6 +80,12 @@ interface DataSources {
   webSearch?: boolean;
 }
 
+interface PaywallPayload {
+  retryAfterMinutes: number;
+  shouldUpgrade: boolean;
+  canPurchase: boolean;
+}
+
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -90,6 +97,8 @@ interface Message {
   internalLinks?: InternalLink[];
   mentionedCoins?: string[];
   dataSources?: DataSources;
+  kind?: "text" | "paywall";
+  paywall?: PaywallPayload;
 }
 
 interface Props {
@@ -725,18 +734,32 @@ export default function ChatClient({ lang, userName, walletAddress }: Props) {
       if (data.error) {
         let errorMsg: string;
         if (data.error === "rate_limit") {
-          const mins = data.retryAfterMinutes ?? 1;
-          const purchaseHint = data.canPurchase
-            ? ko
-              ? " 또는 5 TRX로 10회를 바로 구매할 수 있어요."
-              : " Or buy 10 messages instantly for 5 TRX."
-            : "";
-          errorMsg = ko
-            ? `⏳ 요청 한도에 도달했습니다. ${mins}분 후에 다시 시도해 주세요.${data.shouldUpgrade ? " 프리미엄으로 업그레이드하면 더 많은 분석을 이용할 수 있습니다." : ""}${purchaseHint}`
-            : `⏳ You've reached the request limit. Please try again in ${mins} minute${mins > 1 ? "s" : ""}.${data.shouldUpgrade ? " Upgrade to Premium for more analysis." : ""}${purchaseHint}`;
-          if (data.canPurchase && data.product === "CHAT_PACK_10") {
-            setShowBuyModal(true);
+          // IP-burst (server-side throttle) keeps the text bubble; account-level
+          // limits get the inline paywall card so the user can convert in place.
+          if (data.reason === "ip_burst") {
+            const secs = data.retryAfterSeconds ?? 30;
+            errorMsg = ko
+              ? `⏳ 너무 빠르게 요청하고 있습니다. ${secs}초 후에 다시 시도해 주세요.`
+              : `⏳ Slow down — try again in ${secs}s.`;
+            setMessages((prev) => [...prev, { role: "assistant", content: errorMsg, timestamp: Date.now() }]);
+            return;
           }
+          const mins = data.retryAfterMinutes ?? 1;
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant",
+              content: "",
+              kind: "paywall",
+              timestamp: Date.now(),
+              paywall: {
+                retryAfterMinutes: mins,
+                shouldUpgrade: Boolean(data.shouldUpgrade),
+                canPurchase: Boolean(data.canPurchase) && data.product === "CHAT_PACK_10",
+              },
+            },
+          ]);
+          return;
         } else if (res.status === 401) {
           errorMsg = ko ? "로그인이 필요합니다." : "Please log in to continue.";
         } else if (res.status === 503) {
@@ -1076,6 +1099,20 @@ export default function ChatClient({ lang, userName, walletAddress }: Props) {
                         {msg.content}
                       </div>
                     </div>
+                  ) : msg.kind === "paywall" && msg.paywall ? (
+                    <div data-msg-idx={idx} className="flex justify-center pt-1">
+                      <ChatLimitPaywallCard
+                        lang={ko ? "ko" : "en"}
+                        retryAfterMinutes={msg.paywall.retryAfterMinutes}
+                        shouldUpgrade={msg.paywall.shouldUpgrade}
+                        onBuyTrx={() => {
+                          if (msg.paywall?.canPurchase) setShowBuyModal(true);
+                        }}
+                        onDismiss={() =>
+                          setMessages((prev) => prev.filter((_, i) => i !== idx))
+                        }
+                      />
+                    </div>
                   ) : (
                     <div data-msg-idx={idx} className="flex gap-2.5 items-start">
                       <Image
@@ -1247,7 +1284,6 @@ export default function ChatClient({ lang, userName, walletAddress }: Props) {
               <p className="text-[9px] text-zinc-700">
                 {ko ? "Enter 전송 · Shift+Enter 줄바꿈" : "Enter to send · Shift+Enter for newline"}
               </p>
-              <p className="text-[9px] text-zinc-700">Gemini 2.5 Pro</p>
             </div>
           </div>
         </div>

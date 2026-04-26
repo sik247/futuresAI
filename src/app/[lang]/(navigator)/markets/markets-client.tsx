@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import type { MarketSignals, SignalItem } from "@/lib/services/signals/signals.service";
 import MobileMarkets from "./mobile-markets";
+import ControversialTakes from "./controversial-takes";
 
 /* ═══════════════════════════════════════════════════════════
    Types
@@ -544,6 +545,31 @@ export default function MarketsClient({
       {/* ═══ PREDICTIONS VIEW ══════════════════════════════ */}
       {view === "predictions" && (
         <>
+          {/* Featured top section — Hero + Movers + Controversial Takes (all viewports) */}
+          {events.length > 0 && (
+            <div className="max-w-[1440px] mx-auto px-4 sm:px-6 pb-3 lg:pb-4 space-y-3 lg:space-y-4">
+              {/* Hero: top-volume event */}
+              <HeroMarket
+                event={[...events].sort((a, b) => parseFloat(String(b.volume || 0)) - parseFloat(String(a.volume || 0)))[0]}
+                isKo={isKo}
+              />
+
+              {/* Two-column layout on desktop: Movers + Controversial Takes side-by-side */}
+              <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-3 lg:gap-4">
+                <MoversRail
+                  events={[...events]
+                    .sort((a, b) => (b.volume24hr || 0) - (a.volume24hr || 0))
+                    .slice(0, 6)}
+                  isKo={isKo}
+                />
+                <ControversialTakes
+                  category={categoryCat === "korea" ? "korea" : (categoryCat as "all" | "crypto" | "politics" | "business")}
+                  lang={lang}
+                />
+              </div>
+            </div>
+          )}
+
           {/* Mobile verdict-led feed (<1024px) */}
           <MobileMarkets events={events} lang={lang} />
 
@@ -1017,6 +1043,157 @@ function LegendItem({ name, title, desc }: { name: string; title: string; desc: 
     <div className="flex gap-2.5">
       <div className="shrink-0 w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center"><span className="text-[10px] font-mono font-bold text-zinc-400">{name}</span></div>
       <div><p className="text-[11px] text-zinc-300 font-medium">{title}</p><p className="text-[10px] text-zinc-600 leading-relaxed">{desc}</p></div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Hero Market — featured top-volume event
+   ═══════════════════════════════════════════════════════════ */
+
+function HeroMarket({ event, isKo }: { event: Event; isKo: boolean }) {
+  const vol = parseFloat(String(event.volume || 0));
+  const volLabel = formatVol(vol);
+  const title = isKo ? translateToKo(event.title) : event.title;
+  const isUpDown = event.title.toLowerCase().includes("up or down") || event.title.toLowerCase().includes("up/down");
+  const firstMarket = event.markets[0];
+  const yesRaw = firstMarket?.outcomePrices?.[0] ? parseFloat(String(firstMarket.outcomePrices[0])) : 0.5;
+  const yesPct = Math.round(yesRaw * 100);
+  const noPct = 100 - yesPct;
+  const dominantSide = yesPct > 60 ? "yes" : yesPct < 40 ? "no" : "split";
+
+  const accentBg = dominantSide === "yes"
+    ? "from-emerald-500/[0.10] via-emerald-500/[0.04] to-transparent"
+    : dominantSide === "no"
+    ? "from-rose-500/[0.10] via-rose-500/[0.04] to-transparent"
+    : "from-blue-500/[0.10] via-violet-500/[0.04] to-transparent";
+
+  const yesLabel = isUpDown ? (isKo ? "상승" : "Up") : (isKo ? "예" : "Yes");
+  const noLabel = isUpDown ? (isKo ? "하락" : "Down") : (isKo ? "아니오" : "No");
+
+  return (
+    <a
+      href={`https://polymarket.com/event/${event.slug || event.id}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="relative block rounded-2xl border border-white/[0.08] bg-white/[0.02] overflow-hidden group hover:border-white/[0.14] transition-all duration-200"
+    >
+      {/* Accent gradient */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${accentBg} pointer-events-none`} />
+
+      <div className="relative p-5 sm:p-6 flex flex-col sm:flex-row gap-5 sm:gap-6">
+        {/* Image / icon */}
+        {event.image && (
+          <div className="shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border border-white/[0.08] bg-white/[0.04]">
+            <img src={event.image} alt="" className="w-full h-full object-cover" />
+          </div>
+        )}
+
+        {/* Body */}
+        <div className="flex-1 min-w-0 flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/20">
+              {isKo ? "오늘의 마켓" : "Featured"}
+            </span>
+            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.15em]">
+              {event.category === "crypto" ? "Crypto" : event.category === "politics" ? (isKo ? "정치" : "Politics") : event.category === "business" ? (isKo ? "경제" : "Business") : "Other"}
+            </span>
+            {volLabel && (
+              <>
+                <span className="text-zinc-700">·</span>
+                <span className="text-[10px] font-mono text-zinc-400 tabular-nums">{volLabel}</span>
+              </>
+            )}
+          </div>
+
+          <h2 className="text-lg sm:text-xl font-bold text-white leading-tight tracking-tight line-clamp-2">
+            {title}
+          </h2>
+
+          {/* Probability bar */}
+          <div className="mt-1">
+            <div className="flex items-center justify-between text-[12px] font-mono mb-1.5">
+              <span className="text-emerald-400 font-bold">{yesLabel} {yesPct}%</span>
+              <span className="text-rose-400 font-bold">{noLabel} {noPct}%</span>
+            </div>
+            <div className="h-2.5 rounded-full overflow-hidden bg-white/[0.06] flex">
+              <div className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-700" style={{ width: `${yesPct}%` }} />
+              <div className="h-full bg-gradient-to-r from-rose-500 to-rose-400 transition-all duration-700" style={{ width: `${noPct}%` }} />
+            </div>
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="shrink-0 flex sm:flex-col items-center sm:items-end gap-2 sm:justify-between">
+          <div className="text-right">
+            <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">{isKo ? "결과" : "Verdict"}</div>
+            <div className={`text-2xl sm:text-3xl font-bold tabular-nums ${dominantSide === "yes" ? "text-emerald-400" : dominantSide === "no" ? "text-rose-400" : "text-zinc-300"}`}>
+              {dominantSide === "yes" ? yesLabel : dominantSide === "no" ? noLabel : (isKo ? "접전" : "Toss")}
+            </div>
+          </div>
+          <span className="text-[11px] font-mono text-zinc-600 group-hover:text-zinc-400 transition-colors">
+            {isKo ? "자세히 →" : "Open →"}
+          </span>
+        </div>
+      </div>
+    </a>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Movers Rail — horizontal scroll of biggest 24h volume events
+   ═══════════════════════════════════════════════════════════ */
+
+function MoversRail({ events, isKo }: { events: Event[]; isKo: boolean }) {
+  if (!events.length) return null;
+  return (
+    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+      <div className="flex items-center gap-2 px-4 sm:px-5 py-3 border-b border-white/[0.06]">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-emerald-400">
+          <path d="M3 17l6-6 4 4 8-8" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M14 7h7v7" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <h3 className="text-[13px] font-bold text-white tracking-tight">
+          {isKo ? "거래량 급증" : "Biggest Movers"}
+        </h3>
+        <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-[0.15em]">24h</span>
+      </div>
+      <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar p-3">
+        {events.map((event) => {
+          const m = event.markets[0];
+          const yesRaw = m?.outcomePrices?.[0] ? parseFloat(String(m.outcomePrices[0])) : 0.5;
+          const yesPct = Math.round(yesRaw * 100);
+          const isUp = yesRaw >= 0.5;
+          const title = isKo ? translateToKo(event.title) : event.title;
+          return (
+            <a
+              key={event.id}
+              href={`https://polymarket.com/event/${event.slug || event.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="snap-start shrink-0 w-[240px] rounded-xl border border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/[0.12] transition-all p-3 flex flex-col gap-2"
+            >
+              <div className="flex items-center gap-2">
+                {event.image ? (
+                  <img src={event.image} alt="" className="w-7 h-7 rounded-full object-cover shrink-0 border border-white/[0.08]" />
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-white/[0.06] shrink-0" />
+                )}
+                <span className={`text-[10px] font-mono font-bold tabular-nums px-1.5 py-0.5 rounded ${isUp ? "text-emerald-400 bg-emerald-500/10" : "text-rose-400 bg-rose-500/10"}`}>
+                  {yesPct}%
+                </span>
+                <span className="ml-auto text-[10px] font-mono text-emerald-400 tabular-nums">
+                  {formatVol(event.volume24hr || 0).replace(" Vol.", "")}
+                </span>
+              </div>
+              <p className="text-[12px] font-medium text-white leading-snug line-clamp-2">{title}</p>
+              <div className="h-1 rounded-full overflow-hidden bg-white/[0.06] flex mt-auto">
+                <div className={`h-full ${isUp ? "bg-emerald-500" : "bg-rose-500"} transition-all`} style={{ width: `${yesPct}%` }} />
+              </div>
+            </a>
+          );
+        })}
+      </div>
     </div>
   );
 }

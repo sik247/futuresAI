@@ -50,6 +50,32 @@ const AddExchangeModal = React.forwardRef<
     setSuccess(false);
   }
 
+  function messageForCode(
+    code: Exclude<Awaited<ReturnType<typeof createExchangeAccount>>, { ok: true }>["code"],
+  ): string {
+    switch (code) {
+      case "unauthorized":
+        return ko ? "세션이 만료되었습니다. 다시 로그인해주세요." : "Session expired. Please sign in again.";
+      case "missing_fields":
+        return ko ? "거래소와 UID를 모두 입력해주세요." : "Please select an exchange and enter your UID.";
+      case "exchange_already_linked":
+        return ko ? "이미 해당 거래소를 연동하셨습니다." : "You have already linked this exchange.";
+      case "uid_taken_same_user":
+        return ko
+          ? "이 UID는 이미 다른 거래소에 등록되어 있습니다."
+          : "This UID is already linked to another exchange on your account.";
+      case "uid_taken_by_other_user":
+        return ko
+          ? "이 UID는 다른 계정에 등록되어 있습니다. 본인 UID가 맞다면 고객센터(텔레그램)로 문의해주세요."
+          : "This UID is already registered to another account. If it's yours, please contact support on Telegram.";
+      case "exchange_not_found":
+        return ko ? "선택한 거래소를 찾을 수 없습니다. 페이지를 새로고침 해주세요." : "Selected exchange was not found. Please refresh the page.";
+      case "unknown":
+      default:
+        return ko ? "거래소 추가 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요." : "Could not add exchange. Please try again shortly.";
+    }
+  }
+
   async function onSubmit() {
     if (submitting || success) return;
     setErrorMsg(null);
@@ -63,7 +89,17 @@ const AddExchangeModal = React.forwardRef<
     }
     setSubmitting(true);
     try {
-      await createExchangeAccount(selectedExchange, uid.trim());
+      const result = await createExchangeAccount(selectedExchange, uid.trim());
+      if (!result.ok) {
+        const msg = messageForCode(result.code);
+        setErrorMsg(msg);
+        toast({
+          variant: "destructive",
+          title: ko ? "등록 실패" : "Submission failed",
+          description: msg,
+        });
+        return;
+      }
       setSuccess(true);
       toast({
         title: ko ? "UID 등록 완료" : "UID submitted",
@@ -76,24 +112,18 @@ const AddExchangeModal = React.forwardRef<
         resetForm();
       }, 1500);
     } catch (err: any) {
-      const raw = String(err?.message || err || "");
-      if (raw.includes("Unique constraint") || raw.includes("P2002")) {
-        setErrorMsg(ko
-          ? "이미 등록된 UID입니다. 다른 UID이거나, 이미 연동된 계정인지 확인해주세요."
-          : "This UID is already registered. Check if you already linked this account.");
-      } else if (raw.includes("NEXT_REDIRECT") || raw.toLowerCase().includes("unauthor")) {
-        setErrorMsg(ko ? "세션이 만료되었습니다. 다시 로그인해주세요." : "Session expired. Please sign in again.");
-      } else {
-        setErrorMsg(ko
-          ? `거래소 추가에 실패했습니다. ${raw ? `(${raw.slice(0, 120)})` : "잠시 후 다시 시도해주세요."}`
-          : `Could not add exchange. ${raw ? `(${raw.slice(0, 120)})` : "Please try again shortly."}`);
-      }
+      // Network / serialization failure — the action itself returns errors
+      // structurally, so reaching this branch is unexpected.
+      console.error("[AddExchange] transport failure:", err);
+      const msg = ko
+        ? "네트워크 오류가 발생했습니다. 인터넷 연결을 확인하고 다시 시도해주세요."
+        : "Network error. Check your connection and try again.";
+      setErrorMsg(msg);
       toast({
         variant: "destructive",
         title: ko ? "등록 실패" : "Submission failed",
-        description: ko ? "잠시 후 다시 시도해주세요." : "Please try again shortly.",
+        description: msg,
       });
-      console.error("[AddExchange] failed:", err);
     } finally {
       setSubmitting(false);
     }

@@ -5,14 +5,14 @@ import { translateBatch } from "@/lib/services/social/korean-translator.service"
 import { sendGroupMessage, sendGroupPhoto } from "./telegram.service";
 import { cachedAI } from "@/lib/services/ai-cache";
 import { getAnalyzedTweets } from "./tweet-analysis.service";
+import { hashContent, markSent, wasSent } from "./dedup-store";
+
+const DEDUP_KIND_NEWS = "news-alert";
+const DEDUP_KIND_FAST_NEWS = "fast-news";
 
 /* ================================================================== */
 /*  1. HOURLY NEWS ALERT — one significant news item per hour          */
 /* ================================================================== */
-
-// Track recently sent news to avoid repeats (in-memory, resets on cold start)
-const recentlySentNews = new Set<string>();
-const MAX_SENT_HISTORY = 50;
 
 /**
  * Pick the single most important crypto news, translate to Korean,
@@ -23,8 +23,11 @@ export async function sendHourlyNewsAlert(): Promise<boolean> {
     const allNews = await fetchCryptoNews();
     if (allNews.length === 0) return false;
 
-    // Filter out recently sent news
-    const freshNews = allNews.filter((n) => !recentlySentNews.has(n.title));
+    // Filter out recently sent news (Postgres-backed across cold starts)
+    const seen = await Promise.all(
+      allNews.map((n) => wasSent(DEDUP_KIND_NEWS, hashContent(n.title, n.url || ""))),
+    );
+    const freshNews = allNews.filter((_, i) => !seen[i]);
     if (freshNews.length === 0) return false;
 
     // Use Gemini to pick the most market-significant news
@@ -67,12 +70,7 @@ export async function sendHourlyNewsAlert(): Promise<boolean> {
 
     const sent = await sendGroupMessage(msg);
     if (sent) {
-      recentlySentNews.add(newsItem.title);
-      // Evict old entries
-      if (recentlySentNews.size > MAX_SENT_HISTORY) {
-        const first = recentlySentNews.values().next().value;
-        if (first) recentlySentNews.delete(first);
-      }
+      await markSent(DEDUP_KIND_NEWS, hashContent(newsItem.title, newsItem.url || ""));
     }
     return sent;
   } catch (error) {
@@ -436,9 +434,6 @@ ${headlines.join("\n")}
 /*  4. FAST NEWS FLASH — rapid-fire short news, like 트레이딩 PRO      */
 /* ================================================================== */
 
-const recentFlashNews = new Set<string>();
-const MAX_FLASH_HISTORY = 100;
-
 /**
  * Send 3-5 short news items as separate messages — concise Korean
  * headline + 1-2 sentence AI analysis + related tickers + site link.
@@ -448,10 +443,16 @@ export async function sendFastNewsFlash(): Promise<{ sent: number }> {
     const allNews = await fetchCryptoNews();
     if (allNews.length === 0) return { sent: 0 };
 
-    // Filter already sent
-    const freshNews = allNews.filter(
-      (n) => !recentFlashNews.has(n.title) && !recentlySentNews.has(n.title)
+    // Filter already sent — check both flash and hourly-alert kinds so the
+    // same headline isn't burned through two channels back-to-back.
+    const fingerprints = allNews.map((n) => hashContent(n.title, n.url || ""));
+    const seenFlash = await Promise.all(
+      fingerprints.map((h) => wasSent(DEDUP_KIND_FAST_NEWS, h)),
     );
+    const seenAlert = await Promise.all(
+      fingerprints.map((h) => wasSent(DEDUP_KIND_NEWS, h)),
+    );
+    const freshNews = allNews.filter((_, i) => !seenFlash[i] && !seenAlert[i]);
     if (freshNews.length === 0) return { sent: 0 };
 
     // Use Gemini to rank and summarize top 5 news for flash format
@@ -495,11 +496,7 @@ export async function sendFastNewsFlash(): Promise<{ sent: number }> {
 
       const sent = await sendGroupMessage(msg);
       if (sent) {
-        recentFlashNews.add(newsItem.title);
-        if (recentFlashNews.size > MAX_FLASH_HISTORY) {
-          const first = recentFlashNews.values().next().value;
-          if (first) recentFlashNews.delete(first);
-        }
+        await markSent(DEDUP_KIND_FAST_NEWS, hashContent(newsItem.title, newsItem.url || ""));
         sentCount++;
       }
 

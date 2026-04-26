@@ -5,6 +5,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import OpenAI from "openai";
 import { buildCryptoContext, buildUSStockContext } from "@/lib/services/chat/chat-context.service";
 import { consumeCreditOrRateLimit, consumePurchasedCredit } from "@/lib/services/usage.service";
+import { checkIpRate, getClientIp } from "@/lib/services/rate-limit/ip-rate-limit";
 
 const PERSONA_PROMPTS: Record<string, string> = {
   "crypto": `You are an elite crypto quantitative analyst and head strategist at FuturesAI, one of the top AI-powered crypto trading intelligence platforms. You combine deep technical analysis expertise with on-chain data interpretation, macro-economic awareness, and quantitative modeling.
@@ -113,6 +114,22 @@ function extractTickerFromResponse(
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    const ipGate = checkIpRate(ip, { limit: 20, windowSeconds: 60 });
+    if (!ipGate.allowed) {
+      return NextResponse.json(
+        {
+          error: "rate_limit",
+          reason: "ip_burst",
+          retryAfterSeconds: ipGate.retryAfterSeconds,
+        },
+        {
+          status: 429,
+          headers: { "Retry-After": String(ipGate.retryAfterSeconds) },
+        },
+      );
+    }
+
     const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -1037,8 +1037,7 @@ function ChatWidget({ lang }: { lang: string }) {
               {loading ? "..." : ko ? "전송" : "Send"}
             </button>
           </div>
-          <div className="flex items-center justify-between px-3 py-1.5 border-t border-white/[0.04]">
-            <span className="text-[9px] text-zinc-600">Gemini 2.5 Pro</span>
+          <div className="flex items-center justify-end px-3 py-1.5 border-t border-white/[0.04]">
             <Link href={`/${lang}/chat`} className="text-[10px] text-blue-400 hover:text-blue-300 font-medium transition-colors">
               {ko ? "전체 채팅 →" : "Full chat →"}
             </Link>
