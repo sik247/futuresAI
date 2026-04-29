@@ -7,6 +7,7 @@ import { cachedAI } from "@/lib/services/ai-cache";
 import { getAnalyzedTweets } from "./tweet-analysis.service";
 import { hashContent, markSent, wasSent } from "./dedup-store";
 import { getSnapshotForText, extractTickers } from "./agents/price-snapshot.agent";
+import { newsAnchorUrl } from "@/lib/services/news/news-anchor";
 
 const DEDUP_KIND_NEWS = "news-alert";
 const DEDUP_KIND_FAST_NEWS = "fast-news";
@@ -50,9 +51,15 @@ export async function sendHourlyNewsAlert(): Promise<boolean> {
 
     const impactEmoji = picked.impactEmoji || "🚨";
 
+    // Deep-link straight to this article's card on /ko/news so users land
+    // on our page (not the external source) and see the exact item.
+    const articleUrl = newsAnchorUrl(newsItem.url || newsItem.title, {
+      fallback: newsItem.title,
+    });
+
     let msg = `${impactEmoji} <b>#속보 ${koTitle}</b>\n\n`;
     if (analysis) msg += `${analysis}\n\n`;
-    msg += `다들 어떻게 보세요? 💬 <a href="https://futuresai.io/ko/news">FuturesAI</a>`;
+    msg += `📰 <a href="${articleUrl}">FuturesAI에서 읽기</a> · 다들 어떻게 보세요? 💬`;
 
     const sent = await sendGroupMessage(msg);
     if (sent) {
@@ -478,11 +485,15 @@ export async function sendFastNewsFlash(): Promise<{ sent: number }> {
       const impactEmoji = item.impactEmoji || "📰";
       const recommendation = item.recommendation || "";
 
+      const articleUrl = newsAnchorUrl(newsItem.url || newsItem.title, {
+        fallback: newsItem.title,
+      });
+
       // Compact 2-3 line chat format: headline · one-liner · action.
       let msg = `${impactEmoji} <b>#속보 ${item.headlineKo}</b>\n`;
       msg += `💬 ${item.analysisKo}\n`;
       if (recommendation) msg += `🎯 ${recommendation}\n`;
-      msg += `<a href="https://futuresai.io/ko/news">FuturesAI</a> · 다들 어떻게 보세요? 💬`;
+      msg += `📰 <a href="${articleUrl}">FuturesAI에서 읽기</a> · 💬`;
 
       const sent = await sendGroupMessage(msg);
       if (sent) {

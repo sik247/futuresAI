@@ -1,6 +1,7 @@
 "use client";
 
 import type { CryptoNewsItem } from "@/lib/services/news/crypto-news.service";
+import { newsAnchorId } from "@/lib/services/news/news-anchor";
 import Image from "next/image";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
@@ -283,12 +284,14 @@ const FeaturedCard = React.forwardRef<
   return (
     <a
       ref={ref}
+      id={newsAnchorId(news.url || news.id, news.title)}
       href={news.url}
       target="_blank"
       rel="noopener noreferrer"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className="group grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] overflow-hidden transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] hover:shadow-[0_0_30px_-5px_rgba(37,99,235,0.15)]"
+      style={{ scrollMarginTop: 120 }}
+      className="group grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] overflow-hidden transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] hover:shadow-[0_0_30px_-5px_rgba(37,99,235,0.15)] target:ring-2 target:ring-blue-500/60 target:shadow-[0_0_40px_-5px_rgba(37,99,235,0.4)]"
     >
       {/* Image */}
       <div
@@ -397,12 +400,14 @@ const NewsCard: React.FC<{ news: CryptoNewsItem }> = ({ news }) => {
   return (
     <a
       ref={cardRef}
+      id={newsAnchorId(news.url || news.id, news.title)}
       href={news.url}
       target="_blank"
       rel="noopener noreferrer"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className="news-card group flex flex-col rounded-xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] overflow-hidden transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] hover:shadow-[0_0_25px_-5px_rgba(37,99,235,0.12)]"
+      style={{ scrollMarginTop: 120 }}
+      className="news-card group flex flex-col rounded-xl bg-white/[0.03] backdrop-blur-md border border-white/[0.06] overflow-hidden transition-all duration-300 hover:border-white/[0.12] hover:bg-white/[0.05] hover:shadow-[0_0_25px_-5px_rgba(37,99,235,0.12)] target:ring-2 target:ring-blue-500/60 target:shadow-[0_0_40px_-5px_rgba(37,99,235,0.4)]"
     >
       {/* Image */}
       <div

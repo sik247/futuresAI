@@ -1,6 +1,7 @@
 "use client";
 
 import type { CryptoNewsItem } from "@/lib/services/news/crypto-news.service";
+import { newsAnchorId } from "@/lib/services/news/news-anchor";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 
@@ -74,10 +75,12 @@ function MobileNewsCard({ item, ko }: { item: CryptoNewsItem; ko: boolean }) {
   const breaking = isBreaking(item.publishedAt);
   return (
     <a
+      id={newsAnchorId(item.url || item.id, item.title)}
       href={item.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex items-start gap-3 px-4 py-3 border-b border-white/[0.04] hover:bg-white/[0.02] active:bg-white/[0.04] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+      style={{ scrollMarginTop: 100 }}
+      className="group flex items-start gap-3 px-4 py-3 border-b border-white/[0.04] hover:bg-white/[0.02] active:bg-white/[0.04] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 target:bg-blue-500/[0.08] target:ring-2 target:ring-blue-500/60"
     >
       {/* Thumbnail */}
       <div className="relative shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-zinc-900 border border-white/[0.06]">

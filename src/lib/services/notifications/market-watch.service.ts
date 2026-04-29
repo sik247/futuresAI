@@ -3,6 +3,7 @@ import { fetchCryptoNews, type CryptoNewsItem } from "@/lib/services/news/crypto
 import { fetchMarketSignals } from "@/lib/services/signals/signals.service";
 import { sendGroupMessage } from "./telegram.service";
 import { getSnapshotForText } from "./agents/price-snapshot.agent";
+import { newsAnchorUrl } from "@/lib/services/news/news-anchor";
 
 /**
  * Market Watch — Change-detection service
@@ -184,9 +185,13 @@ ${item.body ? `상세: ${item.body.slice(0, 400)}` : ""}
       const analysis = result.response.text().trim();
       if (!analysis) continue;
 
+      const articleUrl = newsAnchorUrl(item.url || item.title, {
+        fallback: item.title,
+      });
+
       let msg = `🔴 <b>#속보 ${item.title}</b>\n`;
       msg += `${analysis}\n`;
-      msg += `<a href="https://futuresai.io/ko/news">FuturesAI</a> · 다들 어떻게 보세요? 💬`;
+      msg += `📰 <a href="${articleUrl}">FuturesAI에서 읽기</a> · 💬`;
 
       messages.push(msg);
     } catch (err) {
