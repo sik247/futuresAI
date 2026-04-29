@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { fetchCryptoNews, type CryptoNewsItem } from "@/lib/services/news/crypto-news.service";
 import { fetchMarketSignals } from "@/lib/services/signals/signals.service";
 import { sendGroupMessage } from "./telegram.service";
+import { getSnapshotForText } from "./agents/price-snapshot.agent";
 
 /**
  * Market Watch — Change-detection service
@@ -151,43 +152,41 @@ async function checkBreakingNews(): Promise<{ messages: string[] }> {
 
   for (const item of top) {
     try {
-      const result = await model.generateContent(`당신은 수석 트레이더입니다. 이 뉴스가 "오늘 내 포트폴리오에 어떤 의미인지" 답하세요.
+      // Real-time price snapshot for whichever tickers the headline touches.
+      const priceBlock = await getSnapshotForText(item.title);
+      const priceLine = priceBlock
+        ? `현재가 (이 가격만 인용. 다른 가격 만들어내지 말 것):\n${priceBlock}`
+        : "가격 데이터 없음 — 구체적 달러 수치 인용 금지.";
 
-정확히 3개 문단으로 작성:
+      const result = await model.generateContent(`한국 크립토 트레이더가 텔레그램 단톡방에 던지는 1-2줄 채팅. AI 보고서 말투 절대 금지.
 
-1. 무슨 일이 일어났나 (1문장 — 사실만, 의견 없이)
-
-2. 가격에 미치는 영향 — 가장 중요한 부분:
-   - 영향받는 코인과 방향(상승/하락) 명시
-   - 변동폭 예상: "2-4% 움직임 예상" (모호하게 "영향 있을 수 있음" 금지)
-   - 시간대: "24시간 이내" 또는 "1주일 내"
-   - 지금 매수/매도/관망 중 무엇을 해야 하는지 명시
-
-3. 근거 — 역사적 선례(날짜, 수치 포함) 또는 구조적 이유 1문장
-
-모호한 표현 금지. "영향 있을 수 있음", "주시해야 함" 등 금지. 무엇이 일어날 것인지 단정적으로 서술.
-최대 500자. 마크다운, 이모지, 해시태그 금지.
+${priceLine}
 
 뉴스: ${item.title}
 출처: ${item.source}
-${item.body ? `상세: ${item.body.slice(0, 500)}` : ""}`);
+${item.body ? `상세: ${item.body.slice(0, 400)}` : ""}
+
+정확히 2줄로 (HTML 태그 유지, 빈 줄 없음):
+💬 [한 문장, 최대 80자. 위 가격 1개만 인용. 끝에 📈/📉/⚖️ 중 1개]
+🎯 [롱/숏/관망] [⏸/🟢/🔴 1개]
+
+규칙:
+- 위에 안 적힌 가격은 절대 만들어내지 말 것.
+- 금지 표현: "이 뉴스는 ~의미합니다", "~시사합니다", "투자자들이", "긍정적 반응", "추가적인 강세", "범위로 설정"
+- 사용 어투: "~네", "~인 듯", "~할 듯", "~봐야할 듯", "~뚫으면", "~찍으면"
+- 한 문장만, 풀어쓰지 말 것.
+- 허용 이모지: 💬🎯📈📉⚖️⏸🟢🔴 만.
+
+좋은 예:
+💬 BTC 95K 매물대 못 뚫으면 92K까지 밀릴 듯 📉
+🎯 관망 ⏸`);
 
       const analysis = result.response.text().trim();
+      if (!analysis) continue;
 
-      const now = new Date().toLocaleString("ko-KR", {
-        timeZone: "Asia/Seoul",
-        month: "short",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
-
-      let msg = `<b>🔴 속보</b> · ${now} KST\n\n`;
-      msg += `<b>${item.title}</b>\n`;
-      msg += `<i>${item.source}</i>\n\n`;
-      msg += `${analysis}\n\n`;
-      msg += `<a href="https://futuresai.io/ko/news">FuturesAI에서 더 보기</a>\n<i>— FuturesAI드림</i>`;
+      let msg = `🔴 <b>#속보 ${item.title}</b>\n`;
+      msg += `${analysis}\n`;
+      msg += `<a href="https://futuresai.io/ko/news">FuturesAI</a> · 다들 어떻게 보세요? 💬`;
 
       messages.push(msg);
     } catch (err) {

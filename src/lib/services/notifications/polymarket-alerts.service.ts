@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { sendGroupMessage } from "./telegram.service";
 import { translateBatch } from "@/lib/services/social/korean-translator.service";
+import { getSnapshotForText } from "./agents/price-snapshot.agent";
 
 type PolymarketEvent = {
   id: string;
@@ -118,18 +119,16 @@ export async function sendPolymarketAlert(): Promise<boolean> {
     const titles = selected.map((m) => m.question);
     const translated = await translateBatch(titles);
 
-    // Generate bilingual AI commentary with market impact
-    const commentary = await generatePolymarketCommentary(selected);
+    // Pull live prices for any tickers referenced across the headlines so
+    // commentary doesn't invent levels.
+    const priceBlock = await getSnapshotForText(
+      `${selected.map((m) => `${m.eventTitle} ${m.question}`).join(" ")}`
+    );
 
-    const now = new Date().toLocaleString("ko-KR", {
-      timeZone: "Asia/Seoul",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    // Generate one-line AI commentary with market impact
+    const commentary = await generatePolymarketCommentary(selected, priceBlock);
 
-    let msg = `<b>📊 예측 시장 동향</b> · ${now} KST\n\n`;
+    let msg = `📊 <b>예측 시장 동향</b>\n\n`;
 
     for (let i = 0; i < selected.length; i++) {
       const m = selected[i];
@@ -137,24 +136,15 @@ export async function sendPolymarketAlert(): Promise<boolean> {
       const changeStr = m.change24h !== 0
         ? ` (${m.change24h > 0 ? "+" : ""}${(m.change24h * 100).toFixed(1)}%)`
         : "";
-      const volStr = m.volume >= 1e6
-        ? `$${(m.volume / 1e6).toFixed(1)}M`
-        : m.volume >= 1e3
-        ? `$${(m.volume / 1e3).toFixed(0)}K`
-        : `$${m.volume.toFixed(0)}`;
-
-      msg += `<b>${koTitle}</b>\n`;
-      msg += `${m.outcomes[0]}: <b>${m.yesPct}%</b>${changeStr} | ${m.outcomes[1]}: ${m.noPct}%\n`;
-      msg += `거래량: ${volStr}\n\n`;
+      msg += `• <b>${koTitle}</b> — ${m.outcomes[0]} <b>${m.yesPct}%</b>${changeStr}\n`;
     }
+    msg += `\n`;
 
     if (commentary) {
       msg += `${commentary}\n\n`;
     }
 
-    msg += `⚠️ 본 분석은 투자 조언이 아닙니다.\n`;
-    msg += `<a href="https://futuresai.io/ko/markets">FuturesAI 예측 시장</a>\n`;
-    msg += `<i>— FuturesAI드림</i>`;
+    msg += `<a href="https://futuresai.io/ko/markets">FuturesAI</a> · 다들 어떻게 보세요? 💬`;
 
     return await sendGroupMessage(msg);
   } catch (error) {
@@ -164,7 +154,8 @@ export async function sendPolymarketAlert(): Promise<boolean> {
 }
 
 async function generatePolymarketCommentary(
-  markets: { eventTitle: string; question: string; yesPct: string; change24h: number }[]
+  markets: { eventTitle: string; question: string; yesPct: string; change24h: number }[],
+  priceBlock: string
 ): Promise<string> {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
@@ -177,24 +168,34 @@ async function generatePolymarketCommentary(
       .map((m) => `"${m.eventTitle}" — ${m.question}: Yes ${m.yesPct}% (24h change: ${(m.change24h * 100).toFixed(1)}%)`)
       .join("\n");
 
-    const prompt = `예측 시장 이벤트를 크립토 트레이딩 텔레그램 그룹을 위해 분석하세요.
+    const priceLine = priceBlock
+      ? `현재가 (이 가격만 인용. 다른 가격 만들어내지 말 것):\n${priceBlock}`
+      : "가격 데이터 없음 — 구체적 달러 수치 인용 금지.";
 
-이벤트:
+    const prompt = `한국 크립토 트레이더가 텔레그램 단톡방에 던지는 1-2줄 채팅. AI 보고서 말투 절대 금지.
+
+${priceLine}
+
+예측 시장 이벤트:
 ${list}
 
-정확히 이 형식으로 작성 (HTML 태그 유지):
+정확히 2줄로 (HTML 태그 유지, 빈 줄 없음):
+💬 [한 문장, 최대 80자. 가장 영향 큰 이벤트 1개 + 위 가격 1개 인용. 끝에 📈/📉/⚖️ 중 1개]
+🎯 [롱/숏/관망] [⏸/🟢/🔴 1개]
 
-<b>💡 시장 영향 분석</b>
+규칙:
+- 위에 안 적힌 가격은 절대 만들어내지 말 것.
+- 금지 표현: "이것은 ~의미합니다", "~시사합니다", "투자자들이", "긍정적 반응", "추가적인 강세", "범위로 설정"
+- 사용 어투: "~네", "~인 듯", "~할 듯", "~봐야할 듯", "~뚫으면", "~찍으면"
+- 한 문장만, 풀어쓰지 말 것.
+- 허용 이모지: 💬🎯📈📉⚖️⏸🟢🔴 만.
 
-3-4문장으로 작성:
-- 각 이벤트가 크립토/주식 시장에 미치는 구체적 영향을 설명
-- "X 확률이 Y%라는 건 → BTC/ETH에 [구체적 영향]을 의미합니다" 형식
-- 매수/매도/관망 의견을 명확히 제시
-- 마지막에 구체적 가격 레벨과 함께 대담한 예측 하나
+좋은 예:
+💬 BTC 10만 돌파 확률 68% — 95K 매물 다 소화하면 단번에 갈 듯 📈
+🎯 롱 🟢
 
-🎯 추천: [매수/매도/관망] — [구체적 근거]
-
-규칙: 모든 문장은 구체적 주장. "이것은 X를 의미합니다" 형식. 모호한 표현 금지. 강한 의견. 이모지는 💡🎯만 사용. 최대 500자.`;
+💬 Fed 금리 인하 확률 떨어졌네, ETH 3,521 박스권 하단 깨질 위험 📉
+🎯 관망 ⏸`;
 
     const result = await model.generateContent(prompt);
     return result.response.text().trim();

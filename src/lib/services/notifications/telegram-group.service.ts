@@ -6,6 +6,7 @@ import { sendGroupMessage, sendGroupPhoto } from "./telegram.service";
 import { cachedAI } from "@/lib/services/ai-cache";
 import { getAnalyzedTweets } from "./tweet-analysis.service";
 import { hashContent, markSent, wasSent } from "./dedup-store";
+import { getSnapshotForText, extractTickers } from "./agents/price-snapshot.agent";
 
 const DEDUP_KIND_NEWS = "news-alert";
 const DEDUP_KIND_FAST_NEWS = "fast-news";
@@ -42,31 +43,16 @@ export async function sendHourlyNewsAlert(): Promise<boolean> {
     const [translated] = await translateBatch([newsItem.title]);
     const koTitle = translated?.translated || newsItem.title;
 
-    // Generate bilingual analysis
-    const analysis = await generateNewsAnalysis(newsItem.title);
-
-    const now = new Date().toLocaleString("ko-KR", {
-      timeZone: "Asia/Seoul",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    // Pull live prices for the tickers mentioned, so the analysis quotes
+    // ground truth instead of training-data ghosts.
+    const priceBlock = await getSnapshotForText(`${koTitle} ${newsItem.title}`);
+    const analysis = await generateNewsAnalysis(newsItem.title, priceBlock);
 
     const impactEmoji = picked.impactEmoji || "🚨";
 
     let msg = `${impactEmoji} <b>#속보 ${koTitle}</b>\n\n`;
-
-    // Analysis with strong opinions
-    if (analysis) {
-      msg += `${analysis}\n\n`;
-    }
-
-    if (picked.reasonKo) {
-      msg += `<i>${picked.reasonKo}</i>\n\n`;
-    }
-
-    msg += `다들 어떻게 보세요? 💬\n\n`;
-    msg += `<a href="https://futuresai.io/ko/news">📊 FuturesAI에서 더 보기</a>\n`;
-    msg += `<i>— FuturesAI</i>`;
+    if (analysis) msg += `${analysis}\n\n`;
+    msg += `다들 어떻게 보세요? 💬 <a href="https://futuresai.io/ko/news">FuturesAI</a>`;
 
     const sent = await sendGroupMessage(msg);
     if (sent) {
@@ -130,8 +116,14 @@ reasonKo 규칙 — 한국 트레이더 단톡 톤, 한 줄 (최대 50자):
   }
 }
 
-async function generateNewsAnalysis(title: string): Promise<string> {
-  const cacheKey = `news-analysis-v3:${title.slice(0, 80)}`;
+async function generateNewsAnalysis(
+  title: string,
+  priceBlock: string
+): Promise<string> {
+  // Cache key includes price-block hash so cached lines invalidate as soon
+  // as a meaningful price move happens (different snapshot → new key).
+  const priceFingerprint = priceBlock.slice(0, 60);
+  const cacheKey = `news-analysis-v4:${title.slice(0, 80)}|${priceFingerprint}`;
   return cachedAI(cacheKey, async () => {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return "";
@@ -139,37 +131,41 @@ async function generateNewsAnalysis(title: string): Promise<string> {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    const prompt = `한국 크립토 트레이더가 텔레그램 단톡방에 던지는 짧은 코멘트로 작성. 사람이 친구한테 보내는 톤. AI 보고서 말투 절대 금지.
+    const priceLine = priceBlock
+      ? `현재가 (이 가격만 인용. 다른 가격 만들어내지 말 것):\n${priceBlock}`
+      : "가격 데이터 없음 — 구체적 달러 수치 인용 금지.";
+
+    const prompt = `한국 크립토 트레이더가 텔레그램 단톡방에 던지는 1-2줄 채팅. 친구한테 보내는 톤. AI 보고서 말투 절대 금지.
 
 뉴스: "${title}"
+${priceLine}
 
-정확히 이 형식으로 (HTML 태그 유지):
+정확히 2줄로 (HTML 태그 유지, 빈 줄 없음):
+💬 [한 문장, 최대 70자. 위 가격 1개만 인용. 트레이더 톡 톤. 끝에 📈/📉/⚖️ 중 1개]
+🎯 [롱/숏/관망] [⏸/🟢/🔴 1개]
 
-<b>💡 한 줄 코멘트</b>
-[2~3문장, 총 180자 이내. 숫자 1~2개만 짚고 끝.]
+규칙:
+- 위에 안 적힌 가격은 절대 만들어내지 말 것. 가격 데이터 없으면 가격 인용 생략.
+- 금지 표현: "이 뉴스는 ~의미합니다", "~시사합니다", "투자자들이 ~", "긍정적 반응", "추가적인 강세", "범위로 설정", "성공적으로", "다음 목표는"
+- 사용 어투: "~네", "~인 듯", "~할 듯", "~봐야할 듯", "~뚫으면", "~찍으면", "거래량 안 따라줘서", "물량 빠지는 거 보면"
+- 한 줄에 한 문장만. 풀어쓰지 말 것.
+- 허용 이모지: 💬🎯📈📉⚖️⏸🟢🔴 만.
 
-🎯 [매수/매도/관망] — [근거 한 줄, 최대 25자]
+좋은 예:
+💬 BTC 95K 박스권. 거래량 약해서 위로 못 갈 듯 📉
+🎯 관망 ⏸
 
-규칙 — 반드시 지킬 것:
-- 금지 표현: "이 뉴스는 ~의미합니다", "~시사합니다", "투자자들이 ~", "긍정적으로 반응", "추가적인 강세 신호", "범위로 설정", "성공적으로", "다음 목표는", "심리적 저항", "기술적 저항"
-- 자연스러운 트레이더 말투: "~네", "~인 듯", "~할 듯", "~봐야할 듯", "~까진 갈 듯", "~나오면 ~각", "~뚫으면", "~찍으면", "거래량 안 따라줘서", "물량 빠지는 거 보면"
-- 풀어쓰지 말 것. 한 문장 길게 쓰지 말 것. 짧게 끊을 것.
-- 이모지는 💡🎯만.
+💬 ETH 3,521에서 매물대 뚫는 중, 거래량도 따라옴 📈
+🎯 롱 🟢
 
-좋은 예시:
-<b>💡 한 줄 코멘트</b>
-2400 저항 한 번 더 테스트 중인 듯. 거래량 약해서 단번에 뚫긴 어려워 보임. 못 뚫으면 다시 2300 지지대 확인하러 갈 듯.
-
-🎯 관망 — 2400 종가 확인 후 진입
-
-나쁜 예시 (절대 이렇게 쓰지 말 것):
+나쁜 예 (절대 금지):
 <b>💡 시장 영향 분석</b>
-이 뉴스는 이더리움(ETH)의 상승 모멘텀 지속과 $2,400 저항선 돌파 시도 가능성을 의미합니다. 이는 투자자들이 긍정적으로 반응하며...`;
+이 뉴스는 ETH의 가격이 $3,000~$3,200 범위 내에서 변동성을 보일 것임을 의미합니다...`;
 
     const result = await model.generateContent(prompt);
     const text = result.response.text().trim();
-    return text.length > 50 ? text : "";
-  }, 30 * 60 * 1000);
+    return text.length > 20 ? text : "";
+  }, 15 * 60 * 1000);
 }
 
 /* ================================================================== */
@@ -465,9 +461,13 @@ export async function sendFastNewsFlash(): Promise<{ sent: number }> {
     const freshNews = allNews.filter((_, i) => !seenFlash[i] && !seenAlert[i]);
     if (freshNews.length === 0) return { sent: 0 };
 
-    // Use Gemini to rank and summarize top 5 news for flash format
+    // Use Gemini to rank and summarize top 5 news for flash format.
+    // Price snapshot is injected so analysisKo can quote ground-truth prices.
     const top15 = freshNews.slice(0, 15);
-    const flashItems = await rankNewsForFlash(top15);
+    const priceBlock = await getSnapshotForText(
+      top15.map((n) => n.title).join(" ")
+    );
+    const flashItems = await rankNewsForFlash(top15, priceBlock);
     if (!flashItems || flashItems.length === 0) return { sent: 0 };
 
     let sentCount = 0;
@@ -475,34 +475,14 @@ export async function sendFastNewsFlash(): Promise<{ sent: number }> {
       const newsItem = top15[item.index];
       if (!newsItem) continue;
 
-      const now = new Date().toLocaleString("ko-KR", {
-        timeZone: "Asia/Seoul",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      });
-
       const impactEmoji = item.impactEmoji || "📰";
       const recommendation = item.recommendation || "";
 
-      // Fast, concise format inspired by 특파원 style — speed + AI analysis
+      // Compact 2-3 line chat format: headline · one-liner · action.
       let msg = `${impactEmoji} <b>#속보 ${item.headlineKo}</b>\n`;
-      msg += `• ${item.analysisKo}\n`;
-
-      if (recommendation) {
-        msg += `🎯 ${recommendation}\n`;
-      }
-
-      if (item.tickers && item.tickers.length > 0) {
-        msg += `${item.tickers.map((t: string) => `$${t}`).join(" ")}\n`;
-      }
-
-      msg += `${now}\n`;
-      msg += `<a href="https://futuresai.io/ko/news">📊 FuturesAI</a>`;
-      msg += ` · 다들 어떻게 보세요? 💬`;
+      msg += `💬 ${item.analysisKo}\n`;
+      if (recommendation) msg += `🎯 ${recommendation}\n`;
+      msg += `<a href="https://futuresai.io/ko/news">FuturesAI</a> · 다들 어떻게 보세요? 💬`;
 
       const sent = await sendGroupMessage(msg);
       if (sent) {
@@ -524,7 +504,8 @@ export async function sendFastNewsFlash(): Promise<{ sent: number }> {
 }
 
 async function rankNewsForFlash(
-  articles: { title: string; body: string; source: string; url: string }[]
+  articles: { title: string; body: string; source: string; url: string }[],
+  priceBlock: string
 ): Promise<
   { index: number; headlineKo: string; analysisKo: string; impactEmoji?: string; recommendation?: string; tickers: string[] }[] | null
 > {
@@ -539,29 +520,35 @@ async function rankNewsForFlash(
       .map((a, i) => `${i}. [${a.source}] ${a.title}\n   ${a.body.slice(0, 150)}`)
       .join("\n");
 
-    const prompt = `한국 크립토 트레이더가 텔레그램 단톡방에 던지는 짧은 코멘트로 가장 영향 큰 기사 3-5개를 추리세요. AI 보고서 말투 절대 금지. 사람이 친구한테 보내는 느낌.
+    const priceLine = priceBlock
+      ? `현재가 (이 가격만 인용. 다른 가격 만들어내지 말 것):\n${priceBlock}`
+      : "가격 데이터 없음 — 구체적 달러 수치 인용 금지.";
+
+    const prompt = `한국 크립토 트레이더가 텔레그램 단톡방에 던지는 1-2줄 채팅. AI 보고서 말투 절대 금지. 사람이 친구한테 보내는 느낌.
+
+${priceLine}
 
 기사:
 ${list}
 
-각 선택된 기사에 대해 다음 필드를 채우세요:
+가장 영향 큰 3-5개를 추려 각 기사에 대해 채우세요:
 - index: 원본 기사 인덱스
-- headlineKo: 헤드라인 한 줄 (최대 60자). 명사형 마무리 OK. 예: "ETH 2400 저항 재시도", "SEC, 스테이킹 ETF 승인 임박"
-- analysisKo: 한 줄 코멘트 (최대 70자). 숫자 하나만 짚고 끝. 트레이더 단톡 말투.
+- headlineKo: 헤드라인 (최대 50자). 예: "ETH 95K 저항 재시도", "SEC ETF 승인 임박"
+- analysisKo: 한 줄 (최대 60자). 위 가격 1개만 인용. 끝에 📈/📉/⚖️ 중 1개. 트레이더 톡 톤.
 - impactEmoji: 📈 (상승) / 📉 (하락) / ⚠️ (주의) / 🔥 (긴급)
-- recommendation: 한 줄 (최대 25자). 예: "2400 뚫으면 롱각", "저항 강함 관망", "물타기 분할매수"
-- tickers: ["BTC", "ETH"]
+- recommendation: 짧게 (최대 20자). 끝에 ⏸/🟢/🔴 1개. 예: "관망 ⏸", "롱각 🟢", "분할매수 🟢"
+- tickers: ["BTC", "ETH"] — 실제 언급된 것만
 
-analysisKo 톤 — 반드시 지킬 것:
-- 금지: "이 뉴스는 ~의미합니다", "~시사합니다", "투자자들이 ~", "긍정적으로 반응", "추가적인 강세 신호", "범위로 설정", "성공적으로", "다음 목표는"
-- 사용: "~네", "~인 듯", "~할 듯", "~봐야할 듯", "~까진 갈 듯", "~나오면", "~뚫으면", "~찍으면"
-- 한 문장만. 풀어 쓰지 말 것. 군더더기 빼고 핵심만.
-- 좋은 예: "2400 못 뚫으면 다시 2300 테스트 갈 듯."
-- 좋은 예: "거래량 안 따라줘서 위로 못 가는 분위기."
-- 좋은 예: "SEC 승인 나오면 4500까진 가볍게 갈 듯."
-- 나쁜 예: "이 뉴스는 ETH의 상승 모멘텀을 시사하며 투자자들이 긍정적으로 반응할 것으로 보입니다."
+규칙 — 반드시 지킬 것:
+- 위에 안 적힌 가격은 절대 만들어내지 말 것.
+- 금지: "이 뉴스는 ~의미합니다", "~시사합니다", "투자자들이 ~", "긍정적 반응", "추가적인 강세", "범위로 설정", "성공적으로"
+- 사용: "~네", "~인 듯", "~할 듯", "~봐야할 듯", "~뚫으면", "~찍으면", "거래량 안 따라줘서"
+- 한 문장만, 군더더기 빼고.
+- 좋은 예 analysisKo: "거래량 안 따라줘서 위로 못 가는 분위기 📉"
+- 좋은 예 analysisKo: "SEC 승인 나오면 단번에 위로 갈 듯 📈"
+- 나쁜 예: "이 뉴스는 ETH의 상승 모멘텀을 시사하며 투자자들이 긍정적으로 반응할 것입니다."
 
-선택 기준: 규제/정책, 대형 가격 변동, 고래 움직임, 거래소 이벤트, 매크로(연준/CPI). 마케팅/홍보/일반 논평 제외.
+선택 기준: 규제/정책, 대형 가격 변동, 고래 움직임, 거래소 이벤트, 매크로. 마케팅/홍보 제외.
 
 JSON 응답: {"results": [{"index": 0, "headlineKo": "...", "analysisKo": "...", "impactEmoji": "📈", "recommendation": "...", "tickers": ["BTC"]}]}`;
 
