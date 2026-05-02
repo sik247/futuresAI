@@ -129,7 +129,7 @@ export default function HowToPage({
                   { icon: "2", title: ko ? "거래 페어 선택" : "Select Trading Pair", desc: ko ? "BTC/USDT, ETH/USDT 등 10개 인기 페어 중 선택하거나 커스텀 페어를 입력합니다." : "Choose from 10 popular pairs or type a custom pair." },
                   { icon: "3", title: ko ? "뉴스 & 센티먼트 검색" : "News & Sentiment Search", desc: ko ? "Firecrawl을 통해 해당 페어의 최신 뉴스와 시장 센티먼트를 실시간으로 수집합니다." : "Firecrawl fetches latest news and market sentiment for the pair in real-time." },
                   { icon: "4", title: ko ? "바이낸스 실시간 데이터" : "Live Binance Data", desc: ko ? "50개의 4시간봉 캔들, 오더북 깊이(매수/매도 압력), 24시간 가격 변동을 가져옵니다." : "Fetches 50 4H candles, order book depth (buy/sell pressure), and 24h price data." },
-                  { icon: "5", title: ko ? "AI 차트 분석 (Gemini 2.5 Pro)" : "AI Chart Analysis (Gemini 2.5 Pro)", desc: ko ? "Google의 최신 AI가 차트를 시각적으로 읽고(OCR), 모든 데이터를 결합하여 종합 분석을 생성합니다." : "Google's latest AI visually reads the chart (OCR) and combines all data for comprehensive analysis." },
+                  { icon: "5", title: ko ? "AI 차트 분석 (FuturesAI model 1.0)" : "AI Chart Analysis (FuturesAI model 1.0)", desc: ko ? "최신 AI가 차트를 시각적으로 읽고(OCR), 모든 데이터를 결합하여 종합 분석을 생성합니다." : "Our latest AI visually reads the chart (OCR) and combines all data for comprehensive analysis." },
                 ].map((step) => (
                   <div key={step.icon} className="flex items-start gap-4">
                     <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 font-bold text-sm flex-shrink-0">{step.icon}</div>

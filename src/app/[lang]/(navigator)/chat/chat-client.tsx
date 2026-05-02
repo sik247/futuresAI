@@ -228,7 +228,7 @@ function TradingViewChart({ ticker }: { ticker: TickerInfo }) {
 function ThinkingSteps({ step, ko }: { step: string; ko?: boolean }) {
   const allSteps = ko
     ? ["바이낸스 가격 데이터 수집 중", "업비트 + 김치 프리미엄 확인 중", "RSI, MA 기술적 분석 중", "뉴스 & 센티먼트 분석 중", "트레이딩 전략 생성 중"]
-    : ["Fetching Binance price data", "Checking Upbit + Kimchi Premium", "Analyzing RSI, MA technicals", "Scanning news & sentiment", "Generating trading strategy"];
+    : ["Fetching Binance price data", "Analyzing RSI, MA technicals", "Scanning news & sentiment", "Generating trading strategy"];
   const currentIdx = allSteps.findIndex((s) => step.startsWith(s));
 
   return (
@@ -715,7 +715,7 @@ export default function ChatClient({ lang, userName, walletAddress }: Props) {
     // Thinking steps animation
     const steps = ko
       ? ["바이낸스 가격 데이터 수집 중...", "업비트 + 김치 프리미엄 확인 중...", "RSI, MA 기술적 분석 중...", "뉴스 & 센티먼트 분석 중...", "트레이딩 전략 생성 중..."]
-      : ["Fetching Binance price data...", "Checking Upbit + Kimchi Premium...", "Analyzing RSI, MA technicals...", "Scanning news & sentiment...", "Generating trading strategy..."];
+      : ["Fetching Binance price data...", "Analyzing RSI, MA technicals...", "Scanning news & sentiment...", "Generating trading strategy..."];
     let stepIdx = 0;
     setThinkingStep(steps[0]);
     const stepTimer = setInterval(() => {
@@ -1264,7 +1264,11 @@ export default function ChatClient({ lang, userName, walletAddress }: Props) {
                 placeholder={placeholder}
                 disabled={loading}
                 rows={1}
-                className="flex-1 resize-none bg-transparent text-[12px] text-white placeholder-zinc-600 focus:outline-none leading-relaxed min-h-[24px] max-h-[120px] overflow-y-auto disabled:opacity-50 disabled:cursor-not-allowed font-mono"
+                inputMode="text"
+                autoCapitalize="sentences"
+                autoCorrect="on"
+                {...({ enterKeyHint: "send" } as Record<string, string>)}
+                className="flex-1 resize-none bg-transparent text-base sm:text-[12px] text-white placeholder-zinc-600 focus:outline-none leading-relaxed min-h-[24px] max-h-[120px] overflow-y-auto disabled:opacity-50 disabled:cursor-not-allowed font-mono"
               />
               <button
                 onClick={handleSend}

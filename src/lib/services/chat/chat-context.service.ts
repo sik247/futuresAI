@@ -46,7 +46,7 @@ async function validateBinanceTicker(symbol: string): Promise<boolean> {
   try {
     const res = await fetch(
       `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}USDT`,
-      { signal: AbortSignal.timeout(2000) }
+      { signal: AbortSignal.timeout(2000), cache: "no-store" }
     );
     return res.ok;
   } catch {
@@ -134,6 +134,7 @@ async function fetchUpbitPrice(symbol: string): Promise<{ price: number; change:
     const res = await fetch(`https://api.upbit.com/v1/ticker?markets=${upbitTicker}`, {
       headers: { Accept: "application/json" },
       signal: AbortSignal.timeout(3000),
+      cache: "no-store",
     });
     if (!res.ok) return null;
     const [data] = await res.json();
@@ -153,7 +154,7 @@ async function fetchBinanceKlines(symbol: string): Promise<string | null> {
   try {
     const res = await fetch(
       `https://api.binance.com/api/v3/klines?symbol=${symbol}USDT&interval=4h&limit=20`,
-      { signal: AbortSignal.timeout(3000) }
+      { signal: AbortSignal.timeout(3000), cache: "no-store" }
     );
     if (!res.ok) return null;
     const klines = await res.json();
@@ -238,7 +239,7 @@ async function fetchCoinGeckoPrice(symbol: string): Promise<{ price: number; cha
   try {
     const res = await fetch(
       `https://api.coingecko.com/api/v3/simple/price?ids=${cgId}&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_high_24h=true&include_low_24h=true`,
-      { signal: AbortSignal.timeout(5000) }
+      { signal: AbortSignal.timeout(5000), cache: "no-store" }
     );
     const data = await res.json();
     const coin = data[cgId];
@@ -258,7 +259,7 @@ async function fetchCryptoComparePrice(symbol: string): Promise<{ price: number;
   try {
     const res = await fetch(
       `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${symbol}&tsyms=USD`,
-      { signal: AbortSignal.timeout(4000) }
+      { signal: AbortSignal.timeout(4000), cache: "no-store" }
     );
     const data = await res.json();
     const raw = data?.RAW?.[symbol]?.USD;
@@ -272,7 +273,7 @@ async function fetchTopMarketPrices(): Promise<string> {
   try {
     const res = await fetch(
       "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,ripple,binancecoin&vs_currencies=usd&include_24hr_change=true",
-      { signal: AbortSignal.timeout(5000) }
+      { signal: AbortSignal.timeout(5000), cache: "no-store" }
     );
     const data = await res.json();
     const lines: string[] = [];
@@ -293,7 +294,7 @@ async function fetchPolymarketContext(): Promise<string> {
   try {
     const res = await fetch(
       "https://gamma-api.polymarket.com/events?closed=false&tag=crypto&limit=10&order=volume&ascending=false",
-      { signal: AbortSignal.timeout(5000) }
+      { signal: AbortSignal.timeout(5000), cache: "no-store" }
     );
     const events = await res.json();
     if (!Array.isArray(events) || events.length === 0) return "";
@@ -324,6 +325,7 @@ async function webSearchContext(query: string): Promise<string> {
     const q = encodeURIComponent(`${query} crypto latest`);
     const res = await fetch(`https://api.duckduckgo.com/?q=${q}&format=json&no_html=1&skip_disambig=1`, {
       signal: AbortSignal.timeout(4000),
+      cache: "no-store",
     });
     const data = await res.json();
     const parts: string[] = [];
@@ -337,7 +339,7 @@ async function webSearchContext(query: string): Promise<string> {
   } catch { return ""; }
 }
 
-export async function buildCryptoContext(query: string): Promise<ChatContextResult> {
+export async function buildCryptoContext(query: string, lang: string = "ko"): Promise<ChatContextResult> {
   const parts: string[] = [];
 
   // 1. Try hardcoded maps first (fast path)
@@ -371,8 +373,8 @@ export async function buildCryptoContext(query: string): Promise<ChatContextResu
     ticker ? fetchBinancePrice(ticker.ticker) : Promise.resolve(null),
     baseSymbol ? fetchUpbitPrice(baseSymbol) : Promise.resolve(null),
     baseSymbol ? fetchBinanceKlines(baseSymbol) : Promise.resolve(null),
-    fetch("https://api.alternative.me/fng/?limit=1", { signal: AbortSignal.timeout(3000) }),
-    fetch("https://cryptopanic.com/api/free/v1/posts/?auth_token=free&public=true&kind=news&filter=hot", { signal: AbortSignal.timeout(3000) }),
+    fetch("https://api.alternative.me/fng/?limit=1", { signal: AbortSignal.timeout(3000), cache: "no-store" }),
+    fetch("https://cryptopanic.com/api/free/v1/posts/?auth_token=free&public=true&kind=news&filter=hot", { signal: AbortSignal.timeout(3000), cache: "no-store" }),
     fetchCryptoNews().catch(() => [] as CryptoNewsItem[]),
     fetchCryptoFeed(3).catch(() => []),
     fetchTopMarketPrices(),
@@ -397,10 +399,11 @@ export async function buildCryptoContext(query: string): Promise<ChatContextResu
       if (price > 0) {
         gotPrice = true;
         usdPrice = price;
-        const fetchedAt = new Date().toISOString();
-        parts.push(`[LIVE FETCHED PRICE — AUTHORITATIVE GROUND TRUTH, fetched at ${fetchedAt}]
+        const fetchedAt = new Date();
+        const utcStamp = fetchedAt.toISOString().replace("T", " ").slice(0, 19) + " UTC";
+        parts.push(`[LIVE PRICE — fetched ${utcStamp} from Binance. THIS IS THE ONLY CORRECT PRICE. Do NOT use any price from your training data — only this live value.]
 BINANCE ${ticker.ticker}: $${price.toLocaleString()} | 24h: ${pct >= 0 ? "+" : ""}${pct.toFixed(2)}% | Vol: $${(parseFloat(data.quoteVolume) / 1e6).toFixed(1)}M | High: $${parseFloat(data.highPrice).toLocaleString()} | Low: $${parseFloat(data.lowPrice).toLocaleString()}
-[NOTE: The user sees a LIVE chart that refreshes this price every 5s. Anchor ALL your analysis to this exact live price — re-assess support/resistance/entry/stop levels as distances from $${price.toLocaleString()}.]`);
+[CRITICAL INSTRUCTION: When you mention price, write it EXACTLY as "$${price.toLocaleString()} (live ${utcStamp})". Anchor all support/resistance/entry/stop levels as distances from $${price.toLocaleString()}. The user sees a chart refreshing every 5s — if you cite any other price, your answer is wrong.]`);
       }
     } catch {}
   }
@@ -411,7 +414,10 @@ BINANCE ${ticker.ticker}: $${price.toLocaleString()} | 24h: ${pct >= 0 ? "+" : "
     if (cgData) {
       gotPrice = true;
       usdPrice = cgData.price;
-      parts.push(`${baseSymbol}/USD: $${cgData.price.toLocaleString()} | 24h: ${cgData.change24h >= 0 ? "+" : ""}${cgData.change24h.toFixed(2)}%${cgData.vol ? ` | Vol: $${(cgData.vol / 1e6).toFixed(1)}M` : ""}${cgData.high ? ` | High: $${cgData.high.toLocaleString()}` : ""}${cgData.low ? ` | Low: $${cgData.low.toLocaleString()}` : ""}`);
+      const utcStamp = new Date().toISOString().replace("T", " ").slice(0, 19) + " UTC";
+      parts.push(`[LIVE PRICE — fetched ${utcStamp} from CoinGecko (Binance unavailable). Use ONLY this price.]
+${baseSymbol}/USD: $${cgData.price.toLocaleString()} | 24h: ${cgData.change24h >= 0 ? "+" : ""}${cgData.change24h.toFixed(2)}%${cgData.vol ? ` | Vol: $${(cgData.vol / 1e6).toFixed(1)}M` : ""}${cgData.high ? ` | High: $${cgData.high.toLocaleString()}` : ""}${cgData.low ? ` | Low: $${cgData.low.toLocaleString()}` : ""}
+[Cite price as "$${cgData.price.toLocaleString()} (live ${utcStamp})".]`);
     }
   }
 
@@ -421,16 +427,26 @@ BINANCE ${ticker.ticker}: $${price.toLocaleString()} | 24h: ${pct >= 0 ? "+" : "
     if (ccData) {
       gotPrice = true;
       usdPrice = ccData.price;
-      parts.push(`${baseSymbol}/USD: $${ccData.price.toLocaleString()} | 24h: ${ccData.change24h >= 0 ? "+" : ""}${ccData.change24h.toFixed(2)}%`);
+      const utcStamp = new Date().toISOString().replace("T", " ").slice(0, 19) + " UTC";
+      parts.push(`[LIVE PRICE — fetched ${utcStamp} from CryptoCompare (Binance + CoinGecko unavailable). Use ONLY this price.]
+${baseSymbol}/USD: $${ccData.price.toLocaleString()} | 24h: ${ccData.change24h >= 0 ? "+" : ""}${ccData.change24h.toFixed(2)}%
+[Cite price as "$${ccData.price.toLocaleString()} (live ${utcStamp})".]`);
     }
   }
 
-  // Upbit KRW price + Kimchi Premium
-  const upbit = upbitData.status === "fulfilled" ? upbitData.value : null;
-  if (upbit && usdPrice > 0 && baseSymbol) {
-    const krwRate = upbit.price / usdPrice;
-    const premium = ((krwRate / 1370) - 1) * 100;
-    parts.push(`UPBIT ${baseSymbol}/KRW: ₩${upbit.price.toLocaleString()} | 24h: ${upbit.change >= 0 ? "+" : ""}${upbit.change.toFixed(2)}% | Vol: ₩${(upbit.volume / 1e8).toFixed(1)}억 | Kimchi Premium: ${premium >= 0 ? "+" : ""}${premium.toFixed(1)}%`);
+  // Tier 4: NO PRICE AVAILABLE — explicit guard so the AI doesn't hallucinate
+  if (baseSymbol && !gotPrice) {
+    parts.push(`[PRICE UNAVAILABLE — All 3 data sources (Binance, CoinGecko, CryptoCompare) failed for ${baseSymbol}. CRITICAL: Tell the user explicitly: "라이브 가격을 가져오지 못했습니다. 잠시 후 다시 시도해 주세요." (or English equivalent). DO NOT make up a price from memory. DO NOT estimate.]`);
+  }
+
+  // Upbit KRW price + Kimchi Premium — Korean users only
+  if (lang === "ko") {
+    const upbit = upbitData.status === "fulfilled" ? upbitData.value : null;
+    if (upbit && usdPrice > 0 && baseSymbol) {
+      const krwRate = upbit.price / usdPrice;
+      const premium = ((krwRate / 1370) - 1) * 100;
+      parts.push(`UPBIT ${baseSymbol}/KRW: ₩${upbit.price.toLocaleString()} | 24h: ${upbit.change >= 0 ? "+" : ""}${upbit.change.toFixed(2)}% | Vol: ₩${(upbit.volume / 1e8).toFixed(1)}억 | Kimchi Premium: ${premium >= 0 ? "+" : ""}${premium.toFixed(1)}%`);
+    }
   }
 
   // ── Technicals ──

@@ -4,7 +4,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 
 const FEATURES = [
-  "AI-powered chart analysis with Gemini 2.5 Pro",
+  "AI-powered chart analysis with FuturesAI model 1.0",
   "Live market data from Binance",
   "Real-time news sentiment analysis",
   "Order book depth & pressure detection",

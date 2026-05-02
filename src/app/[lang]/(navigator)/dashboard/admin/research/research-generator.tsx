@@ -80,7 +80,7 @@ export default function ResearchGenerator() {
         <div>
           <h1 className="text-2xl font-bold text-white">Deep Research Generator</h1>
           <p className="text-sm text-zinc-500 mt-1">
-            Generate institutional-grade research blog posts with live market data + Gemini AI
+            Generate institutional-grade research blog posts with live market data + FuturesAI model 1.0
           </p>
         </div>
 
