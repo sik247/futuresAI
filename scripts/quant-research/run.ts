@@ -323,7 +323,6 @@ const BRAND = {
   author: "FuturesAI Quant Desk",
   xUrl: "https://x.com/FuturesAI_io",
   tgUrl: "https://t.me/FuturesAIOfficial",
-  proUrl: "https://futuresai.io/ko/pricing",
 };
 
 const CAPTION_LIMIT = 1024;
@@ -348,8 +347,6 @@ function buildKoCaption(article: {
     ``,
     `✏️ <b>한 줄 요약</b>`,
     escapeHtml(article.oneLineKo),
-    ``,
-    `<a href="${BRAND.proUrl}">[FuturesAI Pro 1주일 무료체험]</a>`,
     ``,
     `✖️ <a href="${BRAND.xUrl}">공식 FuturesAI 엑스(🇰🇷한국어)</a>`,
     `✈️ <a href="${BRAND.tgUrl}">공식 FuturesAI 텔레그램(🇰🇷한국어)</a>`,
