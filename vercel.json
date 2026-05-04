@@ -33,6 +33,8 @@
 
     { "path": "/api/cron-blog", "schedule": "0 3 */3 * *" },
 
+    { "path": "/api/cron-blog-broadcast", "schedule": "30 */4 * * *" },
+
     { "path": "/api/cron-price-check", "schedule": "0 */4 * * *" },
 
     { "path": "/api/cron-liquidation-heatmap", "schedule": "0 6 * * *" },
@@ -41,6 +43,13 @@
 
     { "path": "/api/cron-market-watch", "schedule": "*/10 * * * *" },
 
-    { "path": "/api/cron-keepalive", "schedule": "0 4 */3 * *" }
+    { "path": "/api/cron-keepalive", "schedule": "0 4 * * *" },
+
+    { "path": "/api/cron-learn-generate", "schedule": "0 7 * * *" },
+    { "path": "/api/cron-learn-generate", "schedule": "0 19 * * *" },
+
+    { "path": "/api/cron-downgrade", "schedule": "0 * * * *" },
+
+    { "path": "/api/cron-daily-briefing", "schedule": "0 22 * * *" }
   ]
 }

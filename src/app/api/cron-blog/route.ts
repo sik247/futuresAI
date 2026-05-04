@@ -4,6 +4,7 @@ export const maxDuration = 60;
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import prisma from "@/lib/prisma";
+import { broadcastBlogArticle } from "@/lib/services/notifications/blog-broadcast.service";
 
 // Vercel Cron: runs every 3 days to generate AdSense-quality blog posts
 // Schedule: "0 3 */3 * *" (3 AM UTC every 3 days)
@@ -242,6 +243,24 @@ export async function GET(request: Request) {
       },
     });
 
+    // Push the freshly published post to the Korean Telegram channel.
+    // Failures don't block the cron — dedup-store prevents re-sends if the
+    // safety-net /api/cron-blog-broadcast picks it up later.
+    let broadcastSent = false;
+    try {
+      const r = await broadcastBlogArticle({
+        id: article.id,
+        title: article.title,
+        titleKo: article.titleKo,
+        excerpt: article.excerpt,
+        excerptKo: article.excerptKo,
+        imageUrl: article.imageUrl,
+      });
+      broadcastSent = r.ko;
+    } catch (err) {
+      console.error("[cron-blog] broadcast failed:", err);
+    }
+
     // Log
     try {
       await prisma.contentBotLog.create({
@@ -262,6 +281,7 @@ export async function GET(request: Request) {
       title: post.title,
       category: topic.category,
       wordCount,
+      broadcastSent,
       duration: `${Date.now() - startTime}ms`,
     };
 

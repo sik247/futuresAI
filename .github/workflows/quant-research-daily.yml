@@ -1,0 +1,98 @@
+name: Quant Research — Daily
+
+# Captures TradingView 4H charts for the day's top movers (or explicit pairs),
+# runs the chart-analysis pipeline, generates KO+EN blog content, inserts a
+# BlogArticle row, and broadcasts to the Korean Telegram channel via the
+# futuresAIadmin bot. New chart PNGs are committed back to main.
+#
+# Required GH secrets:
+#   GEMINI_API_KEY
+#   TELEGRAM_BOT_TOKEN
+#   TELEGRAM_GROUP_CHAT_ID
+#   DATABASE_URL          # Supabase pgbouncer URL (port 6543)
+#   DIRECT_URL            # Supabase direct URL (port 5432) — used by the script
+
+on:
+  schedule:
+    # 4× daily at major session opens (UTC):
+    #   00:00 = Asia open (09:00 KST)
+    #   06:00 = Asia mid-session (15:00 KST)
+    #   12:00 = Europe open (14:00 CET / 21:00 KST)
+    #   18:00 = US close (13:00 CT / 03:00 KST)
+    - cron: "0 0,6,12,18 * * *"
+  workflow_dispatch:
+    inputs:
+      pairs:
+        description: "Comma-separated pairs (e.g. BTCUSDT.P,ETHUSDT.P). Empty = top 3 movers."
+        required: false
+        default: ""
+      send:
+        description: "Publish + broadcast (true) or dry-run (false)"
+        required: false
+        default: "true"
+
+concurrency:
+  group: quant-research-daily
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write   # for committing new chart PNGs
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - run: npm ci
+
+      # Install Chromium + system deps for Playwright. ubuntu-latest already has
+      # most graphics libs; --with-deps fills the gaps (libnss3, libgtk, etc.).
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run pipeline
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_GROUP_CHAT_ID: ${{ secrets.TELEGRAM_GROUP_CHAT_ID }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+        run: |
+          set -e
+          PAIRS="${{ github.event.inputs.pairs }}"
+          SEND="${{ github.event.inputs.send }}"
+          # Cron-triggered runs always send. Dispatch can override.
+          if [[ "${{ github.event_name }}" == "schedule" || "$SEND" != "false" ]]; then
+            FLAGS="--send"
+          else
+            FLAGS=""
+          fi
+          if [[ -n "$PAIRS" ]]; then
+            npx tsx scripts/quant-research/run.ts --pairs "$PAIRS" $FLAGS
+          else
+            npx tsx scripts/quant-research/run.ts $FLAGS
+          fi
+
+      - name: Commit new chart PNGs
+        run: |
+          git config user.email "bot@futuresai.io"
+          git config user.name "FuturesAI Bot"
+          git add public/images/blog/*.png
+          if git diff --staged --quiet; then
+            echo "no new chart PNGs to commit"
+          else
+            git commit -m "chore(quant-research): auto-captured 4H charts $(date -u +%Y-%m-%d-%H%M) [skip ci]"
+            git push
+          fi
