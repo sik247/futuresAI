@@ -24,6 +24,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 import { captureCharts, type CaptureResult } from "./capture";
 import { annotateChart, colorFor, type AnnotationLine } from "./annotate";
+import { uploadPng } from "./storage";
 
 const prisma = new PrismaClient();
 const SITE_URL = "https://futuresai.io";
@@ -215,7 +216,10 @@ async function generateBlogContent(
   tags: string[];
 }> {
   const ai = new GoogleGenerativeAI(apiKey);
-  const model = ai.getGenerativeModel({ model: "gemini-2.5-pro" });
+  const model = ai.getGenerativeModel({
+    model: "gemini-2.5-pro",
+    generationConfig: { responseMimeType: "application/json" },
+  });
 
   const setup = analysis.tradeSetup;
   const ctxBlock = priceData
@@ -420,11 +424,17 @@ async function runForPair(p: PairCaptures, apiKey: string, adminUserId: string) 
   });
   console.log(`  → ${path.relative(process.cwd(), annotatedPath)}`);
 
-  // Build the 3 image URLs Gemini will embed in the article
+  // Upload all 4 PNGs (4H raw, 4H annotated, 1D, 1W) to Supabase Storage so
+  // the article and Telegram caption reference CDN URLs that work without a
+  // Vercel deploy. Annotated 4H is the hero image; 1D + 1W are body embeds.
+  console.log("  uploading charts to supabase…");
   const annotatedFilename = path.basename(annotatedPath);
-  const fourHUrl = `${SITE_URL}/images/blog/${annotatedFilename}`;
-  const oneDUrl = p.oneD ? p.oneD.publicUrl : fourHUrl;
-  const oneWUrl = p.oneW ? p.oneW.publicUrl : fourHUrl;
+  const fourHUrl = await uploadPng(annotatedPath, annotatedFilename);
+  const oneDUrl = p.oneD ? await uploadPng(p.oneD.filePath) : fourHUrl;
+  const oneWUrl = p.oneW ? await uploadPng(p.oneW.filePath) : fourHUrl;
+  console.log(`  4h: ${fourHUrl}`);
+  console.log(`  1d: ${oneDUrl}`);
+  console.log(`  1w: ${oneWUrl}`);
 
   console.log("  generating Glassnode-style article…");
   const post = await generateBlogContent(

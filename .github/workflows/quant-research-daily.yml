@@ -9,8 +9,10 @@ name: Quant Research — Daily
 #   GEMINI_API_KEY
 #   TELEGRAM_BOT_TOKEN
 #   TELEGRAM_GROUP_CHAT_ID
-#   DATABASE_URL          # Supabase pgbouncer URL (port 6543)
-#   DIRECT_URL            # Supabase direct URL (port 5432) — used by the script
+#   DATABASE_URL                  # Supabase pgbouncer URL (port 6543)
+#   DIRECT_URL                    # Supabase direct URL (port 5432) — used by the script
+#   CHART_RESEARCH_SUPABASE_URL   # https://eejheokhrtzyazsqjrpl.supabase.co
+#   CHART_RESEARCH_SUPABASE_KEY   # Service role key for the chart-research bucket
 
 on:
   schedule:
@@ -39,13 +41,8 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    permissions:
-      contents: write   # for committing new chart PNGs
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
@@ -69,6 +66,8 @@ jobs:
           TELEGRAM_GROUP_CHAT_ID: ${{ secrets.TELEGRAM_GROUP_CHAT_ID }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          CHART_RESEARCH_SUPABASE_URL: ${{ secrets.CHART_RESEARCH_SUPABASE_URL }}
+          CHART_RESEARCH_SUPABASE_KEY: ${{ secrets.CHART_RESEARCH_SUPABASE_KEY }}
         run: |
           set -e
           PAIRS="${{ github.event.inputs.pairs }}"
@@ -83,16 +82,4 @@ jobs:
             npx tsx scripts/quant-research/run.ts --pairs "$PAIRS" $FLAGS
           else
             npx tsx scripts/quant-research/run.ts $FLAGS
-          fi
-
-      - name: Commit new chart PNGs
-        run: |
-          git config user.email "bot@futuresai.io"
-          git config user.name "FuturesAI Bot"
-          git add public/images/blog/*.png
-          if git diff --staged --quiet; then
-            echo "no new chart PNGs to commit"
-          else
-            git commit -m "chore(quant-research): auto-captured 4H charts $(date -u +%Y-%m-%d-%H%M) [skip ci]"
-            git push
           fi
