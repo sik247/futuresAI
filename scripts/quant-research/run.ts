@@ -25,6 +25,20 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { captureCharts, type CaptureResult } from "./capture";
 import { annotateChart, colorFor, type AnnotationLine } from "./annotate";
 import { uploadPng } from "./storage";
+import {
+  fetchKlines,
+  fetchFunding,
+  fetchOi,
+  fetchTopLongShort,
+} from "./data";
+import {
+  renderPriceChart,
+  renderRsiChart,
+  renderMacdChart,
+  renderFundingChart,
+  renderOiChart,
+  renderLongShortChart,
+} from "./render";
 
 const prisma = new PrismaClient();
 const SITE_URL = "https://futuresai.io";
@@ -194,13 +208,46 @@ CRITICAL CALIBRATION RULES:
   return JSON.parse(jsonStr) as ChartAnalysis;
 }
 
-// ----- blog content (Glassnode-style long form, KO + EN) -----
+// ----- blog content (Glassnode-style long form, KO + EN, multi-metric charts) -----
+type MetricUrls = {
+  /** Trade-setup hero — 4H TradingView screenshot with entry/SL/TP overlay */
+  fourHAnnotated: string;
+  /** Server-rendered candlestick chart (1D, 200 candles) */
+  price1D: string;
+  /** Server-rendered RSI(14) line with OB/OS zones */
+  rsi: string;
+  /** Server-rendered MACD line + signal + histogram */
+  macd: string;
+  /** Server-rendered funding rate history (every 8h) */
+  funding: string;
+  /** Server-rendered open-interest history (USD millions) */
+  oi: string;
+  /** Server-rendered top-trader long/short position ratio */
+  longShort: string;
+};
+
+type DerivativesSnapshot = {
+  /** Latest funding rate (decimal, e.g. 0.0001 = 0.01%) */
+  fundingNow: number | null;
+  /** 7-day mean funding rate */
+  fundingMean7d: number | null;
+  /** Latest open-interest in USDT (millions) */
+  oiNowM: number | null;
+  /** OI 24h percent change */
+  oiChange24h: number | null;
+  /** Latest top-trader long/short position ratio */
+  topLsRatio: number | null;
+  /** Top-trader long share, e.g. 0.45 = 45% */
+  topLongShare: number | null;
+};
+
 async function generateBlogContent(
   symbol: string,
   pair: string,
   analysis: ChartAnalysis,
   priceData: PriceData | null,
-  imageUrls: { fourH: string; oneD: string; oneW: string },
+  metrics: MetricUrls,
+  deriv: DerivativesSnapshot,
   apiKey: string,
 ): Promise<{
   title: string;
@@ -226,35 +273,51 @@ async function generateBlogContent(
     ? `Current Price: $${priceData.currentPrice}, 24h Change: ${priceData.changePercent24h}%, Volume: $${(priceData.volume24h / 1e6).toFixed(1)}M`
     : "Live price unavailable.";
 
+  const derivBlock = `Derivatives snapshot (use these in the relevant sections — these are facts, do not invent them):
+- Funding rate (latest): ${deriv.fundingNow != null ? (deriv.fundingNow * 100).toFixed(4) + "%" : "n/a"}
+- Funding rate (7d mean): ${deriv.fundingMean7d != null ? (deriv.fundingMean7d * 100).toFixed(4) + "%" : "n/a"}
+- Open Interest: ${deriv.oiNowM != null ? "$" + deriv.oiNowM.toFixed(1) + "M" : "n/a"} (24h Δ: ${deriv.oiChange24h != null ? (deriv.oiChange24h >= 0 ? "+" : "") + deriv.oiChange24h.toFixed(2) + "%" : "n/a"})
+- Top Trader Long/Short ratio: ${deriv.topLsRatio != null ? deriv.topLsRatio.toFixed(2) : "n/a"} (top-trader long share: ${deriv.topLongShare != null ? (deriv.topLongShare * 100).toFixed(1) + "%" : "n/a"})`;
+
   const tmpl = `<h2>Executive Summary</h2>
 <ul>
   <li>BULLET 1: top-line thesis with the key level</li>
   <li>BULLET 2: market structure / trend phase</li>
   <li>BULLET 3: critical support cluster</li>
   <li>BULLET 4: critical resistance cluster</li>
-  <li>BULLET 5: indicator read (RSI / MACD / volume)</li>
-  <li>BULLET 6: trade direction and bias</li>
-  <li>BULLET 7: entry / stop / target with R:R</li>
+  <li>BULLET 5: momentum read (RSI value + interpretation)</li>
+  <li>BULLET 6: derivatives positioning (funding/OI/long-short bias)</li>
+  <li>BULLET 7: trade direction and bias</li>
+  <li>BULLET 8: highest-conviction risk to the thesis</li>
 </ul>
 
-<h2>Market Context</h2>
-<img src="${imageUrls.oneW}" alt="${symbol} weekly chart" />
-<p>2 paragraphs on the higher-timeframe regime. Reference the 1W chart explicitly.</p>
+<h2>Market Structure</h2>
+<img src="${metrics.price1D}" alt="${symbol} daily price chart" />
+<p>2 paragraphs framing the daily structure: market phase, the dominant trend, recent swing points. Reference the 1D candlesticks specifically.</p>
 
-<h2>Chart Structure</h2>
-<img src="${imageUrls.oneD}" alt="${symbol} daily chart" />
-<p>2 paragraphs on the daily structure: market phase (accumulation/markup/distribution/markdown), key swing points, the dominant pattern. Reference the 1D chart.</p>
+<h2>Momentum &amp; Relative Strength</h2>
+<img src="${metrics.rsi}" alt="${symbol} RSI(14) chart" />
+<p>2 paragraphs interpreting the RSI(14) chart — current value, where it sits between the OB(70) / OS(30) lines, recent divergences if any, and what it implies for the next 4H–1D move. Reference the chart explicitly.</p>
 
-<h2>Key Levels</h2>
-<p>Support cluster: list every support price from the analysis with one-line reasoning per level.</p>
-<p>Resistance cluster: same for resistance levels.</p>
+<h2>MACD Signals</h2>
+<img src="${metrics.macd}" alt="${symbol} MACD chart" />
+<p>2 paragraphs reading the MACD: line vs. signal cross status, histogram momentum, and how it lines up (or disagrees) with the RSI read above. Reference the chart explicitly.</p>
 
-<h2>Indicators &amp; Momentum</h2>
-<p>2 paragraphs covering each indicator from the analysis with its read.</p>
+<h2>Funding Rate</h2>
+<img src="${metrics.funding}" alt="${symbol} funding rate history" />
+<p>2 paragraphs on the funding regime: positive vs. negative, how persistent, and whether longs are paying shorts (crowd long) or shorts are paying longs (crowd short / squeeze fuel). Use the latest funding number from the snapshot.</p>
+
+<h2>Open Interest</h2>
+<img src="${metrics.oi}" alt="${symbol} open interest history" />
+<p>2 paragraphs on OI: rising or falling, what it means alongside the price action (price up + OI up = new longs; price up + OI down = short cover, weaker; price down + OI up = new shorts), and how it pairs with the funding read.</p>
+
+<h2>Positioning — Top Trader Long/Short</h2>
+<img src="${metrics.longShort}" alt="${symbol} top-trader long/short ratio" />
+<p>2 paragraphs on what whales are doing: ratio above 1 = whales net long, below 1 = whales net short. Note the trend, not just the snapshot. Pair the read with the funding/OI section.</p>
 
 <h2>Trade Setup</h2>
-<img src="${imageUrls.fourH}" alt="${symbol} 4H chart with annotated entry, stop loss, take profit" />
-<p>Direction: ${setup.direction}. 2 paragraphs explaining the structural reasoning behind the setup.</p>
+<img src="${metrics.fourHAnnotated}" alt="${symbol} 4H chart with annotated entry, stop loss, take profit" />
+<p>Direction: ${setup.direction}. 2 paragraphs of structural reasoning for the setup, tying together the levels, momentum, and derivatives reads above.</p>
 <ul>
   <li>Entry: ${setup.entry}</li>
   <li>Stop Loss: ${setup.stopLoss}</li>
@@ -269,7 +332,7 @@ async function generateBlogContent(
 </ul>
 
 <h2>Conclusion</h2>
-<p>1 synthesizing paragraph (~150 words) that ties the multi-timeframe view, the levels, and the trade together.</p>
+<p>1 synthesizing paragraph (~150 words) that ties the price structure, momentum, and derivatives positioning into a single thesis.</p>
 
 <p><em>Disclaimer: This research is for informational purposes only and does not constitute financial advice. Always do your own research and trade with proper risk management.</em></p>`;
 
@@ -287,7 +350,9 @@ Structured chart analysis (use as ground truth — do NOT invent levels):
 - Trade setup: ${setup.direction} | entry ${setup.entry} | SL ${setup.stopLoss} | TP ${setup.takeProfit} | R:R ${setup.riskReward} | conf ${setup.confidence}
 - Summary: ${analysis.summary}
 
-Output the article EXACTLY in this HTML structure (replace the placeholder text in each section, keep ALL <img> tags VERBATIM with the URLs as given). Total length: 1,800-2,400 words across all sections. Each <p> should be a real paragraph, not a single sentence:
+${derivBlock}
+
+Output the article EXACTLY in this HTML structure (replace the placeholder text in each section, keep ALL <img> tags VERBATIM with the URLs as given — the user's reader sees these specific charts in these specific sections). Total length: 2,000-2,600 words across all sections. Each <p> should be a real paragraph, not a single sentence:
 
 ${tmpl}
 
@@ -297,8 +362,8 @@ Return ONLY valid JSON, no markdown fences:
   "titleKo": "same title in natural Korean",
   "excerpt": "2-sentence English summary, ~180 chars",
   "excerptKo": "same in natural Korean, ~180 chars",
-  "content": "FULL English HTML article following the template above EXACTLY. Keep the <img> tags exactly as shown. 1,800-2,400 words total.",
-  "contentKo": "FULL Korean HTML article following the same template. Keep the <img> tags exactly as shown (English alt text is fine). 1,800-2,400 words total.",
+  "content": "FULL English HTML article following the template above EXACTLY. Keep the <img> tags exactly as shown. 2,000-2,600 words total.",
+  "contentKo": "FULL Korean HTML article following the same template. Keep the <img> tags exactly as shown (English alt text is fine). 2,000-2,600 words total.",
   "telegramBodyKo": "3 short Korean paragraphs separated by a blank line (\\n\\n between paragraphs). Each ~110 chars, 350 total max. P1: 24h move + trend. P2: market structure / key zones (broad — say 'major resistance overhead' / 'support cluster nearby', no exact prices). P3: tease the setup without revealing it (e.g., '구체적인 진입가/손절/목표는 본 분석에서 확인하세요'). Trader voice, no fluff. Plain text only — no HTML.",
   "oneLineKo": "single Korean sentence, 80-130 chars, restating the thesis and the key zone to watch — STRICTLY NO entry/stop/target prices.",
   "tags": ["${symbol}","chart-analysis","multi-timeframe","technical-analysis","futures"]
@@ -381,16 +446,14 @@ async function sendPhotoBuffer(
   return { ok: json.ok === true, messageId: json.result?.message_id, description: json.description };
 }
 
-// ----- per-coin pipeline (multi-timeframe: 4H drives analysis + Telegram, 1D + 1W embed in article) -----
-type PairCaptures = {
+// ----- per-coin pipeline (multi-metric: 4H TV annotated + 6 server-rendered metric charts) -----
+type PairCapture = {
   pair: string;
   symbol: string;
   fourH: CaptureResult;
-  oneD: CaptureResult | null;
-  oneW: CaptureResult | null;
 };
 
-async function runForPair(p: PairCaptures, apiKey: string, adminUserId: string) {
+async function runForPair(p: PairCapture, apiKey: string, adminUserId: string) {
   console.log(`\n=== ${p.symbol} (${p.pair}) ===`);
   const c = p.fourH;
 
@@ -421,17 +484,85 @@ async function runForPair(p: PairCaptures, apiKey: string, adminUserId: string) 
   });
   console.log(`  → ${path.relative(process.cwd(), annotatedPath)}`);
 
-  // Upload all 4 PNGs (4H raw, 4H annotated, 1D, 1W) to Supabase Storage so
-  // the article and Telegram caption reference CDN URLs that work without a
-  // Vercel deploy. Annotated 4H is the hero image; 1D + 1W are body embeds.
+  // Fetch derivatives data + render 6 metric charts in parallel.
+  console.log("  fetching derivatives data…");
+  const [klines4h, klines1d, funding, oi, ls] = await Promise.all([
+    fetchKlines(c.pair, "4h", 200),
+    fetchKlines(c.pair, "1d", 180),
+    fetchFunding(c.pair, 60).catch((e) => { console.warn("  funding failed:", e.message); return []; }),
+    fetchOi(c.pair, "4h", 100).catch((e) => { console.warn("  oi failed:", e.message); return []; }),
+    fetchTopLongShort(c.pair, "4h", 100).catch((e) => { console.warn("  ls failed:", e.message); return []; }),
+  ]);
+  console.log(`  klines4h=${klines4h.length} klines1d=${klines1d.length} funding=${funding.length} oi=${oi.length} ls=${ls.length}`);
+
+  // Build derivatives snapshot for the prompt.
+  const stamp = c.filePath.match(/-(\d{8})\.png$/)?.[1] ?? "";
+  const fundingNow = funding.length ? funding[funding.length - 1].rate : null;
+  const fundingMean7d = funding.length
+    ? funding.slice(-21).reduce((s, p) => s + p.rate, 0) / Math.min(funding.length, 21)
+    : null;
+  const oiNowM = oi.length ? oi[oi.length - 1].oiValue / 1e6 : null;
+  const oiPrev = oi.length >= 7 ? oi[oi.length - 7].oiValue : oi[0]?.oiValue;
+  const oiChange24h = oi.length && oiPrev ? ((oi[oi.length - 1].oiValue - oiPrev) / oiPrev) * 100 : null;
+  const topLs = ls.length ? ls[ls.length - 1] : null;
+  const deriv: DerivativesSnapshot = {
+    fundingNow,
+    fundingMean7d,
+    oiNowM,
+    oiChange24h,
+    topLsRatio: topLs ? topLs.ratio : null,
+    topLongShare: topLs ? topLs.longPct : null,
+  };
+
+  console.log("  rendering metric charts…");
+  const renderDir = path.dirname(c.filePath);
+  const slug = c.symbol.toLowerCase();
+  const [pricePath, rsiPath, macdPath, fundingPath, oiPath, lsPath] = await Promise.all([
+    renderPriceChart(klines1d, path.join(renderDir, `${slug}-price-1d-${stamp}.png`),
+      { title: `${c.symbol}/USDT 1D — Price`, subtitle: "180 daily candles, BINANCE perp" }),
+    renderRsiChart(klines4h, path.join(renderDir, `${slug}-rsi-${stamp}.png`),
+      { title: `${c.symbol}/USDT 4H — Relative Strength`, period: 14 }),
+    renderMacdChart(klines4h, path.join(renderDir, `${slug}-macd-${stamp}.png`),
+      { title: `${c.symbol}/USDT 4H — MACD` }),
+    funding.length
+      ? renderFundingChart(funding, path.join(renderDir, `${slug}-funding-${stamp}.png`),
+        { title: `${c.symbol} Funding Rate History` })
+      : Promise.resolve(""),
+    oi.length
+      ? renderOiChart(oi, path.join(renderDir, `${slug}-oi-${stamp}.png`),
+        { title: `${c.symbol} Open Interest` })
+      : Promise.resolve(""),
+    ls.length
+      ? renderLongShortChart(ls, path.join(renderDir, `${slug}-ls-${stamp}.png`),
+        { title: `${c.symbol} Top Trader Long/Short Ratio` })
+      : Promise.resolve(""),
+  ]);
+
   console.log("  uploading charts to supabase…");
   const annotatedFilename = path.basename(annotatedPath);
-  const fourHUrl = await uploadPng(annotatedPath, annotatedFilename);
-  const oneDUrl = p.oneD ? await uploadPng(p.oneD.filePath) : fourHUrl;
-  const oneWUrl = p.oneW ? await uploadPng(p.oneW.filePath) : fourHUrl;
-  console.log(`  4h: ${fourHUrl}`);
-  console.log(`  1d: ${oneDUrl}`);
-  console.log(`  1w: ${oneWUrl}`);
+  const fourHAnnotatedUrl = await uploadPng(annotatedPath, annotatedFilename);
+  const [price1DUrl, rsiUrl, macdUrl] = await Promise.all([
+    uploadPng(pricePath),
+    uploadPng(rsiPath),
+    uploadPng(macdPath),
+  ]);
+  // Funding/OI/LS are optional — fall back to the price chart if a metric
+  // had no data (rare, but happens for newly-listed perps).
+  const fundingUrl = fundingPath ? await uploadPng(fundingPath) : price1DUrl;
+  const oiUrl = oiPath ? await uploadPng(oiPath) : price1DUrl;
+  const lsUrl = lsPath ? await uploadPng(lsPath) : price1DUrl;
+  console.log(`  4h(annotated): ${fourHAnnotatedUrl}`);
+  console.log(`  metrics uploaded: price/rsi/macd/funding/oi/ls`);
+
+  const metrics: MetricUrls = {
+    fourHAnnotated: fourHAnnotatedUrl,
+    price1D: price1DUrl,
+    rsi: rsiUrl,
+    macd: macdUrl,
+    funding: fundingUrl,
+    oi: oiUrl,
+    longShort: lsUrl,
+  };
 
   console.log("  generating Glassnode-style article…");
   const post = await generateBlogContent(
@@ -439,7 +570,8 @@ async function runForPair(p: PairCaptures, apiKey: string, adminUserId: string) 
     c.pair,
     analysis,
     priceData,
-    { fourH: fourHUrl, oneD: oneDUrl, oneW: oneWUrl },
+    metrics,
+    deriv,
     apiKey,
   );
   console.log(`  title:    ${post.title}`);
@@ -470,9 +602,9 @@ async function runForPair(p: PairCaptures, apiKey: string, adminUserId: string) 
       contentKo: post.contentKo,
       excerpt: post.excerpt,
       excerptKo: post.excerptKo,
-      imageUrl: fourHUrl,
+      imageUrl: fourHAnnotatedUrl,
       category: "research",
-      tags: post.tags || [c.symbol, "chart-analysis", "multi-timeframe"],
+      tags: post.tags || [c.symbol, "chart-analysis", "multi-metric", "futures"],
       published: true,
       publishedAt: new Date(),
       authorId: adminUserId,
@@ -498,24 +630,10 @@ async function runForPair(p: PairCaptures, apiKey: string, adminUserId: string) 
   }
 }
 
-function groupCaptures(captures: CaptureResult[]): PairCaptures[] {
-  const byPair: Record<string, CaptureResult[]> = {};
-  for (const c of captures) {
-    (byPair[c.pair] ??= []).push(c);
-  }
-  const groups: PairCaptures[] = [];
-  for (const pair of Object.keys(byPair)) {
-    const arr = byPair[pair];
-    const fourH = arr.find((x: CaptureResult) => x.interval === "240");
-    const oneD = arr.find((x: CaptureResult) => x.interval === "1D" || x.interval === "D") ?? null;
-    const oneW = arr.find((x: CaptureResult) => x.interval === "1W" || x.interval === "W") ?? null;
-    if (!fourH) {
-      console.warn(`[group] ${pair}: missing 4H capture, skipping`);
-      continue;
-    }
-    groups.push({ pair, symbol: fourH.symbol, fourH, oneD, oneW });
-  }
-  return groups;
+function groupCaptures(captures: CaptureResult[]): PairCapture[] {
+  return captures
+    .filter((c) => c.interval === "240")
+    .map((c) => ({ pair: c.pair, symbol: c.symbol, fourH: c }));
 }
 
 async function main() {
@@ -532,8 +650,10 @@ async function main() {
   const pairs = explicitPairs ?? (await topMovers(3));
   console.log(`pairs: ${pairs.join(", ")}`);
 
-  // Capture 3 timeframes per pair: 4H (drives analysis + Telegram), 1D + 1W (embedded in article)
-  const captures = await captureCharts({ pairs, intervals: ["240", "1D", "1W"] });
+  // 4H TradingView capture drives the visual analysis + the annotated trade-setup hero.
+  // The other 6 charts in the article are server-rendered from Binance public data
+  // (price 1D, RSI, MACD, funding, OI, long/short).
+  const captures = await captureCharts({ pairs, intervals: ["240"] });
   const groups = groupCaptures(captures);
 
   for (const g of groups) {
